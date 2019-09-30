@@ -27,7 +27,10 @@ FUTURE WORK
 * Coupling of aerodynamic loads and flight path allowing dynamic simulations.
 * Bluff body separation and panel-predicted viscous drag (?).
 
-
+# Files
+  * `src/fvs_geometry.jl`: Geometries are defined here.
+  * `src/fvs_kinematics.jl`: Kinematics of different maneuvers are defined here.
+  * `examples/`: Some example simulations.
 
 # Dependencies
   * [`GeometricTools`](https://github.com/byuflowlab/GeometricTools.jl)
@@ -39,7 +42,7 @@ FUTURE WORK
 
 # Related Projects
   * [Unsteady eVTOL transition](https://github.com/byuflowlab/alvarezanderson2020-unsteady-evtol-transition)
-  * [Airborne wind energy design](https://github.com/byuflowlab/mehr2020-airborne-wind-aero)
+  * [Wind-harvesting aircraft design](https://github.com/byuflowlab/mehr2020-airborne-wind-aero)
 
 # Authorship
   * Author    : Eduardo J Alvarez
