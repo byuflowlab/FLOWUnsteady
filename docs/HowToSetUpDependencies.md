@@ -10,7 +10,11 @@ Dependencies:
 - Roots
 - QuadGK
 
-Clone the package using Julia
+Go ahead and add these Julia packages first with the standard add syntax for v0.6
+
+```Pkg.add("PackageName")```
+
+After you have the dependencies, clone the package using Julia. (Though you can get the dependencies later when errors show up. It's up to you.)
 
 ```Pkg.clone("https://github.com/byuflowlab/GeometricTools.jl.git")```
 
