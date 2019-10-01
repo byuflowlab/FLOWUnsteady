@@ -85,4 +85,5 @@ using Homebrew
 Homebrew.brew(`update-reset`)
 ```
 in order to update your Homebrew.
+
 2. You're going to have to make sure that things are in place in your Julia settings. Having things like Conda, HDF5, etc. on your machine doesn't necessarily mean that the Julia implementation has them as well.
