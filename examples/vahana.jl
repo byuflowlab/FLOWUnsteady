@@ -1,5 +1,5 @@
 # Load simulation engine
-include("../src/fvs.jl")
+include(joinpath(splitdir(@__FILE__)[1], "../src/fvs.jl"))
 
 #=
     Temporary functions for debugging
