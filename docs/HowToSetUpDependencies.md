@@ -74,3 +74,15 @@ Additional Dependencies for MyPanel
 Clone the package using Julia
 
 ```Pkg.clone("https://github.com/EdoAlvarezR/MyPanel.jl.git")```
+
+# Troubleshooting
+
+Some things you might need to look out for:
+
+1. Make sure your Homebrew (in Julia) is up to date. You may need to run the following:
+```
+using Homebrew
+Homebrew.brew(`update-reset`)
+```
+in order to update your Homebrew.
+2. You're going to have to make sure that things are in place in your Julia settings. Having things like Conda, HDF5, etc. on your machine doesn't necessarily mean that the Julia implementation has them as well.
