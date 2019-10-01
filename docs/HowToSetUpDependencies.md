@@ -44,8 +44,7 @@ Finally, clone the FLOWVLM repo (not in julia)
 
 ```git clone https://github.com/byuflowlab/FLOWVLM.git```
 
-and then in any code using FLOWVLM, you'll need to name flowvlm_path the path to where you cloned the directory.
-You will also need to include the FLOWVLM.jl file, and it is convenient to call FLOWVLM vlm as is done in the examples. Your code might begin with something like the following:
+and then in any code using FLOWVLM, you'll need to include the FLOWVLM.jl file, and it is convenient to call FLOWVLM vlm as is done in the examples. Your code might begin with something like the following:
 
 ```
 flowvlm_path = "/path_to_FLOWVLM/"
