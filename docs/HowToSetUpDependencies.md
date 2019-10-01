@@ -26,7 +26,7 @@ Additional Dependencies for FLOWVLM:
 - [CCBlade](https://github.com/byuflowlab/CCBlade.jl)
 - [airfoil](https://github.com/EdoAlvarezR/airfoil)
 
-To get CCBlade:
+To get CCBlade, clone the package in Julia
 
 ```Pkg.clone("https://github.com/byuflowlab/CCBlade.jl.git")```
 
