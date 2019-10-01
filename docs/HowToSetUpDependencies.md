@@ -40,9 +40,7 @@ You will then need to go into the airfoil/src/jxlight directory and build the Fo
 
 and that should be sufficient to build it.
 
-To make sure FLOWVLM is pointed to the airfoil code correctly, in FLOWVLM.jl (in the src folder of the FLOWVLM repo) change line 21 such that the airfoil_path is the path to the directory you just cloned.
-
-Clone the repo (not in julia)
+Finally, clone the FLOWVLM repo (not in julia)
 
 ```git clone https://github.com/byuflowlab/FLOWVLM.git```
 
@@ -54,6 +52,10 @@ flowvlm_path = "/path_to_FLOWVLM/"
 include(flowvlm_path*"src/FLOWVLM.jl")
 vlm = FLOWVLM
 ```
+
+In addition, you will need to make a change in FLOWVLM.jl to make sure FLOWVLM is pointed to the airfoil code correctly. In FLOWVLM.jl (in the src folder of the FLOWVLM repo) change line 21 such that the airfoil_path is the path to the directory you just cloned.
+
+```airfoil_path = "/path_to_airfoil/"```
 
 ## [MyPanel](https://github.com/EdoAlvarezR/MyPanel.jl/blob/master/src/MyPanel.jl)
 
