@@ -94,4 +94,4 @@ vpm = MyVPM
 include("vahana.jl")
 visualize_maneuver_vahana()
 ```
-and it should run, open an instance of paraview, and if you press play, you'll see the vahana evtol takeoff, cruise, and land!
+and it should run, open an instance of paraview, and show the computed geometry and time steps. If you press play, you'll see the vahana evtol takeoff, cruise, and land!
