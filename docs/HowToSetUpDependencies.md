@@ -1,7 +1,7 @@
 # How to set up dependencies needed for FlightVehicleSim (October 2019)
 Note: currently this simulation tool functions only with Julia v0.6, thus the following will assume Julia v0.6 syntax.
 
-## [Geometric Tools](https://github.com/byuflowlab/GeometricTools.jl): 
+## [GeometricTools](https://github.com/byuflowlab/GeometricTools.jl): 
 
 Dependencies:
 - PyCall
