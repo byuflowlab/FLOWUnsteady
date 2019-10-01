@@ -1,3 +1,6 @@
+# Load simulation engine
+include("../src/fvs.jl")
+
 #=
     Temporary functions for debugging
 =#
