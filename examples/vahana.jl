@@ -8,7 +8,7 @@ include(joinpath(splitdir(@__FILE__)[1], "../src/fvs.jl"))
 
 
 function run_simulation_vahana(;    # save_path="temps/vahanasimulation01",
-                                    save_path=extdrive_path*"vahanasimulation00",
+                                    save_path=extdrive_path*"vahanasimulation02",
                                     prompt=true,
                                     run_name="vahana",
                                     verbose=true, v_lvl=1)
@@ -21,27 +21,40 @@ function run_simulation_vahana(;    # save_path="temps/vahanasimulation01",
     # nsteps = 9000                           # Time steps
     # dt = telapsed/nsteps
 
+    # Geometry options
+    n_factor = 5                              # Refinement factor
+
     # Maneuver to perform
     maneuver = maneuver_vahana1
     Vcruise = 0.25 * 125*0.44704            # Cruise speed
-    Vinf(x,t) = 1e-5*[1,0,-1]               # (m/s) freestream velocity, if 0 the simulation will crash
-    RPMh_w = 200                            # RPM of main wing rotors in hover
+    # Vinf(x,t) = 1e-5*[1,0,-1]               # (m/s) freestream velocity, if 0 the simulation will crash
+    Vinf(x,t) = 1.0*[0,0,-1]               # (m/s) freestream velocity, if 0 the simulation will crash
+    # RPMh_w = 200                            # RPM of main wing rotors in hover
+    RPMh_w = 20
     telapsed = 30.0                         # Total time to perform maneuver
     # nsteps = 1500                           # Time steps
     nsteps = 300
     dt = telapsed/nsteps
 
+    # Solver options
+    R = 0.75                                # (m) blade radius as a reference
+    lambda = 4.0                            # Target minimum core overlap
+    p_per_step = 4                          # Particle sheds per time step
+    overwrite_sigma = lambda * (2*pi*RPMh_w/60*R + Vcruise)*dt / p_per_step
+    # vlm_sigma = R/25                        # VLM regularization
+    vlm_sigma = R                        # VLM regularization
+
     # Generate geometry
     (system, rotors,
-            tilting_systems, rotors_tilting_systems,
+            tilting_systems, rotors_systems,
             vlm_system, wake_system,
-            fuselage, grounds, strn) = generategeometry_vahana(; n_factor=1,
+            fuselage, grounds, strn) = generategeometry_vahana(; n_factor=n_factor,
                                                              xfoil=false,
                                                              data_path=data_path,
                                                              run_name=run_name)
 
      run_simulation(maneuver, system, rotors,
-                                  tilting_systems, rotors_tilting_systems,
+                                  tilting_systems, rotors_systems,
                                   wake_system, vlm_system,
                                   fuselage;
                                   # SIMULATION OPTIONS
@@ -50,6 +63,10 @@ function run_simulation_vahana(;    # save_path="temps/vahanasimulation01",
                                   telapsed=telapsed,
                                   nsteps=nsteps,
                                   Vinf=Vinf,
+                                  # SOLVERS OPTIONS
+                                  p_per_step=p_per_step,
+                                  overwrite_sigma=overwrite_sigma,
+                                  vlm_sigma=vlm_sigma,
                                   # OUTPUT OPTIONS
                                   save_path=save_path,
                                   run_name=run_name,
@@ -116,7 +133,7 @@ function visualize_maneuver_vahana(; save_path=extdrive_path*"vahanamaneuver000/
 
     # Generate geometry
     (system, rotors,
-            tilting_systems, rotors_tilting_systems,
+            tilting_systems, rotors_systems,
             vlm_system, wake_system,
             fuselage, grounds, strn) = generategeometry_vahana(; n_factor=1,
                                                      xfoil=false,
@@ -125,7 +142,7 @@ function visualize_maneuver_vahana(; save_path=extdrive_path*"vahanamaneuver000/
 
     # Visualize maneuver
     visualize_kinematic(maneuver, system, rotors, tilting_systems,
-                         rotors_tilting_systems, fuselage;
+                         rotors_systems, fuselage;
                          # SIMULATION OPTIONS
                          Vcruise=Vcruise,
                          RPMh_w=RPMh_w,
@@ -160,7 +177,7 @@ function visualize_geometry_vahana(; save_path=extdrive_path*"vahanageometry00/"
                                      prompt=true, run_name="vahana")
 
     (system, rotors,
-            tilting_systems, rotors_tilting_systems,
+            tilting_systems, rotors_systems,
             vlm_system, wake_system,
             fuselage, grounds, strn) = generategeometry_vahana(; n_factor=1,
                                                      xfoil=false,
