@@ -50,19 +50,11 @@ You will then need to go into the airfoil/src/jxlight directory and build the Fo
 
 and that should be sufficient to build it.
 
-Finally, clone the FLOWVLM repo (not in julia)
+Finally, clone the FLOWVLM repo in Julia
 
-```git clone https://github.com/byuflowlab/FLOWVLM.git```
+```Plg.clone("https://github.com/byuflowlab/FLOWVLM.git")```
 
-and then in any code using FLOWVLM, you'll need to include the FLOWVLM.jl file, and it is convenient to call FLOWVLM vlm as is done in the examples. Your code might begin with something like the following:
-
-```
-flowvlm_path = "/path_to_FLOWVLM/"
-include(flowvlm_path*"src/FLOWVLM.jl")
-vlm = FLOWVLM
-```
-
-In addition, you will need to make a change in FLOWVLM.jl to make sure FLOWVLM is pointed to the airfoil code correctly. In FLOWVLM.jl (in the src folder of the FLOWVLM repo) change line 21 such that the airfoil_path is the path to the directory you just cloned.
+In addition, you will need to make a change in FLOWVLM.jl to make sure FLOWVLM is pointed to the airfoil code correctly. In FLOWVLM.jl (in the src folder of the FLOWVLM repo which is now in your .julia/v0.6 directory) change line 21 such that the airfoil_path is the path to the directory you just cloned.
 
 ```airfoil_path = "/path_to_airfoil/"```
 
@@ -75,7 +67,7 @@ Clone the package using Julia
 
 ```Pkg.clone("https://github.com/EdoAlvarezR/MyPanel.jl.git")```
 
-# Troubleshooting
+# Setup Troubleshooting
 
 Some things you might need to look out for:
 
@@ -87,3 +79,19 @@ Homebrew.brew(`update-reset`)
 in order to update your Homebrew.
 
 2. You're going to have to make sure that things are in place in your Julia settings. Having things like Conda, HDF5, etc. on your machine doesn't necessarily mean that the Julia implementation has them as well.
+
+# Running things:
+
+1. Navigate to the fvs.jl file in the src/ directory.
+2. change the `global extdrive_path` variable to be the directory where you want the files to be saved. Note that the directory _must_ be called temps/, but you can put it wherever you want.
+3. If you don't yet have access to the VPM, you'll also need to comment out the lines:
+```
+import MyVPM
+vpm = MyVPM
+```
+4. Now all you need to do is 
+```
+include("vahana.jl")
+visualize_maneuver_vahana()
+```
+and it should run, open an instance of paraview, and show the computed geometry and time steps. If you press play, you'll see the vahana evtol takeoff, cruise, and land!
