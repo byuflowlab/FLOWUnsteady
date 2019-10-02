@@ -1,6 +1,7 @@
 #=##############################################################################
 # DESCRIPTION
-    Geometry generation.
+    Geometry generation function of every vehicle. Keep adding more vehicle
+    geometries to this file as needed.
 
 # AUTHORSHIP
   * Author    : Eduardo J. Alvarez
@@ -12,11 +13,12 @@
 
 #=
 
-Geometry functions (e.g., `generategeometry_vahana`) are expected to:
+Geometry functions (e.g., `generategeometry_vahana`) are expected have the
+following format:
 
     OUTPUTS
-    * `system::vlm.WingSystem`:         System of all FLOWVLM objects.
-    * `rotors::Array{vlm.Rotor, 1}`:    System of all FLOWVLM Rotor objects.
+    * `system::vlm.WingSystem`:        System of all FLOWVLM objects.
+    * `rotors::Array{vlm.Rotor, 1}`:   System of all FLOWVLM Rotor objects.
     * `tilting_systems::Tuple(vlm.WingSystem, ...)`:   Tuple of all FLOWVLM
                                         tilting objects, where
                                         `tilting_systems[i]` contains the i-th
@@ -27,9 +29,13 @@ Geometry functions (e.g., `generategeometry_vahana`) are expected to:
                                         `rotors_ tilting_systems[i]` contains
                                         the rotors associated to the i-th
                                         tilting system.
-    * `fuselage::gt.Grid`:              Grid object of the fuselage.
-    * `grounds::gt.Grid`:               Grid object of the ground.
-    * `strn::String`                    String containing all vtk file names
+    * `vlm_system::vlm.WingSystem`:    System of all FLOWVLM objects to be
+                                        solved through the VLM solver.
+    * `wake_system::vlm.WingSystem`:   System of all FLOWVLM objects that will
+                                        shed a VPM wake.
+    * `fuselage::gt.Grid`:             Grid object of the fuselage.
+    * `grounds::gt.Grid`:              Grid object of the ground.
+    * `strn::String`                   String containing all vtk file names
                                         that will be generated if `system` is
                                         saved.
 
@@ -425,7 +431,6 @@ function generategeometry_vahana(;
     system = vlm.WingSystem()
     vlm.addwing(system, "MainWing", main_wing)
     vlm.addwing(system, "TandemWing", tandem_wing)
-    # vlm.addwing(system, "Fuselage", fuselage)
 
     rotors = vcat(props_w, props_tw)
 
@@ -463,11 +468,31 @@ function generategeometry_vahana(;
     end
 
 
+    # Tilting systems
     tilting_systems = (main_wing_moving, tandem_wing_moving)
     rotors_tilting_systems = (props_w, props_tw)
 
-    return (system, rotors, tilting_systems, rotors_tilting_systems,
-                                                        fuselage, grounds, strn)
+    # System to solve through the VLM solver
+    vlm_system = vlm.WingSystem()
+    vlm.addwing(vlm_system, "MWingR", wing_R)
+    vlm.addwing(vlm_system, "MWingletR", winglet_R)
+    vlm.addwing(vlm_system, "MWingL", wing_L)
+    vlm.addwing(vlm_system, "MWingletL", winglet_L)
+    vlm.addwing(vlm_system, "TWingR", twing_R)
+    vlm.addwing(vlm_system, "TWingL", twing_L)
+
+    # Wake-shedding system (`vlm_system`+`rotors`)
+    wake_system = vlm.WingSystem()
+    vlm.addwing(wake_system, "SolveVLM", vlm_system)
+    for (i, rotor) in enumerate(rotors)
+        vlm.addwing(wake_system, "Rotor$i", rotor)
+    end
+
+
+    return (system, rotors,
+            tilting_systems, rotors_tilting_systems,
+            vlm_system, wake_system,
+            fuselage, grounds, strn)
 end
 
 """

@@ -1,6 +1,7 @@
 #=##############################################################################
 # DESCRIPTION
-    Maneuver kinematics definitions.
+    Maneuver kinematics definitions of every vehicle. Keep adding more maneuvers
+    to this file as needed.
 
 # AUTHORSHIP
   * Author    : Eduardo J. Alvarez

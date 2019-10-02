@@ -40,6 +40,6 @@ global extdrive_path = "/media/edoalvar/MyExtDrive/simulationdata5/"
 
 # ------------ HEADERS ---------------------------------------------------------
 # Load modules
-for module_name in ["rotor", "geometry", "kinematics"]#, "simulation", "run"]
+for module_name in ["rotor", "geometry", "kinematics", "simulation"]
     include("fvs_"*module_name*".jl")
 end
