@@ -7,9 +7,9 @@ an experimental architecture stitching together mid and high-fidelity
 aerodynamic tools developed at BYU's FLOW Lab: `GeometricTools` (geometric
 engine), `FLOWVLM` (VLM and strip theory solver), `CCBlade` (blade element
 momentum solver), `MyPanel` (3D inviscid panel solver), and `FLOWVPM` (viscous
-vortex particle method). Most of the tools are still using Julia 0.6.3 as they
+vortex particle method). Most of the tools are still using Julia 0.6.4 as they
 are pending for a major revamp, hence this simulation framework is conceived to
-work only in Julia 0.6.3.
+work only in Julia 0.6.4.
 
 FEATURES
 * Viscous, unsteady wake mixing of rotors and lifting surfaces.
