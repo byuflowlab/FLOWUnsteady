@@ -24,11 +24,8 @@ following format:
                                         `tilting_systems[i]` contains the i-th
                                         FLOWVLM system of lifting surfaces and
                                         rotors that tilt together.
-    * `rotors_tilting_systems::Tuple(Array{vlm.Rotor,1}, ...)`:   Tuple of all
-                                        FLOWVLM Rotor tilting objects, where
-                                        `rotors_ tilting_systems[i]` contains
-                                        the rotors associated to the i-th
-                                        tilting system.
+    * `rotors_systems::Tuple(Array{vlm.Rotor,1}, ...)`:   Tuple of groups of
+                                        Rotors that share a common RPM.
     * `vlm_system::vlm.WingSystem`:    System of all FLOWVLM objects to be
                                         solved through the VLM solver.
     * `wake_system::vlm.WingSystem`:   System of all FLOWVLM objects that will
@@ -44,7 +41,7 @@ following format:
         where `Vaircraft(t)` is the translation velocity of both `system`
         and `fuselage`, `angles(t)[i]` is the tilt angle of
         `tilting_systems[i]`, `RPMs(t)[i]` is the RPM of
-        `rotors_tilting_systems[i]`. `angles(t)[end]` is the tilt angle of the
+        `rotors_systems[i]`. `angles(t)[end]` is the tilt angle of the
         entire aircraft.
 =#
 
@@ -470,7 +467,9 @@ function generategeometry_vahana(;
 
     # Tilting systems
     tilting_systems = (main_wing_moving, tandem_wing_moving)
-    rotors_tilting_systems = (props_w, props_tw)
+
+    # Rotors grouped by systems of the same RPM
+    rotors_systems = (props_w, props_tw)
 
     # System to solve through the VLM solver
     vlm_system = vlm.WingSystem()
@@ -490,10 +489,30 @@ function generategeometry_vahana(;
 
 
     return (system, rotors,
-            tilting_systems, rotors_tilting_systems,
+            tilting_systems, rotors_systems,
             vlm_system, wake_system,
             fuselage, grounds, strn)
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 """
     Returns a loft of the Vahana fuselage.

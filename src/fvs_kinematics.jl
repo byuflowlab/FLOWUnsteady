@@ -14,7 +14,7 @@
     Maneuver functions return a tuple of three functions `(Vaircraft, angles, RPMs)`
     where `Vaircraft(t)` is the translation velocity of both `system` and
     `fuselage`, `angles(t)[i]` is the tilt angle of `tilting_systems[i]`,
-    `RPMs(t)[i]` is the RPM of `rotors_tilting_systems[i]`. `angles(t)[end]` is
+    `RPMs(t)[i]` is the RPM of `rotors_systems[i]`. `angles(t)[end]` is
     the tilt angle of the entire aircraft.
 
     Each of the three functions received a non-dimensional time between 0 and 1
@@ -418,7 +418,7 @@ end
 ################################################################################
 
 function visualize_kinematic(maneuver::Function, system, rotors, tilting_systems,
-                             rotors_tilting_systems, fuselage;
+                             rotors_systems, fuselage;
                              # SIMULATION OPTIONS
                              Vcruise=125*0.44704,       # Cruise speed
                              RPMh_w=400,                # RPM of main wing rotors in hover
@@ -508,7 +508,7 @@ function visualize_kinematic(maneuver::Function, system, rotors, tilting_systems
             # Rotation of rotors in every tilting system
             rpms = RPMs(t/telapsed)
             for j in 1:size(rpms, 1)
-                for rotor in rotors_tilting_systems[j]
+                for rotor in rotors_systems[j]
                     rpm = rpms[j] * (rand_RPM ? 1 + (rand()-0.5)*0.1 : 1.0)
                     rotation = 360*(RPMh_w*rpm)/60 * dt
                     vlm.rotate(rotor, rotation)
