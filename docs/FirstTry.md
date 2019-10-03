@@ -1,6 +1,12 @@
 # How to set up dependencies needed for FlightVehicleSim (October 2019)
 Note: currently this simulation tool functions only with Julia v0.6, thus the following will assume Julia v0.6 syntax.
 
+## Setting up Julia v0.6.4
+Most likely you have the latest version already installed in your system. In order to have multiple versions of Julia do the following
+* Download the v0.6.4 binary from https://julialang.org/downloads/oldreleases.html
+* Extract it anywhere, in my case it's located at '/home/edo/Programs/julia-0.6.4'. The exectuable binary is located at '/home/edo/Programs/julia-0.6.4/bin/julia'.
+* Make a simbolic link in your system binaries to the Julia v0.6.4 binary: In my Linux machine, the binaries are located at '/usr/bin/'. Go to that path as 'cd /usr/bin/', then create the link through the following command 'sudo ln -s /home/edo/Programs/julia-0.6.4/bin/julia julia-0.6.4' replacing the path to where your julia binary is. To check that it worked, open a new terminal and do 'julia-0.6.4'.
+
 ## [GeometricTools](https://github.com/byuflowlab/GeometricTools.jl): 
 
 Dependencies:
@@ -95,7 +101,7 @@ So don't put airfoil in Box.
 # Running things:
 
 1. Navigate to the fvs.jl file in the src/ directory.
-2. change the `global extdrive_path` variable to be the directory where you want the files to be saved. Note that the directory _must_ be called temps/, but you can put it wherever you want.
+2. change the `global extdrive_path` variable to be the directory where you want the files to be saved. But you can put it wherever you want.
 3. If you don't yet have access to the VPM, you'll also need to comment out the lines:
 ```
 import MyVPM
