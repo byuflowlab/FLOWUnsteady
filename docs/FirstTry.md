@@ -30,6 +30,20 @@ If using MacOS, you'll want to add
 
 to your .bash_profile, swapping the 5.5.2 for whatever version of [Paraview](https://www.paraview.org/download/) you have downloaded (you'll need to download it if you don't already have it).
 
+To test if GeometricTools + Paraview is working well, you can pull up one of the examples under 'examples/' in this repo:
+```
+  # Import Package
+  import GeometricTools
+  gt = GeometricTools
+  
+  # Load example
+  example_path = "examples/example_simple.jl"
+  include(joinpath(Pkg.dir("GeometricTools"), example_path))
+  
+  # Run example: it will pull up paraview with a good-looking cube
+  simple_box2()
+```
+
 ## [FLOWVLM](https://github.com/byuflowlab/FLOWVLM)
 
 Additional Dependencies for FLOWVLM:
@@ -100,6 +114,7 @@ So don't put airfoil in Box.
 
 # Running things:
 
+0. Clone the simulation engine (https://github.com/byuflowlab/FlightVehicleSim) to whenever you want it
 1. Navigate to the fvs.jl file in the src/ directory.
 2. change the `global extdrive_path` variable to be the directory where you want the files to be saved. But you can put it wherever you want.
 3. If you don't yet have access to the VPM, you'll also need to comment out the lines:
