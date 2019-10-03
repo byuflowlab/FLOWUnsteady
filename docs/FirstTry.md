@@ -52,7 +52,7 @@ and that should be sufficient to build it.
 
 Finally, clone the FLOWVLM repo in Julia
 
-```Plg.clone("https://github.com/byuflowlab/FLOWVLM.git")```
+```Pkg.clone("https://github.com/byuflowlab/FLOWVLM.git")```
 
 In addition, you will need to make a change in FLOWVLM.jl to make sure FLOWVLM is pointed to the airfoil code correctly. In FLOWVLM.jl (in the src folder of the FLOWVLM repo which is now in your .julia/v0.6 directory) change line 21 such that the airfoil_path is the path to the directory you just cloned.
 
@@ -79,6 +79,18 @@ Homebrew.brew(`update-reset`)
 in order to update your Homebrew.
 
 2. You're going to have to make sure that things are in place in your Julia settings. Having things like Conda, HDF5, etc. on your machine doesn't necessarily mean that the Julia implementation has them as well.
+
+3. If you don't have a fortran compiler, airfoil won't compile.  On MacOS, try `brew install gcc`
+
+4. The airfoil compiler creates symbolic links. Right now, symbolic links do not work if you're trying to create them in [Box](http://box.byu.edu/), it won't work, you'll get the following error:
+```
+Linux - Gfortran
+rm -f common.mk
+ln -s ./config/config.LINUX_GFORTRAN.mk common.mk
+ln: common.mk: Function not implemented
+make: *** [gfortran] Error 1
+```
+So don't put airfoil in Box.
 
 # Running things:
 
