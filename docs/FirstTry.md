@@ -7,6 +7,16 @@ Most likely you have the latest version already installed in your system. In ord
 * Extract it anywhere, in my case it's located at '/home/edo/Programs/julia-0.6.4'. The exectuable binary is located at '/home/edo/Programs/julia-0.6.4/bin/julia'.
 * Make a simbolic link in your system binaries to the Julia v0.6.4 binary: In my Linux machine, the binaries are located at '/usr/bin/'. Go to that path as 'cd /usr/bin/', then create the link through the following command 'sudo ln -s /home/edo/Programs/julia-0.6.4/bin/julia julia-0.6.4' replacing the path to where your julia binary is. To check that it worked, open a new terminal and do 'julia-0.6.4'.
 
+## Setting up PyCall
+'airfoilprep.py' in the 'airfoil' module is written in Python 2.7, so you need to make sure that the Python version that is linked to PyCall is a 2.7 version. My recommendation is to use the python version that the system is using, which most-likely is 2.7 (do 'which python' in the terminal to find the path to that Python binary). Hopefully the binary of python you choose is the one that is linked with 'pip' in your system, as that will save you tons of headaches. Then set up PyCall on that python version as
+
+```
+  Pkg.add("PyCall")
+  ENV["PYTHON"] = "path/to/your/python"
+  Pkg.build("Pycall")
+```
+Then close and open the julia terminal again.
+
 ## [GeometricTools](https://github.com/byuflowlab/GeometricTools.jl): 
 
 Dependencies:
@@ -122,7 +132,7 @@ So don't put airfoil in Box.
 import MyVPM
 vpm = MyVPM
 ```
-4. Now all you need to do is 
+4. Now all you need to do is to include and run the example drive under the 'examples' folder:
 ```
 include("vahana.jl")
 visualize_maneuver_vahana()
