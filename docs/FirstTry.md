@@ -30,7 +30,7 @@ If using MacOS, you'll want to add
 
 to your .bash_profile, swapping the 5.5.2 for whatever version of [Paraview](https://www.paraview.org/download/) you have downloaded (you'll need to download it if you don't already have it).
 
-To test if GeometricTools + Paraview is working well, you can pull up one of the examples under 'examples/' in this repo:
+To test if GeometricTools + Paraview is working well, you can pull up one of the examples under 'examples/' in the GeometricTools repo:
 ```
   # Import Package
   import GeometricTools
