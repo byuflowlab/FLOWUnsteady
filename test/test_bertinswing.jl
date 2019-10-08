@@ -20,12 +20,13 @@ function bertin_VLM(;   # TEST OPTIONS
                         tol=0.025,
                         wake_coupled=true,
                         nsteps=200,
+                        vlm_fsgm=-1,
                         # OUTPUT OPTIONS
                         save_path=nothing,
                         run_name="bertins",
                         prompt=true,
-                        verbose=true, v_lvl=1,
-                        disp_plot=true,
+                        verbose=true, verbose2=true, v_lvl=1,
+                        disp_plot=true, figsize_factor=5/6
                         )
 
     if verbose; println("\t"^(v_lvl)*"Running Bertin's wing test..."); end;
@@ -59,9 +60,6 @@ function bertin_VLM(;   # TEST OPTIONS
                                                     n=n, r=r, central=central)
 
 
-    # TODO: Change the freestream to zero and make the wing move
-
-
     # ------------- SIMULATION SETUP -------------------------------------------
     if verbose; println("\t"^(v_lvl+1)*"Simulation setup..."); end;
 
@@ -70,17 +68,16 @@ function bertin_VLM(;   # TEST OPTIONS
 
     # Simulation options
     telapsed = wake_len/magVinf # (s) total time to perform maneuver
-    # nsteps = 2000                # Number of time steps
-    # nsteps = 10
+    # nsteps = 2000             # Number of time steps
     Vcruise = 0.0               # (m/s) aircraft velocity during cruise (dummy)
     RPMh_w = 0.0                # Rotor RPM during hover (dummy)
 
     # Solver options
     overwrite_sigma = lambda_vpm * magVinf * (telapsed/nsteps) # Smoothing core size
-    vlm_sigma = -1              # VLM regularization core size (deactivated with -1)
+    # vlm_sigma = -1            # VLM regularization core size (deactivated with -1)
+    vlm_sigma = vlm_fsgm*b
     p_per_step = 1              # Number of particle sheds per time steps (dummy)
-    # wake_coupled = true         # Coupled VPM wake with VLM solution
-    # wake_coupled = false
+    # wake_coupled = true       # Coupled VPM wake with VLM solution
     shed_unsteady = true        # Whether to shed unsteady-loading wake
     # shed_unsteady = false
 
@@ -129,7 +126,7 @@ function bertin_VLM(;   # TEST OPTIONS
         clr = (1-aux, 0, aux)
 
         if PFIELD.nt==0 && disp_plot
-            figure(figname, figsize=[7*2, 5*2]*5/6)
+            figure(figname, figsize=[7*2, 5*2]*figsize_factor)
             subplot(221)
             xlim([0,1])
             xlabel(L"$\frac{2y}{b}$")
@@ -207,7 +204,7 @@ function bertin_VLM(;   # TEST OPTIONS
                          save_path=save_path,
                          run_name=run_name,
                          prompt=prompt,
-                         verbose=verbose, v_lvl=v_lvl+1,
+                         verbose=verbose2, v_lvl=v_lvl+1,
                          save_horseshoes=!wake_coupled
                          )
 

@@ -14,6 +14,8 @@
     * If calculating force coefficients through FLOWVLM, remember to specify
         qinf manually, otherwise it will include the wake-induced velocity in
         the normalizing static pressure.
+    * FLOWVLM has a a rough regularization scheme that tends to make the solver
+        oscillate if the smoothing radius overlaps any control point. Just FYI.
 =#
 
 #=
