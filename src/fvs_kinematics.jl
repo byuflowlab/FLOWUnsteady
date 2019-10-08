@@ -22,7 +22,7 @@
     and returns non-dimensionalized outputs: `Vaircraft(t)` returns a components
     of velocity [vx, vy, vz] normalized by the cruise speed; `angles(t)[i]`
     returns the tilt of the i-th tilt system in degrees; `RPMs(t)[i]` returns
-    the RPM of the rotors in the i-th tilt system normalized by the hover RPM of
+    the RPM of the rotors in the i-th rotor system normalized by the hover RPM of
     the main wing.
 
 =#
