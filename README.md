@@ -31,6 +31,9 @@ FUTURE WORK
   * `src/fvs_geometry.jl`: Geometries are defined here.
   * `src/fvs_kinematics.jl`: Kinematics of different maneuvers are defined here.
   * `examples/`: Some example simulations.
+  * `docs/`: Documentation.
+    - `docs/instructions-setup.md`: Instructions for setting up this package.
+    - `docs/validation.ipynb`: Validation of models implemented in this package.
 
 # Dependencies
   * [`GeometricTools`](https://github.com/byuflowlab/GeometricTools.jl)
