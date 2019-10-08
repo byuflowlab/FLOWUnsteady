@@ -49,6 +49,9 @@ function run_simulation(maneuver::Function,
                              sigmafactor=1.0,           # Particle core overlap
                              overwrite_sigma=nothing,   # Overwrite cores to this value (ignoring sigmafactor)
                              vlm_sigma=-1,              # VLM regularization
+                             wake_coupled=true,         # Couple VPM wake on VLM solution
+                             shed_unsteady=true,        # Whether to shed unsteady-loading wake
+                             extra_runtime_function=(PFIELD,T,DT)->false,
                              # OUTPUT OPTIONS
                              save_path="temps/vahanasimulation00",
                              run_name="vahana",
@@ -58,11 +61,16 @@ function run_simulation(maneuver::Function,
                              nsteps_save=1,             # Save vtks every this many steps
                              nsteps_restart=-1,         # Save jlds every this many steps
                              save_code=module_path,     # Saves the source code in this path
+                             save_horseshoes=false,     # Save VLM horseshoes
                              )
 
 
     # THIS IS ONLY FOR TESTING. GET RID OF THIS TO SHED PROP WAKES
     wake_system = vlm_system
+
+    if wake_coupled==false
+        warn("Running wake-decoupled simulation")
+    end
 
     # asdasd
     ############################################################################
@@ -94,7 +102,7 @@ function run_simulation(maneuver::Function,
     # Initiate particle field
     # max_particles = ceil(Int, 0.1*nsteps*vlm.get_m(wake_system))
     # TODO: Reduce the max number of particles
-    max_particles = ceil(Int, nsteps*vlm.get_m(wake_system))
+    max_particles = ceil(Int, 2*(nsteps+1)*vlm.get_m(wake_system))
     pfield = vpm.ParticleField(max_particles, Vinf, nothing, vpm_solver)
 
     pfield.nu = mu/rho                  # Kinematic viscosity
@@ -256,9 +264,12 @@ function run_simulation(maneuver::Function,
 
             # ---------- 5) Solve VLM system -----------------------------------
             # NOTE: Here is solving without VPM-induced velocity
-            vlm.solve(vlm_system, Vinf; t=T, extraVinf=extraVinf1, keep_sol=true)
-            # vlm.solve(vlm_system, Vinf; t=T, extraVinf=extraVinf2, keep_sol=true,
-                                                # vortexsheet=(X,t)->zeros(3))
+            if wake_coupled
+                vlm.solve(vlm_system, Vinf; t=T, extraVinf=extraVinf2, keep_sol=true,
+                                                vortexsheet=(X,t)->zeros(3))
+            else
+                vlm.solve(vlm_system, Vinf; t=T, keep_sol=true)
+            end
 
             # ---------- 5) Solve Rotor system ---------------------------------
             # for rotor in rotors
@@ -269,11 +280,13 @@ function run_simulation(maneuver::Function,
             #                             Uinds=nothing, _lookuptable=false, _Vinds=nothing)
             # end
             # ---------- 6) Shed unsteady-loading wake with new solution -------
-            VLM2VPM(wake_system, PFIELD, DT, Vinf; t=T,
+            if shed_unsteady
+                VLM2VPM(wake_system, PFIELD, DT, Vinf; t=T,
                             prev_system=prev_wake_system, unsteady_shedcrit=0.01,
                             p_per_step=p_per_step, sigmafactor=sigmafactor,
                             overwrite_sigma=overwrite_sigma,
                             check=false)
+            end
             # TODO: Verify that semi-infinite and unsteady wake is being placed half way the distance
 
         else # Case of first time step (pfield.nt==0)
@@ -294,6 +307,7 @@ function run_simulation(maneuver::Function,
             # for rotor in rotors
             #     RPM = cur_RPMs[rotor]
             #     # TODO: Add kinematic velocity
+            #       # NOTE: leave CCBlade for the deocupled case
             #     vlm.solvefromCCBlade(rotor, Vinf, RPM, rho; t=T, sound_spd=sound_spd,
             #                             Uinds=nothing, _lookuptable=false, _Vinds=nothing)
             # end
@@ -302,11 +316,13 @@ function run_simulation(maneuver::Function,
 
         # Output vtks
         if save_path!=nothing && PFIELD.nt%nsteps_save==0
-            vlm.save(system, run_name; save_horseshoes=true, path=save_path, num=PFIELD.nt)
-            vlm.vtk.save(fuselage, run_name*"_FuselageGrid"; path=save_path, num=PFIELD.nt)
+            vlm.save(system, run_name; save_horseshoes=save_horseshoes,
+                                                path=save_path, num=PFIELD.nt)
+            vlm.vtk.save(fuselage, run_name*"_FuselageGrid"; path=save_path,
+                                                                num=PFIELD.nt)
         end
 
-        breakflag = false
+        breakflag = extra_runtime_function(PFIELD, T, DT)
         return breakflag
     end
 
