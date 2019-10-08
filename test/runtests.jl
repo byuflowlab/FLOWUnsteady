@@ -13,14 +13,12 @@ for module_name in ["bertinswing"]
 end
 
 # ------------ TESTS -----------------------------------------------------------
-# @test bertin_VLM(; wake_coupled=false, nsteps=1, verbose=true)
-# @test bertin_VLM(; wake_coupled=true, nsteps=200, verbose=true)
-@test bertin_VLM(; wake_coupled=false, nsteps=200, save_path="temps/bertinswing/", verbose=true)
-# @test bertin_VLM(; wake_coupled=true, nsteps=200, save_path="temps/bertinswing01/", verbose=true)
+@test bertin_VLM(; wake_coupled=false, nsteps=1, verbose=true, disp_plot=true)
+@test bertin_VLM(; wake_coupled=true, nsteps=150, verbose=true, disp_plot=true)
+# @test bertin_VLM(; wake_coupled=true, nsteps=150, save_path="temps/bertinswing03/", verbose=true)
 
 
 
 # TODO
 # * Test VLM regularization
 # * Test solution on kinematic velocity
-# *

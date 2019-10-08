@@ -9,6 +9,18 @@
   * License   : MIT
 =###############################################################################
 
+#=
+    NOTES
+    * If calculating force coefficients through FLOWVLM, remember to specify
+        qinf manually, otherwise it will include the wake-induced velocity in
+        the normalizing static pressure.
+=#
+
+#=
+    TODO
+    * Incorporate VPM-induced velocity in VLM force calculations.
+=#
+
 
 # ------------ FLOW CODES ------------------------------------------------------
 # FLOWVLM https://github.com/byuflowlab/FLOWVLM
