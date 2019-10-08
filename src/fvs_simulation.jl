@@ -314,6 +314,8 @@ function run_simulation(maneuver::Function,
 
         end
 
+        breakflag = extra_runtime_function(PFIELD, T, DT)
+
         # Output vtks
         if save_path!=nothing && PFIELD.nt%nsteps_save==0
             vlm.save(system, run_name; save_horseshoes=save_horseshoes,
@@ -321,8 +323,6 @@ function run_simulation(maneuver::Function,
             vlm.vtk.save(fuselage, run_name*"_FuselageGrid"; path=save_path,
                                                                 num=PFIELD.nt)
         end
-
-        breakflag = extra_runtime_function(PFIELD, T, DT)
         return breakflag
     end
 
@@ -386,12 +386,20 @@ function Vvpm_on_VLM(pfield, system, vpm_solver; targetX="CP")
                                         ] for i in 1:vlm.get_m(system)]
     end
 
+    # Omit freestream
+    Uinf = pfield.Uinf
+    pfield.Uinf = (X, t)->zeros(3)
+
+    # Evaluate velocity induced by particle field
     if vpm_solver=="ExaFMM"
         Vvpm = vpm.conv_ExaFMM(pfield; Uprobes=Xs)[2]
     else
         warn("Evaluating VPM-on-VLM velocity without FMM")
         Vvpm = [vpm.reg_Uomega(pfield, X) for X in Xs]
     end
+
+    # Restore freestream
+    pfield.Uinf = Uinf
 
     return Vvpm
 end

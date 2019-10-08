@@ -24,17 +24,19 @@ function bertin_VLM(;   # TEST OPTIONS
                         save_path=nothing,
                         run_name="bertins",
                         prompt=true,
-                        verbose=true, v_lvl=1
+                        verbose=true, v_lvl=1,
+                        disp_plot=true,
                         )
 
     if verbose; println("\t"^(v_lvl)*"Running Bertin's wing test..."); end;
 
     # ------------- GENERATE BERTIN'S WING -------------------------------------
     if verbose; println("\t"^(v_lvl+1)*"Generating geometry..."); end;
-    # Testing conditions
+    # Experimental conditions
     magVinf = 163*0.3048            # (m/s) freestream
     rhoinf = 9.093/10^1             # (kg/m^3) air density
     alpha = 4.2                     # (deg) angle of attack
+    qinf = 0.5*rhoinf*magVinf^2     # (Pa) static pressure
 
     # Geometry
     twist = 0.0                     # (deg) root twist
@@ -45,8 +47,8 @@ function bertin_VLM(;   # TEST OPTIONS
     tr = 1.0                        # Taper ratio
 
     # Discretization
-    n = 4*2^3                       # Number of horseshoes
-    r = 20.0                        # Geometric expansion
+    n = 4*2^4                       # Number of horseshoes
+    r = 12.0                        # Geometric expansion
     central = false                 # Central expansion
 
     # Freestream function
@@ -63,7 +65,7 @@ function bertin_VLM(;   # TEST OPTIONS
     # ------------- SIMULATION SETUP -------------------------------------------
     if verbose; println("\t"^(v_lvl+1)*"Simulation setup..."); end;
 
-    wake_len = 3*b              # (m) length to develop the wake
+    wake_len = 2*b              # (m) length to develop the wake
     lambda_vpm = 2.0            # target core overlap of vpm wake
 
     # Simulation options
@@ -121,24 +123,24 @@ function bertin_VLM(;   # TEST OPTIONS
     web_CD = 0.005
     web_CdCD = web_Cd/web_CD
 
-    function monitor(PFIELD, T, DT; figname="monitor", nsteps_plot=1)
+    function monitor(PFIELD, T, DT; figname="monitor_$(save_path)", nsteps_plot=1)
 
         aux = PFIELD.nt/nsteps
         clr = (1-aux, 0, aux)
 
-        if PFIELD.nt==0
-            figure(figname, figsize=[7*2, 5*2]*2/3)
+        if PFIELD.nt==0 && disp_plot
+            figure(figname, figsize=[7*2, 5*2]*5/6)
             subplot(221)
             xlim([0,1])
             xlabel(L"$\frac{2y}{b}$")
             ylabel(L"$\frac{Cl}{CL}$")
-            title(L"Spanwise lift distribution")
+            title("Spanwise lift distribution")
 
             subplot(222)
             xlim([0,1])
             xlabel(L"$\frac{2y}{b}$")
             ylabel(L"$\frac{Cd}{CD}$")
-            title(L"Spanwise drag distribution")
+            title("Spanwise drag distribution")
 
             subplot(223)
             xlabel("Simulation time (s)")
@@ -149,11 +151,11 @@ function bertin_VLM(;   # TEST OPTIONS
             ylabel(L"Drag Coefficient $C_D$")
         end
 
-        if PFIELD.nt%nsteps_plot==0
+        if PFIELD.nt%nsteps_plot==0 && disp_plot
             figure(figname)
 
-            vlm.calculate_field(wing, "CFtot"; S=b^2/ar)
-            vlm.calculate_field(wing, "Cftot/CFtot"; S=b^2/ar)
+            vlm.calculate_field(wing, "CFtot"; S=b^2/ar, qinf=qinf, rhoinf=rhoinf)
+            vlm.calculate_field(wing, "Cftot/CFtot"; S=b^2/ar, qinf=qinf, rhoinf=rhoinf)
             ClCL1 = wing.sol["Cl/CL"]
             CdCD1 = wing.sol["Cd/CD"]
 
@@ -205,14 +207,15 @@ function bertin_VLM(;   # TEST OPTIONS
                          save_path=save_path,
                          run_name=run_name,
                          prompt=prompt,
-                         verbose=verbose, v_lvl=v_lvl+1
+                         verbose=verbose, v_lvl=v_lvl+1,
+                         save_horseshoes=!wake_coupled
                          )
 
 
     # ------------- POST-PROCESSING --------------------------------------------
     if verbose; println("\t"^(v_lvl+1)*"Postprocessing..."); end;
     # Simulation fift and drag
-    vlm.calculate_field(wing, "CFtot"; S=b^2/ar)
+    vlm.calculate_field(wing, "CFtot"; S=b^2/ar, qinf=qinf, rhoinf=rhoinf)
     info = vlm.fields_summary(wing)
     CLsim = info["CL"]
     CDsim = info["CD"]
