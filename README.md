@@ -31,7 +31,7 @@ FUTURE WORK
   * `src/fvs_geometry.jl`: Geometries are defined here.
   * `src/fvs_kinematics.jl`: Kinematics of different maneuvers are defined here.
   * `examples/`: Some example simulations.
-  * `docs/`: Documentation.
+  * `docs/`: Documentation (open Jupyter notebooks with [nbviewer](https://nbviewer.jupyter.org/).
     - `docs/instructions-setup.md`: Instructions for setting up this package.
     - `docs/validation.ipynb`: Validation of models implemented in this package.
 
