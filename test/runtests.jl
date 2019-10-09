@@ -32,7 +32,3 @@ end
 
 
 # @test bertin_kinematic(; nsteps=150, p_per_step=4, vlm_rlx=0.75, save_path="temps/bertinswing11/", verbose=true, disp_plot=true)
-
-
-# TODO
-# * Test sheds_per_step

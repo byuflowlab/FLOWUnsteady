@@ -67,7 +67,7 @@ function run_simulation(maneuver::Function,
 
 
     # THIS IS ONLY FOR TESTING. GET RID OF THIS TO SHED PROP WAKES
-    wake_system = vlm_system
+    # wake_system = vlm_system
 
     if wake_coupled==false
         warn("Running wake-decoupled simulation")
@@ -103,7 +103,7 @@ function run_simulation(maneuver::Function,
     # Initiate particle field
     # max_particles = ceil(Int, 0.1*nsteps*vlm.get_m(wake_system))
     # TODO: Reduce the max number of particles
-    max_particles = ceil(Int, 2*(nsteps+1)*vlm.get_m(wake_system)*p_per_step)
+    max_particles = ceil(Int, (nsteps+2)*(2*vlm.get_m(wake_system)+1)*p_per_step)
     pfield = vpm.ParticleField(max_particles, Vinf, nothing, vpm_solver)
 
     pfield.nu = mu/rho                  # Kinematic viscosity
@@ -151,7 +151,7 @@ function run_simulation(maneuver::Function,
     # SIMULATION RUNTIME FUNCTION
     ############################################################################
 
-    prev_angles = Float64[angles(0)...]     # Previous angles (deg)
+    prev_angles = [angles(0)...]            # Previous angles (deg)
     O_fuselage = zeros(3)                   # Current origin of fuselage
 
     """
@@ -199,7 +199,7 @@ function run_simulation(maneuver::Function,
 
             for (j, dangle) in enumerate(dangles)
 
-                Oaxis = vlm.vtk.rotation_matrix2(0, -dangle, 0)
+                Oaxis = vlm.vtk.rotation_matrix2([-a for a in dangle]...)
 
                 if j != size(dangles, 1)        # Titlting systems
                     sys = tilting_systems[j]
