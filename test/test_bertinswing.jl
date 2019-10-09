@@ -438,7 +438,7 @@ function bertin_kinematic(;   # TEST OPTIONS
             # Drag of the wing
             Dwing = norm(sum(D))
             CDwing = Dwing/(qinf*b^2/ar)
-            CdCD = [sign(dot(this_d, [-1,0,0])) for this_d in d].*norm.(d) / (Dwing/b) # Preserves the sign of drag
+            CdCD = [sign(dot(this_d, [1,0,0])) for this_d in d].*norm.(d) / (Dwing/b) # Preserves the sign of drag
 
             vlm._addsolution(wing, "Cl/CL", ClCL)
             vlm._addsolution(wing, "Cd/CD", CdCD)
