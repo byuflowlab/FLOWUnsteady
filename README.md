@@ -33,7 +33,7 @@ FUTURE WORK
   * `examples/`: Some example simulations.
   * `docs/`: Documentation (open Jupyter notebooks with [nbviewer](https://nbviewer.jupyter.org/).
     - `docs/instructions-setup.md`: Instructions for setting up this package.
-    - `docs/validation.ipynb`: Validation of models implemented in this package.
+    - `docs/validation.ipynb`: Validation of models implemented in this package, and numeric observations.
 
 # Dependencies
   * [`GeometricTools`](https://github.com/byuflowlab/GeometricTools.jl)
