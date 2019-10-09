@@ -82,7 +82,7 @@ function calc_aerodynamicforce(vlm_system::Union{vlm.Wing, vlm.WingSystem},
                 projl[1] = unitV[2]*l[3] - unitV[3]*l[2]
                 projl[2] = unitV[3]*l[1] - unitV[1]*l[3]
                 projl[3] = unitV[1]*l[2] - unitV[2]*l[1]
-                len = sqrt(V[1]*V[1]+V[2]*V[2]+V[3]*V[3])
+                len = sqrt(projl[1]*projl[1]+projl[2]*projl[2]+projl[3]*projl[3])
             else
                 len = 1
             end

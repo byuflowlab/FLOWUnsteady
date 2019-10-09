@@ -24,8 +24,9 @@ end
 # @test bertin_VLM(; wake_coupled=true, nsteps=150, verbose=true, disp_plot=true)
 # @test bertin_VLM(; wake_coupled=true, nsteps=150, save_path="temps/bertinswing03/", verbose=true)
 
-
-@test bertin_kinematic(; wake_coupled=true, nsteps=150, save_path="temps/bertinswing06/", verbose=true)
+# Test VPM+VLM solver on kinematic velocity: Isolated wing
+@test bertin_kinematic(; nsteps=150, verbose=true, disp_plot=true)
+# @test bertin_kinematic(; wake_coupled=true, nsteps=150, save_path="temps/bertinswing07/", verbose=true)
 
 
 # TODO
