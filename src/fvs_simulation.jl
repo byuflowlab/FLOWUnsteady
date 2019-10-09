@@ -354,37 +354,18 @@ end
 Returns the local translational velocity of every control point in `system`.
 """
 function Vtranslation(system, prev_system, dt; t=0.0, targetX="CP")
-    Vtrans = []
 
-    for i in 1:vlm.get_m(system)
-        if targetX=="CP"
-            prev_X = vlm.getControlPoint(prev_system, i)
-            cur_X = vlm.getControlPoint(system, i)
-        else
-            prev_X = vlm.getHorseshoe(prev_system, i; t=t)[vlm.VLMSolver.HS_hash[targetX]]
-            cur_X = vlm.getHorseshoe(system, i; t=t)[vlm.VLMSolver.HS_hash[targetX]]
-        end
+    cur_Xs = get_Xs(system, targetX; t=t)
+    prev_Xs = get_Xs(prev_system, targetX; t=t)
 
-        push!(Vtrans, -(cur_X-prev_X)/dt )
-    end
-
-    return Vtrans
+    return [-(cur_Xs[i]-prev_Xs[i])/dt for i in 1:size(cur_Xs,1)]
 end
 
 
 """
-Returns the velocity induced by particle field on every control point
-of `system`.
+Returns the velocity induced by particle field on every position `Xs`
 """
-function Vvpm_on_VLM(pfield, system, vpm_solver; targetX="CP")
-
-    if targetX=="CP"
-        Xs = [vlm.getControlPoint(system, i
-                                        ) for i in 1:vlm.get_m(system)]
-    else
-        Xs = [vlm.getHorseshoe(system, i; t=t)[vlm.VLMSolver.HS_hash[targetX]
-                                        ] for i in 1:vlm.get_m(system)]
-    end
+function Vvpm_on_Xs(pfield, Xs::Array{T, 1}, vpm_solver) where {T}
 
     # Omit freestream
     Uinf = pfield.Uinf
@@ -405,6 +386,31 @@ function Vvpm_on_VLM(pfield, system, vpm_solver; targetX="CP")
 end
 
 
+"""
+Returns the velocity induced by particle field on every control point
+of `system`.
+"""
+function Vvpm_on_VLM(pfield, system, vpm_solver; targetX="CP")
+
+    Xs = get_Xs(system, targetX; t=pfield.t)
+
+    return Vvpm_on_Xs(pfield, Xs, vpm_solver)
+end
+
+function get_Xs(system, targetX::String; t=0.0)
+    if targetX=="CP"
+        Xs = [vlm.getControlPoint(system, i
+                                        ) for i in 1:vlm.get_m(system)]
+    else
+        Xs = [vlm.getHorseshoe(system, i; t=t)[vlm.VLMSolver.HS_hash[targetX]
+                                        ] for i in 1:vlm.get_m(system)]
+    end
+    return Xs
+end
+
+function get_Xs(system, targetXs::Array{T,1}; t=0.0) where{T}
+    return vcat([get_Xs(system, targetX; t=t) for targetX in targetXs]...)
+end
 
 
 
