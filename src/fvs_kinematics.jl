@@ -15,7 +15,9 @@
     where `Vaircraft(t)` is the translation velocity of both `system` and
     `fuselage`, `angles(t)[i]` is the tilt angle of `tilting_systems[i]`,
     `RPMs(t)[i]` is the RPM of `rotors_systems[i]`. `angles(t)[end]` is
-    the tilt angle of the entire aircraft.
+    the tilt angle of the entire aircraft. Let `a = angles(t)[i]` be a tilt
+    angle, `a[1]` is the tilt about the local x-axis (roll), `a[2]` about the
+    y-axis (pitch), and `a[3]` about the z-axis (yaw).
 
     Each of the three functions received a non-dimensional time between 0 and 1
     (where 0 is the beginning of the maneuver, and 1 is the end of the maneuver)
@@ -156,7 +158,7 @@ function maneuver_vahana1(; Mtip=0.1,
         # ------------ TAKE OFF ------------------------------------------------
         if t<t1
 
-            return (90, 90, 0)
+            return [[0, 90, 0], [0, 90, 0], [0, 0, 0]]
 
         # ------------ TRANSITION ----------------------------------------------
         elseif t<t2
@@ -175,12 +177,14 @@ function maneuver_vahana1(; Mtip=0.1,
             val3 = (val3)^(val3 < 1 ? 3 : 1.5)
             angle_aircraft = -15*(1.5/0.75 * val3^0.5 * exp(-(val3^1.5)))
 
-            return (angle_main, angle_tandem, angle_aircraft)
+            return [[0, angle_main, 0],
+                    [0, angle_tandem, 0],
+                    [0, angle_aircraft,0 ]]
 
         # ------------ CRUISE --------------------------------------------------
         elseif t<t3
 
-            return (0, 0, 0)
+            return [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
 
         # ------------ TRANSITION ----------------------------------------------
         elseif t<t4
@@ -194,12 +198,14 @@ function maneuver_vahana1(; Mtip=0.1,
             val = 2.0 * (t-t3) / (t4-t3)
             angle_aircraft = 15 * 0.5 * (5 * val^4 * exp(-val^5))
 
-            return (angle_main, angle_tandem, angle_aircraft)
+            return [[0, angle_main, 0],
+                    [0, angle_tandem, 0],
+                    [0, angle_aircraft, 0]]
 
         # ------------ LANDING -------------------------------------------------
         else
 
-            return (90, 90, 0)
+            return [[0, 90, 0], [0, 90, 0], [0, 0, 0]]
 
         end
     end
@@ -373,9 +379,9 @@ function maneuver_vahana1(; Mtip=0.1,
         amax = max([maximum([a[i] for a in as]) for i in 1:3]...)
         amin = min([minimum([a[i] for a in as]) for i in 1:3]...)
 
-        plot(ts, [a[1] for a in as], "-g", label="Main", alpha=0.8)
-        plot(ts, [a[2] for a in as], "-b", label="Tandem", alpha=0.8)
-        plot(ts, [a[3] for a in as], "-r", label="Aircraft", alpha=0.8)
+        plot(ts, [a[1][2] for a in as], "-g", label="Main", alpha=0.8)
+        plot(ts, [a[2][2] for a in as], "-b", label="Tandem", alpha=0.8)
+        plot(ts, [a[3][2] for a in as], "-r", label="Aircraft", alpha=0.8)
 
         for tstage in [t1, t2, t3, t4]
             plot(tstage*ones(2), [amin, amax], ":k", alpha=0.5)
@@ -489,7 +495,7 @@ function visualize_kinematic(maneuver::Function, system, rotors, tilting_systems
 
             for (j, dangle) in enumerate(dangles)
 
-                Oaxis = vlm.vtk.rotation_matrix2(0, -dangle, 0)
+                Oaxis = vlm.vtk.rotation_matrix2([-a for a in dangle]...)
 
                 if j != size(dangles, 1)        # Titlting systems
                     sys = tilting_systems[j]
