@@ -49,6 +49,7 @@ function run_simulation(maneuver::Function,
                              sigmafactor=1.0,           # Particle core overlap
                              overwrite_sigma=nothing,   # Overwrite cores to this value (ignoring sigmafactor)
                              vlm_sigma=-1,              # VLM regularization
+                             vlm_rlx=-1,                # VLM relaxation
                              wake_coupled=true,         # Couple VPM wake on VLM solution
                              shed_unsteady=true,        # Whether to shed unsteady-loading wake
                              extra_runtime_function=(PFIELD,T,DT)->false,
@@ -102,7 +103,7 @@ function run_simulation(maneuver::Function,
     # Initiate particle field
     # max_particles = ceil(Int, 0.1*nsteps*vlm.get_m(wake_system))
     # TODO: Reduce the max number of particles
-    max_particles = ceil(Int, 2*(nsteps+1)*vlm.get_m(wake_system))
+    max_particles = ceil(Int, 2*(nsteps+1)*vlm.get_m(wake_system)*p_per_step)
     pfield = vpm.ParticleField(max_particles, Vinf, nothing, vpm_solver)
 
     pfield.nu = mu/rho                  # Kinematic viscosity
@@ -269,6 +270,12 @@ function run_simulation(maneuver::Function,
                                                 vortexsheet=(X,t)->zeros(3))
             else
                 vlm.solve(vlm_system, Vinf; t=T, keep_sol=true)
+            end
+
+            # Relaxes (vlm_rlx->1) or stiffens (vlm_rlx->0) the VLM solution
+            if vlm_rlx > 0
+                rlxd_Gamma = vlm_rlx*vlm_system.sol["Gamma"] + (1-vlm_rlx)*prev_vlm_system.sol["Gamma"]
+                vlm._addsolution(vlm_system, "Gamma", rlxd_Gamma)
             end
 
             # ---------- 5) Solve Rotor system ---------------------------------
@@ -599,13 +606,8 @@ function add_particle(pfield::vpm.ParticleField, X::Array{Float64, 1},
                         sigma::Float64, vol::Float64,
                         l::Array{T1, 1}, p_per_step::Int64;
                         overwrite_sigma=nothing) where {T1<:Real}
+
     Gamma = gamma*(V*dt)*infD       # Vectorial circulation
-
-    if p_per_step!=1 && overwrite_sigma==nothing
-        warn("Overwrite_sigma is expected to be (Vtip*dt/p_per_step) for"*
-        " p_per_step!=1, got nothing")
-    end
-
 
     # Decreases p_per_step for slowly moving parts of blade
     # aux = min((sigma/p_per_step)/overwrite_sigma, 1)

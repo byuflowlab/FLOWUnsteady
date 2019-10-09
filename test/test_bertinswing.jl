@@ -73,10 +73,10 @@ function bertin_VLM(;   # TEST OPTIONS
     RPMh_w = 0.0                # Rotor RPM during hover (dummy)
 
     # Solver options
-    overwrite_sigma = lambda_vpm * magVinf * (telapsed/nsteps) # Smoothing core size
+    p_per_step = 1              # Number of particle sheds per time steps (dummy)
+    overwrite_sigma = lambda_vpm * magVinf * (telapsed/nsteps)/p_per_step # Smoothing core size
     # vlm_sigma = -1            # VLM regularization core size (deactivated with -1)
     vlm_sigma = vlm_fsgm*b
-    p_per_step = 1              # Number of particle sheds per time steps (dummy)
     # wake_coupled = true       # Coupled VPM wake with VLM solution
     shed_unsteady = true        # Whether to shed unsteady-loading wake
     # shed_unsteady = false
@@ -265,8 +265,10 @@ end
 function bertin_kinematic(;   # TEST OPTIONS
                         tol=0.025,
                         wake_coupled=true,
-                        nsteps=200,
+                        nsteps=150,
                         vlm_fsgm=-1,
+                        p_per_step = 1,
+                        vlm_rlx = -1,
                         # OUTPUT OPTIONS
                         save_path=nothing,
                         run_name="bertins",
@@ -328,13 +330,14 @@ function bertin_kinematic(;   # TEST OPTIONS
     RPMh_w = 0.0                # Rotor RPM during hover (dummy)
 
     # Solver options
-    overwrite_sigma = lambda_vpm * magVinf * (telapsed/nsteps) # Smoothing core size
+    # p_per_step = 1              # Number of particle sheds per time steps
+    overwrite_sigma = lambda_vpm * magVinf * (telapsed/nsteps)/p_per_step # Smoothing core size
     # vlm_sigma = -1            # VLM regularization core size (deactivated with -1)
     vlm_sigma = vlm_fsgm*b
-    p_per_step = 1              # Number of particle sheds per time steps (dummy)
     # wake_coupled = true       # Coupled VPM wake with VLM solution
     shed_unsteady = true        # Whether to shed unsteady-loading wake
     # shed_unsteady = false
+    # vlm_rlx = -1                # VLM relaxation (deactivated with -1)
 
     # Maneuver definition
     Vaircraft(t) = [-1,0,0]     # Translational velocity of system over Vcruise
@@ -493,6 +496,7 @@ function bertin_kinematic(;   # TEST OPTIONS
                          p_per_step=p_per_step,
                          overwrite_sigma=overwrite_sigma,
                          vlm_sigma=vlm_sigma,
+                         vlm_rlx=vlm_rlx,
                          wake_coupled=wake_coupled,
                          shed_unsteady=shed_unsteady,
                          extra_runtime_function=monitor,
