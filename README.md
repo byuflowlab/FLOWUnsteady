@@ -4,12 +4,14 @@
 
 High-fidelity simulation engine of fully-unsteady flight vehicle. This module is
 an experimental architecture stitching together mid and high-fidelity
-aerodynamic tools developed at BYU's FLOW Lab: `GeometricTools` (geometric
-engine), `FLOWVLM` (VLM and strip theory solver), `CCBlade` (blade element
-momentum solver), `MyPanel` (3D inviscid panel solver), and `FLOWVPM` (viscous
-vortex particle method). Most of the tools are still using Julia 0.6.4 as they
-are pending for a major revamp, hence this simulation framework is conceived to
-work only in Julia 0.6.4.
+aerodynamic tools developed at BYU's FLOW Lab: [`GeometricTools`](https://github.com/byuflowlab/GeometricTools.jl)
+(geometric engine), [`FLOWVLM`](https://github.com/byuflowlab/FLOWVLM) (VLM and
+strip theory solver), [`CCBlade`](https://github.com/byuflowlab/CCBlade.jl)
+(blade element momentum solver),
+[`MyPanel`](https://github.com/EdoAlvarezR/MyPanel.jl) (3D inviscid panel
+solver), and `FLOWVPM` (viscous vortex particle method). Most of the tools are
+still using Julia 0.6.4 as they are pending for a major revamp, hence this
+simulation framework is conceived to work only in Julia 0.6.4.
 
 FEATURES
 * Viscous, unsteady wake mixing of rotors and lifting surfaces.
@@ -27,13 +29,17 @@ FUTURE WORK
 * Coupling of aerodynamic loads and flight path allowing dynamic simulations.
 * Bluff body separation and panel-predicted viscous drag (?).
 
+
+For validation and numerical recommendations, check this notebook in the
+documentation: [`docs/validation.ipynb`](https://nbviewer.jupyter.org/github/byuflowlab/FlightVehicleSim/blob/master/docs/validation.ipynb).
+
 # Files
   * `src/fvs_geometry.jl`: Geometries are defined here.
   * `src/fvs_kinematics.jl`: Kinematics of different maneuvers are defined here.
   * `examples/`: Some example simulations.
   * `docs/`: Documentation (open Jupyter notebooks with [nbviewer](https://nbviewer.jupyter.org/).
     - `docs/instructions-setup.md`: Instructions for setting up this package.
-    - `docs/validation.ipynb`: Validation of models implemented in this package, and numeric observations.
+    - [`docs/validation.ipynb`](https://nbviewer.jupyter.org/github/byuflowlab/FlightVehicleSim/blob/master/docs/validation.ipynb): Validation of models implemented in this package, and numeric observations.
 
 # Dependencies
   * [`GeometricTools`](https://github.com/byuflowlab/GeometricTools.jl)
