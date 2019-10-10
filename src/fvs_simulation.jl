@@ -52,6 +52,7 @@ function run_simulation(maneuver::Function,
                              vlm_rlx=-1,                # VLM relaxation
                              wake_coupled=true,         # Couple VPM wake on VLM solution
                              shed_unsteady=true,        # Whether to shed unsteady-loading wake
+                             unsteady_shedcrit=0.01,    # Criterion for unsteady-loading shedding
                              extra_runtime_function=(PFIELD,T,DT)->false,
                              # OUTPUT OPTIONS
                              save_path="temps/vahanasimulation00",
@@ -289,7 +290,8 @@ function run_simulation(maneuver::Function,
             # ---------- 6) Shed unsteady-loading wake with new solution -------
             if shed_unsteady
                 VLM2VPM(wake_system, PFIELD, DT, Vinf; t=T,
-                            prev_system=prev_wake_system, unsteady_shedcrit=0.01,
+                            prev_system=prev_wake_system,
+                            unsteady_shedcrit=unsteady_shedcrit,
                             p_per_step=p_per_step, sigmafactor=sigmafactor,
                             overwrite_sigma=overwrite_sigma,
                             check=false)

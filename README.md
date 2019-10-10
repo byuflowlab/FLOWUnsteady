@@ -39,13 +39,17 @@ FUTURE WORK
   * [`GeometricTools`](https://github.com/byuflowlab/GeometricTools.jl)
   * [`FLOWVLM`](https://github.com/byuflowlab/FLOWVLM)
   * [`MyPanel`](https://github.com/EdoAlvarezR/MyPanel.jl)
-  * `FLOWVPM`: Available upon request.
+  * `FLOWVPM`: Contact Ed Alvarez or the FLOW Lab.
   * Paraview  : Not needed, but examples call Paraview for visualization of
       outputs.
 
 # Related Projects
   * [Unsteady eVTOL transition](https://github.com/byuflowlab/alvarezanderson2020-unsteady-evtol-transition)
   * [Wind-harvesting aircraft design](https://github.com/byuflowlab/mehr2020-airborne-wind-aero)
+
+# Examples
+**HEAVING WING:** `examples/heavingwing.jl`
+<img src="docs/vid/bertinsheaving00.gif" alt="Vid here" style="width: 900px;"/>
 
 # Authorship
   * Author    : Eduardo J Alvarez

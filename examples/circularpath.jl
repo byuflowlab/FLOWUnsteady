@@ -7,7 +7,8 @@ Run this example through the following command:
 
 ```
     circularpath(; nsteps=800, p_per_step=4, vlm_rlx=0.75,
-                    save_path="temps/circularpath02/",
+                    # save_path="temps/circularpath02/",
+                    save_path=extdrive_path*"circularpath03/",
                     verbose=true, disp_plot=true)
 ```
 
