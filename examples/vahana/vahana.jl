@@ -1,11 +1,23 @@
+#=##############################################################################
+# DESCRIPTION
+    Unsteady simulation of eVTOL transition maneuver on tilt-wing, tandem,
+    distributed propulsion aircraft.
+
+    REFERENCES
+    * Vahana geometry: Droandi, G., Syal, M., and Bower, G., “Tiltwing Multi-Rotor
+    Aerodynamic Modeling in Hover, Transition and Cruise Flight Conditions,” AHS
+    International 74th Annual Forum & Technology Display, 2018, p. 2018.
+
+# AUTHORSHIP
+  * Author    : Eduardo J. Alvarez
+  * Email     : Edo.AlvarezR@gmail.com
+  * Created   : Oct 2019
+  * License   : MIT
+=###############################################################################
+
+
 # Load simulation engine
 include(joinpath(splitdir(@__FILE__)[1], "../src/fvs.jl"))
-
-#=
-    Temporary functions for debugging
-=#
-
-
 
 function run_simulation_vahana(;    # save_path="temps/vahanasimulation01",
                                     save_path=extdrive_path*"vahanasimulation02",

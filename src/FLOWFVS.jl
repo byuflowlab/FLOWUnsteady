@@ -1,13 +1,16 @@
-#=##############################################################################
-# DESCRIPTION
-    High-fidelity simulation engine of fully-unsteady flight vehicle.
+"""
+Flight Vehicle Simulator; a high-fidelity simulation engine of fully-unsteady
+flight vehicle.
 
-# AUTHORSHIP
-  * Author    : Eduardo J. Alvarez
-  * Email     : Edo.AlvarezR@gmail.com
-  * Created   : Oct 2019
-  * License   : MIT
-=###############################################################################
+    # AUTHORSHIP
+      * Author    : Eduardo J. Alvarez
+      * Email     : Edo.AlvarezR@gmail.com
+      * Created   : Oct 2019
+      * License   : MIT
+"""
+module FLOWFVS
+
+export Vehicle
 
 #=
     NOTES
@@ -21,23 +24,17 @@
     * FLOWVLM has a a rough regularization scheme that tends to make the solver
         oscillate if the smoothing radius overlaps any control point. Just FYI.
 =#
-
 #=
     TODO
     * Incorporate VPM-induced velocity in VLM force calculations.
 =#
 
-
 # ------------ FLOW CODES ------------------------------------------------------
 # FLOWVLM https://github.com/byuflowlab/FLOWVLM
-# flowvlm_path = "/home/edoalvar/Dropbox/FLOWResearch/FLOWCodes/FLOWVLM/"
-# include(flowvlm_path*"src/FLOWVLM.jl")
 import FLOWVLM
 vlm = FLOWVLM
 
 # MyVPM https://github.com/EdoAlvarezR/MyVPM
-# myvpm_path = "/home/edoalvar/Dropbox/FLOWResearch/MyCodes/MyVPM/"
-# include(myvpm_path*"src/MyVPM.jl")
 import MyVPM
 vpm = MyVPM
 
@@ -50,15 +47,14 @@ import CSV
 using PyPlot
 
 # ------------ GLOBAL VARIABLES ------------------------------------------------
-global module_path; module_path,_ = splitdir(@__FILE__)    # Path to this module
-global data_path = joinpath(module_path, "../data/")       # Path to data folder
-# Path to external dr
-global extdrive_path = "/media/edoalvar/MyExtDrive/simulationdata5/"
+module_path = splitdir(@__FILE__)[1]                # Path to this module
+data_path = joinpath(module_path, "../data/")       # Path to data folder
 
 
 # ------------ HEADERS ---------------------------------------------------------
 # Load modules
-for module_name in ["rotor", "geometry", "kinematics", "simulation",
-                                                                "processing"]
-    include("fvs_"*module_name*".jl")
+for module_name in ["vehicle", "maneuver"]
+    include("FLOWFVS_"*module_name*".jl")
 end
+
+end # END OF MODULE
