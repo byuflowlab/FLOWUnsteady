@@ -1,7 +1,6 @@
 #=##############################################################################
 # DESCRIPTION
-    Geometry generation function of every vehicle. Keep adding more vehicle
-    geometries to this file as needed.
+    Vahana vehicle geometry generation.
 
 # AUTHORSHIP
   * Author    : Eduardo J. Alvarez
@@ -9,7 +8,6 @@
   * Created   : Oct 2019
   * License   : MIT
 =###############################################################################
-
 
 #=
 
@@ -45,19 +43,6 @@ following format:
         entire aircraft.
 =#
 
-
-################################################################################
-# VAHANA
-################################################################################
-#=
-
-Unsteady simulation of eVTOL transition maneuver.
-
-REFERENCES
-* Vahana geometry: Droandi, G., Syal, M., and Bower, G., “Tiltwing Multi-Rotor
-Aerodynamic Modeling in Hover, Transition and Cruise Flight Conditions,” AHS
-International 74th Annual Forum & Technology Display, 2018, p. 2018.
-=#
 
 """
     Generates the geometry of Vahana aircraft
