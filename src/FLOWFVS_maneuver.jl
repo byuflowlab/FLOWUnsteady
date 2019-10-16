@@ -51,7 +51,7 @@ axes, in degrees) of `vehicle` performing `maneuver` at time `t` (s) after a
 time step `dt` (s). `ttot` is the total time at which this maneuver is to be
 performed.
 """
-function calc_dtheta(self::AbstractManeuver, vehicle::Vehicle, t::Real,
+function calc_dW(self::AbstractManeuver, vehicle::Vehicle, t::Real,
                                                         dt::Real, ttot::Real)
     error("$(typeof(self)) has no implementation yet!")
 end
@@ -108,6 +108,13 @@ end
 
 
 
+
+
+
+
+
+
+
 ################################################################################
 # KINEMATIC MANEUVER TYPE
 ################################################################################
@@ -161,6 +168,12 @@ end
 ##### INTERNAL FUNCTIONS  ######################################################
 
 ##### END OF KINEMATICMANEUVER  ################################################
+
+
+
+
+
+
 
 
 

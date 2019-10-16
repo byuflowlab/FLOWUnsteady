@@ -1,6 +1,6 @@
 #=##############################################################################
 # DESCRIPTION
-    Function for rotor geometry generation.
+    Auxiliary functions for rotor geometry generation and calculations.
 
 # AUTHORSHIP
   * Author    : Eduardo J. Alvarez
@@ -11,7 +11,7 @@
 
 """
 Generates the Rotor object. `pitch` is the pitch of the blades in degrees,
-`n` is the number of lattices in the VLM..
+`n` is the number of lattices in the VLM.
 
 `ReD` is the diameter Reynolds number based on rotational speed calculated
 as ReD = (omega*R)*(2*R)/nu, and `Matip` is the rotational+freestream Mach
@@ -27,19 +27,44 @@ NOTE: If Matip is different than zero while running XFOIL, remember to deactive
 compressibility corrections when running `vlm.solvefromCCBlade()` by giving it
 `sound_spd=nothing`
 """
-function generate_rotor(pitch::Float64; n=10, CW=true,
-                          ReD=5*10^5, altReD=nothing, Matip=0.0,
-                          verbose=false, xfoil=false,
-                          rotor_file="apc10x7.jl",
-                          data_path=data_path,
-                          plot_disc=true, v_lvl=1,
-                          spline_k=5, spline_s=0.001, spline_bc="extrapolate",
-                          turbine_flag=false,
-                          rfl_n_lower=15, rfl_n_upper=15)
+function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
+                        chorddist::Array{Float64,2},
+                        pitchdist::Array{Float64,2},
+                        sweepdist::Array{Float64,2},
+                        heightdist::Array{Float64,2},
+                        airfoil_files::Array{Tuple{Float64,String,String},1};
+                        # INPUT OPTIONS
+                        data_path=def_data_path,
+                        # PROCESSING OPTIONS
+                        pitch=0.0,
+                        n=10, CW=true,
+                        ReD=5*10^5, altReD=nothing, Matip=0.0,
+                        xfoil=false,
+                        rotor_file="apc10x7.jl",
+                        spline_k=5, spline_s=0.001, spline_bc="extrapolate",
+                        turbine_flag=false,
+                        rfl_n_lower=15, rfl_n_upper=15,
+                        # OUTPUT OPTIONS
+                        verbose=false,
+                        plot_disc=true, v_lvl=1)
     if verbose; println("\t"^v_lvl*"Generating geometry..."); end;
     n_bem = n
-    include(data_path*rotor_file)
 
+    # Read airfoil contours
+    # Airfoils along the blade as
+    # airfoil_contours=[ (pos1, contour1, polar1), (pos2, contour2, pol2), ...]
+    # with contour=(x,y) and pos the position from root to tip between 0 and 1.
+    # pos1 must equal 0 (root airfoil) and the last must be 1 (tip airfoil)
+    airfoil_contours = []
+    airfoil_path = joinpath(data_path, "airfoils")
+    for (r, rfl_file, clcurve_file) in airfoil_files
+        x,y = gt.readcontour(rfl_file; delim=",", path=airfoil_path, header_len=1)
+        rfl = hcat(x,y)
+
+        push!(airfoil_contours, (r, rfl, clcurve_file))
+    end
+
+    # Splines
     _spl_chord = Dierckx.Spline1D(chorddist[:, 1]*Rtip, chorddist[:, 2]*Rtip;
                                         k= size(chorddist)[1]>2 ? spline_k : 1,
                                         s=spline_s, bc=spline_bc)
@@ -148,6 +173,54 @@ function generate_rotor(pitch::Float64; n=10, CW=true,
     return propeller
 end
 
+function generate_rotor(Rtip::Real, Rhub::Real, B::Int, blade_file::String;
+                        data_path=def_data_path, optargs...)
+
+    # Path to rotor files
+    rotor_path = joinpath(data_path, "rotors")
+
+    # Read blade
+    files = CSV.read(joinpath(rotor_path, blade_file))
+    chorddist = CSV.read(joinpath(rotor_path, files[1, 2]))
+    pitchdist = CSV.read(joinpath(rotor_path, files[2, 2]))
+    sweepdist = CSV.read(joinpath(rotor_path, files[3, 2]))
+    heightdist = CSV.read(joinpath(rotor_path, files[4, 2]))
+    airfoil_files = CSV.read(joinpath(rotor_path, files[5, 2]))
+    spl_k = parse(files[6, 2])
+    spl_s = parse(files[7, 2])
+
+    # Convert DataFrames to concrete types
+    chorddist = Array{Float64, 2}(chorddist)
+    pitchdist = Array{Float64, 2}(pitchdist)
+    sweepdist = Array{Float64, 2}(sweepdist)
+    heightdist = Array{Float64, 2}(heightdist)
+
+    af = airfoil_files
+    airfoil_files = [(Float64(af[i, 1]), String(af[i, 2]), String(af[i, 3]))
+                        for i in 1:size(af, 1)]
+
+    return generate_rotor(Rtip, Rhub, B, chorddist, pitchdist, sweepdist,
+                            heightdist, airfoil_files;
+                            data_path=data_path,
+                            spline_k=spl_k, spline_s=spl_s, optargs...)
+end
+
+
+function generate_rotor(rotor_file::String;
+                        data_path=def_data_path, optargs...)
+
+    # Path to rotor files
+    rotor_path = joinpath(data_path, "rotors")
+
+    data = CSV.read(joinpath(rotor_path, rotor_file))
+    Rtip = parse(data[1, 2])
+    Rhub = parse(data[2, 2])
+    B = parse(data[3, 2])
+    blade_file = data[4, 2]
+
+    return generate_rotor(Rtip, Rhub, B, blade_file;
+                            data_path=data_path, optargs...)
+end
 
 """
     Given a diameter-based Reynolds number \mathrm{Re}_D(r) at a certain

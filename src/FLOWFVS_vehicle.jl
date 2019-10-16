@@ -35,6 +35,8 @@ Type handling all geometries and subsystems that define a flight vehicle.
                                     through the VLM solver.
 * `wake_system::vlm.WingSystem`:   System of all FLOWVLM objects that will
                                     shed a VPM wake.
+* `grids::Array{gt.GridTypes, 1}`: Array of grids that will be translated and
+                                    rotated along with `system`.
 """
 struct Vehicle{N, M}
 
@@ -46,19 +48,22 @@ struct Vehicle{N, M}
     rotor_systems::NTuple{M, Array{vlm.Rotor, 1}}
     vlm_system::vlm.WingSystem
     wake_system::vlm.WingSystem
+    grids::Array{gt.GridTypes, 1}
 
     Vehicle{N, M}(
                     system;
                     tilting_systems=NTuple{0, vlm.WingSystem}(),
                     rotor_systems=NTuple{0, Array{vlm.Rotor, 1}}(),
                     vlm_system=vlm.WingSystem(),
-                    wake_system=vlm.WingSystem()
+                    wake_system=vlm.WingSystem(),
+                    grids=Array{gt.GridTypes, 1}()
                 ) where {N, M} = new(
                     system,
                     tilting_systems,
                     rotor_systems,
                     vlm_system,
-                    wake_system
+                    wake_system,
+                    grids
                 )
 end
 
@@ -69,7 +74,7 @@ Vehicle(system::vlm.WingSystem;
         optargs...
         ) where {N, M} = Vehicle{N, M}( system;
                                         tilting_systems=tilting_systems,
-                                        rotor_systems=rotor_systems)
+                                        rotor_systems=rotor_systems, optargs...)
 
 
 ##### FUNCTIONS  ###############################################################
@@ -86,5 +91,14 @@ Return number of rotor systems.
 get_nrtrsys(self::Vehicle) = typeof(self).parameters[2]
 
 ##### INTERNAL FUNCTIONS  ######################################################
+function save_vtk(self::Vehicle, filename; path=nothing, num=nothing, optargs...)
+    strn = vlm.save(self.system, filename; path=path, num=num, optargs...)
+
+    for (i, grid) in enumerate(self.grids)
+        strn *= gt.save(grid, filename*"_Grid$i"; path=path, num=num)
+    end
+
+    return strn
+end
 
 ##### END OF VEHICLE ###########################################################
