@@ -10,7 +10,8 @@ flight vehicle.
 """
 module FLOWFVS
 
-export Vehicle
+export Vehicle, KinematicManeuver, DynamicManeuver,
+        generate_rotor, save_vtk
 
 #=
     NOTES
@@ -39,7 +40,8 @@ import MyVPM
 vpm = MyVPM
 
 # GeometricTools https://github.com/byuflowlab/GeometricTools.jl
-gt = vlm.vtk
+import GeometricTools
+gt = GeometricTools
 
 # ------------ GENERIC MODULES -------------------------------------------------
 import Dierckx
@@ -48,12 +50,12 @@ using PyPlot
 
 # ------------ GLOBAL VARIABLES ------------------------------------------------
 module_path = splitdir(@__FILE__)[1]                # Path to this module
-data_path = joinpath(module_path, "../data/")       # Path to data folder
+def_data_path = joinpath(module_path, "../data/")   # Default path to data folder
 
 
 # ------------ HEADERS ---------------------------------------------------------
 # Load modules
-for module_name in ["vehicle", "maneuver"]
+for module_name in ["vehicle", "maneuver", "rotor"]
     include("FLOWFVS_"*module_name*".jl")
 end
 
