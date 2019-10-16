@@ -22,7 +22,7 @@ following format:
                                         `tilting_systems[i]` contains the i-th
                                         FLOWVLM system of lifting surfaces and
                                         rotors that tilt together.
-    * `rotors_systems::Tuple(Array{vlm.Rotor,1}, ...)`:   Tuple of groups of
+    * `rotor_systems::Tuple(Array{vlm.Rotor,1}, ...)`:   Tuple of groups of
                                         Rotors that share a common RPM.
     * `vlm_system::vlm.WingSystem`:    System of all FLOWVLM objects to be
                                         solved through the VLM solver.
@@ -39,7 +39,7 @@ following format:
         where `Vaircraft(t)` is the translation velocity of both `system`
         and `fuselage`, `angles(t)[i]` is the tilt angle of
         `tilting_systems[i]`, `RPMs(t)[i]` is the RPM of
-        `rotors_systems[i]`. `angles(t)[end]` is the tilt angle of the
+        `rotor_systems[i]`. `angles(t)[end]` is the tilt angle of the
         entire aircraft.
 =#
 
@@ -49,8 +49,8 @@ following format:
 """
 function generategeometry_vahana(;
                                     # AIRCRAFT OPTIONS
-                                    rotor_file="apc10x7_vahana.jl", # Rotor
-                                    # rotor_file="ning_vahana.jl",
+                                    rotor_file="apc10x7Vahana.csv", # Rotor
+                                    # rotor_file="DJI-IIVahana.csv",
                                     data_path=data_path,
                                     xfoil=true,                     # Run XFOIL
                                     n_factor::Int=1,                # Refinement factor
@@ -164,9 +164,10 @@ function generategeometry_vahana(;
     # Generates base propellers (one on each rotation orientation)
     propellers = vlm.Rotor[]
     if verbose; println("\t"^(v_lvl+1)*"Generating first propeller..."); end;
-    @time push!(propellers, generate_rotor(pitch; n=n_ccb, CW=!CW_w, ReD=ReD,
-                          verbose=verbose, xfoil=xfoil, rotor_file=rotor_file,
-                          data_path=data_path, plot_disc=false))
+    @time push!(propellers, fvs.generate_rotor(rotor_file; pitch=pitch,
+                                            n=n_ccb, CW=!CW_w, ReD=ReD,
+                                            verbose=verbose, xfoil=xfoil,
+                                            data_path=data_path, plot_disc=false))
     if verbose; println("\t"^(v_lvl+1)*"Generating second propeller..."); end;
     # @time push!(propellers, generate_rotor(pitch; n=n_ccb, CW=CW_w, ReD=ReD,
     #                         verbose=verbose, xfoil=xfoil, rotor_file=rotor_file))
@@ -424,37 +425,11 @@ function generategeometry_vahana(;
 
 
     # ------------ OUTPUTS------------------------------------------------
-
-    # Creates string of vtk components
-    save_name = run_name
-    strn = ""
-    strn = strn * save_name * "_MainWing_FixedWing_vlm.vtk;"
-    strn = strn * save_name * "_MainWing_Moving_WingR_vlm.vtk;"
-    strn = strn * save_name * "_MainWing_Moving_WingletR_vlm.vtk;"
-    strn = strn * save_name * "_MainWing_Moving_WingL_vlm.vtk;"
-    strn = strn * save_name * "_MainWing_Moving_WingletL_vlm.vtk;"
-    strn = strn * save_name * "_TandemWing_FixedWing_vlm.vtk;"
-    strn = strn * save_name * "_TandemWing_Moving_WingR_vlm.vtk;"
-    strn = strn * save_name * "_TandemWing_Moving_WingL_vlm.vtk;"
-    # strn = strn * save_name * "_Fuselage_vlm.vtk;"
-    num_blades = propellers[1].B
-    for (sys_name, num_props) in [("MainWing_Moving", np_w*2), ("TandemWing_Moving", np_tw*2)]
-        for j in 1:num_props
-            for i in 1:num_blades
-                # strn = strn * save_name * "_" * sys_name * "_Prop$j" * "_Blade$(i)_vlm.vtk;"
-            end
-            for i in 1:num_blades
-                strn = strn * save_name * "_" * sys_name * "_Prop$j" * "_Blade$(i)_loft.vtk;"
-            end
-        end
-    end
-
-
     # Tilting systems
     tilting_systems = (main_wing_moving, tandem_wing_moving)
 
     # Rotors grouped by systems of the same RPM
-    rotors_systems = (props_w, props_tw)
+    rotor_systems = (props_w, props_tw)
 
     # System to solve through the VLM solver
     vlm_system = vlm.WingSystem()
@@ -472,11 +447,20 @@ function generategeometry_vahana(;
         vlm.addwing(wake_system, "Rotor$i", rotor)
     end
 
+    # Dummy grids that are rotated and translated along with the vehicle
+    grids = [fuselage]
 
-    return (system, rotors,
-            tilting_systems, rotors_systems,
-            vlm_system, wake_system,
-            fuselage, grounds, strn)
+    # FVS's Vehicle object
+    vehicle = fvs.Vehicle(  system;
+                            tilting_systems=tilting_systems,
+                            rotor_systems=rotor_systems,
+                            vlm_system=vlm_system,
+                            wake_system=wake_system,
+                            grids=grids
+                         )
+
+
+    return vehicle, grounds
 end
 
 
@@ -856,7 +840,7 @@ end
 
 
 ################################################################################
-# COMMON FUNCTIONS
+# UTILITIES
 ################################################################################
 
 """
