@@ -37,7 +37,7 @@ documentation: [`docs/validation.ipynb`](https://nbviewer.jupyter.org/github/byu
   * `src/fvs_geometry.jl`: Geometries are defined here.
   * `src/fvs_kinematics.jl`: Kinematics of different maneuvers are defined here.
   * `examples/`: Some example simulations.
-  * `docs/`: Documentation (open Jupyter notebooks with [nbviewer](https://nbviewer.jupyter.org/).
+  * `docs/`: Documentation (open Jupyter notebooks with [nbviewer](https://nbviewer.jupyter.org/)).
     - `docs/instructions-setup.md`: Instructions for setting up this package.
     - [`docs/validation.ipynb`](https://nbviewer.jupyter.org/github/byuflowlab/FlightVehicleSim/blob/master/docs/validation.ipynb): Validation of models implemented in this package, and numeric observations.
 
@@ -56,6 +56,9 @@ documentation: [`docs/validation.ipynb`](https://nbviewer.jupyter.org/github/byu
 # Examples
 **HEAVING WING:** `examples/heavingwing.jl`
 <img src="docs/vid/bertinsheaving00.gif" alt="Vid here" style="width: 900px;"/>
+
+**CROSS-WIND CIRCULAR PATH:** `examples/circularpath.jl`
+<img src="docs/vid/circularpath03_1.gif" alt="Vid here" style="width: 900px;"/>
 
 # Authorship
   * Author    : Eduardo J Alvarez
