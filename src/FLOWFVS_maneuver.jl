@@ -29,7 +29,7 @@ Every implementation of `AbstractManeuver` must have the properties:
 """
 abstract type AbstractManeuver{N, M} end
 
-##### REQUIRED FUNCTIONS IN IMPLEMENTATIONS ####################################
+##### FUNCTIONS REQUIRED IN IMPLEMENTATIONS ####################################
 """
     `calc_dV(maneuver::AbstractManeuver, vehicle::Vehicle, t, dt, ttot, Vref)`
 
@@ -38,8 +38,8 @@ Returns the change in velocity `dV=[dVx, dVy, dVz]` (m/s) of `vehicle` performin
 reference velocity and the total time at which this maneuver is being performed,
 respectively. `dV` is in the global reference system.
 """
-function calc_dV(self::AbstractManeuver, vehicle::Vehicle, t::Real, dt::Real,
-                                                        ttot::Real, Vref::Real)
+function calc_dV(self::AbstractManeuver, vehicle::AbstractVehicle, t::Real,
+                                            dt::Real, ttot::Real, Vref::Real)
     error("$(typeof(self)) has no implementation yet!")
 end
 
@@ -51,7 +51,7 @@ axes, in degrees) of `vehicle` performing `maneuver` at time `t` (s) after a
 time step `dt` (s). `ttot` is the total time at which this maneuver is to be
 performed.
 """
-function calc_dW(self::AbstractManeuver, vehicle::Vehicle, t::Real,
+function calc_dW(self::AbstractManeuver, vehicle::AbstractVehicle, t::Real,
                                                         dt::Real, ttot::Real)
     error("$(typeof(self)) has no implementation yet!")
 end
@@ -151,13 +151,13 @@ end
 
 
 ##### FUNCTIONS  ###############################################################
-function calc_dV(self::KinematicManeuver, vehicle::Vehicle, t::Real, dt::Real,
-                                                        ttot::Real, Vref::Real)
+function calc_dV(self::KinematicManeuver, vehicle::AbstractVehicle, t::Real,
+                                            dt::Real, ttot::Real, Vref::Real)
     return Vref * (self.Vvehicle((t+dt)/ttot) - self.Vvehicle(t/ttot))
 end
 
 
-function calc_dW(self::KinematicManeuver, vehicle::Vehicle, t::Real,
+function calc_dW(self::KinematicManeuver, vehicle::AbstractVehicle, t::Real,
                                                          dt::Real, ttot::Real)
     prev_W = (self.anglevehicle(t/ttot) - self.anglevehicle((t-dt)/ttot)) / dt
     cur_W = (self.anglevehicle((t+dt)/ttot) - self.anglevehicle(t/ttot)) / dt
@@ -192,15 +192,15 @@ end
 
 
 ##### FUNCTIONS  ###############################################################
-function calc_dV(self::DynamicManeuver, vehicle::Vehicle, t::Real, dt::Real,
-                                                        ttot::Real, Vref::Real)
+function calc_dV(self::DynamicManeuver, vehicle::AbstractVehicle, t::Real,
+                                            dt::Real, ttot::Real, Vref::Real)
     # Here calculate change in velocity of the vehicle based on current
     # aerodynamic forces
     error("Implementation pending")
 end
 
 
-function calc_dw(self::KinematicManeuver, vehicle::Vehicle, t::Real,
+function calc_dw(self::KinematicManeuver, vehicle::AbstractVehicle, t::Real,
                                                          dt::Real, ttot::Real)
      # Here calculate change in angular velocity of the vehicle based on current
      # aerodynamics forces
