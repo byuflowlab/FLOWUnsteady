@@ -451,13 +451,13 @@ function generategeometry_vahana(;
     grids = [fuselage]
 
     # FVS's Vehicle object
-    vehicle = fvs.Vehicle(  system;
-                            tilting_systems=tilting_systems,
-                            rotor_systems=rotor_systems,
-                            vlm_system=vlm_system,
-                            wake_system=wake_system,
-                            grids=grids
-                         )
+    vehicle = fvs.VLMVehicle(   system;
+                                tilting_systems=tilting_systems,
+                                rotor_systems=rotor_systems,
+                                vlm_system=vlm_system,
+                                wake_system=wake_system,
+                                grids=grids
+                             )
 
 
     return vehicle, grounds

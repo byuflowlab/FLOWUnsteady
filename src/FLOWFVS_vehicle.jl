@@ -9,6 +9,64 @@
   * License   : MIT
 =###############################################################################
 
+################################################################################
+# ABSTRACT VEHICLE TYPE
+################################################################################
+"""
+    `AbstractVehicle{N, M}`
+
+Type handling all geometries and subsystems that define a flight vehicle.
+
+`N` indicates the number of tilting systems in this vehicle, while and `M`
+indicates the number of rotor systems.
+"""
+abstract type AbstractVehicle{N, M} end
+
+##### FUNCTIONS REQUIRED IN IMPLEMENTATIONS ####################################
+"""
+    `get_ntltsys(self::AbstractVehicle)`
+Return number of tilting systems.
+"""
+function get_ntltsys(self::AbstractVehicle)
+    error("$(typeof(self)) has no implementation yet!")
+end
+
+"""
+    `get_nrtrsys(self::AbstractVehicle)`
+Return number of rotor systems.
+"""
+function get_nrtrsys(self::AbstractVehicle)
+    error("$(typeof(self)) has no implementation yet!")
+end
+
+"""
+    `save_vtk(self::AbstractVehicle, filename; path=nothing, num=nothing,
+optargs...)`
+
+Output VTK files with vehicle geometry and solution fields.
+"""
+function save_vtk(self::AbstractVehicle, filename;
+                        path=nothing, num=nothing, optargs...)
+    error("$(typeof(self)) has no implementation yet!")
+end
+
+##### COMMON FUNCTIONS  ########################################################
+##### COMMON INTERNAL FUNCTIONS  ###############################################
+##### END OF ABSTRACT VEHICLE ##################################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ################################################################################
 # VEHICLE TYPE
@@ -16,7 +74,8 @@
 """
     `Vehicle(system; optargs...)`
 
-Type handling all geometries and subsystems that define a flight vehicle.
+Type handling all geometries and subsystems that define a flight vehicle made
+out of VLM (Wing, WingSystem, Rotor) components.
 
 # ARGUMENTS
 * `system::vlm.WingSystem`:        System of all FLOWVLM objects. This system
@@ -38,7 +97,7 @@ Type handling all geometries and subsystems that define a flight vehicle.
 * `grids::Array{gt.GridTypes, 1}`: Array of grids that will be translated and
                                     rotated along with `system`.
 """
-struct Vehicle{N, M}
+struct VLMVehicle{N, M} <: AbstractVehicle{N, M}
 
     # Required inputs
     system::vlm.WingSystem
@@ -50,7 +109,7 @@ struct Vehicle{N, M}
     wake_system::vlm.WingSystem
     grids::Array{gt.GridTypes, 1}
 
-    Vehicle{N, M}(
+    VLMVehicle{N, M}(
                     system;
                     tilting_systems=NTuple{0, vlm.WingSystem}(),
                     rotor_systems=NTuple{0, Array{vlm.Rotor, 1}}(),
@@ -68,30 +127,22 @@ struct Vehicle{N, M}
 end
 
 # Implicit N and M constructor
-Vehicle(system::vlm.WingSystem;
+VLMVehicle(system::vlm.WingSystem;
         tilting_systems::NTuple{N, vlm.WingSystem}=NTuple{0, vlm.WingSystem}(),
         rotor_systems::NTuple{M, Array{vlm.Rotor, 1}}=NTuple{0, Array{vlm.Rotor, 1}}(),
         optargs...
-        ) where {N, M} = Vehicle{N, M}( system;
+        ) where {N, M} = VLMVehicle{N, M}( system;
                                         tilting_systems=tilting_systems,
                                         rotor_systems=rotor_systems, optargs...)
 
 
 ##### FUNCTIONS  ###############################################################
-"""
-    `get_ntltsys(self::Vehicle)`
-Return number of tilting systems.
-"""
-get_ntltsys(self::Vehicle) = typeof(self).parameters[1]
+get_ntltsys(self::VLMVehicle) = typeof(self).parameters[1]
 
-"""
-    `get_nrtrsys(self::Vehicle)`
-Return number of rotor systems.
-"""
-get_nrtrsys(self::Vehicle) = typeof(self).parameters[2]
+get_nrtrsys(self::VLMVehicle) = typeof(self).parameters[2]
 
 ##### INTERNAL FUNCTIONS  ######################################################
-function save_vtk(self::Vehicle, filename; path=nothing, num=nothing, optargs...)
+function save_vtk(self::VLMVehicle, filename; path=nothing, num=nothing, optargs...)
     strn = vlm.save(self.system, filename; path=path, num=num, optargs...)
 
     for (i, grid) in enumerate(self.grids)
