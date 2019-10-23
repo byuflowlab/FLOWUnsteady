@@ -9,6 +9,17 @@
   * License   : MIT
 =###############################################################################
 
+
+
+################################################################################
+# SIMULATION TYPE
+################################################################################
+"""
+    `Simulation(vehicle, maneuver, Vref::Real, RPMref::R, ttot:R)`
+
+Simulation interface. This type carries the simulation's options and connects
+vehicle and maneuver together.
+"""
 mutable struct Simulation{V<:AbstractVehicle, M<:AbstractManeuver, R<:Real}
     # USER INPUTS: Simulation setup
     vehicle::V              # Vehicle
@@ -25,7 +36,7 @@ mutable struct Simulation{V<:AbstractVehicle, M<:AbstractManeuver, R<:Real}
     Simulation{V, M, R}(
                             vehicle, maneuver, Vref, RPMref, ttot;
                             t=zero(R), nt=0
-                        ) where {V, M, R} = check(vehicle, maneuver) ? new(
+                        ) where {V, M, R} = _check(vehicle, maneuver) ? new(
                             vehicle, maneuver, Vref, RPMref, ttot,
                             t, nt
                         ) : nothing
@@ -34,22 +45,12 @@ end
 
 # Implicit V and M constructor
 Simulation(v::AbstractVehicle, m::AbstractManeuver, n::Real, args...
-                 ) = Simulation{typeof(v), typeof(m), typeof(n)}(v, m, n, args...)
+             ) = Simulation{typeof(v), typeof(m), typeof(n)}(v, m, n, args...)
 
-"""
-Checks that vehicle and maneuver are compatible.
-"""
-function check(vehicle::AbstractVehicle, maneuver::AbstractManeuver;
-                                                            raise_error=true)
-    res = get_ntltsys(vehicle)==get_ntltsys(maneuver)
-    res *= get_nrtrsys(vehicle)==get_nrtrsys(maneuver)
 
-    if raise_error && res==false
-        error("Encountered incompatible Vehicle and Maneuver!")
-    end
 
-    return res
-end
+
+##### FUNCTIONS  ###############################################################
 
 """
 Takes a kinematic time step `dt` where the new velocity and angular velocity
@@ -89,6 +90,22 @@ end
 
 
 
+##### INTERNAL FUNCTIONS  ######################################################
+"""
+Checks that vehicle and maneuver are compatible.
+"""
+function _check(vehicle::AbstractVehicle, maneuver::AbstractManeuver;
+                                                            raise_error=true)
+    res = get_ntltsys(vehicle)==get_ntltsys(maneuver)
+    res *= get_nrtrsys(vehicle)==get_nrtrsys(maneuver)
+
+    if raise_error && res==false
+        error("Encountered incompatible Vehicle and Maneuver!")
+    end
+
+    return res
+end
+##### END OF SIMULATION  #######################################################
 
 
 
