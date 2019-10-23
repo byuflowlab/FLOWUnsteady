@@ -53,6 +53,8 @@ Simulation(v::AbstractVehicle, m::AbstractManeuver, n::Real, args...
 ##### FUNCTIONS  ###############################################################
 
 """
+    `nextstep_kinematic(self::Simulation, dt::Real)`
+
 Takes a kinematic time step `dt` where the new velocity and angular velocity
 is calculated and the vehicle is translated and rotated according to it. It also
 updates the tilt angle and RPM of every system.
@@ -75,7 +77,10 @@ function nextstep_kinematic(self::Simulation, dt::Real)
     # Translates and rotates the vehicle according to current velocity
     nextstep_kinematic(self.vehicle, dt)
 
-    # TODO: Update tilt angles
+    # Rotate tilting systems
+    angles = get_angles(self.maneuver, self.t/self.ttot)
+    tilt_systems(self.vehicle, angles)
+
     # TODO: Have the rotor solver update rotor RPMs
 
 
