@@ -150,7 +150,7 @@ end
 
 """
     `visualize_kinematics(sim::Simulation, nsteps::Int, save_path::String)`
-    
+
 Generate VTKs of the kinematics of this simulation.
 """
 function visualize_kinematics(sim::Simulation{V, KinematicManeuver{N, M}, R},
@@ -189,6 +189,7 @@ function visualize_kinematics(sim::Simulation{V, KinematicManeuver{N, M}, R},
     for i in 0:nsteps
 
         if i!=0
+            # Move tilting systems, and translate and rotate vehicle
             nextstep_kinematic(sim, dt)
         end
 
