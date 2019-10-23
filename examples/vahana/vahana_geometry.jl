@@ -47,7 +47,7 @@ following format:
 """
     Generates the geometry of Vahana aircraft
 """
-function generategeometry_vahana(;
+function generate_geometry_vahana(;
                                     # AIRCRAFT OPTIONS
                                     rotor_file="apc10x7Vahana.csv", # Rotor
                                     # rotor_file="DJI-IIVahana.csv",
@@ -164,18 +164,18 @@ function generategeometry_vahana(;
     # Generates base propellers (one on each rotation orientation)
     propellers = vlm.Rotor[]
     if verbose; println("\t"^(v_lvl+1)*"Generating first propeller..."); end;
-    @time push!(propellers, fvs.generate_rotor(rotor_file; pitch=pitch,
+    push!(propellers, fvs.generate_rotor(rotor_file; pitch=pitch,
                                             n=n_ccb, CW=!CW_w, ReD=ReD,
                                             verbose=verbose, xfoil=xfoil,
                                             data_path=data_path, plot_disc=false))
     if verbose; println("\t"^(v_lvl+1)*"Generating second propeller..."); end;
-    # @time push!(propellers, generate_rotor(pitch; n=n_ccb, CW=CW_w, ReD=ReD,
+    # push!(propellers, generate_rotor(pitch; n=n_ccb, CW=CW_w, ReD=ReD,
     #                         verbose=verbose, xfoil=xfoil, rotor_file=rotor_file))
-    @time push!(propellers, vlm.Rotor(!propellers[1].CW, propellers[1].r,
+    push!(propellers, vlm.Rotor(!propellers[1].CW, propellers[1].r,
                               propellers[1].chord, propellers[1].theta,
                               propellers[1].LE_x, propellers[1].LE_z,
                               propellers[1].B, propellers[1].airfoils))
-    @time vlm.initialize(propellers[2], propellers[1].m)
+    vlm.initialize(propellers[2], propellers[1].m)
 
 
     # ------------ MAIN WING ---------------------------------------------

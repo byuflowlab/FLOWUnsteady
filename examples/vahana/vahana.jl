@@ -34,7 +34,7 @@ extdrive_path = "/media/edoalvar/MyExtDrive/simulationdata5/"
 data_path = joinpath(splitdir(@__FILE__)[1], "../../data/")
 
 # ------------ HEADERS ---------------------------------------------------------
-for header_name in ["geometry"]
+for header_name in ["geometry", "kinematics"]
     include("vahana_"*header_name*".jl")
 end
 
@@ -128,82 +128,85 @@ end
 # end
 
 
-# function visualize_maneuver_vahana(; save_path=extdrive_path*"vahanamaneuver000/",
-#                                         prompt=true,
-#                                         run_name="vahana",
-#                                         verbose=true, v_lvl=1)
-#
-#     # Maneuver to perform
-#     maneuver = maneuver_vahana1
-#     Vcruise = 0.25 * 125*0.44704            # Cruise speed
-#     RPMh_w = 400                            # RPM of main wing rotors in hover
-#     telapsed = 30.0                         # Total time to perform maneuver
-#     nsteps = 300                           # Time steps
-#     dt = telapsed/nsteps
-#
-#     # # Maneuver to perform
-#     # maneuver = maneuver_vahana1
-#     # Vcruise = 0.25 * 125*0.44704            # Cruise speed
-#     # RPMh_w = 1200                            # RPM of main wing rotors in hover
-#     # telapsed = 30.0                         # Total time to perform maneuver
-#     # nsteps = 9000                           # Time steps
-#     # dt = telapsed/nsteps
-#
-#     # # Maneuver to perform
-#     # maneuver = maneuver_vahana1
-#     # Vcruise = 0.25 * 125*0.44704            # Cruise speed
-#     # RPMh_w = 1200                            # RPM of main wing rotors in hover
-#     # telapsed = 30.0                         # Total time to perform maneuver
-#     # nsteps = 27000                           # Time steps
-#     # dt = telapsed/nsteps
-#
-#     # # Maneuver to perform
-#     # maneuver = maneuver_vahana1
-#     # Vcruise = 0.125 * 125*0.44704            # Cruise speed
-#     # RPMh_w = 600                            # RPM of main wing rotors in hover
-#     # telapsed = 60.0                         # Total time to perform maneuver
-#     # nsteps = 9000                           # Time steps
-#     # dt = telapsed/nsteps
-#
-#     # Generate geometry
-#     (system, rotors,
-#             tilting_systems, rotors_systems,
-#             vlm_system, wake_system,
-#             fuselage, grounds, strn) = generategeometry_vahana(; n_factor=1,
-#                                                      xfoil=false,
-#                                                      data_path=data_path,
-#                                                      run_name=run_name)
-#
-#     # Visualize maneuver
-#     visualize_kinematic(maneuver, system, rotors, tilting_systems,
-#                          rotors_systems, fuselage;
-#                          # SIMULATION OPTIONS
-#                          Vcruise=Vcruise,
-#                          RPMh_w=RPMh_w,
-#                          telapsed=telapsed,
-#                          nsteps=nsteps,
-#                          # OUTPUT OPTIONS
-#                          save_path=save_path,
-#                          run_name=run_name,
-#                          prompt=prompt,
-#                          verbose=verbose, v_lvl=v_lvl+1)
-#
-#     # Move landing pad to landing area
-#     vlm.vtk.lintransform!(grounds[2], eye(3), Vcruise*telapsed*[-0.25, 0, -0.0025])
-#
-#     # Save ground
-#     strn *= run_name*"_FuselageGrid.vtk;"
-#     strn = replace(strn, ".", "...")
-#
-#     for (i, ground) in enumerate(grounds)
-#       vlm.vtk.save(ground, run_name*"_Ground$i"; path=save_path)
-#       strn *= run_name*"_Ground$i.vtk;"
-#     end
-#     # println(strn)
-#
-#     # Call paraview
-#     run(`paraview --data="$save_path/$strn"`)
-# end
+function visualize_maneuver_vahana(; save_path=extdrive_path*"vahanamaneuver100/",
+                                        prompt=true,
+                                        run_name="vahana",
+                                        verbose=true, v_lvl=0,
+                                        paraview=true)
+
+    # Maneuver to perform
+    Vcruise = 0.25 * 125*0.44704            # Cruise speed
+    RPMh_w = 400.0                          # RPM of main wing rotors in hover
+    telapsed = 30.0                         # Total time to perform maneuver
+    nsteps = 100                           # Time steps
+    dt = telapsed/nsteps
+
+    # # Maneuver to perform
+    # Vcruise = 0.25 * 125*0.44704            # Cruise speed
+    # RPMh_w = 1200.0                         # RPM of main wing rotors in hover
+    # telapsed = 30.0                         # Total time to perform maneuver
+    # nsteps = 9000                           # Time steps
+    # dt = telapsed/nsteps
+
+    # # Maneuver to perform
+    # Vcruise = 0.25 * 125*0.44704            # Cruise speed
+    # RPMh_w = 1200.0                         # RPM of main wing rotors in hover
+    # telapsed = 30.0                         # Total time to perform maneuver
+    # nsteps = 27000                           # Time steps
+    # dt = telapsed/nsteps
+
+    # # Maneuver to perform
+    # Vcruise = 0.125 * 125*0.44704            # Cruise speed
+    # RPMh_w = 600.0                          # RPM of main wing rotors in hover
+    # telapsed = 60.0                         # Total time to perform maneuver
+    # nsteps = 9000                           # Time steps
+    # dt = telapsed/nsteps
+
+    # Generate maneuver
+    maneuver = generate_maneuver_vahana1()
+
+    # Plot maneuver path and controls
+    fvs.plot_maneuver(maneuver; tstages=[0.2, 0.3, 0.5, 0.6])
+
+
+    # Generate geometry
+    (vehicle, grounds) = generate_geometry_vahana(; n_factor=1,
+                                                    xfoil=false,
+                                                    data_path=data_path,
+                                                    run_name=run_name)
+
+    # Simulation setup
+    Vref = Vcruise
+    RPMref = RPMh_w
+    ttot = telapsed
+    simulation = fvs.Simulation(vehicle, maneuver, Vref, RPMref, ttot)
+
+    save_vtk_optsargs = [(:save_horseshoes, false)]
+
+    # Visualize maneuver
+    strn = fvs.visualize_kinematics(simulation, nsteps, save_path;
+                                    run_name=run_name,
+                                    save_vtk_optsargs=save_vtk_optsargs,
+                                    prompt=prompt, verbose=verbose, v_lvl=v_lvl,
+                                    paraview=false
+                                    )
+
+    # Move landing pad to landing area
+    vlm.vtk.lintransform!(grounds[2], eye(3), Vcruise*telapsed*[-0.25, 0, -0.0025])
+
+    # Save ground
+    for (i, ground) in enumerate(grounds)
+        gt.save(ground, run_name*"_Ground$i"; path=save_path)
+        strn *= run_name*"_Ground$i.vtk;"
+    end
+
+    # Call paraview
+    if paraview
+        run(`paraview --data="$save_path/$strn"`)
+    end
+
+    return strn
+end
 
 
 """
@@ -213,7 +216,7 @@ end
 function visualize_geometry_vahana(; save_path=extdrive_path*"vahanageometry00/",
                                      prompt=true, run_name="vahana")
 
-    (vehicle, grounds) = generategeometry_vahana(; n_factor=1,
+    (vehicle, grounds) = generate_geometry_vahana(; n_factor=1,
                                                      xfoil=false,
                                                      data_path=data_path,
                                                      run_name=run_name)
