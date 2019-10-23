@@ -23,6 +23,12 @@ clrs = [
             [252, 127, 178]/255
         ]
 
+"""
+    `plot_maneuver(maneuver::KinematicManeuver; ti::Real=0, tf::Real=1,
+vis_nsteps=300, figname="maneuver", tstages=[])`
+
+Plots the kinematics and controls of a `KinematicManeuver`.
+"""
 function plot_maneuver(maneuver::KinematicManeuver;
                         ti::Real=0, tf::Real=1, vis_nsteps=300,
                         figname="maneuver", tstages=[])
@@ -142,7 +148,11 @@ function plot_maneuver(maneuver::KinematicManeuver;
 
 end
 
-
+"""
+    `visualize_kinematics(sim::Simulation, nsteps::Int, save_path::String)`
+    
+Generate VTKs of the kinematics of this simulation.
+"""
 function visualize_kinematics(sim::Simulation{V, KinematicManeuver{N, M}, R},
                                 nsteps::Int, save_path::String;
                                 run_name="vis",
