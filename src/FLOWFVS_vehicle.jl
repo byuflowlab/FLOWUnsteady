@@ -63,6 +63,16 @@ end
 
 
 """
+    `nextstep_kinematic(self::AbstractVehicle, angles)`
+Tilts every tilting system of this vehicle into its corresponding new angle,
+where `angles[i]=[Ax, Ay, Az]` is the new angle of the i-th tilting system (in
+degrees).
+"""
+function tilt_systems(self::AbstractVehicle, angles)
+    error("$(typeof(self)) has no implementation yet!")
+end
+
+"""
     `nextstep_kinematic(self::AbstractVehicle, dt::Real)`
 Translates and rotates the vehicle in a time step `dt` according to current
 linear and angular velocity.
@@ -203,10 +213,17 @@ function add_dW(self::VLMVehicle, dW)
     return nothing
 end
 
-function set_angles(self::VLMVehicle{N,M,R}, angles::NTuple{N, Array{R2, 1}}
+function tilt_systems(self::VLMVehicle{N,M,R}, angles::NTuple{N, Array{R2, 1}}
                                                     ) where{N, M, R, R2<:Real}
-    error("Missing implementation")
+    # Iterate over tilting system
+    for i in 1:get_ntltsys(self)
+        sys = self.tilting_systems[i]
+        Oaxis = gt.rotation_matrix2([-a for a in angles[i]]...)
+        vlm.setcoordsystem(sys, sys.O, Oaxis)
+    end
+    return nothing
 end
+
 
 function nextstep_kinematic(self::VLMVehicle, dt::Real)
     dX = dt*self.V                  # Translation
