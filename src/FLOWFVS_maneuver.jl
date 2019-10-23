@@ -47,7 +47,7 @@ end
     `calc_dw(maneuver::AbstractManeuver, vehicle::Vehicle, t, dt, Vref, ttot)`
 
 Returns the change in angular velocity `dW=[dWx, dWy, dWz]` (about global
-axes, in degrees) of `vehicle` performing `maneuver` at time `t` (s) after a
+axes, in radians) of `vehicle` performing `maneuver` at time `t` (s) after a
 time step `dt` (s). `ttot` is the total time at which this maneuver is to be
 performed.
 """
@@ -86,6 +86,14 @@ function get_angle(self::AbstractManeuver, i::Int, t::Real)
 end
 
 """
+    `get_angles(maneuver::AbstractManeuver, t::Real)`
+
+Returns the angle (in degrees) of every tilting systems at the non-dimensional
+time t.
+"""
+get_angles(self::AbstractManeuver, t::Real) = Tuple(a(t) for a in self.angle)
+
+"""
     `get_RPM(maneuver::AbstractManeuver, i::Int, t::Real)`
 
 Returns the normalized RPM of the i-th rotor system at the non-dimensional time
@@ -100,6 +108,14 @@ function get_RPM(self::AbstractManeuver, i::Int, t::Real)
     end
     return self.RPM[i](t)
 end
+
+"""
+    `get_RPMs(maneuver::AbstractManeuver, t::Real)`
+
+Returns the normalized RPM of every rotor systems at the non-dimensional time
+t.
+"""
+get_RPMs(self::AbstractManeuver, t::Real) = Tuple(rpm(t) for rpm in self.RPM)
 
 
 ##### COMMON INTERNAL FUNCTIONS  ###############################################
@@ -124,9 +140,10 @@ end
 A vehicle maneuver where the kinematic are prescribed.
 
 # ARGUMENTS
-* `angle::NTuple{N, Function}` where `angle[i](t)` returns the angle of the
-        i-th tilting system at time `t` (t is nondimensionalized by the total
-        time of the maneuver, from 0 to 1, beginning to end).
+* `angle::NTuple{N, Function}` where `angle[i](t)` returns the angles
+        `[Ax, Ay, Az]` (in degrees)of the i-th tilting system at time `t` (t is
+        nondimensionalized by the total time of the maneuver, from 0 to 1,
+        beginning to end).
 * `RPM::NTuple{M, Function}` where `RPM[i](t)` returns the normalized RPM of
         the i-th rotor system at time `t`. This RPM values are normalized by the
         an arbitrary RPM value (usually RPM in hover or cruise).
@@ -156,12 +173,11 @@ function calc_dV(self::KinematicManeuver, vehicle::AbstractVehicle, t::Real,
     return Vref * (self.Vvehicle((t+dt)/ttot) - self.Vvehicle(t/ttot))
 end
 
-
 function calc_dW(self::KinematicManeuver, vehicle::AbstractVehicle, t::Real,
                                                          dt::Real, ttot::Real)
     prev_W = (self.anglevehicle(t/ttot) - self.anglevehicle((t-dt)/ttot)) / dt
     cur_W = (self.anglevehicle((t+dt)/ttot) - self.anglevehicle(t/ttot)) / dt
-    return cur_W - prev_W
+    return pi/180 * (cur_W - prev_W)
 end
 
 
