@@ -455,9 +455,11 @@ function generate_geometry_vahana(;
                                 tilting_systems=tilting_systems,
                                 rotor_systems=rotor_systems,
                                 vlm_system=vlm_system,
-                                wake_system=wake_system,
+                                wake_system=vlm_system,
+                                # wake_system=wake_system,
                                 grids=grids
                              )
+                             warn("Remember to switch wake_system back")
 
 
     return vehicle, grounds
