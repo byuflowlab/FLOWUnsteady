@@ -41,91 +41,89 @@ end
 
 # ------------ DRIVERS ---------------------------------------------------------
 
-# function run_simulation_vahana(;    # save_path="temps/vahanasimulation01",
-#                                     save_path=extdrive_path*"vahanasimulation02",
-#                                     prompt=true,
-#                                     run_name="vahana",
-#                                     verbose=true, v_lvl=1)
-#
-#     # # Maneuver to perform
-#     # maneuver = maneuver_vahana1
-#     # Vcruise = 0.125 * 125*0.44704            # Cruise speed
-#     # RPMh_w = 600                            # RPM of main wing rotors in hover
-#     # telapsed = 60.0                         # Total time to perform maneuver
-#     # nsteps = 9000                           # Time steps
-#     # dt = telapsed/nsteps
-#
-#     # Geometry options
-#     n_factor = 5                              # Refinement factor
-#
-#     # Maneuver to perform
-#     maneuver = maneuver_vahana1
-#     Vcruise = 0.25 * 125*0.44704            # Cruise speed
-#     # Vinf(x,t) = 1e-5*[1,0,-1]               # (m/s) freestream velocity, if 0 the simulation will crash
-#     Vinf(x,t) = 1.0*[0,0,-1]               # (m/s) freestream velocity, if 0 the simulation will crash
-#     # RPMh_w = 200                            # RPM of main wing rotors in hover
-#     RPMh_w = 20
-#     telapsed = 30.0                         # Total time to perform maneuver
-#     # nsteps = 1500                           # Time steps
-#     nsteps = 300
-#     dt = telapsed/nsteps
-#
-#     # Solver options
-#     R = 0.75                                # (m) blade radius as a reference
-#     lambda = 4.0                            # Target minimum core overlap
-#     p_per_step = 4                          # Particle sheds per time step
-#     overwrite_sigma = lambda * (2*pi*RPMh_w/60*R + Vcruise)*dt / p_per_step
-#     # vlm_sigma = R/25                        # VLM regularization
-#     vlm_sigma = R                        # VLM regularization
-#
-#     # Generate geometry
-#     (system, rotors,
-#             tilting_systems, rotors_systems,
-#             vlm_system, wake_system,
-#             fuselage, grounds, strn) = generategeometry_vahana(; n_factor=n_factor,
-#                                                              xfoil=false,
-#                                                              data_path=data_path,
-#                                                              run_name=run_name)
-#
-#      run_simulation(maneuver, system, rotors,
-#                                   tilting_systems, rotors_systems,
-#                                   wake_system, vlm_system,
-#                                   fuselage;
-#                                   # SIMULATION OPTIONS
-#                                   Vcruise=Vcruise,
-#                                   RPMh_w=RPMh_w,
-#                                   telapsed=telapsed,
-#                                   nsteps=nsteps,
-#                                   Vinf=Vinf,
-#                                   # SOLVERS OPTIONS
-#                                   p_per_step=p_per_step,
-#                                   overwrite_sigma=overwrite_sigma,
-#                                   vlm_sigma=vlm_sigma,
-#                                   # OUTPUT OPTIONS
-#                                   save_path=save_path,
-#                                   run_name=run_name,
-#                                   prompt=prompt,
-#                                   verbose=verbose, v_lvl=v_lvl,
-#                                   # paraview=false
-#                                   )
-#
-#
-#       # Move landing pad to landing area
-#       gt.lintransform!(grounds[2], eye(3), Vcruise*telapsed*[-0.25, 0, -0.0025])
-#
-#       # Save ground
-#       strn *= run_name*"_FuselageGrid.vtk;"
-#       strn = replace(strn, ".", "...")
-#
-#       for (i, ground) in enumerate(grounds)
-#         gt.save(ground, run_name*"_Ground$i"; path=save_path)
-#         strn *= run_name*"_Ground$i.vtk;"
-#       end
-#       # println(strn)
-#
-#       # Call paraview
-#       run(`paraview --data="$save_path/$strn"`)
-# end
+function run_simulation_vahana(;    # save_path="temps/vahanasimulation01",
+                                    save_path=extdrive_path*"vahanasimulation10",
+                                    prompt=true,
+                                    run_name="vahana",
+                                    verbose=true, v_lvl=1)
+
+    # # Maneuver to perform
+    # Vcruise = 0.125 * 125*0.44704            # Cruise speed
+    # RPMh_w = 600                            # RPM of main wing rotors in hover
+    # telapsed = 60.0                         # Total time to perform maneuver
+    # nsteps = 9000                           # Time steps
+    # dt = telapsed/nsteps
+
+    # Geometry options
+    n_factor = 5                              # Refinement factor
+
+    # Maneuver to perform
+    Vcruise = 0.25 * 125*0.44704            # Cruise speed
+    # Vinf(x,t) = 1e-5*[1,0,-1]               # (m/s) freestream velocity, if 0 the simulation will crash
+    Vinf(x,t) = 1.0*[0,0,-1]               # (m/s) freestream velocity, if 0 the simulation will crash
+    # RPMh_w = 200                            # RPM of main wing rotors in hover
+    RPMh_w = 20
+    telapsed = 30.0                         # Total time to perform maneuver
+    # nsteps = 1500                           # Time steps
+    nsteps = 100
+    dt = telapsed/nsteps
+
+    # Solver options
+    R = 0.75                                # (m) blade radius as a reference
+    lambda = 4.0                            # Target minimum core overlap
+    p_per_step = 4                          # Particle sheds per time step
+    overwrite_sigma = lambda * (2*pi*RPMh_w/60*R + Vcruise)*dt / p_per_step
+    # vlm_sigma = R/25                        # VLM regularization
+    vlm_sigma = R                        # VLM regularization
+
+    # Generate maneuver
+    maneuver = generate_maneuver_vahana1()
+
+    # Plot maneuver path and controls
+    fvs.plot_maneuver(maneuver; tstages=[0.2, 0.3, 0.5, 0.6])
+
+
+    # Generate geometry
+    (vehicle, grounds) = generate_geometry_vahana(; n_factor=n_factor,
+                                                    xfoil=false,
+                                                    data_path=data_path,
+                                                    run_name=run_name)
+
+    # Simulation setup
+    Vref = Vcruise
+    RPMref = RPMh_w
+    ttot = telapsed
+    max_particles = ceil(Int, (nsteps+2)*(2*vlm.get_m(vehicle.vlm_system)+1)*p_per_step)
+    simulation = fvs.Simulation(vehicle, maneuver, Vref, RPMref, ttot)
+
+
+    # Run simulation
+    pfield = fvs.run_simulation(simulation, nsteps;
+                                      # SIMULATION OPTIONS
+                                      Vinf=Vinf,
+                                      # SOLVERS OPTIONS
+                                      p_per_step=p_per_step,
+                                      overwrite_sigma=overwrite_sigma,
+                                      vlm_sigma=vlm_sigma,
+                                      max_particles=max_particles,
+                                      # OUTPUT OPTIONS
+                                      save_path=save_path,
+                                      run_name=run_name,
+                                      prompt=prompt,
+                                      verbose=verbose, v_lvl=v_lvl,
+                                      )
+
+
+    # Move landing pad to landing area
+    gt.lintransform!(grounds[2], eye(3), Vcruise*telapsed*[-0.25, 0, -0.0025])
+
+    # Save ground
+    for (i, ground) in enumerate(grounds)
+        gt.save(ground, run_name*"_Ground$i"; path=save_path)
+    end
+
+    return simulation, pfield
+end
 
 
 function visualize_maneuver_vahana(; save_path=extdrive_path*"vahanamaneuver100/",
