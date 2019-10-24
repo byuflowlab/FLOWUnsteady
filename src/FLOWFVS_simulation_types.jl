@@ -1,6 +1,6 @@
 #=##############################################################################
 # DESCRIPTION
-    Simulation driver.
+    Simulation interface connecting vehicles and maneuvers.
 
 # AUTHORSHIP
   * Author    : Eduardo J. Alvarez
@@ -111,57 +111,3 @@ function _check(vehicle::AbstractVehicle, maneuver::AbstractManeuver;
     return res
 end
 ##### END OF SIMULATION  #######################################################
-
-
-
-
-function nextstep(self::Simulation, dt::Real)
-
-    # ---------- 0) TRANSLATION AND ROTATION OF SYSTEM -----------------
-    t = (self.t+dt)/self.ttot              # Non-dimensional time
-
-    # Translation of aircraft
-    V = self.Vref * Vaircraft(t)
-    dX = V*DT
-
-    vlm.setcoordsystem(system, system.O + dX, system.Oaxis)
-    vlm.vtk.lintransform!(fuselage, eye(3), dX)
-
-    O_fuselage .+=  dX
-
-    # Rotation of tilting systems and aircraft (dangles[end] is aircraft)
-    new_angles = [angles(t)...]
-    dangles = new_angles - prev_angles
-
-    for (j, dangle) in enumerate(dangles)
-
-        Oaxis = vlm.vtk.rotation_matrix2([-a for a in dangle]...)
-
-        if j != size(dangles, 1)        # Titlting systems
-            sys = tilting_systems[j]
-        else                            # Aircraft and fuselage
-            sys = system
-            vlm.vtk.lintransform!(fuselage, eye(3), -O_fuselage)
-            vlm.vtk.lintransform!(fuselage, Oaxis, O_fuselage)
-        end
-
-        vlm.setcoordsystem(sys, sys.O, Oaxis*sys.Oaxis)
-    end
-
-    prev_angles[:] = new_angles
-
-
-    # Rotation of rotors
-    rpms = RPMs(t)
-    cur_RPMs = Dict()
-    for j in 1:size(rpms, 1)
-        for rotor in rotors_systems[j]
-            rpm = rpms[j] * (rand_RPM ? 1 + (rand()-0.5)*0.1 : 1.0)
-            rotation = 360*(RPMh_w*rpm)/60 * DT
-            vlm.rotate(rotor, rotation)
-
-            cur_RPMs[rotor] = RPMh_w*rpm
-        end
-    end
-
-end
