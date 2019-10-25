@@ -56,7 +56,8 @@ def_data_path = joinpath(module_path, "../data/")   # Default path to data folde
 # ------------ HEADERS ---------------------------------------------------------
 # Load modules
 for module_name in ["vehicle", "vehicle_vlm", "maneuver", "rotor",
-                        "simulation_types", "simulation", "utils"]
+                        "simulation_types", "simulation", "utils",
+                        "processing"]
     include("FLOWFVS_"*module_name*".jl")
 end
 

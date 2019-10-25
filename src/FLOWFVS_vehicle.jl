@@ -62,6 +62,22 @@ function add_dW(self::AbstractVehicle, dW)
 end
 
 """
+    `set_V(self::AbstractVehicle, V)`
+Set current vehicle velocity to `V`.
+"""
+function set_V(self::AbstractVehicle, V)
+    error("$(typeof(self)) has no implementation yet!")
+end
+
+"""
+    `set_W(self::AbstractVehicle, W)`
+Set current vehicle angular velocity to `W`.
+"""
+function set_W(self::AbstractVehicle, W)
+    error("$(typeof(self)) has no implementation yet!")
+end
+
+"""
     `nextstep_kinematic(self::AbstractVehicle, angles)`
 Tilts every tilting system of this vehicle into its corresponding new angle,
 where `angles[i]=[Ax, Ay, Az]` is the new angle of the i-th tilting system (in

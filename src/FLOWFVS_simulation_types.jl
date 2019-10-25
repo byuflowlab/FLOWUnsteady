@@ -28,6 +28,10 @@ mutable struct Simulation{V<:AbstractVehicle, M<:AbstractManeuver, R<:Real}
     RPMref::R               # Reference RPM in this maneuver
     ttot::R                 # Total time in which to perform the maneuver
 
+    # OPTION USER INPUTS
+    Vinit::Any              # Initial vehicle velocity
+    Winit::Any              # Initial vehicle angular velocity
+
 
     # INTERNAL PROPERTIES: Runtime parameters
     t::R                    # Dimensional time
@@ -35,17 +39,20 @@ mutable struct Simulation{V<:AbstractVehicle, M<:AbstractManeuver, R<:Real}
 
     Simulation{V, M, R}(
                             vehicle, maneuver, Vref, RPMref, ttot;
-                            t=zero(R), nt=0
+                            Vinit=nothing, Winit=nothing,
+                            t=zero(R), nt=-1
                         ) where {V, M, R} = _check(vehicle, maneuver) ? new(
                             vehicle, maneuver, Vref, RPMref, ttot,
+                            Vinit, Winit,
                             t, nt
                         ) : nothing
 end
 
 
 # Implicit V and M constructor
-Simulation(v::AbstractVehicle, m::AbstractManeuver, n::Real, args...
-             ) = Simulation{typeof(v), typeof(m), typeof(n)}(v, m, n, args...)
+Simulation(v::AbstractVehicle, m::AbstractManeuver, n::Real, args...; optargs...
+             ) = Simulation{typeof(v), typeof(m), typeof(n)}(v, m, n, args...;
+                                                                     optargs...)
 
 
 
@@ -64,27 +71,34 @@ solution to calculate acceleration and moment.
 """
 function nextstep_kinematic(self::Simulation, dt::Real)
 
-    # Linear velocity increment
-    dV = calc_dV(self.maneuver, self.vehicle, self.t, dt, self.ttot, self.Vref)
+    if self.nt==-1 # Setup step (first step of simulation)
 
-    # Angular velocity increment
-    dW = calc_dW(self.maneuver, self.vehicle, self.t, dt, self.ttot)
+        # Initial vehicle linear and angular velocity
+        if self.Vinit!=nothing; set_V(self.vehicle, self.Vinit); end;
+        if self.Winit!=nothing; set_W(self.vehicle, self.Winit); end;
 
-    # Update vehicle linear and angular velocity
-    add_dV(self.vehicle, dV)
-    add_dW(self.vehicle, dW)
+    else
+        # Linear velocity increment
+        dV = calc_dV(self.maneuver, self.vehicle, self.t, dt, self.ttot, self.Vref)
 
-    # Translates and rotates the vehicle according to current velocity
-    nextstep_kinematic(self.vehicle, dt)
+        # Angular velocity increment
+        dW = calc_dW(self.maneuver, self.vehicle, self.t, dt, self.ttot)
 
-    # Rotate tilting systems
-    angles = get_angles(self.maneuver, self.t/self.ttot)
-    tilt_systems(self.vehicle, angles)
+        # Update vehicle linear and angular velocity
+        add_dV(self.vehicle, dV)
+        add_dW(self.vehicle, dW)
 
-    # TODO: Have the rotor solver update rotor RPMs
+        # Translates and rotates the vehicle according to current velocity
+        nextstep_kinematic(self.vehicle, dt)
 
+        # Rotate tilting systems
+        angles = get_angles(self.maneuver, self.t/self.ttot)
+        tilt_systems(self.vehicle, angles)
 
-    self.t += dt
+        # TODO: Have the rotor solver update rotor RPMs
+        self.t += dt
+    end
+
     self.nt += 1
 end
 
