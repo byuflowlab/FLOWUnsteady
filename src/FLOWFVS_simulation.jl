@@ -162,7 +162,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
                       save_code=save_code,
                       prompt=prompt,
                       nsteps_relax=nsteps_relax,
-                      nsteps_restart=nsteps_restart,
+                      nsteps_restart=nsteps_restart>0 ? nsteps_restart : nsteps,
                       save_sigma=true,
                       # static_particles_function=generate_static_particles,
                       # beta=cs_beta, sgm0=sgm0,

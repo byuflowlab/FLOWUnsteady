@@ -24,10 +24,10 @@ function calc_aerodynamicforce(vlm_system::Union{vlm.Wing, vlm.WingSystem},
     m = vlm.get_m(vlm_system)    # Number of horseshoes
 
     # Nodes of every horseshoe
-    Ap = get_Xs(vlm_system, "Ap")
-    A = get_Xs(vlm_system, "A")
-    B = get_Xs(vlm_system, "B")
-    Bp = get_Xs(vlm_system, "Bp")
+    Ap = _get_Xs(vlm_system, "Ap")
+    A = _get_Xs(vlm_system, "A")
+    B = _get_Xs(vlm_system, "B")
+    Bp = _get_Xs(vlm_system, "Bp")
 
     # Midpoints of bound vortices
     ApA = (Ap .+ A)/2
@@ -45,7 +45,7 @@ function calc_aerodynamicforce(vlm_system::Union{vlm.Wing, vlm.WingSystem},
     Vinfs = Vinf.(Xs, t)
 
     # Evaluate kinematic velocity on each node
-    Vtran = Vtranslation(vlm_system, prev_vlm_system, dt; t=t,
+    Vtran = _Vkinematic(vlm_system, prev_vlm_system, dt; t=t,
                                                 targetX=["Ap", "A", "B", "Bp"])
 
     Ftot = [zeros(3) for i in 1:m]

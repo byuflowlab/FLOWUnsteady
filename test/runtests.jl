@@ -1,5 +1,9 @@
 # Load simulation engine
-include(joinpath(splitdir(@__FILE__)[1], "../src/fvs.jl"))
+# import FLOWFVS
+reload("FLOWFVS")
+fvs = FLOWFVS
+vlm = fvs.vlm
+gt = vlm.vtk
 
 # ------------ GENERIC MODULES -------------------------------------------------
 using Base.Test
@@ -15,10 +19,10 @@ end
 # ------------ TESTS -----------------------------------------------------------
 
 # Test VLM solver: Isolated wing
-@test bertin_VLM(; wake_coupled=false, nsteps=1, verbose=true, disp_plot=true)
+@test bertin_VLM(; wake_coupled=false, nsteps=0, verbose=true, disp_plot=true)
 
 # Test VLM regularization: Isolated wing
-@test bertin_VLM(; wake_coupled=false, vlm_fsgm=0.00125, nsteps=1, verbose=true, disp_plot=true)
+@test bertin_VLM(; wake_coupled=false, vlm_fsgm=0.00125, nsteps=0, verbose=true, disp_plot=true)
 
 # Test VPM+VLM coupling: Isolated wing
 @test bertin_VLM(; wake_coupled=true, nsteps=150, verbose=true, disp_plot=true)

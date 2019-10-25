@@ -107,44 +107,52 @@ function plot_maneuver(maneuver::KinematicManeuver;
 
 
     # -------------------- Tilting system history ------------------------------
-    figure(figname*"-controls", figsize=[7*2, 5*2])
-    suptitle("VEHICLE CONTROLS")
-
     angle_syss = [a.(ts) for a in maneuver.angle]    # Angles of every tilt sys
-    for i in 1:3
-        subplot(220+i)
+    RPM_syss = [rpm.(ts) for rpm in maneuver.RPM]    # RPM of every rotor system
 
-         # i-th angle of every tilting system
-        a_syss = [[a[i] for a in angle_sys] for angle_sys in angle_syss]
+    if length(angle_syss)!=0 || length(RPM_syss)!=0
+        figure(figname*"-controls", figsize=[7*2, 5*2])
+        suptitle("VEHICLE CONTROLS")
+    end
 
-        amax = max([maximum(a_sys) for a_sys in a_syss]...)
-        amin = min([minimum(a_sys) for a_sys in a_syss]...)
+    if length(angle_syss)!=0
+        for i in 1:3
+            subplot(220+i)
 
-        for (j, a_sys) in enumerate(a_syss)
-            plot(ts, a_sys, "-", label="Tilt-sys #$j", alpha=0.8,
+             # i-th angle of every tilting system
+            a_syss = [[a[i] for a in angle_sys] for angle_sys in angle_syss]
+
+            amax = max([maximum(a_sys) for a_sys in a_syss]...)
+            amin = min([minimum(a_sys) for a_sys in a_syss]...)
+
+            for (j, a_sys) in enumerate(a_syss)
+                plot(ts, a_sys, "-", label="Tilt-sys #$j", alpha=0.8,
+                                                color=clrs[(j-1)%length(clrs) + 1])
+            end
+
+            xlabel("Non-dimensional time")
+            ylabel("Angle "*(i==1? L"\theta_x" : i==2 ? L"\theta_y" : L"\theta_z") * L" ($^\circ$)")
+            legend(loc="best", frameon=false)
+        end
+    end
+
+    # -------------------- Rotor systems history -------------------------------
+
+    if length(RPM_syss)!=0
+        subplot(224)
+
+        RPMmax = max([maximum(RPM_sys) for RPM_sys in RPM_syss]...)
+        RPMmin = min([minimum(RPM_sys) for RPM_sys in RPM_syss]...)
+
+        for (j, RPM_sys) in enumerate(RPM_syss)
+            plot(ts, RPM_sys, "-", label="Rotor-sys #$j", alpha=0.8,
                                             color=clrs[(j-1)%length(clrs) + 1])
         end
 
         xlabel("Non-dimensional time")
-        ylabel("Angle "*(i==1? L"\theta_x" : i==2 ? L"\theta_y" : L"\theta_z") * L" ($^\circ$)")
+        ylabel("Non-dimensional RPM (RPM/RPMh)")
         legend(loc="best", frameon=false)
     end
-
-    # -------------------- Rotor systems history -------------------------------
-    RPM_syss = [rpm.(ts) for rpm in maneuver.RPM]    # RPM of every rotor system
-    subplot(224)
-
-    RPMmax = max([maximum(RPM_sys) for RPM_sys in RPM_syss]...)
-    RPMmin = min([minimum(RPM_sys) for RPM_sys in RPM_syss]...)
-
-    for (j, RPM_sys) in enumerate(RPM_syss)
-        plot(ts, RPM_sys, "-", label="Rotor-sys #$j", alpha=0.8,
-                                        color=clrs[(j-1)%length(clrs) + 1])
-    end
-
-    xlabel("Non-dimensional time")
-    ylabel("Non-dimensional RPM (RPM/RPMh)")
-    legend(loc="best", frameon=false)
 
 end
 

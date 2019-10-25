@@ -2,16 +2,6 @@
 # DESCRIPTION
 Wing in a circular path with cross wind.
 
-
-Run this example through the following command:
-
-```
-    circularpath(; nsteps=800, p_per_step=4, vlm_rlx=0.75,
-                    # save_path="temps/circularpath02/",
-                    save_path=extdrive_path*"circularpath03/",
-                    verbose=true, disp_plot=true)
-```
-
 # AUTHORSHIP
   * Author    : Eduardo J. Alvarez
   * Email     : Edo.AlvarezR@gmail.com
@@ -20,6 +10,36 @@ Run this example through the following command:
 =###############################################################################
 
 
+# ------------ MODULES ---------------------------------------------------------
+# Load simulation engine
+# import FLOWFVS
+reload("FLOWFVS")
+fvs = FLOWFVS
+vlm = fvs.vlm
+
+import GeometricTools
+gt = GeometricTools
+
+using PyPlot
+
+# ------------ GLOBAL VARIABLES ------------------------------------------------
+# Default path where to save data
+extdrive_path = "/media/edoalvar/MyExtDrive/simulationdata5/"
+
+
+
+# ------------ DRIVERS ---------------------------------------------------------
+function run_circularpath()
+    # circularpath(; nsteps=800, p_per_step=4, vlm_rlx=0.75,
+    #                 save_path=extdrive_path*"circularpath10/",
+    #                 verbose=true, disp_plot=true)
+    circularpath(; nsteps=400, p_per_step=1, vlm_rlx=0.75,
+                    save_path=extdrive_path*"circularpath10/",
+                    verbose=true, disp_plot=true)
+end
+
+
+# ------------------------------------------------------------------------------
 
 """
     Test FLOWVLM solver on kinematics a wint in circular path with cross wind.
@@ -116,13 +136,14 @@ function circularpath(;   # TEST OPTIONS
     Oaxis = [0 0 -1; 0 1 0; 1 0 0]
     vlm.setcoordsystem(system, O, Oaxis)
 
-    rotors = vlm.Rotor[]        # System of all FLOWVLM Rotor objects (dummy)
-    tilting_systems = ()        # Tuple of all lilting FLOWVLM Systems (dummy)
-    rotors_systems = ()         # Tuple of all groups of rotors (dummy)
     vlm_system = system         # System solved through VLM solver
     wake_system = system        # System that will shed a VPM wake
-                                # Fuselage Grid (dummy)
-    fuselage = vlm.vtk.GridTriangleSurface(gt.Grid(zeros(3), [1.0, 1.0, 0.0], [1, 1, 0]), 1)
+
+    # Vehicle definition
+    vehicle = fvs.VLMVehicle(   system;
+                                vlm_system=vlm_system,
+                                wake_system=wake_system
+                             )
 
     if verbose
         println("\t"^(v_lvl+1)*"Core overlap:\t\t$(lambda_vpm)")
@@ -143,12 +164,16 @@ function circularpath(;   # TEST OPTIONS
         Vz = cos(k*t)
         return [Vx, Vy, Vz]
     end
-    # Tilt angle of each tilting system
-    function angles(t)
-        return [[0, 0, -360*k/(2*pi) * t]]
+    # Angle of the vehicle
+    function angle_wing(t)
+        return [0, 0, -360*k/(2*pi) * t]
     end
-    RPMs(t) = ()                # RPM of each rotor system
-    maneuver(args...; optargs...) = (Vaircraft, angles, RPMs)
+    angle = ()                  # Angle of each tilting system
+    RPM = ()                    # RPM of each rotor system
+    Vvehicle = Vaircraft        # Velocity of the vehicle
+    anglevehicle = angle_wing   # Angle of the vehicle
+
+    maneuver = fvs.KinematicManeuver(angle, RPM, Vvehicle, anglevehicle)
     # ------------- SIMULATION MONITOR -----------------------------------------
     y2b = 2*wing._ym/b
 
@@ -165,7 +190,7 @@ function circularpath(;   # TEST OPTIONS
 
     prev_wing = nothing
 
-    function monitor(PFIELD, T, DT; figname="monitor_$(save_path)", nsteps_plot=1)
+    function monitor(sim, PFIELD, T, DT; figname="monitor_$(save_path)", nsteps_plot=1)
 
         aux = PFIELD.nt/nsteps
         clr = (1-aux, 0, aux)
@@ -206,17 +231,17 @@ function circularpath(;   # TEST OPTIONS
 
 
             # Force at each VLM element
-            Ftot = calc_aerodynamicforce(wing, prev_wing, PFIELD, Vinf, DT,
+            Ftot = fvs.calc_aerodynamicforce(wing, prev_wing, PFIELD, Vinf, DT,
                                                             rhoinf; t=PFIELD.t)
-            L, D, S = decompose(Ftot, [0,0,1], [-1,0,0])
+            L, D, S = fvs.decompose(Ftot, [0,0,1], [-1,0,0])
             vlm._addsolution(wing, "L", L)
             vlm._addsolution(wing, "D", D)
             vlm._addsolution(wing, "S", S)
 
             # Force per unit span at each VLM element
-            ftot = calc_aerodynamicforce(wing, prev_wing, PFIELD, Vinf, DT,
+            ftot = fvs.calc_aerodynamicforce(wing, prev_wing, PFIELD, Vinf, DT,
                                         rhoinf; t=PFIELD.t, per_unit_span=true)
-            l, d, s = decompose(ftot, [0,0,1], [-1,0,0])
+            l, d, s = fvs.decompose(ftot, [0,0,1], [-1,0,0])
 
             # Lift of the wing
             Lwing = norm(sum(L))
@@ -266,32 +291,38 @@ function circularpath(;   # TEST OPTIONS
 
 
     # ------------- RUN SIMULATION ---------------------------------------------
-    if verbose; println("\t"^(v_lvl+1)*"Running simulation..."); end;
-    run_simulation(maneuver, system, rotors,
-                         tilting_systems, rotors_systems,
-                         wake_system, vlm_system,
-                         fuselage;
-                         # SIMULATION OPTIONS
-                         Vcruise=Vcruise,
-                         RPMh_w=RPMh_w,
-                         telapsed=telapsed,
-                         nsteps=nsteps,
-                         Vinf=Vinf,
-                         # SOLVERS OPTIONS
-                         p_per_step=p_per_step,
-                         overwrite_sigma=overwrite_sigma,
-                         vlm_sigma=vlm_sigma,
-                         vlm_rlx=vlm_rlx,
-                         wake_coupled=wake_coupled,
-                         shed_unsteady=shed_unsteady,
-                         extra_runtime_function=monitor,
-                         # OUTPUT OPTIONS
-                         save_path=save_path,
-                         run_name=run_name,
-                         prompt=prompt,
-                         verbose=verbose2, v_lvl=v_lvl+1,
-                         save_horseshoes=!wake_coupled
-                         )
+    # Simulation setup
+    Vref = Vcruise                  # Reference velocity
+    RPMref = RPMh_w                 # Reference RPM
+    ttot = telapsed                 # Total time to perform maneuver
+    Vinit = Vref*Vaircraft(0)       # Initial vehicle velocity
+    Winit = pi/180*(angle_wing(1e-6) - angle_wing(0))/(1e-6*ttot)  # Initial angular velocity
+                                    # Maximum number of particles
+    max_particles = ceil(Int, (nsteps+2)*(2*vlm.get_m(vehicle.vlm_system)+1)*p_per_step)
 
-    return true
+    simulation = fvs.Simulation(vehicle, maneuver, Vref, RPMref, ttot;
+                                                        Vinit=Vinit, Winit=Winit)
+
+    if verbose; println("\t"^(v_lvl+1)*"Running simulation..."); end;
+    pfield = fvs.run_simulation(simulation, nsteps;
+                                      # SIMULATION OPTIONS
+                                      Vinf=Vinf,
+                                      # SOLVERS OPTIONS
+                                      p_per_step=p_per_step,
+                                      overwrite_sigma=overwrite_sigma,
+                                      vlm_sigma=vlm_sigma,
+                                      vlm_rlx=vlm_rlx,
+                                      max_particles=max_particles,
+                                      wake_coupled=wake_coupled,
+                                      shed_unsteady=shed_unsteady,
+                                      extra_runtime_function=monitor,
+                                      # OUTPUT OPTIONS
+                                      save_path=save_path,
+                                      run_name=run_name,
+                                      prompt=prompt,
+                                      verbose=verbose2, v_lvl=v_lvl+1,
+                                      save_horseshoes=!wake_coupled
+                                      )
+
+    return simulation, pfield
 end
