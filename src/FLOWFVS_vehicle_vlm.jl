@@ -101,6 +101,16 @@ function add_dW(self::VLMVehicle, dW)
     return nothing
 end
 
+function set_V(self::VLMVehicle, V)
+    self.V .= V
+    return nothing
+end
+
+function set_W(self::VLMVehicle, W)
+    self.W .= W
+    return nothing
+end
+
 function tilt_systems(self::VLMVehicle{N,M,R}, angles::NTuple{N, Array{R2, 1}}
                                                     ) where{N, M, R, R2<:Real}
     # Iterate over tilting system
@@ -109,6 +119,9 @@ function tilt_systems(self::VLMVehicle{N,M,R}, angles::NTuple{N, Array{R2, 1}}
         Oaxis = gt.rotation_matrix2([-a for a in angles[i]]...)
         vlm.setcoordsystem(sys, sys.O, Oaxis)
     end
+    return nothing
+end
+function tilt_systems(self::VLMVehicle{0,M,R}, angles::Tuple{})  where{M, R}
     return nothing
 end
 
@@ -279,21 +292,23 @@ end
 """
 Returns the local translational velocity of every control point in `vlm_system`.
 """
-function _Vkinematic_vlm(self::VLMVehicle, dt::Real; t=0.0, targetX::String="CP")
-
-    cur_Xs = _get_Xs(self.vlm_system, targetX; t=t)
-    prev_Xs = _get_Xs(_get_prev_vlm_system(self), targetX; t=t)
-
-    return [-(cur_Xs[i]-prev_Xs[i])/dt for i in 1:size(cur_Xs, 1)]
+function _Vkinematic_vlm(self::VLMVehicle, args...; optargs...)
+    return _Vkinematic(self.vlm_system, _get_prev_vlm_system(self), args...;
+                                                                    optargs...)
 end
 
 """
 Returns the local translational velocity of every control point in `wake_system`.
 """
-function _Vkinematic_wake(self::VLMVehicle, dt::Real; t=0.0, targetX::String="CP")
+function _Vkinematic_wake(self::VLMVehicle, args...; optargs...)
+    return _Vkinematic(self.wake_system, _get_prev_wake_system(self), args...;
+                                                                    optargs...)
+end
 
-    cur_Xs = _get_Xs(self.wake_system, targetX; t=t)
-    prev_Xs = _get_Xs(_get_prev_wake_system(self), targetX; t=t)
+function _Vkinematic(system, prev_system, dt::Real; t=0.0, targetX="CP")
+
+    cur_Xs = _get_Xs(system, targetX; t=t)
+    prev_Xs = _get_Xs(prev_system, targetX; t=t)
 
     return [-(cur_Xs[i]-prev_Xs[i])/dt for i in 1:size(cur_Xs, 1)]
 end
