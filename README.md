@@ -60,6 +60,9 @@ documentation: [`docs/validation.ipynb`](https://nbviewer.jupyter.org/github/byu
 **CROSS-WIND CIRCULAR PATH:** `examples/circularpath.jl`
 <img src="docs/vid/circularpath03_1.gif" alt="Vid here" style="width: 900px;"/>
 
+**INTERACTING TANDEM HEAVING WING:** `examples/tandemheavingwing.jl`
+[![Vid here](docs/img/play02.png)](https://youtu.be/p-qvEf6pnZE)
+
 # Authorship
   * Author    : Eduardo J Alvarez
   * Email     : Edo.AlvarezR@gmail.com
