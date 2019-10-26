@@ -30,6 +30,8 @@ function run_simulation(sim::Simulation, nsteps::Int;
                              overwrite_sigma=nothing,   # Overwrite cores to this value (ignoring sigmafactor)
                              vlm_sigma=-1,              # VLM regularization
                              vlm_rlx=-1,                # VLM relaxation
+                             vpm_surface=true,          # Whether to include surfaces in the VPM
+                             surf_sigma=-1,             # Vehicle surface regularization
                              wake_coupled=true,         # Couple VPM wake on VLM solution
                              shed_unsteady=true,        # Whether to shed unsteady-loading wake
                              unsteady_shedcrit=0.01,    # Criterion for unsteady-loading shedding
@@ -78,10 +80,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
     # SIMULATION SETUP
     ############################################################################
     # Initiate particle field
-    # max_particles = ceil(Int, 0.1*nsteps*vlm.get_m(wake_system))
-    # TODO: Reduce the max number of particles
     pfield = vpm.ParticleField(max_particles, Vinf, nothing, vpm_solver)
-
     pfield.nu = mu/rho                  # Kinematic viscosity
 
     # TODO: Add particle removal
@@ -94,44 +93,24 @@ function run_simulation(sim::Simulation, nsteps::Int;
         This function gets called by `vpm.run_vpm!` at every time step.
     """
     function runtime_function(PFIELD, T, DT)
-        # TIME-STEPPING PROCEDURE:
-        # -1) Solve one particle field time step
-        # 0) Translate and rotate systems
-        # 1) Recalculate horseshoes with kinematic velocity
-        # 2) Paste previous Gamma solution to new system position after translation
-        # 3) Shed semi-infinite wake after translation
-        # 4) Calculate wake-induced velocity on VLM and Rotor system
-        # 5) Solve VLM and Rotor system
-        # 6) Shed unsteady-loading wake after new solution
-        # 7) Save new solution as prev solution
-        # Iterate
-        #
-        # On the first time step (pfield.nt==0), it only does steps (5) and (7),
-        # meaning that the unsteady wake of the first time step is never shed.
 
-    # TODO: Add vlm-on-vpm velocity
-
-        # ---------- 0) TRANSLATION AND ROTATION OF SYSTEM -----------------
         # Move tilting systems, and translate and rotate vehicle
         nextstep_kinematic(sim, dt)
 
-        # ---------- 1) Recalculate horseshoes with kinematic velocity -----
-        # ---------- 2) Paste previous Gamma solution ----------------------
+        # Solver-specific pre-calculations
         precalculations(sim.vehicle, Vinf, PFIELD, T, DT)
 
-
-        # ---------- 3) Shed semi-infinite wake ----------------------------
+        # Shed semi-infinite wake
         shed_wake(sim.vehicle, Vinf, PFIELD, DT; t=T,
                             unsteady_shedcrit=-1,
                             p_per_step=p_per_step, sigmafactor=sigmafactor,
                             overwrite_sigma=overwrite_sigma)
 
-        # ---------- 4) Calculate VPM velocity on VLM and Rotor system -----
-        # ---------- 5) Solve VLM system -----------------------------------
-        # ---------- 5) Solve Rotor system ---------------------------------
-        solve(sim.vehicle, Vinf, PFIELD, vpm_solver, T, DT, vlm_rlx)
+        # Solve aerodynamics of the vehicle
+        solve(sim.vehicle, Vinf, PFIELD, wake_coupled, vpm_solver, T, DT,
+                                                                        vlm_rlx)
 
-        # ---------- 6) Shed unsteady-loading wake with new solution -------
+        # Shed unsteady-loading wake with new solution
         if shed_unsteady
             shed_wake(sim.vehicle, Vinf, PFIELD, DT; t=T,
                         unsteady_shedcrit=unsteady_shedcrit,
@@ -139,6 +118,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
                         overwrite_sigma=overwrite_sigma)
         end
 
+        # Simulation-specific postprocessing
         breakflag = extra_runtime_function(sim, PFIELD, T, DT)
 
         # Output vtks
@@ -148,6 +128,12 @@ function run_simulation(sim::Simulation, nsteps::Int;
         end
 
         return breakflag
+    end
+
+    if vpm_surface
+        static_particles_function = generate_static_particle_fun(sim.vehicle, surf_sigma)
+    else
+        static_particles_function = nothing
     end
 
     ############################################################################
@@ -164,7 +150,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
                       nsteps_relax=nsteps_relax,
                       nsteps_restart=nsteps_restart>0 ? nsteps_restart : nsteps,
                       save_sigma=true,
-                      # static_particles_function=generate_static_particles,
+                      static_particles_function=static_particles_function,
                       # beta=cs_beta, sgm0=sgm0,
                       # rbf_ign_iterror=true,
                       # rbf_itmax=rbf_itmax, rbf_tol=rbf_tol
