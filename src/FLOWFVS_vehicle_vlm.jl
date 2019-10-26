@@ -213,7 +213,8 @@ end
 
 
 function solve(self::VLMVehicle, Vinf::Function, pfield::vpm.ParticleField,
-                            vpm_solver::String, t::Real, dt::Real, rlx::Real)
+                wake_coupled::Bool, vpm_solver::String, t::Real, dt::Real,
+                                                                    rlx::Real)
     # TIME-STEPPING PROCEDURE:
     # -1) Solve one particle field time step
     # 0) Translate and rotate systems
@@ -229,9 +230,14 @@ function solve(self::VLMVehicle, Vinf::Function, pfield::vpm.ParticleField,
     # On the first time step (pfield.nt==0), it only does steps (5) and (7),
     # meaning that the unsteady wake of the first time step is never shed.
     if t==0
-        vlm.solve(self.vlm_system, Vinf; t=t)
+        vlm.solve(self.vlm_system, Vinf; t=t, keep_sol=true)
 
         # TODO: Solve Rotor systems
+        # TODO: Include velocity induced by rotor's blades when solving vlm_system
+
+    elseif wake_coupled==false
+        vlm.solve(self.vlm_system, Vinf; t=t, extraVinf=_extraVinf1,
+                                                                keep_sol=true)
     else
         # ---------- 4) Calculate VPM velocity on VLM and Rotor system -----
         # Control points
@@ -243,8 +249,8 @@ function solve(self::VLMVehicle, Vinf::Function, pfield::vpm.ParticleField,
 
         # ---------- 5) Solve VLM system -----------------------------------
         # Wake-coupled solution
-        vlm.solve(self.vlm_system, Vinf; t=t, extraVinf=_extraVinf2, keep_sol=true,
-                                        vortexsheet=(X,t)->zeros(3))
+        vlm.solve(self.vlm_system, Vinf; t=t, extraVinf=_extraVinf2,
+                                    keep_sol=true, vortexsheet=(X,t)->zeros(3))
         # Wake-decoupled solution
         # vlm.solve(vlm_system, Vinf; t=t, keep_sol=true)
 
@@ -265,6 +271,29 @@ function solve(self::VLMVehicle, Vinf::Function, pfield::vpm.ParticleField,
         # end
 
     end
+end
+
+function generate_static_particle_fun(self::VLMVehicle, sigma::Real)
+
+    if sigma<=0
+        error("Invalid smoothing radius $sigma.")
+    end
+
+    function static_particles_function(args...)
+        out = Array{Float64, 1}[]
+
+        # Adds a particle for every bound vortex of the VLM
+        for i in 1:vlm.get_m(self.vlm_system)
+            (Ap, A, B, Bp, _, _, _, Gamma) = vlm.getHorseshoe(self.vlm_system, i)
+            for (i,(x1, x2)) in enumerate([(Ap,A), (A,B), (B,Bp)])
+                push!(out, vcat((x1+x2)/2, Gamma*(x2-x1), sigma, 0))
+            end
+        end
+
+        return out
+    end
+
+    return static_particles_function
 end
 
 function save_vtk(self::VLMVehicle, filename; path=nothing, num=nothing,

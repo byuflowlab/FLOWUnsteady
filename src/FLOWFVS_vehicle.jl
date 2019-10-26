@@ -97,17 +97,6 @@ function nextstep_kinematic(self::AbstractVehicle, dt::Real)
 end
 
 """
-    `save_vtk(self::AbstractVehicle, filename; path=nothing, num=nothing,
-optargs...)`
-
-Output VTK files with vehicle geometry and solution fields.
-"""
-function save_vtk(self::AbstractVehicle, filename;
-                        path=nothing, num=nothing, optargs...)
-    error("$(typeof(self)) has no implementation yet!")
-end
-
-"""
     `precalculations(self, pfield, t, dt)`
 Precalculations before calling the solver and before shedding trialing wake.
 """
@@ -131,7 +120,27 @@ end
 Solves the aerodynamics of this vehicle.
 """
 function solve(self::AbstractVehicle, Vinf::Function, pfield::vpm.ParticleField,
-                               vpm_solver::String, t::Real, dt::Real, rlx::Real)
+                wake_coupled::Bool, vpm_solver::String,  t::Real, dt::Real,
+                                                                      rlx::Real)
+    error("$(typeof(self)) has no implementation yet!")
+end
+
+"""
+Returns a function that generates an array of particles representing the surface
+of the vehicle as a collection of vortex particles.
+"""
+function generate_static_particle_fun(self::AbstractVehicle, sigma::Real)
+    error("$(typeof(self)) has no implementation yet!")
+end
+
+"""
+    `save_vtk(self::AbstractVehicle, filename; path=nothing, num=nothing,
+optargs...)`
+
+Output VTK files with vehicle geometry and solution fields.
+"""
+function save_vtk(self::AbstractVehicle, filename;
+                        path=nothing, num=nothing, optargs...)
     error("$(typeof(self)) has no implementation yet!")
 end
 
