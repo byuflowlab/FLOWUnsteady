@@ -42,7 +42,7 @@ struct VLMVehicle{N, M, R} <: AbstractVehicle{N, M, R}
     # Internal properties
     V::Array{R, 1}                          # Current vehicle velocity
     W::Array{R, 1}                          # Current vehicle angular velocity
-    prev_data::Array{vlm.WingSystem, 1}     # Information about previous step
+    prev_data::Array{Any, 1}                # Information about previous step
     grid_O::Array{Array{R, 1}, 1}           # Origin of every grid
 
 
@@ -54,7 +54,8 @@ struct VLMVehicle{N, M, R} <: AbstractVehicle{N, M, R}
                     wake_system=vlm.WingSystem(),
                     grids=Array{gt.GridTypes, 1}(),
                     V=zeros(3), W=zeros(3),
-                    prev_data=[deepcopy(vlm_system), deepcopy(wake_system)],
+                    prev_data=[deepcopy(vlm_system), deepcopy(wake_system),
+                                                    deepcopy(rotor_systems)],
                     grid_O=Array{Array{Float64, 1}, 1}(),
                 ) where {N, M, R} = new(
                     system,
@@ -137,6 +138,7 @@ function nextstep_kinematic(self::VLMVehicle, dt::Real)
     # Save state of current vehicle
     _update_prev_vlm_system(self, deepcopy(self.vlm_system))
     _update_prev_wake_system(self, deepcopy(self.wake_system))
+    _update_prev_rotor_systems(self, deepcopy(self.rotor_systems))
 
     # Translation and rotation
     vlm.setcoordsystem(self.system, O, Oaxis)
@@ -212,66 +214,6 @@ function shed_wake(self::VLMVehicle, Vinf::Function,
 end
 
 
-function solve(self::VLMVehicle, Vinf::Function, pfield::vpm.ParticleField,
-                wake_coupled::Bool, vpm_solver::String, t::Real, dt::Real,
-                                                                    rlx::Real)
-    # TIME-STEPPING PROCEDURE:
-    # -1) Solve one particle field time step
-    # 0) Translate and rotate systems
-    # 1) Recalculate horseshoes with kinematic velocity
-    # 2) Paste previous Gamma solution to new system position after translation
-    # 3) Shed semi-infinite wake after translation
-    # 4) Calculate wake-induced velocity on VLM and Rotor system
-    # 5) Solve VLM and Rotor system
-    # 6) Shed unsteady-loading wake after new solution
-    # 7) Save new solution as prev solution
-    # Iterate
-    #
-    # On the first time step (pfield.nt==0), it only does steps (5) and (7),
-    # meaning that the unsteady wake of the first time step is never shed.
-    if t==0
-        vlm.solve(self.vlm_system, Vinf; t=t, keep_sol=true)
-
-        # TODO: Solve Rotor systems
-        # TODO: Include velocity induced by rotor's blades when solving vlm_system
-
-    elseif wake_coupled==false
-        vlm.solve(self.vlm_system, Vinf; t=t, extraVinf=_extraVinf1,
-                                                                keep_sol=true)
-    else
-        # ---------- 4) Calculate VPM velocity on VLM and Rotor system -----
-        # Control points
-        Xs = _get_Xs(self.vlm_system, "CP"; t=t)
-
-        # VPM-induced velocity at every control point
-        Vvpm = Vvpm_on_Xs(pfield, Xs, vpm_solver)
-        vlm._addsolution(self.vlm_system, "Vvpm", Vvpm; t=t)
-
-        # ---------- 5) Solve VLM system -----------------------------------
-        # Wake-coupled solution
-        vlm.solve(self.vlm_system, Vinf; t=t, extraVinf=_extraVinf2,
-                                    keep_sol=true, vortexsheet=(X,t)->zeros(3))
-        # Wake-decoupled solution
-        # vlm.solve(vlm_system, Vinf; t=t, keep_sol=true)
-
-        # Relaxes (rlx->1) or stiffens (rlx->0) the VLM solution
-        if rlx > 0
-            rlxd_Gamma = rlx*self.vlm_system.sol["Gamma"] +
-                                (1-rlx)*_get_prev_vlm_system(self).sol["Gamma"]
-            vlm._addsolution(self.vlm_system, "Gamma", rlxd_Gamma)
-        end
-
-        # ---------- 5) Solve Rotor system ---------------------------------
-        # for rotor in rotors
-        #     RPM = cur_RPMs[rotor]
-        #     # TODO: Add kinematic velocity
-        #     # TODO: Add VPM-induced velocity and get rid of CCBlade
-        #     vlm.solvefromCCBlade(rotor, Vinf, RPM, rho; t=T, sound_spd=sound_spd,
-        #                             Uinds=nothing, _lookuptable=false, _Vinds=nothing)
-        # end
-
-    end
-end
 
 function generate_static_particle_fun(self::VLMVehicle, sigma::Real)
 
@@ -282,11 +224,13 @@ function generate_static_particle_fun(self::VLMVehicle, sigma::Real)
     function static_particles_function(args...)
         out = Array{Float64, 1}[]
 
-        # Adds a particle for every bound vortex of the VLM
-        for i in 1:vlm.get_m(self.vlm_system)
-            (Ap, A, B, Bp, _, _, _, Gamma) = vlm.getHorseshoe(self.vlm_system, i)
-            for (i,(x1, x2)) in enumerate([(Ap,A), (A,B), (B,Bp)])
-                push!(out, vcat((x1+x2)/2, Gamma*(x2-x1), sigma, 0))
+        # Particles from vlm system
+        _static_particles(self.vlm_system, sigma; out=out)
+
+        # Particles from rotor systems
+        for rotors in self.rotor_systems
+            for rotor in rotors
+                _static_particles(rotor, sigma; out=out)
             end
         end
 
@@ -294,6 +238,20 @@ function generate_static_particle_fun(self::VLMVehicle, sigma::Real)
     end
 
     return static_particles_function
+end
+
+function _static_particles(system::Union{vlm.Wing, vlm.WingSystem, vlm.Rotor},
+                                    sigma::Real; out=Array{Float64, 1}[])
+
+    # Adds a particle for every bound vortex of the VLM
+    for i in 1:vlm.get_m(system)
+        (Ap, A, B, Bp, _, _, _, Gamma) = vlm.getHorseshoe(system, i)
+        for (i,(x1, x2)) in enumerate([(Ap,A), (A,B), (B,Bp)])
+            push!(out, vcat((x1+x2)/2, Gamma*(x2-x1), sigma, 0))
+        end
+    end
+
+    return out
 end
 
 function save_vtk(self::VLMVehicle, filename; path=nothing, num=nothing,
@@ -311,11 +269,15 @@ end
 
 _get_prev_vlm_system(self::VLMVehicle) = self.prev_data[1]
 _get_prev_wake_system(self::VLMVehicle) = self.prev_data[2]
+_get_prev_rotor_systems(self::VLMVehicle) = self.prev_data[3]
 function _update_prev_vlm_system(self::VLMVehicle, system)
     self.prev_data[1] = system
 end
 function _update_prev_wake_system(self::VLMVehicle, system)
     self.prev_data[2] = system
+end
+function _update_prev_rotor_systems(self::VLMVehicle, rotor_systems)
+    self.prev_data[3] = rotor_systems
 end
 
 """
@@ -342,6 +304,28 @@ function _Vkinematic(system, prev_system, dt::Real; t=0.0, targetX="CP")
     return [-(cur_Xs[i]-prev_Xs[i])/dt for i in 1:size(cur_Xs, 1)]
 end
 
+"""
+Returns the local translational velocity of midpoint in `rotor`.
+"""
+function _Vkinematic_rotor(rotor_systems::NTuple{M, Array{vlm.Rotor, 1}},
+                           prev_rotor_systems::NTuple{M, Array{vlm.Rotor, 1}}
+                           si, ri
+                          ) where{M}
+
+    out = []
+
+    for bi in 1:rotor_systems[si][ri].B
+        cur_Xs = _get_midXs(rotor_systems[si][ri], targetX; t=t)
+        prev_Xs = _get_midXs(prev_rotor_systems[si][ri], targetX; t=t)
+
+        Vkin = [-(cur_Xs[i]-prev_Xs[i])/dt for i in 1:size(cur_Xs, 1)]
+        push!(out, Vkin)
+    end
+
+    return out
+
+end
+
 function _get_Xs(system::Union{vlm.Wing, vlm.WingSystem, vlm.Rotor},
                                                         targetX::String; t=0.0)
     if targetX=="CP"
@@ -359,6 +343,56 @@ function _get_Xs(system::Union{vlm.Wing, vlm.WingSystem, vlm.Rotor},
     return vcat([_get_Xs(system, targetX; t=t) for targetX in targetXs]...)
 end
 
+"Returns the i-th bound-vortex midpoint of the j-th blade in `rotor`"
+function _get_midX(rotor::vlm.Rotor, j::Int, i::Int)
+    return (vlm.getHorseshoe(vlm.get_blade(rotor, j), i)[2] +
+            vlm.getHorseshoe(vlm.get_blade(rotor, j), i)[3]) / 2
+end
+
+"Returns all bound-vortex midpoints of the j-th blade in `rotor`"
+function _get_midXs(rotor::vlm.Rotor, j::Int)
+    return [_get_midX(rotor, j, i)
+                            for i in 1:vlm.get_m(vlm.get_blade(rotor, j)) ]
+end
+"Returns all bound-vortex midpoints in `rotor`"
+_get_midXs(rotor::vlm.Rotor) = vcat([_get_midXs(rotor, j) for j in 1:rotor.B]...)
+
+"Returns all bound-vortex midpoints in an array of rotors"
+_get_midXs(rotors::Array{vlm.Rotor, 1}) = vcat([_get_midXs(rotor) for rotor in rotors]...)
+
+"Returns all bound-vortex midpoints in multiple rotor systems"
+function _get_midXs(rotor_systems::NTuple{M, Array{vlm.Rotor, 1}}) where{M}
+    return vcat([_get_midXs(rotors) for rotors in rotor_systems]...)
+end
+
+"Receives an array `midXs` formatted as the output of `_get_midXs(rotor_systems`
+and returns the section of the array that corresponds to the ri-th rotor in the
+si-th system formatted as blades.
+"
+function _parse_midXs(rotor_systems::NTuple{M, Array{vlm.Rotor, 1}}
+                        midXs::Array{Array{R, 1}}, si, ri) where{R<:Real, M}
+
+    if si>length(rotor_systems) || si<=0
+        error("Got invalid system index $si; max is $(length(rotor_systems))")
+    end
+
+    # Find lower bound of midXs belonging to rotor ri
+    i_low = 1
+    for rotors in rotor_systems[1:(si-1)]         # Iterate over rotor systems
+        for rotor in rotors                       # Iterative over rotors
+            i_low += vlm.get_m(rotor)
+        end
+    end
+
+    # Find upper bound of midXs belinging to rotor ri
+    rotor = rotor_systems[si][ri]
+    i_up = i_low-1 + vlm.get_m(rotor)
+
+    # Formats it as blades
+    arr = midXs[i_low:i_up]
+    out = [arr[ ((i-1)*rotor.m+1):(i*rotor.m) ] for i in 1:rotor.B]
+    return out
+end
 
 """
 Function for FLOWVLM to fetch and add extra velocities to what every
