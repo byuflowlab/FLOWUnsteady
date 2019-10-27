@@ -116,14 +116,14 @@ function shed_wake(self::AbstractVehicle, Vinf::Function,
     error("$(typeof(self)) has no implementation yet!")
 end
 
-"""
-Solves the aerodynamics of this vehicle.
-"""
-function solve(self::AbstractVehicle, Vinf::Function, pfield::vpm.ParticleField,
-                wake_coupled::Bool, vpm_solver::String,  t::Real, dt::Real,
-                                                                      rlx::Real)
-    error("$(typeof(self)) has no implementation yet!")
-end
+# """
+# Solves the aerodynamics of this vehicle.
+# """
+# function solve(self::AbstractVehicle, Vinf::Function, pfield::vpm.ParticleField,
+#                 wake_coupled::Bool, vpm_solver::String,  t::Real, dt::Real,
+#                                                       rlx::Real, sigma::Real)
+#     error("$(typeof(self)) has no implementation yet!")
+# end
 
 """
 Returns a function that generates an array of particles representing the surface

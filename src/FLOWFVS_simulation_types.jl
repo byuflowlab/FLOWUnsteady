@@ -95,7 +95,6 @@ function nextstep_kinematic(self::Simulation, dt::Real)
         angles = get_angles(self.maneuver, self.t/self.ttot)
         tilt_systems(self.vehicle, angles)
 
-        # TODO: Have the rotor solver update rotor RPMs
         self.t += dt
     end
 
@@ -107,6 +106,189 @@ function save_vtk(self::Simulation, filename; optargs...)
     return save_vtk(self.vehicle, filename; num=self.nt, optargs...)
 end
 
+"""
+Precalculations before calling the solver.
+"""
+function precalculations(self::Simulation{V, M, R}, args..., dt::Real)
+    # Rotate rotors
+    rotate_rotors(self, dt)
+
+    # Calculate kinematic velocities
+    precalculations(self.vehicle, args..., dt)
+
+    # Bring the rotors back to their initial positions. This is needed to avoid
+    # double accounting for the RPM when the solver is run
+    rotate_rotors(self, -dt)
+
+    return nothing
+end
+
+function solve(self::Simulation{V, M, R}, Vinf::Function,
+                pfield::vpm.ParticleField, wake_coupled::Bool,
+                vpm_solver::String, dt::Real, rlx::Real, sigma::Real, rho::real,
+                speedofsound::real
+                ) where {V<:VLMVehicle, M<:AbstractManeuver, R}
+
+    vhcl = self.vehicle
+    mnvr = self.maneuver
+    t = self.t
+
+    # TIME-STEPPING PROCEDURE:
+    # -1) Solve one particle field time step
+    # 0) Translate and rotate systems
+    # 1) Recalculate horseshoes with kinematic velocity
+    # 2) Paste previous Gamma solution to new system position after translation
+    # 3) Shed semi-infinite wake after translation
+    # 4) Calculate wake-induced velocity on VLM and Rotor system
+    # 5) Solve VLM and Rotor system
+    # 6) Shed unsteady-loading wake after new solution
+    # 7) Save new solution as prev solution
+    # Iterate
+    #
+    # On the first time step (pfield.nt==0), it only does steps (5) and (7),
+    # meaning that the unsteady wake of the first time step is never shed.
+    if t==0
+        # NOTE: VLMs and Rotors solutions are losely coupled
+
+        # Solve VLMs
+        # TODO: Add Rotor-on-VLM induced velocity
+        vlm.solve(vhcl.vlm_system, Vinf; t=t, keep_sol=true,
+                                                    vortexsheet=(X,t)->zeros(3))
+
+        # Calculate induced velocities to use in rotor solver
+        ## Points where to calculate induced velocities
+        Xs = _get_midXs(vhcl.rotor_systems)
+
+        ## Particles for VLM-on-Rotor induced velocity
+        static_particles = _static_particles(vhcl.vlm_system, sigma)
+
+        ## Evaluate VPM-on-Rotor induced velocity + static particles
+        Vinds = Vvpm_on_Xs(pfield, Xs, vpm_solver;
+                                            static_particles=static_particles)
+
+        # Solve Rotors
+        for (si, rotors) in enumerate(vhcl.rotor_systems)
+
+            # RPM of this rotor system
+            RPM = self.RPMref*get_RPM(mnvr, si, t/sim.ttot)
+
+            for (ri, rotor) in enumerate(rotors)
+
+                # Get velocities induced at every blade of this rotor
+                this_Vinds = _parse_midXs(vhcl.rotor_systems,  Vinds, si, ri)
+
+                # vlm.solvefromCCBlade(rotor, Vinf, RPM, rho;
+                #                                 t=t, sound_spd=sound_spd)
+                vlm.solvefromV(rotor, this_Vinds, Vinf, RPM,
+                                  rho; t=t, sound_spd=sound_spd)
+            end
+        end
+
+
+    elseif wake_coupled==false
+        vlm.solve(vhcl.vlm_system, Vinf; t=t, extraVinf=_extraVinf1,
+                                                                keep_sol=true)
+        error("There isn't a wake-decoupled solver yet!")
+
+    else
+        # ---------- 4) Calculate VPM velocity on VLM and Rotor system -----
+        # Control points of VLM
+        Xs = _get_Xs(vhcl.vlm_system, "CP"; t=t)
+
+        # Generate static particles
+        static_particles = Array{Float64, 1}[]
+
+        ### Particles for Rotor induced velocity
+        for rotors in vhcl.rotor_systems
+            for rotor in rotors
+                _static_particles(rotor, sigma; out=static_particles)
+            end
+        end
+
+        # VPM-induced velocity (+ static particles) at every VLM control point
+        Vvpm = Vvpm_on_Xs(pfield, Xs, vpm_solver; static_particles=static_particles)
+        vlm._addsolution(vhcl.vlm_system, "Vvpm", Vvpm; t=t)
+
+
+        # Calculate induced velocities to use in rotor solver
+        ## Points where to calculate induced velocities
+        Xs = _get_midXs(vhcl.rotor_systems)
+
+        ### Particles for VLM-on-Rotor induced velocity
+        _static_particles(vhcl.vlm_system, sigma; out=static_particles)
+
+        ## Evaluate VPM-on-Rotor induced velocity + static particles
+        Vinds = Vvpm_on_Xs(pfield, Xs, vpm_solver;
+                                            static_particles=static_particles)
+
+        # ---------- 5) Solve VLM system -----------------------------------
+        # Wake-coupled solution
+        vlm.solve(vhcl.vlm_system, Vinf; t=t, extraVinf=_extraVinf2,
+                                    keep_sol=true, vortexsheet=(X,t)->zeros(3))
+        # Wake-decoupled solution
+        # vlm.solve(vlm_system, Vinf; t=t, keep_sol=true)
+
+        # Relaxes (rlx->1) or stiffens (rlx->0) the VLM solution
+        if rlx > 0
+            rlxd_Gamma = rlx*vhcl.vlm_system.sol["Gamma"] +
+                                (1-rlx)*_get_prev_vlm_system(vhcl).sol["Gamma"]
+            vlm._addsolution(vhcl.vlm_system, "Gamma", rlxd_Gamma)
+        end
+
+        # ---------- 5) Solve Rotor system ---------------------------------
+
+        # Solve Rotors
+        for (si, rotors) in enumerate(vhcl.rotor_systems)
+
+            # RPM of this rotor system
+            RPM = self.RPMref*get_RPM(mnvr, si, t/self.ttot)
+
+            for (ri, rotor) in enumerate(rotors)
+
+                # Calculate kinematic velocities
+                Vkin = _Vkinematic_rotor(vhcl.rotor_systems,
+                                         vhcl.prev_rotor_systems, si, ri)
+
+                # Get velocities induced at every blade of this rotor
+                this_Vinds = _parse_midXs(vhcl.rotor_systems,  Vinds, si, ri)
+
+                # vlm.solvefromCCBlade(rotor, Vinf, RPM, rho;
+                #                                 t=t, sound_spd=sound_spd)
+                vlm.solvefromV(rotor, this_Vinds + Vkin, Vinf, RPM,
+                                  rho; t=t, sound_spd=sound_spd)
+            end
+        end
+
+        # Rotate rotors
+        rotate_rotors(self, dt)
+    end
+end
+
+function rotate_rotors(self::Simulation{V, M, R}, dt::Real
+                                ) where {V<:VLMVehicle, M<:AbstractManeuver, R}
+
+    for (si, rotors) in enumerate(self.vehicle.rotor_systems)
+
+        # RPM of this rotor system
+        RPM = self.RPMref*get_RPM(self.maneuver, si, self.t/self.ttot)
+
+        for rotor in rotors
+
+            # Save solution fields
+            sol1 = deepcopy(rotor._wingsystem.sol)
+            sol2 = deepcopy(rotor.sol)
+
+            # Rotate rotor
+            vlm.rotate(rotor, 360*RPM/60*dt)
+
+            # Paste solution fields back
+            for (key,val) in sol1; vlm._addsolution(rotor._wingsystem, key, val); end;
+            for (key,val) in sol2; rotor.sol[key] = val; end;
+
+        end
+    end
+    return nothing
+end
 
 
 ##### INTERNAL FUNCTIONS  ######################################################
