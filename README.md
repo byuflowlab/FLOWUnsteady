@@ -61,7 +61,7 @@ documentation: [`docs/validation.ipynb`](https://nbviewer.jupyter.org/github/byu
 <img src="docs/vid/circularpath03_1.gif" alt="Vid here" style="width: 900px;"/>
 
 **INTERACTING TANDEM HEAVING WING:** `examples/tandemheavingwing.jl`
-[![Vid here](docs/img/play01.png)](https://youtu.be/p-qvEf6pnZE)
+[![Vid here](docs/img/play01.png)](https://youtu.be/Pch94bKpjrQ)
 
 # Authorship
   * Author    : Eduardo J Alvarez
