@@ -259,9 +259,10 @@ function generate_geometry_vahana(;
     vlm.addwing(main_wing_moving, "WingletR", winglet_R)
     vlm.addwing(main_wing_moving, "WingL", wing_L)
     vlm.addwing(main_wing_moving, "WingletL", winglet_L)
-    for (i, prop) in enumerate(props_w)
-        vlm.addwing(main_wing_moving, "Prop$i", prop)
-    end
+    warn("Add prop1")
+    # for (i, prop) in enumerate(props_w)
+    #     vlm.addwing(main_wing_moving, "Prop$i", prop)
+    # end
 
     # offset to align with pivot line
     x_off_w = pivot_w*b_w/AR_w
@@ -361,9 +362,10 @@ function generate_geometry_vahana(;
     tandem_wing_moving = vlm.WingSystem()
     vlm.addwing(tandem_wing_moving, "WingR", twing_R)
     vlm.addwing(tandem_wing_moving, "WingL", twing_L)
-    for (i, prop) in enumerate(props_tw)
-        vlm.addwing(tandem_wing_moving, "Prop$i", prop)
-    end
+    warn("Add prop2")
+    # for (i, prop) in enumerate(props_tw)
+    #     vlm.addwing(tandem_wing_moving, "Prop$i", prop)
+    # end
 
     # offset to align with pivot line
     x_off_tw = pivot_tw*b_tw/AR_tw
@@ -429,7 +431,9 @@ function generate_geometry_vahana(;
     tilting_systems = (main_wing_moving, tandem_wing_moving)
 
     # Rotors grouped by systems of the same RPM
-    rotor_systems = (props_w, props_tw)
+    warn("Remember to add rotor systems")
+    # rotor_systems = (props_w, props_tw)
+    rotor_systems = ()
 
     # System to solve through the VLM solver
     vlm_system = vlm.WingSystem()
@@ -442,10 +446,11 @@ function generate_geometry_vahana(;
 
     # Wake-shedding system (`vlm_system`+`rotors`)
     wake_system = vlm.WingSystem()
-    vlm.addwing(wake_system, "SolveVLM", vlm_system)
-    for (i, rotor) in enumerate(rotors)
-        vlm.addwing(wake_system, "Rotor$i", rotor)
-    end
+    # vlm.addwing(wake_system, "SolveVLM", vlm_system)
+    warn("Remember to add rotors to wake system")
+    # for (i, rotor) in enumerate(rotors)
+    #     vlm.addwing(wake_system, "Rotor$i", rotor)
+    # end
 
     # Dummy grids that are rotated and translated along with the vehicle
     grids = [fuselage]
@@ -455,11 +460,10 @@ function generate_geometry_vahana(;
                                 tilting_systems=tilting_systems,
                                 rotor_systems=rotor_systems,
                                 vlm_system=vlm_system,
-                                wake_system=vlm_system,
-                                # wake_system=wake_system,
+                                # wake_system=vlm_system,
+                                wake_system=wake_system,
                                 grids=grids
                              )
-                             warn("Remember to switch wake_system back")
 
 
     return vehicle, grounds

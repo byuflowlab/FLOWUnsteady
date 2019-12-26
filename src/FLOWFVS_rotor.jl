@@ -164,7 +164,7 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
         grid(true, color="0.8", linestyle="--")
 
         for (i,(pos, polar)) in enumerate(airfoils)
-            ap.plot(polar; geometry=true, label="pos=$pos, Re=$(ap.get_Re(polar))"*
+            vlm.ap.plot(polar; geometry=true, label="pos=$pos, Re=$(vlm.ap.get_Re(polar))"*
                                         (Mas!=nothing ? ", Ma=$(round(Mas[i],2))" : ""),
                     cdpolar=false, fig_id="prelim_curves", title_str="Re sweep")
         end
@@ -175,6 +175,43 @@ end
 
 function generate_rotor(Rtip::Real, Rhub::Real, B::Int, blade_file::String;
                         data_path=def_data_path, optargs...)
+
+    (chorddist, pitchdist,
+     sweepdist, heightdist,
+     airfoil_files, spl_k,
+     spl_s) = read_blade(blade_file; data_path=data_path)
+
+    return generate_rotor(Rtip, Rhub, B, chorddist, pitchdist, sweepdist,
+                            heightdist, airfoil_files;
+                            data_path=data_path,
+                            spline_k=spl_k, spline_s=spl_s, optargs...)
+end
+
+
+function generate_rotor(rotor_file::String;
+                        data_path=def_data_path, optargs...)
+
+    Rtip, Rhub, B, blade_file = read_rotor(rotor_file; data_path=data_path)
+
+    return generate_rotor(Rtip, Rhub, B, blade_file;
+                            data_path=data_path, optargs...)
+end
+
+function read_rotor(rotor_file::String; data_path=def_data_path)
+
+    # Path to rotor files
+    rotor_path = joinpath(data_path, "rotors")
+
+    data = CSV.read(joinpath(rotor_path, rotor_file))
+    Rtip = parse(data[1, 2])
+    Rhub = parse(data[2, 2])
+    B = parse(data[3, 2])
+    blade_file = data[4, 2]
+
+    return Rtip, Rhub, B, blade_file
+end
+
+function read_blade(blade_file::String; data_path=def_data_path)
 
     # Path to rotor files
     rotor_path = joinpath(data_path, "rotors")
@@ -199,27 +236,7 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int, blade_file::String;
     airfoil_files = [(Float64(af[i, 1]), String(af[i, 2]), String(af[i, 3]))
                         for i in 1:size(af, 1)]
 
-    return generate_rotor(Rtip, Rhub, B, chorddist, pitchdist, sweepdist,
-                            heightdist, airfoil_files;
-                            data_path=data_path,
-                            spline_k=spl_k, spline_s=spl_s, optargs...)
-end
-
-
-function generate_rotor(rotor_file::String;
-                        data_path=def_data_path, optargs...)
-
-    # Path to rotor files
-    rotor_path = joinpath(data_path, "rotors")
-
-    data = CSV.read(joinpath(rotor_path, rotor_file))
-    Rtip = parse(data[1, 2])
-    Rhub = parse(data[2, 2])
-    B = parse(data[3, 2])
-    blade_file = data[4, 2]
-
-    return generate_rotor(Rtip, Rhub, B, blade_file;
-                            data_path=data_path, optargs...)
+    return chorddist, pitchdist, sweepdist, heightdist, airfoil_files, spl_k, spl_s
 end
 
 """

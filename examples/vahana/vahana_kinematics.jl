@@ -250,7 +250,7 @@ function generate_maneuver_vahana1(; disp_plot=false)
             # Weibull acceleration to target climb
             if t<t1/2
                 val = t / (t1/2)
-                RPM_w = RPM1*(1-exp(-(5*val)^2))
+                RPM_w = RPM1*(1.05-exp(-(5*val)^2))
             # Weibull decceleration to hover
             else
                 val = 1 - (t-t1/2) / (t1/2)
@@ -350,7 +350,9 @@ function generate_maneuver_vahana1(; disp_plot=false)
     # MANEUVER OBJECT
     ############################################################################
     angle = (angle_main, angle_tandem)
-    RPM = (RPM_main, RPM_tandem)
+    warn("Remember to add rotors RPM")
+    # RPM = (RPM_main, RPM_tandem)
+    RPM = ()
     Vvehicle = Vaircraft
     anglevehicle = angleaircraft
 

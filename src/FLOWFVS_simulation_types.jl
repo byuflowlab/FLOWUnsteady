@@ -109,25 +109,35 @@ end
 """
 Precalculations before calling the solver.
 """
-function precalculations(self::Simulation{V, M, R}, args..., dt::Real)
+function precalculations(self::Simulation, Vinf::Function,
+                                pfield::vpm.ParticleField, t::Real, dt::Real)
     # Rotate rotors
     rotate_rotors(self, dt)
 
     # Calculate kinematic velocities
-    precalculations(self.vehicle, args..., dt)
+    precalculations(self.vehicle, Vinf, pfield, t, dt)
 
-    # Bring the rotors back to their initial positions. This is needed to avoid
-    # double accounting for the RPM when the solver is run
-    rotate_rotors(self, -dt)
+    # # Bring the rotors back to their initial positions. This is needed to avoid
+    # # double accounting for the RPM when the solver is run
+    # NOTE: I've moved this to after shedding the wake and before running the
+    # solver, otherwise the particles shedding wouldn't see the kinematic
+    # velocity due to rotor RPM
+    # rotate_rotors(self, -dt)
 
     return nothing
 end
 
 function solve(self::Simulation{V, M, R}, Vinf::Function,
                 pfield::vpm.ParticleField, wake_coupled::Bool,
-                vpm_solver::String, dt::Real, rlx::Real, sigma::Real, rho::real,
-                speedofsound::real
+                vpm_solver::String, dt::Real, rlx::Real, sigma::Real, rho::Real,
+                speedofsound::Real
                 ) where {V<:VLMVehicle, M<:AbstractManeuver, R}
+
+
+    # Bring the rotors back to their initial positions at beginning of this
+    # time step before `precalculations`. This is needed to avoid double
+    # accounting for the RPM when the solver is run
+    rotate_rotors(self, -dt)
 
     vhcl = self.vehicle
     mnvr = self.maneuver
@@ -150,6 +160,9 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
     if t==0
         # NOTE: VLMs and Rotors solutions are losely coupled
 
+        # Set Vinf on system to get horseshoes
+        vlm.setVinf(vhcl.system, Vinf)
+
         # Solve VLMs
         # TODO: Add Rotor-on-VLM induced velocity
         vlm.solve(vhcl.vlm_system, Vinf; t=t, keep_sol=true,
@@ -170,17 +183,19 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
         for (si, rotors) in enumerate(vhcl.rotor_systems)
 
             # RPM of this rotor system
-            RPM = self.RPMref*get_RPM(mnvr, si, t/sim.ttot)
+            RPM = self.RPMref*get_RPM(mnvr, si, t/self.ttot)
 
             for (ri, rotor) in enumerate(rotors)
 
                 # Get velocities induced at every blade of this rotor
                 this_Vinds = _parse_midXs(vhcl.rotor_systems,  Vinds, si, ri)
 
+                VindVkin = _format_blades(this_Vinds, vhcl.rotor_systems, si, ri)
+
                 # vlm.solvefromCCBlade(rotor, Vinf, RPM, rho;
-                #                                 t=t, sound_spd=sound_spd)
-                vlm.solvefromV(rotor, this_Vinds, Vinf, RPM,
-                                  rho; t=t, sound_spd=sound_spd)
+                #                                 t=t, sound_spd=speedofsound)
+                vlm.solvefromV(rotor, VindVkin, Vinf, RPM,
+                                  rho; t=t, sound_spd=speedofsound)
             end
         end
 
@@ -199,9 +214,16 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
         static_particles = Array{Float64, 1}[]
 
         ### Particles for Rotor induced velocity
-        for rotors in vhcl.rotor_systems
-            for rotor in rotors
+        prev_rotor_systems = _get_prev_rotor_systems(vhcl)
+
+        for (si, rotors) in enumerate(vhcl.rotor_systems)
+            for (ri, rotor) in enumerate(rotors)
+
+                vlm.getHorseshoe(rotor, 1)          # Force HS calculation
+                vlm._addsolution(rotor, "Gamma",    # Give previous solution
+                                prev_rotor_systems[si][ri]._wingsystem.sol["Gamma"])
                 _static_particles(rotor, sigma; out=static_particles)
+
             end
         end
 
@@ -215,6 +237,8 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
         Xs = _get_midXs(vhcl.rotor_systems)
 
         ### Particles for VLM-on-Rotor induced velocity
+        # NOTE: If I keep the rotor particles wouldn't I be double-counting
+        # the blade induced velocity and make the solution unstable?
         _static_particles(vhcl.vlm_system, sigma; out=static_particles)
 
         ## Evaluate VPM-on-Rotor induced velocity + static particles
@@ -247,15 +271,18 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
 
                 # Calculate kinematic velocities
                 Vkin = _Vkinematic_rotor(vhcl.rotor_systems,
-                                         vhcl.prev_rotor_systems, si, ri)
+                                         prev_rotor_systems, si, ri, dt)
 
                 # Get velocities induced at every blade of this rotor
-                this_Vinds = _parse_midXs(vhcl.rotor_systems,  Vinds, si, ri)
+                this_Vinds = _parse_midXs(vhcl.rotor_systems, Vinds, si, ri)
+
+                VindVkin = _format_blades(this_Vinds + Vkin, vhcl.rotor_systems,
+                                                                        si, ri)
 
                 # vlm.solvefromCCBlade(rotor, Vinf, RPM, rho;
-                #                                 t=t, sound_spd=sound_spd)
-                vlm.solvefromV(rotor, this_Vinds + Vkin, Vinf, RPM,
-                                  rho; t=t, sound_spd=sound_spd)
+                #                                 t=t, sound_spd=speedofsound)
+                vlm.solvefromV(rotor, VindVkin, Vinf, RPM,
+                                  rho; t=t, sound_spd=speedofsound)
             end
         end
 
@@ -277,9 +304,17 @@ function rotate_rotors(self::Simulation{V, M, R}, dt::Real
             # Save solution fields
             sol1 = deepcopy(rotor._wingsystem.sol)
             sol2 = deepcopy(rotor.sol)
+            Vinf = rotor._wingsystem.Vinf
 
             # Rotate rotor
             vlm.rotate(rotor, 360*RPM/60*dt)
+
+            # Force regeneration of horseshoes
+            if "Gamma" in keys(sol1)
+                vlm.setVinf(rotor, Vinf)
+                vlm.setRPM(rotor, RPM)
+                vlm.getHorseshoe(rotor, 1)
+            end
 
             # Paste solution fields back
             for (key,val) in sol1; vlm._addsolution(rotor._wingsystem, key, val); end;

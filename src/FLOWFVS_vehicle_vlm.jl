@@ -180,12 +180,25 @@ function precalculations(self::VLMVehicle, Vinf::Function,
         vlm._addsolution(self.vlm_system, "Vkin", Vkin; t=t)
 
         # Recalculate horseshoes
+        vlm.getHorseshoes(self.vlm_system; t=t, extraVinf=_extraVinf1)
         vlm.getHorseshoes(self.wake_system; t=t, extraVinf=_extraVinf1)
 
         # ---------- 2) Paste previous Gamma solution ----------------------
         for i in 1:length(self.wake_system.wings)
             wing = vlm.get_wing(self.wake_system, i)
             prev_wing = vlm.get_wing(_get_prev_wake_system(self), i)
+
+            if typeof(prev_wing) != vlm.Rotor
+                sol = deepcopy(prev_wing.sol["Gamma"])
+            else
+                sol = deepcopy(prev_wing._wingsystem.sol["Gamma"])
+            end
+
+            vlm._addsolution(wing, "Gamma", sol; t=t)
+        end
+        for i in 1:length(self.vlm_system.wings)
+            wing = vlm.get_wing(self.vlm_system, i)
+            prev_wing = vlm.get_wing(_get_prev_vlm_system(self), i)
 
             if typeof(prev_wing) != vlm.Rotor
                 sol = deepcopy(prev_wing.sol["Gamma"])
@@ -305,24 +318,20 @@ function _Vkinematic(system, prev_system, dt::Real; t=0.0, targetX="CP")
 end
 
 """
-Returns the local translational velocity of midpoint in `rotor`.
+Returns the local translational velocity of every midpoint in the ri-th rotor in
+the si-th system formatted as the output of `_get_midXs()`.
 """
 function _Vkinematic_rotor(rotor_systems::NTuple{M, Array{vlm.Rotor, 1}},
-                           prev_rotor_systems::NTuple{M, Array{vlm.Rotor, 1}}
-                           si, ri
+                           prev_rotor_systems::NTuple{M, Array{vlm.Rotor, 1}},
+                           si, ri, dt::Real
                           ) where{M}
 
-    out = []
+    cur_Xs = _get_midXs(rotor_systems[si][ri])
+    prev_Xs = _get_midXs(prev_rotor_systems[si][ri])
 
-    for bi in 1:rotor_systems[si][ri].B
-        cur_Xs = _get_midXs(rotor_systems[si][ri], targetX; t=t)
-        prev_Xs = _get_midXs(prev_rotor_systems[si][ri], targetX; t=t)
+    Vkin = [-(cur_Xs[i]-prev_Xs[i])/dt for i in 1:size(cur_Xs, 1)]
 
-        Vkin = [-(cur_Xs[i]-prev_Xs[i])/dt for i in 1:size(cur_Xs, 1)]
-        push!(out, Vkin)
-    end
-
-    return out
+    return Vkin
 
 end
 
@@ -365,11 +374,11 @@ function _get_midXs(rotor_systems::NTuple{M, Array{vlm.Rotor, 1}}) where{M}
     return vcat([_get_midXs(rotors) for rotors in rotor_systems]...)
 end
 
-"Receives an array `midXs` formatted as the output of `_get_midXs(rotor_systems`
+"Receives an array `midXs` formatted as the output of `_get_midXs(rotor_systems)`
 and returns the section of the array that corresponds to the ri-th rotor in the
-si-th system formatted as blades.
+si-th system (formatted linearly).
 "
-function _parse_midXs(rotor_systems::NTuple{M, Array{vlm.Rotor, 1}}
+function _parse_midXs(rotor_systems::NTuple{M, Array{vlm.Rotor, 1}},
                         midXs::Array{Array{R, 1}}, si, ri) where{R<:Real, M}
 
     if si>length(rotor_systems) || si<=0
@@ -378,20 +387,37 @@ function _parse_midXs(rotor_systems::NTuple{M, Array{vlm.Rotor, 1}}
 
     # Find lower bound of midXs belonging to rotor ri
     i_low = 1
-    for rotors in rotor_systems[1:(si-1)]         # Iterate over rotor systems
-        for rotor in rotors                       # Iterative over rotors
+    for (sj, rotors) in enumerate(rotor_systems[1:(si-1)])   # Iterate over rotor systems
+        for (rj, rotor) in enumerate(rotors)                 # Iterative over rotors
+            if sj==si && rj==ri
+                break
+            end
             i_low += vlm.get_m(rotor)
         end
     end
 
-    # Find upper bound of midXs belinging to rotor ri
+    # Find upper bound of midXs belonging to rotor ri
     rotor = rotor_systems[si][ri]
     i_up = i_low-1 + vlm.get_m(rotor)
 
-    # Formats it as blades
-    arr = midXs[i_low:i_up]
-    out = [arr[ ((i-1)*rotor.m+1):(i*rotor.m) ] for i in 1:rotor.B]
+    # # Format it as blades
+    out = midXs[i_low:i_up]
+    # out = [out[ ((i-1)*rotor.m+1):(i*rotor.m) ] for i in 1:rotor.B]
     return out
+end
+
+"""
+    Receives the output of `parse_midXs(rotor_systems, midXs, si, ri)` and
+outputs the array formatted as blades.
+"""
+function _format_blades(arr::Array{Array{R, 1}, 1},
+                        rotor_systems::NTuple{M, Array{vlm.Rotor, 1}},
+                        si, ri) where{R, M}
+
+    rotor = rotor_systems[si][ri]
+    arr = [arr[ ((i-1)*rotor.m+1):(i*rotor.m) ] for i in 1:rotor.B]
+
+    return arr
 end
 
 """
