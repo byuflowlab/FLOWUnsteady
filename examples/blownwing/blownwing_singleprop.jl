@@ -1,10 +1,9 @@
 #=##############################################################################
 # DESCRIPTION
-Test rotor model simulating an isolated 9.4in rotor in hover. The rotor and
-configuration matches the 3D-printed propeller described in Ning, Z.,
-*Experimental investigations on the aerodynamic and aeroacoustic characteristics
-of small UAS propellers*, Sec. 5.2. This rotor roughly resembles a DJI Phantom
-II rotor.
+Test rotor model simulating an isolated 10in propeller in forward flight. The
+rotor and configuration approximates the APC Thin Electric 10x7 propeller as
+used in McCrink, M. H., & Gregory, J. W. (2017), *Blade Element Momentum
+Modeling of Low-Reynolds Electric Propulsion Systems*.
 
 # AUTHORSHIP
   * Author    : Eduardo J. Alvarez
@@ -13,35 +12,9 @@ II rotor.
   * License   : MIT
 =###############################################################################
 
-# ------------ MODULES ---------------------------------------------------------
-# Load simulation engine
-# import FLOWFVS
-reload("FLOWFVS")
-fvs = FLOWFVS
-vlm = fvs.vlm
-
-import GeometricTools
-gt = GeometricTools
-
-using PyPlot
-
-# ------------ GLOBAL VARIABLES ------------------------------------------------
-# Default path where to save data
-extdrive_path = "/media/edoalvar/MyExtDrive/simulationdata5/"
-# extdrive_path = "temps/"
-
-
-
-# ------------ DRIVERS ---------------------------------------------------------
-function run_singlerotor(; xfoil=true, prompt=true)
-    singlerotor(; xfoil=xfoil, save_path=extdrive_path*"fvs_singlerotor02/",
-                  prompt=prompt)
-end
-
-
 # ------------------------------------------------------------------------------
 
-function singlerotor(; xfoil=true,
+function singleprop(; xfoil=true,
                         # OUTPUT OPTIONS
                         save_path=nothing,
                         run_name="singlerotor",
@@ -53,11 +26,10 @@ function singlerotor(; xfoil=true,
     # ------------ PARAMETERS --------------------------------------------------
 
     # Rotor geometry
-    rotor_file = "DJI-II.csv"           # Rotor geometry
+    rotor_file = "apc10x7.csv"           # Rotor geometry
     data_path = fvs.def_data_path       # Path to rotor database
     pitch = 0.0                         # (deg) collective pitch of blades
-    # n = 50                              # Number of blade elements
-    n = 10
+    n = 10                              # Number of blade elements
     CW = false                          # Clock-wise rotation
     # xfoil = false                       # Whether to run XFOIL
 
@@ -65,17 +37,31 @@ function singlerotor(; xfoil=true,
     R, B = fvs.read_rotor(rotor_file; data_path=data_path)[[1,3]]
 
     # Simulation parameters
-    RPM = 81*60                         # RPM
-    J = 0.0                             # Advance ratio Vinf/(nD)
+    J = 0.6                             # Advance ratio Vinf/(nD)
+    ReD07 = 1.5e6                       # Diameter-based Reynolds at 70% span
+    ReD = ReD07/0.7                     # Diameter-based Reynolds
     rho = 1.225                         # (kg/m^3) air density
     mu = 1.81e-5                        # (kg/ms) air dynamic viscosity
-    ReD = 2*pi*RPM/60*R * rho/mu * 2*R  # Diameter-based Reynolds number
+    nu = mu/rho
+    sound_spd = 343                     # (m/s) speed of sound
+    RPM = fvs.calc_RPM(ReD, J, R, 2*R, nu) # RPM
+    magVinf = J*RPM/60*2*R              # (m/s) freestream velocity
+    Minf = magVinf / sound_spd
+    Mtip = 2*pi*RPM/60*R / sound_spd
 
-    magVinf = J*RPM/60*(2*R)
+    if verbose
+        println("\t"^(v_lvl+1)*"OPERATION PARAMETERS")
+        println("\t"^(v_lvl+2)*"J:\t\t$(J)")
+        println("\t"^(v_lvl+2)*"ReD07:\t\t$(ReD07)")
+        println("\t"^(v_lvl+2)*"RPM:\t\t$(ceil(Int, RPM))")
+        println("\t"^(v_lvl+2)*"Mtip:\t\t$(round(Mtip, 3))")
+        println("\t"^(v_lvl+2)*"Minf:\t\t$(round(Minf, 3))")
+    end
+
     Vinf(X,t) = magVinf*[1.0,0,0]       # (m/s) freestream velocity
 
     # Solver parameters
-    nrevs = 6                           # Number of revolutions in simulation
+    nrevs = 4                           # Number of revolutions in simulation
     nsteps_per_rev = 72                 # Time steps per revolution
     p_per_step = 2                      # Sheds per time step
     ttot = nrevs/(RPM/60)               # (s) total simulation time
