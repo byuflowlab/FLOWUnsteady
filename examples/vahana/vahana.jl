@@ -60,12 +60,12 @@ function run_simulation_vahana(;    # save_path="temps/vahanasimulation01",
     # Maneuver to perform
     Vcruise = 0.25 * 125*0.44704            # Cruise speed
     # Vinf(x,t) = 1e-5*[1,0,-1]               # (m/s) freestream velocity, if 0 the simulation will crash
-    Vinf(x,t) = 1.0*[0,0,-1]               # (m/s) freestream velocity, if 0 the simulation will crash
+    Vinf(x,t) = 1.0*[1,0,-1]               # (m/s) freestream velocity, if 0 the simulation will crash
     # RPMh_w = 200                            # RPM of main wing rotors in hover
     RPMh_w = 20
     telapsed = 30.0                         # Total time to perform maneuver
-    # nsteps = 1500                           # Time steps
-    nsteps = 100
+    nsteps = 1500                           # Time steps
+    # nsteps = 100
     dt = telapsed/nsteps
 
     # Solver options
@@ -75,6 +75,8 @@ function run_simulation_vahana(;    # save_path="temps/vahanasimulation01",
     overwrite_sigma = lambda * (2*pi*RPMh_w/60*R + Vcruise)*dt / p_per_step
     # vlm_sigma = R/25                        # VLM regularization
     vlm_sigma = R                        # VLM regularization
+    surf_sigma = vlm_sigma                  # Surface regularization
+    shed_unsteady = false                   # Shed unsteady-loading particles
 
     # Generate maneuver
     maneuver = generate_maneuver_vahana1()
@@ -105,7 +107,9 @@ function run_simulation_vahana(;    # save_path="temps/vahanasimulation01",
                                       p_per_step=p_per_step,
                                       overwrite_sigma=overwrite_sigma,
                                       vlm_sigma=vlm_sigma,
+                                      surf_sigma=surf_sigma,
                                       max_particles=max_particles,
+                                      shed_unsteady=shed_unsteady,
                                       # OUTPUT OPTIONS
                                       save_path=save_path,
                                       run_name=run_name,

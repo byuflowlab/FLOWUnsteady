@@ -22,7 +22,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
                              vpm_solver="ExaFMM",       # VPM solver
                              vpm_timesch="rk",          # VPM time stepping scheme
                              vpm_strtch="transpose",    # VPM stretching scheme
-                             max_particles=1e5,         # Maximum number of particles
+                             max_particles=Int(1e5),    # Maximum number of particles
                              nsteps_relax=1,            # Steps in between VPM relaxation
                              relaxfactor=0.3,           # VPM relaxation factor
                              p_per_step=1,              # Particle sheds per time step
@@ -45,12 +45,16 @@ function run_simulation(sim::Simulation, nsteps::Int;
                              nsteps_save=1,             # Save vtks every this many steps
                              nsteps_restart=-1,         # Save jlds every this many steps
                              save_code=module_path,     # Saves the source code in this path
-                             save_horseshoes=false,     # Save VLM horseshoes
+                             save_horseshoes=true,     # Save VLM horseshoes
                              )
 
 
     if wake_coupled==false
         warn("Running wake-decoupled simulation")
+    end
+
+    if shed_unsteady==false
+        warn("Unsteady wake shedding is off!")
     end
 
     if surf_sigma<=0
@@ -205,25 +209,29 @@ function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs::Array{T, 1},
                     vpm_solver::String; static_particles=Array{Float64,1}[]
                                                                     ) where {T}
 
-    # Omit freestream
-    Uinf = pfield.Uinf
-    pfield.Uinf = (X, t)->zeros(3)
+    if length(Xs)!=0 && vpm.get_np(pfield)!=0
+        # Omit freestream
+        Uinf = pfield.Uinf
+        pfield.Uinf = (X, t)->zeros(3)
 
-    # Evaluate velocity induced by particle field
-    if vpm_solver=="ExaFMM"
-        # Vvpm = vpm.conv_ExaFMM(pfield; Uprobes=Xs)[2]
-        Vvpm = conv(pfield, "ExaFMM"; Uprobes=Xs,
-                                        static_particles=static_particles)[2]
-    else
-        warn("Evaluating VPM-on-VLM velocity without FMM")
-        if length(static_particles)!=0
-            error("$vpm_solver has no implementation with static particles.")
+        # Evaluate velocity induced by particle field
+        if vpm_solver=="ExaFMM"
+            # Vvpm = vpm.conv_ExaFMM(pfield; Uprobes=Xs)[2]
+            Vvpm = vpm.conv(pfield, "ExaFMM"; Uprobes=Xs,
+                                            static_particles=static_particles)[2]
+        else
+            warn("Evaluating VPM-on-VLM velocity without FMM")
+            if length(static_particles)!=0
+                error("$vpm_solver has no implementation with static particles.")
+            end
+            Vvpm = [vpm.reg_Uomega(pfield, X) for X in Xs]
         end
-        Vvpm = [vpm.reg_Uomega(pfield, X) for X in Xs]
-    end
 
-    # Restore freestream
-    pfield.Uinf = Uinf
+        # Restore freestream
+        pfield.Uinf = Uinf
+    else
+        Vvpm = [zeros(3) for i in 1:length(Xs)]
+    end
 
     return Vvpm
 end

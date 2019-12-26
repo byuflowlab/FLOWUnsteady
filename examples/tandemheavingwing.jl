@@ -32,7 +32,7 @@ extdrive_path = "temps/"
 # ------------ DRIVERS ---------------------------------------------------------
 function run_tandemheavingwing()
     tandemheavingwing(; nsteps=400, p_per_step=1, vlm_rlx=0.75,
-                    save_path=extdrive_path*"tandemheaving03/",
+                    save_path=extdrive_path*"tandemheaving04/",
                     verbose=true, disp_plot=true)
 end
 
