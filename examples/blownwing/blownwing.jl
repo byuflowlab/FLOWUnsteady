@@ -31,7 +31,7 @@ extdrive_path = "/media/edoalvar/MyExtDrive/simulationdata5/"
 
 
 # ------------ HEADERS ---------------------------------------------------------
-for header_name in ["singleprop"]
+for header_name in ["singleprop", "isolatedwing"]
     include("blownwing_"*header_name*".jl")
 end
 
@@ -39,5 +39,9 @@ end
 # ------------ DRIVERS ---------------------------------------------------------
 function run_singleprop(; xfoil=true, prompt=true)
     singleprop(; xfoil=xfoil, save_path=extdrive_path*"fvs_singleprop01/",
-                  prompt=prompt)
+                                                                prompt=prompt)
+end
+
+function run_isolatedwing(; prompt=true)
+    isolatedwing(; save_path=extdrive_path*"fvs_isolatedwing08/", prompt=prompt)
 end
