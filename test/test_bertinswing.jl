@@ -21,6 +21,7 @@ function bertin_VLM(;   # TEST OPTIONS
                         wake_coupled=true,
                         nsteps=200,
                         vlm_fsgm=-1,
+                        surf_fsgm=0.0075,
                         # OUTPUT OPTIONS
                         save_path=nothing,
                         run_name="bertins",
@@ -77,9 +78,11 @@ function bertin_VLM(;   # TEST OPTIONS
     overwrite_sigma = lambda_vpm * magVinf * (telapsed/nsteps)/p_per_step # Smoothing core size
     # vlm_sigma = -1            # VLM regularization core size (deactivated with -1)
     vlm_sigma = vlm_fsgm*b
+    surf_sigma = surf_fsgm*b    # Smoothing radius of lifting surface on VPM
     # wake_coupled = true       # Coupled VPM wake with VLM solution
     shed_unsteady = true        # Whether to shed unsteady-loading wake
     # shed_unsteady = false
+    vlm_init = true             # Initialize with the VLM semi-infinite wake solution
 
     # Maneuver definition (dummy)
     Vaircraft(t) = zeros(3)     # Translational velocity of system
@@ -227,6 +230,8 @@ function bertin_VLM(;   # TEST OPTIONS
                                       p_per_step=p_per_step,
                                       overwrite_sigma=overwrite_sigma,
                                       vlm_sigma=vlm_sigma,
+                                      surf_sigma=surf_sigma,
+                                      vlm_init=vlm_init,
                                       max_particles=max_particles,
                                       wake_coupled=wake_coupled,
                                       shed_unsteady=shed_unsteady,
@@ -278,6 +283,7 @@ function bertin_kinematic(;   # TEST OPTIONS
                         wake_coupled=true,
                         nsteps=150,
                         vlm_fsgm=-1,
+                        surf_fsgm=0.0075,
                         p_per_step = 1,
                         vlm_rlx = -1,
                         # OUTPUT OPTIONS
@@ -345,10 +351,12 @@ function bertin_kinematic(;   # TEST OPTIONS
     overwrite_sigma = lambda_vpm * magVinf * (telapsed/nsteps)/p_per_step # Smoothing core size
     # vlm_sigma = -1            # VLM regularization core size (deactivated with -1)
     vlm_sigma = vlm_fsgm*b
+    surf_sigma = surf_fsgm*b    # Smoothing radius of lifting surface on VPM
     # wake_coupled = true       # Coupled VPM wake with VLM solution
     shed_unsteady = true        # Whether to shed unsteady-loading wake
     # shed_unsteady = false
     # vlm_rlx = -1                # VLM relaxation (deactivated with -1)
+    vlm_init = true             # Initialize with the VLM semi-infinite wake solution
 
     # Maneuver definition
     Vaircraft(t) = [-1,0,0]     # Translational velocity of system
@@ -517,6 +525,9 @@ function bertin_kinematic(;   # TEST OPTIONS
                                       p_per_step=p_per_step,
                                       overwrite_sigma=overwrite_sigma,
                                       vlm_sigma=vlm_sigma,
+                                      surf_sigma=surf_sigma,
+                                      vlm_rlx=vlm_rlx,
+                                      vlm_init=vlm_init,
                                       max_particles=max_particles,
                                       wake_coupled=wake_coupled,
                                       shed_unsteady=shed_unsteady,

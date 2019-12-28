@@ -130,7 +130,7 @@ end
 function solve(self::Simulation{V, M, R}, Vinf::Function,
                 pfield::vpm.ParticleField, wake_coupled::Bool,
                 vpm_solver::String, dt::Real, rlx::Real, sigma::Real, rho::Real,
-                speedofsound::Real
+                speedofsound::Real; init_sol::Bool=false
                 ) where {V<:VLMVehicle, M<:AbstractManeuver, R}
 
 
@@ -165,8 +165,14 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
 
         # Solve VLMs
         # TODO: Add Rotor-on-VLM induced velocity
-        vlm.solve(vhcl.vlm_system, Vinf; t=t, keep_sol=true,
+        if init_sol
+            # NOTE: Here I use the semi-infinite wake for the first step, which is
+            # may lead to some unphysical results when shedding unsteady loading wake
+            vlm.solve(vhcl.vlm_system, Vinf; t=t, keep_sol=true)
+        else
+            vlm.solve(vhcl.vlm_system, Vinf; t=t, keep_sol=true,
                                                     vortexsheet=(X,t)->zeros(3))
+        end
 
         # Calculate induced velocities to use in rotor solver
         ## Points where to calculate induced velocities
