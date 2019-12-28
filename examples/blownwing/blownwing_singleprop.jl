@@ -26,12 +26,12 @@ function singleprop(; xfoil=true,
     # ------------ PARAMETERS --------------------------------------------------
 
     # Rotor geometry
-    rotor_file = "apc10x7.csv"           # Rotor geometry
+    rotor_file = "apc10x7.csv"          # Rotor geometry
     data_path = fvs.def_data_path       # Path to rotor database
     pitch = 0.0                         # (deg) collective pitch of blades
     n = 10                              # Number of blade elements
     CW = false                          # Clock-wise rotation
-    # xfoil = false                       # Whether to run XFOIL
+    # xfoil = false                     # Whether to run XFOIL
 
     # Read radius of this rotor and number of blades
     R, B = fvs.read_rotor(rotor_file; data_path=data_path)[[1,3]]
@@ -123,7 +123,7 @@ function singleprop(; xfoil=true,
     Vref = 0.0
     simulation = fvs.Simulation(vehicle, maneuver, Vref, RPMref, ttot)
 
-    monitor = generate_monitor(J, rho, RPM, nsteps; save_path=save_path,
+    monitor = generate_monitor_prop(J, rho, RPM, nsteps; save_path=save_path,
                                                             run_name=run_name)
 
 
@@ -144,6 +144,7 @@ function singleprop(; xfoil=true,
                                       run_name=run_name,
                                       prompt=prompt,
                                       verbose=verbose, v_lvl=v_lvl,
+                                      save_code=splitdir(@__FILE__)[1],
                                       )
     return pfield, rotor
 end
@@ -152,10 +153,10 @@ end
 """
 Generate monitor for rotor performance parameters
 """
-function generate_monitor(J, rho, RPM, nsteps; save_path=nothing,
-                            run_name="singlerotor",
-                            figname="monitor", disp_conv=true,
-                            nsteps_savefig=10)
+function generate_monitor_prop(J, rho, RPM, nsteps; save_path=nothing,
+                                run_name="singlerotor",
+                                figname="monitor_rotor", disp_conv=true,
+                                nsteps_savefig=10)
 
     fcalls = 0                  # Number of function calls
 
