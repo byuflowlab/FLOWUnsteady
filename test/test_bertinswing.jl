@@ -21,7 +21,7 @@ function bertin_VLM(;   # TEST OPTIONS
                         wake_coupled=true,
                         nsteps=200,
                         vlm_fsgm=-1,
-                        surf_fsgm=0.0075,
+                        surf_fsgm=0.05,
                         # OUTPUT OPTIONS
                         save_path=nothing,
                         run_name="bertins",
@@ -283,7 +283,7 @@ function bertin_kinematic(;   # TEST OPTIONS
                         wake_coupled=true,
                         nsteps=150,
                         vlm_fsgm=-1,
-                        surf_fsgm=0.0075,
+                        surf_fsgm=0.046,
                         p_per_step = 1,
                         vlm_rlx = -1,
                         # OUTPUT OPTIONS
