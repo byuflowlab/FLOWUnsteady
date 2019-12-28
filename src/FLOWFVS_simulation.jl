@@ -30,8 +30,9 @@ function run_simulation(sim::Simulation, nsteps::Int;
                              overwrite_sigma=nothing,   # Overwrite cores to this value (ignoring sigmafactor)
                              vlm_sigma=-1,              # VLM regularization
                              vlm_rlx=-1,                # VLM relaxation
+                             vlm_init=false,            # Initialize the first step with the VLM semi-infinite wake solution
                              vpm_surface=true,          # Whether to include surfaces in the VPM
-                             surf_sigma=-1,             # Vehicle surface regularization
+                             surf_sigma=-1,             # Vehicle surface regularization (for VLM-on-VPM, VLM-on-Rotor, and Rotor-on-VLM)
                              wake_coupled=true,         # Couple VPM wake on VLM solution
                              shed_unsteady=true,        # Whether to shed unsteady-loading wake
                              unsteady_shedcrit=0.01,    # Criterion for unsteady-loading shedding
@@ -45,7 +46,8 @@ function run_simulation(sim::Simulation, nsteps::Int;
                              nsteps_save=1,             # Save vtks every this many steps
                              nsteps_restart=-1,         # Save jlds every this many steps
                              save_code=module_path,     # Saves the source code in this path
-                             save_horseshoes=true,     # Save VLM horseshoes
+                             save_horseshoes=true,      # Save VLM horseshoes
+                             save_static_particles=false,# Whether to save particles to represent the VLM
                              )
 
 
@@ -66,7 +68,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
     # SOLVERS SETUP
     ############################################################################
     dt = sim.ttot/nsteps            # (s) time step
-    nsteps_relax = 1                # Relaxation every this many steps
+    # nsteps_relax = 1                # Relaxation every this many steps
 
     if vlm_sigma<=0
         vlm.VLMSolver._blobify(false)
@@ -117,7 +119,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
 
         # Solve aerodynamics of the vehicle
         solve(sim, Vinf, PFIELD, wake_coupled, vpm_solver, DT, vlm_rlx,
-                surf_sigma, rho, sound_spd)
+                surf_sigma, rho, sound_spd; init_sol=vlm_init)
 
         # Shed unsteady-loading wake with new solution
         if shed_unsteady
@@ -160,6 +162,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
                       nsteps_restart=nsteps_restart>0 ? nsteps_restart : nsteps,
                       save_sigma=true,
                       static_particles_function=static_particles_function,
+                      save_static_particles=save_static_particles,
                       # beta=cs_beta, sgm0=sgm0,
                       # rbf_ign_iterror=true,
                       # rbf_itmax=rbf_itmax, rbf_tol=rbf_tol
