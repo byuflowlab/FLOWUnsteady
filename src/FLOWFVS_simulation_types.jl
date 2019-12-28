@@ -198,18 +198,15 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
 
                 VindVkin = _format_blades(this_Vinds, vhcl.rotor_systems, si, ri)
 
-                # vlm.solvefromCCBlade(rotor, Vinf, RPM, rho;
-                #                                 t=t, sound_spd=speedofsound)
-                vlm.solvefromV(rotor, VindVkin, Vinf, RPM,
+                if wake_coupled
+                    vlm.solvefromV(rotor, VindVkin, Vinf, RPM,
                                   rho; t=t, sound_spd=speedofsound)
+                else
+                    vlm.solvefromCCBlade(rotor, Vinf, RPM, rho;
+                                              t=t, sound_spd=speedofsound)
+                end
             end
         end
-
-
-    elseif wake_coupled==false
-        vlm.solve(vhcl.vlm_system, Vinf; t=t, extraVinf=_extraVinf1,
-                                                                keep_sol=true)
-        error("There isn't a wake-decoupled solver yet!")
 
     else
         # ---------- 4) Calculate VPM velocity on VLM and Rotor system -----
@@ -253,10 +250,14 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
 
         # ---------- 5) Solve VLM system -----------------------------------
         # Wake-coupled solution
-        vlm.solve(vhcl.vlm_system, Vinf; t=t, extraVinf=_extraVinf2,
+        if wake_coupled
+            vlm.solve(vhcl.vlm_system, Vinf; t=t, extraVinf=_extraVinf2,
                                     keep_sol=true, vortexsheet=(X,t)->zeros(3))
         # Wake-decoupled solution
-        # vlm.solve(vlm_system, Vinf; t=t, keep_sol=true)
+        else
+            vlm.solve(vhcl.vlm_system, Vinf; t=t, extraVinf=_extraVinf1,
+                                                                keep_sol=true)
+        end
 
         # Relaxes (rlx->1) or stiffens (rlx->0) the VLM solution
         if rlx > 0
@@ -284,11 +285,13 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
 
                 VindVkin = _format_blades(this_Vinds + Vkin, vhcl.rotor_systems,
                                                                         si, ri)
-
-                # vlm.solvefromCCBlade(rotor, Vinf, RPM, rho;
-                #                                 t=t, sound_spd=speedofsound)
-                vlm.solvefromV(rotor, VindVkin, Vinf, RPM,
+                if wake_coupled
+                    vlm.solvefromV(rotor, VindVkin, Vinf, RPM,
                                   rho; t=t, sound_spd=speedofsound)
+                else
+                    vlm.solvefromCCBlade(rotor, Vinf, RPM, rho;
+                                                t=t, sound_spd=speedofsound)
+                end
             end
         end
 
