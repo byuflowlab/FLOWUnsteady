@@ -30,9 +30,11 @@ function isolatedwing(; xfoil=true,
     rotor_file = "apc10x7.csv"          # Rotor geometry
     data_path = fvs.def_data_path       # Path to rotor database
     pitch = 0.0                         # (deg) collective pitch of blades
-    n_r = 10                        # Number of blade elements
-    CW = false                          # Clock-wise rotation
+    n_r = 10                            # Number of blade elements
     # xfoil = false                     # Whether to run XFOIL
+    pos_bs = [-0.5, 0.5]                # Position on the semispan of every rotor
+    CWs = [false, false]                # Clock-wise rotation of every rotor
+
 
     # Read radius of this rotor and number of blades
     R, B = fvs.read_rotor(rotor_file; data_path=data_path)[[1,3]]
@@ -58,21 +60,19 @@ function isolatedwing(; xfoil=true,
     alpha = 4.2                         # (deg) angle of attack
     qinf = 0.5*rhoinf*magVinf^2         # (Pa) static pressure
 
-    # Geometry
+    # Wing geometry
     twist = 0.0                         # (deg) root twist
     lambda = 45.0                       # (deg) sweep
     gamma = 0.0                         # (deg) Dihedral
     # b = 98*0.0254                     # (m) span
     ar = 5.0                            # Aspect ratio
     tr = 1.0                            # Taper ratio
+    n_w = 4*2^3                         # Number of horseshoes
+    r_w = 3.0                           # Expansion ratio of horeshoes
+    n_rot = 1.75                        # Factor for HS density behind rotors
 
     chord = b/ar
     Rec = magVinf*chord/nu
-
-    # Discretization
-    n_w = 4*2^2                  # Number of horseshoes
-    r = 12.0                        # Geometric expansion
-    central = false                 # Central expansion
 
     # Freestream function
     # Vinf(X, t) = magVinf*[cos(alpha*pi/180), 0.0, sin(alpha*pi/180)]
@@ -84,10 +84,9 @@ function isolatedwing(; xfoil=true,
 
     # Solver parameters
     nrevs = 10                          # Number of revolutions in simulation
-    nsteps_per_rev = 72               # Time steps per revolution
-    # nsteps_per_rev = 48
-    p_per_step = 2                    # Sheds per time step
-    # p_per_step = 1
+    nsteps_per_rev = 72                 # Time steps per revolution
+    # p_per_step = 2                    # Sheds per time step
+    p_per_step = 1
     ttot = nrevs/(RPM/60)               # (s) total simulation time
     nsteps = nrevs*nsteps_per_rev       # Number of time steps
     lambda_vpm = 2.125                  # Core overlap
@@ -131,9 +130,47 @@ function isolatedwing(; xfoil=true,
     #                                         plot_disc=plot_disc,
     #                                         verbose=verbose, v_lvl=v_lvl+1)
 
+    # Wing discretization
+    _pos_bs = unique(abs.(pos_bs))
+    if length(pos_bs)!=0 && length(pos_bs)!=1 && length(pos_bs)/length(_pos_bs)!=2
+        error("Logic error: Position of rotors is expected to be symmetric.")
+    end
+    refinement = []
+    for pos_b in _pos_bs
+        # Add wing section before rotor
+        pos = pos_b - R/(b/2)                   # Position along semi span
+        if pos > 0                              # Length of segment
+            len = pos - (length(refinement)!=0 ? refinement[end][1] : 0)
+            nfrac = len                         # fraction of horseshoes
+            if length(refinement) != 0
+                push!(refinement, [len/2, nfrac/2, r_w])
+                push!(refinement, [len/2, nfrac/2, 1/r_w])
+            else
+                push!(refinement, [len, nfrac, 1/r_w])
+            end
+        end
+
+        # Add rotor section
+        pos = min(pos_b + R/(b/2), 1.0)
+        len = pos - (length(refinement)!=0 ? refinement[end][1] : 0)
+        nfrac = len
+        push!(refinement, [len, n_rot*nfrac, 1.01])
+    end
+    if length(refinement) == 0
+        push!(refinement, [1.0, 1.0, 1/r_w])
+    end
+    # Add tip
+    sumc = sum(ref[1] for ref in refinement)
+    if abs(sumc-1.0) > 0.0001
+        len = abs(sumc-1)
+        nfrac = 1.5*len
+        push!(refinement, [len/2, nfrac/2, r_w])
+        push!(refinement, [len/2, nfrac/2, 1/r_w])
+    end
+
     # Generate wing
     wing = vlm.simpleWing(b, ar, tr, twist, lambda, gamma;
-                                                n=n_w, r=r, central=central)
+                                                n=n_w, refinement=refinement)
 
     # Pitch wing to corresponding angle of attack
     O = zeros(3)                                    # Coordinate system origin

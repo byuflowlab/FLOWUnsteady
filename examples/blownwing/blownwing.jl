@@ -43,5 +43,5 @@ function run_singleprop(; xfoil=true, prompt=true)
 end
 
 function run_isolatedwing(; prompt=true)
-    isolatedwing(; save_path=extdrive_path*"fvs_isolatedwing08/", prompt=prompt)
+    isolatedwing(; save_path=extdrive_path*"fvs_isolatedwing10/", prompt=prompt)
 end
