@@ -81,7 +81,7 @@ function blownwing(; xfoil=true,
 
 
     # Solver parameters
-    nrevs = 10                          # Number of revolutions in simulation
+    nrevs = 30                          # Number of revolutions in simulation
     # nsteps_per_rev = 72                 # Time steps per revolution
     nsteps_per_rev = 36
     # p_per_step = 2                    # Sheds per time step
@@ -90,17 +90,19 @@ function blownwing(; xfoil=true,
     nsteps = nrevs*nsteps_per_rev       # Number of time steps
     lambda_vpm = 2.125                  # Core overlap
     overwrite_sigma = lambda_vpm * 2*pi*R/(nsteps_per_rev*p_per_step) # Smoothing core size
+    vpm_surface = true                  # Whether to include surfaces in the VPM
     surf_sigma = R/10                   # Smoothing radius of lifting surface
     # vlm_sigma = surf_sigma              # Smoothing radius of VLM
     vlm_sigma = -1                      # NOTE: keep this disabled or the VLM will go awry
     shed_unsteady = true                # Shed particles from unsteady loading
                                         # Max particles for memory pre-allocation
-    max_particles = ((2*n_r+1)*B*length(CWs) + 2*n_w+1)*nrevs*nsteps_per_rev*p_per_step
+    max_particles = ((2*n_r+1)*B*length(CWs) + 2*n_w+1)*(nrevs*nsteps_per_rev+1)*p_per_step
     plot_disc = false                   # Plot blade discretization for debugging
     wake_coupled = true                 # Coupled VLM solver with VPM
     vlm_rlx = 0.75                      # VLM relaxation (deactivated with -1)
     # vlm_rlx = 0.0
-    vlm_init = true                     # Initialize with the VLM semi-infinite wake solution
+    # vlm_init = true                     # Initialize with the VLM semi-infinite wake solution
+    vlm_init = false
 
     if verbose
         println("\t"^(v_lvl+2)*"J:\t\t$(J)")
@@ -143,6 +145,9 @@ function blownwing(; xfoil=true,
 
     # Generate the actual rotors to use along wing
     rotors = vlm.Rotor[]
+    # warn("Rotors disabled!")
+    # pos_bs = []
+    # CWs = []
     for (i, pos) in enumerate(pos_bs)
         # Rotor geometry
         copy_prop = base_props[2^!CWs[i]]
@@ -286,6 +291,7 @@ function blownwing(; xfoil=true,
                                       p_per_step=p_per_step,
                                       overwrite_sigma=overwrite_sigma,
                                       vlm_sigma=vlm_sigma,
+                                      vpm_surface=vpm_surface,
                                       surf_sigma=surf_sigma,
                                       vlm_init=vlm_init,
                                       vlm_rlx=vlm_rlx,

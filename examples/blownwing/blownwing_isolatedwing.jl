@@ -263,7 +263,8 @@ end
 function generate_monitor_wing(wing, b, ar, nsteps, Vinf, rhoinf, qinf, magVinf,
                                 wake_coupled;
                                 figname="monitor_wing", nsteps_plot=1,
-                                disp_plot=true, figsize_factor=5/6)
+                                disp_plot=true, figsize_factor=5/6,
+                                extra_plots=true)
 
     # ------------- SIMULATION MONITOR -----------------------------------------
     y2b = 2*wing._ym/b
@@ -281,6 +282,10 @@ function generate_monitor_wing(wing, b, ar, nsteps, Vinf, rhoinf, qinf, magVinf,
 
     prev_wing = nothing
 
+    # Critical length to ignore horseshoe forces
+    meanchord = b/ar
+    lencrit = 0.5*meanchord/vlm.get_m(wing)
+
     function extra_runtime_function(sim, PFIELD, T, DT)
 
         aux = PFIELD.nt/nsteps
@@ -289,13 +294,13 @@ function generate_monitor_wing(wing, b, ar, nsteps, Vinf, rhoinf, qinf, magVinf,
         if PFIELD.nt==0 && disp_plot
             figure(figname, figsize=[7*2, 5*2]*figsize_factor)
             subplot(221)
-            xlim([0,1])
+            xlim([-1,1])
             xlabel(L"$\frac{2y}{b}$")
             ylabel(L"$\frac{Cl}{CL}$")
             title("Spanwise lift distribution")
 
             subplot(222)
-            xlim([0,1])
+            xlim([-1,1])
             xlabel(L"$\frac{2y}{b}$")
             ylabel(L"$\frac{Cd}{CD}$")
             title("Spanwise drag distribution")
@@ -315,6 +320,33 @@ function generate_monitor_wing(wing, b, ar, nsteps, Vinf, rhoinf, qinf, magVinf,
             subplot(122)
             xlabel(L"$\frac{2y}{b}$")
             ylabel(L"Effective velocity $V_\infty$")
+
+            if extra_plots
+                for num in 1:3 # (1==ApA, 2==AB, 3==BBp)
+                    figure(figname*"_3_$num", figsize=[7*3, 5*3]*figsize_factor)
+                    suptitle("Velocitiy at $(num==1 ? "ApA" : num==2 ? "AB" : "BBp")")
+                    for i in 7:9; subplot(330+i); xlabel(L"$\frac{2y}{b}$"); end
+                    subplot(331)
+                    ylabel(L"$V_\mathrm{VPM}$ Velocity")
+                    subplot(334)
+                    ylabel(L"$V_\mathrm{VLM}$ Velocity")
+                    subplot(337)
+                    ylabel(L"$V_\mathrm{kin}$ and $V_\infty$ Velocity")
+                    subplot(331)
+                    title(L"$x$-component")
+                    subplot(332)
+                    title(L"$y$-component")
+                    subplot(333)
+                    title(L"$z$-component")
+                end
+                figure(figname*"_4", figsize=[7*3, 5*1]*figsize_factor)
+                for num in 1:3
+                    subplot(130+num)
+                    title("Length at $(num==1 ? "ApA" : num==2 ? "AB" : "BBp")")
+                    xlabel(L"$\frac{2y}{b}$")
+                    if num==1; ylabel("Bound-vortex length"); end;
+                end
+            end
         end
 
         if PFIELD.nt!=0 && PFIELD.nt%nsteps_plot==0 && disp_plot
@@ -322,15 +354,19 @@ function generate_monitor_wing(wing, b, ar, nsteps, Vinf, rhoinf, qinf, magVinf,
 
             # Force at each VLM element
             Ftot = fvs.calc_aerodynamicforce(wing, prev_wing, PFIELD, Vinf, DT,
-                                                            rhoinf; t=PFIELD.t)
+                                                            rhoinf; t=PFIELD.t,
+                                                            lencrit=lencrit)
             L, D, S = fvs.decompose(Ftot, [0,0,1], [-1,0,0])
             vlm._addsolution(wing, "L", L)
             vlm._addsolution(wing, "D", D)
             vlm._addsolution(wing, "S", S)
 
             # Force per unit span at each VLM element
+            Vout, lenout = extra_plots ? ([], []) : (nothing, nothing)
             ftot = fvs.calc_aerodynamicforce(wing, prev_wing, PFIELD, Vinf, DT,
-                                        rhoinf; t=PFIELD.t, per_unit_span=true)
+                                        rhoinf; t=PFIELD.t, per_unit_span=true,
+                                        Vout=Vout, lenout=lenout,
+                                        lencrit=lencrit)
             l, d, s = fvs.decompose(ftot, [0,0,1], [-1,0,0])
 
             # Lift of the wing
@@ -348,10 +384,12 @@ function generate_monitor_wing(wing, b, ar, nsteps, Vinf, rhoinf, qinf, magVinf,
 
             subplot(221)
             plot(web_2yb, web_ClCL, "ok", label="Weber's experimental data")
+            plot(-web_2yb, web_ClCL, "ok")
             plot(y2b, ClCL, "-", label="FLOWVLM", alpha=0.5, color=clr)
 
             subplot(222)
             plot(web_2yb, web_CdCD, "ok", label="Weber's experimental data")
+            plot(-web_2yb, web_CdCD, "ok")
             plot(y2b, CdCD, "-", label="FLOWVLM", alpha=0.5, color=clr)
 
             subplot(223)
@@ -371,6 +409,29 @@ function generate_monitor_wing(wing, b, ar, nsteps, Vinf, rhoinf, qinf, magVinf,
                 plot(y2b, norm.(wing.sol["Vvpm"]), "-", label="FLOWVLM", alpha=0.5, color=clr)
                 plot(y2b, [norm(Vinf(vlm.getControlPoint(wing, i), T)) for i in 1:vlm.get_m(wing)],
                                                             "-k", label="FLOWVLM", alpha=0.5)
+            end
+
+            if extra_plots
+                m = vlm.get_m(wing)
+                for num in 1:3               # (1==ApA, 2==AB, 3==BBp)
+                    figure(figname*"_3_$num")
+                    for Vi in 1:3           # (1==Vvpm, 2==Vvlm, 3==Vinf && Vkin)
+                        for xi in 1:3       # (1==Vx, 2==Vy, 3==Vz)
+                            subplot(330 + (Vi-1)*3 + xi)
+                            if Vi!=3
+                                plot(y2b, [Vout[(i-1)*3 + num][Vi][xi] for i in 1:m], color=clr, alpha=0.5)
+                            else
+                                plot(y2b, [Vout[(i-1)*3 + num][Vi][xi] for i in 1:m], "k", alpha=0.5)
+                                plot(y2b, [Vout[(i-1)*3 + num][Vi+1][xi] for i in 1:m], color=clr, alpha=0.5)
+                            end
+                        end
+                    end
+                end
+                figure(figname*"_4")
+                for num in 1:3
+                    subplot(130+num)
+                    plot(y2b, [lenout[(i-1)*3 + num] for i in 1:m], color=clr, alpha=0.5)
+                end
             end
         end
 

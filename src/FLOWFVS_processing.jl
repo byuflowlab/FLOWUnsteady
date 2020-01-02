@@ -19,7 +19,9 @@ as the field `vlm_system.sol["Ftot"]`
 """
 function calc_aerodynamicforce(vlm_system::Union{vlm.Wing, vlm.WingSystem},
                                 prev_vlm_system, pfield, Vinf, dt, rho; t=0.0,
-                                vpm_solver="ExaFMM", per_unit_span=false)
+                                vpm_solver="ExaFMM", per_unit_span=false,
+                                Vout=nothing, lenout=nothing,
+                                lencrit=-1)
 
     m = vlm.get_m(vlm_system)    # Number of horseshoes
 
@@ -70,6 +72,9 @@ function calc_aerodynamicforce(vlm_system::Union{vlm.Wing, vlm.WingSystem},
 
             # Effective velocity at midpoint
             V = Vvpm[i + m*(j-1)] + Vvlm[i + m*(j-1)] + Vinfs[i + m*(j-1)] + Vtranmid
+            if Vout != nothing
+                push!(Vout, [Vvpm[i + m*(j-1)], Vvlm[i + m*(j-1)], Vinfs[i + m*(j-1)], Vtranmid])
+            end
 
             # Circulation
             Gamma = vlm_system.sol["Gamma"][i]
@@ -86,11 +91,17 @@ function calc_aerodynamicforce(vlm_system::Union{vlm.Wing, vlm.WingSystem},
             else
                 len = 1
             end
+            if lenout != nothing
+                push!(lenout, per_unit_span==false || len>lencrit ? len : -10*lencrit)
+            end
 
             # Kutta–Joukowski theorem: F = rho * V × vecGamma
-            Ftot[i][1] += rho * Gamma * (V[2]*l[3] - V[3]*l[2]) / len
-            Ftot[i][2] += rho * Gamma * (V[3]*l[1] - V[1]*l[3]) / len
-            Ftot[i][3] += rho * Gamma * (V[1]*l[2] - V[2]*l[1]) / len
+            if per_unit_span==false || len > lencrit # NOTE: Use lencrit to avoid dividing by zero
+                Ftot[i][1] += rho * Gamma * (V[2]*l[3] - V[3]*l[2]) / len
+                Ftot[i][2] += rho * Gamma * (V[3]*l[1] - V[1]*l[3]) / len
+                Ftot[i][3] += rho * Gamma * (V[1]*l[2] - V[2]*l[1]) / len
+            end
+
         end
     end
 
