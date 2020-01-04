@@ -38,7 +38,7 @@ end
 
 # ------------ DRIVERS ---------------------------------------------------------
 function run_singleprop(; xfoil=true, prompt=true)
-    singleprop(; xfoil=xfoil, save_path=extdrive_path*"fvs_singleprop02/",
+    singleprop(; xfoil=xfoil, save_path=extdrive_path*"fvs_singleprop03/",
                                                                   prompt=prompt)
 end
 
