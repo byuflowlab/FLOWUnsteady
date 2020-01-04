@@ -82,10 +82,10 @@ function blownwing(; xfoil=true,
 
     # Solver parameters
     nrevs = 30                          # Number of revolutions in simulation
-    # nsteps_per_rev = 72                 # Time steps per revolution
-    nsteps_per_rev = 36
-    # p_per_step = 2                    # Sheds per time step
-    p_per_step = 1
+    nsteps_per_rev = 72                 # Time steps per revolution
+    # nsteps_per_rev = 36
+    p_per_step = 2                    # Sheds per time step
+    # p_per_step = 1
     ttot = nrevs/(RPM/60)               # (s) total simulation time
     nsteps = nrevs*nsteps_per_rev       # Number of time steps
     lambda_vpm = 2.125                  # Core overlap
