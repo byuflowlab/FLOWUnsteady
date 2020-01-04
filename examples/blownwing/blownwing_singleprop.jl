@@ -61,15 +61,18 @@ function singleprop(; xfoil=true,
     Vinf(X,t) = magVinf*[1.0,0,0]       # (m/s) freestream velocity
 
     # Solver parameters
-    nrevs = 4                           # Number of revolutions in simulation
-    nsteps_per_rev = 72                 # Time steps per revolution
-    p_per_step = 2                      # Sheds per time step
+    nrevs = 8                           # Number of revolutions in simulation
+    # nsteps_per_rev = 72               # Time steps per revolution
+    nsteps_per_rev = 36
+    # p_per_step = 2                    # Sheds per time step
+    p_per_step = 1
     ttot = nrevs/(RPM/60)               # (s) total simulation time
     nsteps = nrevs*nsteps_per_rev       # Number of time steps
     lambda = 2.125                      # Core overlap
     overwrite_sigma = lambda * 2*pi*R/(nsteps_per_rev*p_per_step) # Smoothing core size
     surf_sigma = R/10                   # Smoothing radius of lifting surface
-    vlm_sigma = surf_sigma              # Smoothing radius of VLM
+    # vlm_sigma = surf_sigma            # Smoothing radius of VLM
+    vlm_sigma = -1
     shed_unsteady = true                # Shed particles from unsteady loading
 
     max_particles = ((2*n+1)*B)*nrevs*nsteps_per_rev*p_per_step # Max particles for memory pre-allocation
