@@ -268,11 +268,27 @@ function _static_particles(system::Union{vlm.Wing, vlm.WingSystem, vlm.Rotor},
 end
 
 function save_vtk(self::VLMVehicle, filename; path=nothing, num=nothing,
-                                                                    optargs...)
+                                            save_wopwopin=false, optargs...)
     strn = vlm.save(self.system, filename; path=path, num=num, optargs...)
 
     for (i, grid) in enumerate(self.grids)
         strn *= gt.save(grid, filename*"_Grid$i"; path=path, num=num)
+    end
+
+    # Generate inputs for PSU-WOPWOP
+    if save_wopwopin
+        for (si, rotors) in enumerate(self.rotor_systems)
+            # Compact patch for loading
+            generate_vtkliftinglines(rotors, filename*"_Sys$(si)", path; num=num,
+                                                                suf="_compact")
+            # Loft for thickness
+            # NOTE: this is not needed since FLOWNoise can read the lofted VTK
+            # straight up
+            # for (ri, rotors) enumerate(rotors)
+            #     vlm.save(rotor, filename*"_Sys$(si)_Rotor$(ri)"; path=path, addtiproot=true,
+            #                             wopwop=true, wopbin=true, wopv=1.0, num=num)
+            # end
+        end
     end
 
     return strn

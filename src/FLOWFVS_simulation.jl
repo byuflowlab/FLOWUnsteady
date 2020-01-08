@@ -47,7 +47,8 @@ function run_simulation(sim::Simulation, nsteps::Int;
                              nsteps_restart=-1,         # Save jlds every this many steps
                              save_code=module_path,     # Saves the source code in this path
                              save_horseshoes=true,      # Save VLM horseshoes
-                             save_static_particles=false,# Whether to save particles to represent the VLM
+                             save_static_particles=true,# Whether to save particles to represent the VLM
+                             save_wopwopin=true,       # Generate inputs for PSU-WOPWOP
                              )
 
 
@@ -135,7 +136,8 @@ function run_simulation(sim::Simulation, nsteps::Int;
         # Output vtks
         if save_path!=nothing && PFIELD.nt%nsteps_save==0
             strn = save_vtk(sim, run_name; path=save_path,
-                                        save_horseshoes=save_horseshoes)
+                            save_horseshoes=save_horseshoes,
+                            save_wopwopin=save_wopwopin)
         end
 
         return breakflag
