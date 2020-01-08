@@ -90,6 +90,9 @@ function blownwing(; xfoil=true,
     nsteps = nrevs*nsteps_per_rev       # Number of time steps
     lambda_vpm = 2.125                  # Core overlap
     overwrite_sigma = lambda_vpm * 2*pi*R/(nsteps_per_rev*p_per_step) # Smoothing core size
+    # vpm_relax = 0.3                     # VPM relaxation factor
+    vpm_relax = 0.05
+    warn("Remember that you are under-relaxing the VPM")
     vpm_surface = true                  # Whether to include surfaces in the VPM
     surf_sigma = R/10                   # Smoothing radius of lifting surface
     # vlm_sigma = surf_sigma              # Smoothing radius of VLM
@@ -277,9 +280,11 @@ function blownwing(; xfoil=true,
     simulation = fvs.Simulation(vehicle, maneuver, Vref, RPMref, ttot; Vinit=Vinit)
 
     monitor_rotor = generate_monitor_prop(J, rho, RPM, nsteps; save_path=save_path,
-                                                            run_name=run_name)
+                                                    run_name=run_name*"_rotors")
     monitor_wing = generate_monitor_wing(wing, b, ar, nsteps, Vinf, rhoinf, qinf,
-                                                        magVinf, wake_coupled)
+                                                    magVinf, wake_coupled;
+                                                    save_path=save_path,
+                                                    run_name=run_name*"_wing")
     monitor(args...) = monitor_rotor(args...) || monitor_wing(args...)
 
     # ------------- RUN SIMULATION ---------------------------------------------
@@ -296,6 +301,7 @@ function blownwing(; xfoil=true,
                                       vlm_init=vlm_init,
                                       vlm_rlx=vlm_rlx,
                                       max_particles=max_particles,
+                                      relaxfactor=vpm_relax,
                                       wake_coupled=wake_coupled,
                                       shed_unsteady=shed_unsteady,
                                       extra_runtime_function=monitor,
