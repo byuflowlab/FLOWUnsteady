@@ -46,6 +46,7 @@ gt = GeometricTools
 # ------------ GENERIC MODULES -------------------------------------------------
 import Dierckx
 import CSV
+import JLD
 using PyPlot
 
 # ------------ GLOBAL VARIABLES ------------------------------------------------
