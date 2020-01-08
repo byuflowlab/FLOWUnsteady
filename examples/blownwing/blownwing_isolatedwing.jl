@@ -264,6 +264,8 @@ function generate_monitor_wing(wing, b, ar, nsteps, Vinf, rhoinf, qinf, magVinf,
                                 wake_coupled;
                                 figname="monitor_wing", nsteps_plot=1,
                                 disp_plot=true, figsize_factor=5/6,
+                                save_path=nothing, run_name="wing",
+                                nsteps_savefig=10,
                                 extra_plots=true)
 
     # ------------- SIMULATION MONITOR -----------------------------------------
@@ -286,12 +288,17 @@ function generate_monitor_wing(wing, b, ar, nsteps, Vinf, rhoinf, qinf, magVinf,
     meanchord = b/ar
     lencrit = 0.5*meanchord/vlm.get_m(wing)
 
+    # Name of convergence file
+    if save_path!=nothing
+        fname = joinpath(save_path, run_name*"_convergence.csv")
+    end
+
     function extra_runtime_function(sim, PFIELD, T, DT)
 
         aux = PFIELD.nt/nsteps
         clr = (1-aux, 0, aux)
 
-        if PFIELD.nt==0 && disp_plot
+        if PFIELD.nt==0 && (disp_plot || save_path!=nothing)
             figure(figname, figsize=[7*2, 5*2]*figsize_factor)
             subplot(221)
             xlim([-1,1])
@@ -347,9 +354,16 @@ function generate_monitor_wing(wing, b, ar, nsteps, Vinf, rhoinf, qinf, magVinf,
                     if num==1; ylabel("Bound-vortex length"); end;
                 end
             end
+
+            # Convergence file header
+            if save_path!=nothing
+                f = open(fname, "w")
+                print(f, "T,CL,CD\n")
+                close(f)
+            end
         end
 
-        if PFIELD.nt!=0 && PFIELD.nt%nsteps_plot==0 && disp_plot
+        if PFIELD.nt!=0 && PFIELD.nt%nsteps_plot==0 && (disp_plot || save_path!=nothing)
             figure(figname)
 
             # Force at each VLM element
@@ -431,6 +445,23 @@ function generate_monitor_wing(wing, b, ar, nsteps, Vinf, rhoinf, qinf, magVinf,
                 for num in 1:3
                     subplot(130+num)
                     plot(y2b, [lenout[(i-1)*3 + num] for i in 1:m], color=clr, alpha=0.5)
+                end
+            end
+            if save_path!=nothing
+
+                # Write rotor position and time on convergence file
+                f = open(fname, "a")
+                print(f, T, ",", CLwing, ",", CDwing, "\n")
+                close(f)
+
+                # Save figures
+                if PFIELD.nt%nsteps_savefig==0
+                    figure(figname)
+                    savefig(joinpath(save_path, run_name*"_convergence.png"),
+                                                            transparent=false)
+                    figure(figname*"_2")
+                    savefig(joinpath(save_path, run_name*"_convergence2.png"),
+                                                            transparent=false)
                 end
             end
         end

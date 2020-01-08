@@ -292,7 +292,7 @@ function generate_monitor_prop(J, rho, RPM, nsteps; save_path=nothing,
             # Save figure
             if fcalls%nsteps_savefig==0 && fcalls!=0 && save_path!=nothing
                 savefig(joinpath(save_path, run_name*"_convergence.png"),
-                                                            transparent=true)
+                                                            transparent=false)
             end
         end
 
