@@ -238,3 +238,29 @@ function visualize_kinematics(sim::Simulation{V, KinematicManeuver{N, M}, R},
 
     return strn
 end
+
+
+"""
+Generate lifting lines for acoustic compact patches of rotors
+"""
+function generate_vtkliftinglines(rotors, rotor_name, save_path;
+                                                num=nothing, suf="_compact")
+
+    for (ri, rotor) in enumerate(rotors)
+
+        nHS = vlm.get_mBlade(rotor)
+
+        for bi in 1:rotor.B
+
+            blade = vlm.get_blade(rotor, bi)
+            points = [vlm.getHorseshoe(blade, k)[2] for k in 1:nHS]
+            push!(points, vlm.getHorseshoe(blade, nHS)[3])
+            vtk_line = [i-1 for i in 1:nHS+1]
+
+            gt.generateVTK(rotor_name*"_Rotor$(ri)_Blade$(bi)$(suf)", points;
+                                lines=[vtk_line], num=num, path=save_path)
+
+        end
+    end
+
+end
