@@ -31,7 +31,7 @@ extdrive_path = "/media/edoalvar/MyExtDrive/simulationdata5/"
 
 
 # ------------ HEADERS ---------------------------------------------------------
-for header_name in ["singleprop", "isolatedwing", "blownwing"]
+for header_name in ["singleprop", "isolatedwing", "blownwing", "postprocessing"]
     include("blownwing_"*header_name*".jl")
 end
 
