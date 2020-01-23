@@ -58,8 +58,17 @@ def_data_path = joinpath(module_path, "../data/")   # Default path to data folde
 # Load modules
 for module_name in ["vehicle", "vehicle_vlm", "maneuver", "rotor",
                         "simulation_types", "simulation", "utils",
-                        "processing"]
+                        "processing", "noise"]
     include("FLOWFVS_"*module_name*".jl")
 end
+
+# # Noise analysis
+# try
+#     # FLOWNoise https://github.com/byuflowlab/FLOWNoise (it requires PSU-WOPWOP)
+#     import FLOWNoise
+#     noise = FLOWNoise
+# catch e
+#     warn("FLOWNoise not loaded: $e")
+# end
 
 end # END OF MODULE

@@ -48,7 +48,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
                              save_code=module_path,     # Saves the source code in this path
                              save_horseshoes=true,      # Save VLM horseshoes
                              save_static_particles=true,# Whether to save particles to represent the VLM
-                             save_wopwopin=true,       # Generate inputs for PSU-WOPWOP
+                             save_wopwopin=true,        # Generate inputs for PSU-WOPWOP
                              )
 
 
