@@ -302,7 +302,7 @@ function save_vtk(self::VLMVehicle, filename; path=nothing, num=nothing,
                                 vlm.getHorseshoe(vlm.get_blade(rotor, i), j)[3] )
                                 for j in 1:vlm.get_m(vlm.get_blade(rotor, i))]
                                       for i in 1:rotor.B] for rotor in rotors]
-            loadfname = "loading_Sys$(si)"*(num!=nothing ? ".($num)" : "")*".jld"
+            loadfname = "loading_Sys$(si)"*(num!=nothing ? ".$num" : "")*".jld"
             JLD.save(joinpath(path, loadfname), "rotorgammas", save_gammas,
                                                         "Ftot", save_Ftot,
                                                         "ftot", save_ftot)
