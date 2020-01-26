@@ -1,6 +1,6 @@
-# Unsteady Aerodynamics and Aeroacoustics
+# FLOW's Unsteady Aerodynamics Suite
 
-[![Vid here](docs/img/play00.png)](https://youtu.be/-xTHvwIe_34)
+<img src="docs/img/blownwing00.png" alt="Pic here" style="width: 900px;"/>
 
 Simulation engine of mixed-fidelity unsteady aerodynamics and aeroacoustics.
 This suite brings together mid and high-fidelity
@@ -13,8 +13,8 @@ solver), and `FLOWVPM` (viscous vortex particle method). The aeroacoustics
 solver uses PSU-WOPWOP (FW-H solver) and [`FLOWNoise`](https://github.com/byuflowlab/FLOWNoise).
 
 
-Most of the codes are still using Julia 0.6.4 as they are pending for a major
-revamp, hence this simulation framework is conceived to work only in Julia 0.6.4.
+This module is written in Julia 0.6.4 since most of the codes are still using
+Julia 0.6.4 as they are pending for a major revamp.
 
 FEATURES
 * Viscous, unsteady wake mixing of rotors and lifting surfaces.
@@ -23,8 +23,8 @@ interactions.
 * Fully resolved unsteady loads during prescribed kinematic maneuvers.
 
 LIMITATIONS
-* Separation is only captured trough strip theory, without attempting to shed
-separation wakes.
+* Viscous drag and separation is only captured through strip theory, without
+attempting to shed separation wakes.
 * No viscous drag is captured through VLM and panel models.
 
 FUTURE WORK
@@ -59,7 +59,7 @@ documentation: [`docs/validation.ipynb`](https://nbviewer.jupyter.org/github/byu
 <img src="docs/vid/bertinsheaving00.gif" alt="Vid here" style="width: 900px;"/>
 
 **CROSS-WIND CIRCULAR PATH:** `examples/circularpath.jl`
-[<img src="docs/img/circlesim.jpg" alt="Vid here" style="width: 900px;"/>](docs/vid/circularpath03_1.gif)
+[<img src="docs/img/circlesim_wide.jpg" alt="Vid here" style="width: 900px;"/>](docs/vid/circularpath03_1.gif)
 
 **HOVERING ROTOR:** `examples/singlerotor.jl`
 <img src="docs/vid/fvs_singlerotor02.gif" alt="Vid here" style="width: 900px;"/>
@@ -69,7 +69,11 @@ documentation: [`docs/validation.ipynb`](https://nbviewer.jupyter.org/github/byu
 
 
 **BLOWN WING:** `examples/blownwing/blownwing.jl`
-<img src="docs/img/blownwing00.png" alt="Vid here" style="width: 900px;"/>
+<img src="docs/img/blownwing01.png" alt="Pic here" style="width: 900px;"/>
+
+
+**eVTOL TRANSITION:** `examples/vahana/vahana.jl` (in progress)
+[![Vid here](docs/img/play00.png)](https://youtu.be/-xTHvwIe_34)
 
 
 # Authorship
