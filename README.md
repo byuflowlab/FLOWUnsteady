@@ -16,18 +16,18 @@ solver uses PSU-WOPWOP (FW-H solver) and [`FLOWNoise`](https://github.com/byuflo
 This module is written in Julia 0.6.4 since most of the codes are still using
 Julia 0.6.4 as they are pending for a major revamp.
 
-FEATURES
+**FEATURES**
 * Viscous, unsteady wake mixing of rotors and lifting surfaces.
 * Fully resolved rotor-on-rotor, rotor-on-wing, wing-on-rotor, and wing-on-wing
 interactions.
 * Fully resolved unsteady loads during prescribed kinematic maneuvers.
 
-LIMITATIONS
+**LIMITATIONS**
 * Viscous drag and separation is only captured through strip theory, without
 attempting to shed separation wakes.
 * No viscous drag is captured through VLM and panel models.
 
-FUTURE WORK
+**FUTURE WORK**
 * Coupling of aerodynamic loads and flight path allowing dynamic simulations.
 * Bluff body separation and panel-predicted viscous drag (?).
 
@@ -69,7 +69,7 @@ documentation: [`docs/validation.ipynb`](https://nbviewer.jupyter.org/github/byu
 
 
 **BLOWN WING:** `examples/blownwing/blownwing.jl`
-<img src="docs/img/blownwing01.png" alt="Pic here" style="width: 900px;"/>
+<img src="docs/img/blownwing02_wide.png" alt="Pic here" style="width: 900px;"/>
 
 
 **eVTOL TRANSITION:** `examples/vahana/vahana.jl` (in progress)
