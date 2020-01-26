@@ -4,12 +4,12 @@
 
 Simulation engine of mixed-fidelity unsteady aerodynamics and aeroacoustics.
 This suite brings together mid and high-fidelity
-aerodynamic tools developed at BYU's [FLOW Lab](http://flow.byu.edu/): [`GeometricTools`](https://github.com/byuflowlab/GeometricTools.jl)
+aerodynamics tools developed at BYU's [FLOW Lab](http://flow.byu.edu/): [`GeometricTools`](https://github.com/byuflowlab/GeometricTools.jl)
 (geometric engine), [`FLOWVLM`](https://github.com/byuflowlab/FLOWVLM) (VLM and
 strip theory solver), [`CCBlade`](https://github.com/byuflowlab/CCBlade.jl)
 (blade element momentum solver),
 [`MyPanel`](https://github.com/EdoAlvarezR/MyPanel.jl) (3D inviscid panel
-solver), and `FLOWVPM` (viscous vortex particle method). The aeroacoustics
+solver), and `FLOWVPM` (viscous vortex particle method). The aeroacoustic
 solver uses PSU-WOPWOP (FW-H solver) and [`FLOWNoise`](https://github.com/byuflowlab/FLOWNoise).
 
 
