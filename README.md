@@ -65,7 +65,7 @@ documentation: [`docs/validation.ipynb`](https://nbviewer.jupyter.org/github/byu
 <img src="docs/vid/fvs_singlerotor02.gif" alt="Vid here" style="width: 900px;"/>
 
 **INTERACTING TANDEM HEAVING WING:** `examples/tandemheavingwing.jl`
-[![Vid here](docs/img/play01.png)](https://youtu.be/Pch94bKpjrQ)
+[![Vid here](docs/img/play01_wide.png)](https://youtu.be/Pch94bKpjrQ)
 
 
 **BLOWN WING:** `examples/blownwing/blownwing.jl`
@@ -73,7 +73,7 @@ documentation: [`docs/validation.ipynb`](https://nbviewer.jupyter.org/github/byu
 
 
 **eVTOL TRANSITION:** `examples/vahana/vahana.jl` (in progress)
-[![Vid here](docs/img/play00.png)](https://youtu.be/-xTHvwIe_34)
+[![Vid here](docs/img/play00_wide.png)](https://youtu.be/-xTHvwIe_34)
 
 
 # Authorship
