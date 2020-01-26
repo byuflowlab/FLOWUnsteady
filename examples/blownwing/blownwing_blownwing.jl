@@ -24,7 +24,7 @@ function blownwing(; xfoil=true,
 
     # Rotor parameters
     rotor_file = "apc10x7.csv"          # Rotor geometry
-    data_path = fvs.def_data_path       # Path to rotor database
+    data_path = uns.def_data_path       # Path to rotor database
     pitch = 0.0                         # (deg) collective pitch of blades
     n_r = 10                            # Number of blade elements
     # xfoil = false                     # Whether to run XFOIL
@@ -35,7 +35,7 @@ function blownwing(; xfoil=true,
 
 
     # Read radius of this rotor and number of blades
-    R, B = fvs.read_rotor(rotor_file; data_path=data_path)[[1,3]]
+    R, B = uns.read_rotor(rotor_file; data_path=data_path)[[1,3]]
 
     # Simulation parameters
     J = 0.6                             # Advance ratio Vinf/(nD)
@@ -45,7 +45,7 @@ function blownwing(; xfoil=true,
     mu = 1.81e-5                        # (kg/ms) air dynamic viscosity
     nu = mu/rho
     sound_spd = 343                     # (m/s) speed of sound
-    RPM = fvs.calc_RPM(ReD, J, R, 2*R, nu) # RPM
+    RPM = uns.calc_RPM(ReD, J, R, 2*R, nu) # RPM
     magVinf = J*RPM/60*2*R              # (m/s) freestream velocity
     Minf = magVinf / sound_spd
     Mtip = 2*pi*RPM/60*R / sound_spd
@@ -130,7 +130,7 @@ function blownwing(; xfoil=true,
     end
 
     # Generate clockwise rotor
-    rotor_cw = fvs.generate_rotor(rotor_file; pitch=pitch,
+    rotor_cw = uns.generate_rotor(rotor_file; pitch=pitch,
                                             n=n_r, CW=true, ReD=ReD,
                                             verbose=verbose, xfoil=xfoil,
                                             data_path=data_path,
@@ -250,7 +250,7 @@ function blownwing(; xfoil=true,
     wake_system = system
 
     # FVS's Vehicle object
-    vehicle = fvs.VLMVehicle(   system;
+    vehicle = uns.VLMVehicle(   system;
                                 vlm_system=vlm_system,
                                 rotor_systems=rotor_systems,
                                 wake_system=wake_system
@@ -269,14 +269,14 @@ function blownwing(; xfoil=true,
     RPMref = RPM                    # Reference RPM
 
     # FVS's Maneuver object
-    maneuver = fvs.KinematicManeuver(angle, sysRPM, Vvehicle, anglevehicle)
+    maneuver = uns.KinematicManeuver(angle, sysRPM, Vvehicle, anglevehicle)
 
     # Plot maneuver path and controls
-    fvs.plot_maneuver(maneuver; vis_nsteps=nsteps)
+    uns.plot_maneuver(maneuver; vis_nsteps=nsteps)
 
     # ----- SIMULATION DEFINITION
     Vinit = Vref*Vvehicle(0)       # Initial vehicle velocity
-    simulation = fvs.Simulation(vehicle, maneuver, Vref, RPMref, ttot; Vinit=Vinit)
+    simulation = uns.Simulation(vehicle, maneuver, Vref, RPMref, ttot; Vinit=Vinit)
 
     monitor_rotor = generate_monitor_prop(J, rho, RPM, nsteps; save_path=save_path,
                                                     run_name=run_name*"_rotors")
@@ -288,7 +288,7 @@ function blownwing(; xfoil=true,
 
     # ------------- RUN SIMULATION ---------------------------------------------
     if verbose; println("\t"^(v_lvl+1)*"Running simulation..."); end;
-    pfield = fvs.run_simulation(simulation, nsteps;
+    pfield = uns.run_simulation(simulation, nsteps;
                                       # SIMULATION OPTIONS
                                       Vinf=Vinf,
                                       # SOLVERS OPTIONS

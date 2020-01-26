@@ -1,6 +1,5 @@
 """
-Flight Vehicle Simulator; a high-fidelity simulation engine of fully-unsteady
-flight vehicle.
+Mixed-fidelity unsteady aerodynamics simulation engine.
 
     # AUTHORSHIP
       * Author    : Eduardo J. Alvarez
@@ -8,7 +7,7 @@ flight vehicle.
       * Created   : Oct 2019
       * License   : MIT
 """
-module FLOWFVS
+module FLOWUnsteady
 
 export Vehicle, KinematicManeuver, DynamicManeuver,
         generate_rotor, save_vtk
@@ -59,16 +58,7 @@ def_data_path = joinpath(module_path, "../data/")   # Default path to data folde
 for module_name in ["vehicle", "vehicle_vlm", "maneuver", "rotor",
                         "simulation_types", "simulation", "utils",
                         "processing", "noise"]
-    include("FLOWFVS_"*module_name*".jl")
+    include("FLOWUnsteady_"*module_name*".jl")
 end
-
-# # Noise analysis
-# try
-#     # FLOWNoise https://github.com/byuflowlab/FLOWNoise (it requires PSU-WOPWOP)
-#     import FLOWNoise
-#     noise = FLOWNoise
-# catch e
-#     warn("FLOWNoise not loaded: $e")
-# end
 
 end # END OF MODULE

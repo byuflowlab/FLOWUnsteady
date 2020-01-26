@@ -53,22 +53,22 @@ function postprocessing_fluiddomain(read_path::String, nums, save_path::String;
         gt.lintransform!(grid, eye(3), curX-prevX)
 
         # Read particle field
-        pfield = fvs.vpm.read_vtk(run_name*"_pfield", Vinf, nothing; path=read_path,
+        pfield = uns.vpm.read_vtk(run_name*"_pfield", Vinf, nothing; path=read_path,
                                                 num=num, solver_method="ExaFMM")
 
         # Eliminates particles outside the domain to save computation
         xmax = gt.get_node(grid, NDIVS+1)[1]
-        for p in fvs.vpm.get_np(pfield):-1:1
-            if fvs.vpm.get_x(pfield, p)[1]>xmax
-                fvs.vpm.delparticle(pfield, p)
+        for p in uns.vpm.get_np(pfield):-1:1
+            if uns.vpm.get_x(pfield, p)[1]>xmax
+                uns.vpm.delparticle(pfield, p)
             end
         end
 
-        if verbose; println("\t$(fvs.vpm.get_np(pfield)) particles"); end;
+        if verbose; println("\t$(uns.vpm.get_np(pfield)) particles"); end;
 
         # Evaluate particle field velocity
         nodes = [gt.get_node(grid, n) for n in 1:grid.nnodes]
-        @time _, U, W, dUdX = fvs.vpm.conv(pfield, "ExaFMM"; Uprobes=nodes, vorticity=true)
+        @time _, U, W, dUdX = uns.vpm.conv(pfield, "ExaFMM"; Uprobes=nodes, vorticity=true)
 
         gt.add_field(grid, "U", "vector", U, "node"; raise_warn=false)
         gt.add_field(grid, "W", "vector", W, "node"; raise_warn=false)

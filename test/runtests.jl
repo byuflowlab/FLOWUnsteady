@@ -1,8 +1,8 @@
 # Load simulation engine
 # import FLOWFVS
-reload("FLOWFVS")
-fvs = FLOWFVS
-vlm = fvs.vlm
+reload("FLOWUnsteady")
+uns = FLOWUnsteady
+vlm = uns.vlm
 gt = vlm.vtk
 
 # ------------ GENERIC MODULES -------------------------------------------------
