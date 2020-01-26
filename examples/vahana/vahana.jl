@@ -18,10 +18,10 @@
 
 # ------------ MODULES ---------------------------------------------------------
 # Load simulation engine
-# import FLOWFVS
-reload("FLOWFVS")
-fvs = FLOWFVS
-vlm = fvs.vlm
+# import FLOWUnsteady
+reload("FLOWUnsteady")
+uns = FLOWUnsteady
+vlm = uns.vlm
 
 import GeometricTools
 gt = GeometricTools
@@ -82,7 +82,7 @@ function run_simulation_vahana(;    # save_path="temps/vahanasimulation01",
     maneuver = generate_maneuver_vahana1()
 
     # Plot maneuver path and controls
-    fvs.plot_maneuver(maneuver; tstages=[0.2, 0.3, 0.5, 0.6])
+    uns.plot_maneuver(maneuver; tstages=[0.2, 0.3, 0.5, 0.6])
 
 
     # Generate geometry
@@ -96,11 +96,11 @@ function run_simulation_vahana(;    # save_path="temps/vahanasimulation01",
     RPMref = RPMh_w
     ttot = telapsed
     max_particles = ceil(Int, (nsteps+2)*(2*vlm.get_m(vehicle.vlm_system)+1)*p_per_step)
-    simulation = fvs.Simulation(vehicle, maneuver, Vref, RPMref, ttot)
+    simulation = uns.Simulation(vehicle, maneuver, Vref, RPMref, ttot)
 
 
     # Run simulation
-    pfield = fvs.run_simulation(simulation, nsteps;
+    pfield = uns.run_simulation(simulation, nsteps;
                                       # SIMULATION OPTIONS
                                       Vinf=Vinf,
                                       # SOLVERS OPTIONS
@@ -168,7 +168,7 @@ function visualize_maneuver_vahana(; save_path=extdrive_path*"vahanamaneuver100/
     maneuver = generate_maneuver_vahana1()
 
     # Plot maneuver path and controls
-    fvs.plot_maneuver(maneuver; tstages=[0.2, 0.3, 0.5, 0.6])
+    uns.plot_maneuver(maneuver; tstages=[0.2, 0.3, 0.5, 0.6])
 
 
     # Generate geometry
@@ -181,12 +181,12 @@ function visualize_maneuver_vahana(; save_path=extdrive_path*"vahanamaneuver100/
     Vref = Vcruise
     RPMref = RPMh_w
     ttot = telapsed
-    simulation = fvs.Simulation(vehicle, maneuver, Vref, RPMref, ttot)
+    simulation = uns.Simulation(vehicle, maneuver, Vref, RPMref, ttot)
 
     save_vtk_optsargs = [(:save_horseshoes, false)]
 
     # Visualize maneuver
-    strn = fvs.visualize_kinematics(simulation, nsteps, save_path;
+    strn = uns.visualize_kinematics(simulation, nsteps, save_path;
                                     run_name=run_name,
                                     save_vtk_optsargs=save_vtk_optsargs,
                                     prompt=prompt, verbose=verbose, v_lvl=v_lvl,
@@ -238,7 +238,7 @@ function visualize_geometry_vahana(; save_path=extdrive_path*"vahanageometry00/"
     gt.create_path(save_path, prompt)
 
     # Save vehicle
-    strn = fvs.save_vtk(vehicle, run_name; path=save_path, save_horseshoes=false)
+    strn = uns.save_vtk(vehicle, run_name; path=save_path, save_horseshoes=false)
 
     # Save ground
     for (i, ground) in enumerate(grounds)

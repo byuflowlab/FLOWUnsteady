@@ -13,10 +13,10 @@ Aerodynamics for Engineers) with two APC 10x7 propellers (one on each side).
 
 # ------------ MODULES ---------------------------------------------------------
 # Load simulation engine
-# import FLOWFVS
-reload("FLOWFVS")
-fvs = FLOWFVS
-vlm = fvs.vlm
+# import FLOWUnsteady
+reload("FLOWUnsteady")
+uns = FLOWUnsteady
+vlm = uns.vlm
 
 import GeometricTools
 gt = GeometricTools
@@ -49,7 +49,7 @@ end
 
 # ------------ DRIVERS ---------------------------------------------------------
 function run_singleprop(; xfoil=true, prompt=true)
-    singleprop(; xfoil=xfoil, save_path=extdrive_path*"fvs_singleprop03/",
+    singleprop(; xfoil=xfoil, save_path=extdrive_path*"fvs_singleprop04/",
                                                                   prompt=prompt)
 end
 

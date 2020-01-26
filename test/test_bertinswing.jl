@@ -93,7 +93,7 @@ function bertin_VLM(;   # TEST OPTIONS
     Vvehicle = Vaircraft        # Velocity of the vehicle
     anglevehicle = angle_wing   # Angle of the vehicle
 
-    maneuver = fvs.KinematicManeuver(angle, RPM, Vvehicle, anglevehicle)
+    maneuver = uns.KinematicManeuver(angle, RPM, Vvehicle, anglevehicle)
 
     # System definitions
     system = vlm.WingSystem()   # System of all FLOWVLM objects
@@ -103,7 +103,7 @@ function bertin_VLM(;   # TEST OPTIONS
     wake_system = system        # System that will shed a VPM wake
 
     # Vehicle definition
-    vehicle = fvs.VLMVehicle(   system;
+    vehicle = uns.VLMVehicle(   system;
                                 vlm_system=vlm_system,
                                 wake_system=wake_system
                              )
@@ -219,11 +219,11 @@ function bertin_VLM(;   # TEST OPTIONS
                                     # Maximum number of particles
     max_particles = ceil(Int, (nsteps+2)*(2*vlm.get_m(vehicle.vlm_system)+1)*p_per_step)
 
-    simulation = fvs.Simulation(vehicle, maneuver, Vref, RPMref, ttot;
+    simulation = uns.Simulation(vehicle, maneuver, Vref, RPMref, ttot;
                                                                     Vinit=Vinit)
 
     if verbose; println("\t"^(v_lvl+1)*"Running simulation..."); end;
-    pfield = fvs.run_simulation(simulation, nsteps;
+    pfield = uns.run_simulation(simulation, nsteps;
                                       # SIMULATION OPTIONS
                                       Vinf=Vinf,
                                       # SOLVERS OPTIONS
@@ -367,7 +367,7 @@ function bertin_kinematic(;   # TEST OPTIONS
     Vvehicle = Vaircraft        # Velocity of the vehicle
     anglevehicle = angle_wing   # Angle of the vehicle
 
-    maneuver = fvs.KinematicManeuver(angle, RPM, Vvehicle, anglevehicle)
+    maneuver = uns.KinematicManeuver(angle, RPM, Vvehicle, anglevehicle)
 
     # System definitions
     system = vlm.WingSystem()   # System of all FLOWVLM objects
@@ -377,7 +377,7 @@ function bertin_kinematic(;   # TEST OPTIONS
     wake_system = system        # System that will shed a VPM wake
 
     # Vehicle definition
-    vehicle = fvs.VLMVehicle(   system;
+    vehicle = uns.VLMVehicle(   system;
                                 vlm_system=vlm_system,
                                 wake_system=wake_system
                              )
@@ -446,17 +446,17 @@ function bertin_kinematic(;   # TEST OPTIONS
 
 
             # Force at each VLM element
-            Ftot = fvs.calc_aerodynamicforce(wing, prev_wing, PFIELD, Vinf, DT,
+            Ftot = uns.calc_aerodynamicforce(wing, prev_wing, PFIELD, Vinf, DT,
                                                             rhoinf; t=PFIELD.t)
-            L, D, S = fvs.decompose(Ftot, [0,0,1], [-1,0,0])
+            L, D, S = uns.decompose(Ftot, [0,0,1], [-1,0,0])
             vlm._addsolution(wing, "L", L)
             vlm._addsolution(wing, "D", D)
             vlm._addsolution(wing, "S", S)
 
             # Force per unit span at each VLM element
-            ftot = fvs.calc_aerodynamicforce(wing, prev_wing, PFIELD, Vinf, DT,
+            ftot = uns.calc_aerodynamicforce(wing, prev_wing, PFIELD, Vinf, DT,
                                         rhoinf; t=PFIELD.t, per_unit_span=true)
-            l, d, s = fvs.decompose(ftot, [0,0,1], [-1,0,0])
+            l, d, s = uns.decompose(ftot, [0,0,1], [-1,0,0])
 
             # Lift of the wing
             Lwing = norm(sum(L))
@@ -514,11 +514,11 @@ function bertin_kinematic(;   # TEST OPTIONS
                                     # Maximum number of particles
     max_particles = ceil(Int, (nsteps+2)*(2*vlm.get_m(vehicle.vlm_system)+1)*p_per_step)
 
-    simulation = fvs.Simulation(vehicle, maneuver, Vref, RPMref, ttot;
+    simulation = uns.Simulation(vehicle, maneuver, Vref, RPMref, ttot;
                                                                     Vinit=Vinit)
 
     if verbose; println("\t"^(v_lvl+1)*"Running simulation..."); end;
-    pfield = fvs.run_simulation(simulation, nsteps;
+    pfield = uns.run_simulation(simulation, nsteps;
                                       # SIMULATION OPTIONS
                                       Vinf=Vinf,
                                       # SOLVERS OPTIONS

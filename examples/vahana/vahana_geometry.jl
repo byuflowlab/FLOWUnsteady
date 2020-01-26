@@ -164,7 +164,7 @@ function generate_geometry_vahana(;
     # Generates base propellers (one on each rotation orientation)
     propellers = vlm.Rotor[]
     if verbose; println("\t"^(v_lvl+1)*"Generating first propeller..."); end;
-    push!(propellers, fvs.generate_rotor(rotor_file; pitch=pitch,
+    push!(propellers, uns.generate_rotor(rotor_file; pitch=pitch,
                                             n=n_ccb, CW=!CW_w, ReD=ReD,
                                             verbose=verbose, xfoil=xfoil,
                                             data_path=data_path, plot_disc=false))
@@ -456,7 +456,7 @@ function generate_geometry_vahana(;
     grids = [fuselage]
 
     # FVS's Vehicle object
-    vehicle = fvs.VLMVehicle(   system;
+    vehicle = uns.VLMVehicle(   system;
                                 tilting_systems=tilting_systems,
                                 rotor_systems=rotor_systems,
                                 vlm_system=vlm_system,

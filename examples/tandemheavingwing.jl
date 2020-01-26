@@ -12,10 +12,10 @@ wing in heaving motion.
 
 # ------------ MODULES ---------------------------------------------------------
 # Load simulation engine
-# import FLOWFVS
-reload("FLOWFVS")
-fvs = FLOWFVS
-vlm = fvs.vlm
+# import FLOWUnsteady
+reload("FLOWUnsteady")
+uns = FLOWUnsteady
+vlm = uns.vlm
 
 import GeometricTools
 gt = GeometricTools
@@ -131,7 +131,7 @@ function tandemheavingwing(;   # TEST OPTIONS
     wake_system = system        # System that will shed a VPM wake
 
     # Vehicle definition
-    vehicle = fvs.VLMVehicle(   system;
+    vehicle = uns.VLMVehicle(   system;
                                 tilting_systems=tilting_systems,
                                 vlm_system=vlm_system,
                                 wake_system=wake_system
@@ -155,10 +155,10 @@ function tandemheavingwing(;   # TEST OPTIONS
     angle = (angle_tandemwing, ) # Angle of each tilting system
     RPM = ()                     # RPM of each rotor system
 
-    maneuver = fvs.KinematicManeuver(angle, RPM, Vvehicle, anglevehicle)
+    maneuver = uns.KinematicManeuver(angle, RPM, Vvehicle, anglevehicle)
 
     # Plot maneuver path and controls
-    fvs.plot_maneuver(maneuver; vis_nsteps=nsteps)
+    uns.plot_maneuver(maneuver; vis_nsteps=nsteps)
 
     # ------------- SIMULATION SETUP -------------------------------------------
     if verbose; println("\t"^(v_lvl+1)*"Simulation setup..."); end;
@@ -203,7 +203,7 @@ function tandemheavingwing(;   # TEST OPTIONS
                                     # Maximum number of particles
     max_particles = ceil(Int, (nsteps+2)*(2*vlm.get_m(vehicle.vlm_system)+1)*p_per_step)
 
-    simulation = fvs.Simulation(vehicle, maneuver, Vref, RPMref, ttot;
+    simulation = uns.Simulation(vehicle, maneuver, Vref, RPMref, ttot;
                                                     Vinit=Vinit, Winit=Winit)
 
     # ------------- SIMULATION MONITOR -----------------------------------------
@@ -266,9 +266,9 @@ function tandemheavingwing(;   # TEST OPTIONS
 
 
             # Force at each VLM element
-            Ftot = fvs.calc_aerodynamicforce(system, prev_system, PFIELD, Vinf, DT,
+            Ftot = uns.calc_aerodynamicforce(system, prev_system, PFIELD, Vinf, DT,
                                                             rhoinf; t=PFIELD.t)
-            L, D, S = fvs.decompose(Ftot, [0,0,1], [-1,0,0])
+            L, D, S = uns.decompose(Ftot, [0,0,1], [-1,0,0])
             vlm._addsolution(system, "L", L)
             vlm._addsolution(system, "D", D)
             vlm._addsolution(system, "S", S)
@@ -276,9 +276,9 @@ function tandemheavingwing(;   # TEST OPTIONS
             L, D, S = wing.sol["L"], wing.sol["D"], wing.sol["S"]
 
             # Force per unit span at each VLM element
-            ftot = fvs.calc_aerodynamicforce(wing, prev_wing, PFIELD, Vinf, DT,
+            ftot = uns.calc_aerodynamicforce(wing, prev_wing, PFIELD, Vinf, DT,
                                         rhoinf; t=PFIELD.t, per_unit_span=true)
-            l, d, s = fvs.decompose(ftot, [0,0,1], [-1,0,0])
+            l, d, s = uns.decompose(ftot, [0,0,1], [-1,0,0])
 
             # Lift of the wing
             Lwing = norm(sum(L))
@@ -332,7 +332,7 @@ function tandemheavingwing(;   # TEST OPTIONS
     # ------------- RUN SIMULATION ---------------------------------------------
     if verbose; println("\t"^(v_lvl+1)*"Running simulation..."); end;
     # Run simulation
-    pfield = fvs.run_simulation(simulation, nsteps;
+    pfield = uns.run_simulation(simulation, nsteps;
                                       # SIMULATION OPTIONS
                                       Vinf=Vinf,
                                       # SOLVERS OPTIONS

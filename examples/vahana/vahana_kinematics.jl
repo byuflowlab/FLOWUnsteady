@@ -356,10 +356,10 @@ function generate_maneuver_vahana1(; disp_plot=false)
     Vvehicle = Vaircraft
     anglevehicle = angleaircraft
 
-    maneuver = fvs.KinematicManeuver(angle, RPM, Vvehicle, anglevehicle)
+    maneuver = uns.KinematicManeuver(angle, RPM, Vvehicle, anglevehicle)
 
     if disp_plot
-        fvs.plot(maneuver)
+        uns.plot(maneuver)
     end
 
     return maneuver
