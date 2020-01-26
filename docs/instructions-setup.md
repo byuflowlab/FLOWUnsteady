@@ -1,4 +1,4 @@
-# How to set up dependencies needed for FlightVehicleSim (October 2019)
+# How to set up dependencies needed for FLOWUnsteady (October 2019)
 Note: currently this simulation tool functions only with Julia v0.6, thus the following will assume Julia v0.6 syntax.
 
 ## Setting up Julia v0.6.4
@@ -17,7 +17,7 @@ Most likely you have the latest version already installed in your system. In ord
 ```
 Then close and open the julia terminal again.
 
-## [GeometricTools](https://github.com/byuflowlab/GeometricTools.jl): 
+## [GeometricTools](https://github.com/byuflowlab/GeometricTools.jl):
 
 Dependencies:
 - PyCall
@@ -34,7 +34,7 @@ After you have the dependencies, clone the package using Julia. (Though you can 
 
 ```Pkg.clone("https://github.com/byuflowlab/GeometricTools.jl.git")```
 
-If using MacOS, you'll want to add 
+If using MacOS, you'll want to add
 
 ```export PATH=$PATH:/Applications/ParaView-5.5.2.app/Contents/MacOS/```
 
@@ -45,11 +45,11 @@ To test if GeometricTools + Paraview is working well, you can pull up one of the
   # Import Package
   import GeometricTools
   gt = GeometricTools
-  
+
   # Load example
   example_path = "examples/example_simple.jl"
   include(joinpath(Pkg.dir("GeometricTools"), example_path))
-  
+
   # Run example: it will pull up paraview with a good-looking cube
   simple_box2()
 ```
@@ -124,7 +124,7 @@ So don't put airfoil in Box.
 
 # Running things:
 
-0. Clone the simulation engine (https://github.com/byuflowlab/FlightVehicleSim) to whenever you want it
+0. Clone the simulation engine (https://github.com/byuflowlab/FLOWUnsteady) to whenever you want it
 1. Navigate to the fvs.jl file in the src/ directory.
 2. change the `global extdrive_path` variable to be the directory where you want the files to be saved. But you can put it wherever you want.
 3. If you don't yet have access to the VPM, you'll also need to comment out the lines:

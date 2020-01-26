@@ -15,10 +15,10 @@ II rotor.
 
 # ------------ MODULES ---------------------------------------------------------
 # Load simulation engine
-# import FLOWFVS
-reload("FLOWFVS")
-fvs = FLOWFVS
-vlm = fvs.vlm
+# import FLOWUnsteady
+reload("FLOWUnsteady")
+uns = FLOWUnsteady
+vlm = uns.vlm
 
 import GeometricTools
 gt = GeometricTools
@@ -54,7 +54,7 @@ function singlerotor(; xfoil=true,
 
     # Rotor geometry
     rotor_file = "DJI-II.csv"           # Rotor geometry
-    data_path = fvs.def_data_path       # Path to rotor database
+    data_path = uns.def_data_path       # Path to rotor database
     pitch = 0.0                         # (deg) collective pitch of blades
     # n = 50                              # Number of blade elements
     n = 10
@@ -62,7 +62,7 @@ function singlerotor(; xfoil=true,
     # xfoil = false                       # Whether to run XFOIL
 
     # Read radius of this rotor and number of blades
-    R, B = fvs.read_rotor(rotor_file; data_path=data_path)[[1,3]]
+    R, B = uns.read_rotor(rotor_file; data_path=data_path)[[1,3]]
 
     # Simulation parameters
     RPM = 81*60                         # RPM
@@ -92,7 +92,7 @@ function singlerotor(; xfoil=true,
 
     # ------------ SIMULATION SETUP --------------------------------------------
     # Generate rotor
-    rotor = fvs.generate_rotor(rotor_file; pitch=pitch,
+    rotor = uns.generate_rotor(rotor_file; pitch=pitch,
                                             n=n, CW=CW, ReD=ReD,
                                             verbose=verbose, xfoil=xfoil,
                                             data_path=data_path,
@@ -111,7 +111,7 @@ function singlerotor(; xfoil=true,
     vlm.addwing(wake_system, run_name, rotor)
 
     # FVS's Vehicle object
-    vehicle = fvs.VLMVehicle(   system;
+    vehicle = uns.VLMVehicle(   system;
                                 rotor_systems=rotor_systems,
                                 wake_system=wake_system
                              )
@@ -126,23 +126,23 @@ function singlerotor(; xfoil=true,
     anglevehicle(t) = zeros(3)      # (deg) angle of the vehicle
 
     # FVS's Maneuver object
-    maneuver = fvs.KinematicManeuver(angle, sysRPM, Vvehicle, anglevehicle)
+    maneuver = uns.KinematicManeuver(angle, sysRPM, Vvehicle, anglevehicle)
 
     # Plot maneuver path and controls
-    fvs.plot_maneuver(maneuver; vis_nsteps=nsteps)
+    uns.plot_maneuver(maneuver; vis_nsteps=nsteps)
 
 
     # ----- SIMULATION DEFINITION
     RPMref = RPM
     Vref = 0.0
-    simulation = fvs.Simulation(vehicle, maneuver, Vref, RPMref, ttot)
+    simulation = uns.Simulation(vehicle, maneuver, Vref, RPMref, ttot)
 
     monitor = generate_monitor(J, rho, RPM, nsteps; save_path=save_path,
                                                             run_name=run_name)
 
 
     # ------------ RUN SIMULATION ----------------------------------------------
-    pfield = fvs.run_simulation(simulation, nsteps;
+    pfield = uns.run_simulation(simulation, nsteps;
                                       # SIMULATION OPTIONS
                                       Vinf=Vinf,
                                       # SOLVERS OPTIONS
@@ -182,10 +182,10 @@ function generate_monitor(J, rho, RPM, nsteps; save_path=nothing,
     end
 
     # Function for run_vpm! to call on each iteration
-    function extra_runtime_function(sim::fvs.Simulation{V, M, R},
-                                    PFIELD::fvs.vpm.ParticleField,
+    function extra_runtime_function(sim::uns.Simulation{V, M, R},
+                                    PFIELD::uns.vpm.ParticleField,
                                     T::Real, DT::Real
-                                   ) where{V<:fvs.VLMVehicle, M, R}
+                                   ) where{V<:uns.VLMVehicle, M, R}
 
         rotors = vcat(sim.vehicle.rotor_systems...)
         angle = T*360*RPM/60
