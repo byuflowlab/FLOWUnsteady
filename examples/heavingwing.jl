@@ -31,7 +31,7 @@ extdrive_path = "/media/edoalvar/MyExtDrive/simulationdata5/"
 # ------------ DRIVERS ---------------------------------------------------------
 function run_heavingwing()
     heavingwing(; nsteps=400, p_per_step=1, vlm_rlx=0.75,
-                    save_path=extdrive_path*"bertinsheaving11/",
+                    save_path=extdrive_path*"bertinsheaving12/",
                     verbose=true, disp_plot=true)
 end
 
@@ -112,6 +112,7 @@ function heavingwing(;   # TEST OPTIONS
     overwrite_sigma = lambda_vpm * magVinf * (telapsed/nsteps)/p_per_step # Smoothing core size
     # vlm_sigma = -1            # VLM regularization core size (deactivated with -1)
     vlm_sigma = vlm_fsgm*b
+    surf_sigma = overwrite_sigma
     # wake_coupled = true       # Coupled VPM wake with VLM solution
     shed_unsteady = true        # Whether to shed unsteady-loading wake
     # shed_unsteady = false
@@ -324,6 +325,7 @@ function heavingwing(;   # TEST OPTIONS
                                       overwrite_sigma=overwrite_sigma,
                                       vlm_sigma=vlm_sigma,
                                       vlm_rlx=vlm_rlx,
+                                      surf_sigma=surf_sigma,
                                       max_particles=max_particles,
                                       wake_coupled=wake_coupled,
                                       shed_unsteady=shed_unsteady,
