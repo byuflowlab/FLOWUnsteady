@@ -69,7 +69,7 @@ documentation: [`docs/validation.ipynb`](https://nbviewer.jupyter.org/github/byu
 
 
 **BLOWN WING:** `examples/blownwing/blownwing.jl`
-<img src="docs/img/blownwing02_wide.png" alt="Pic here" style="width: 900px;"/>
+[![Vid here](docs/img/blownwingplay03.png)](https://youtu.be/3REcIdIXrZA)
 
 
 **eVTOL TRANSITION:** `examples/vahana/vahana.jl` (in progress)
@@ -84,5 +84,6 @@ documentation: [`docs/validation.ipynb`](https://nbviewer.jupyter.org/github/byu
 # Authorship
   * Author    : Eduardo J Alvarez
   * Email     : Edo.AlvarezR@gmail.com
+  * Website   : [edoalvarez.com](https://www.edoalvarez.com/)
   * Created   : Oct 2019
   * License   : MIT License
