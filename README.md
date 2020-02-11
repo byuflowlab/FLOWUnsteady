@@ -76,6 +76,11 @@ documentation: [`docs/validation.ipynb`](https://nbviewer.jupyter.org/github/byu
 [![Vid here](docs/img/play00_wide.png)](https://youtu.be/-xTHvwIe_34)
 
 
+# Publications
+  * Alvarez, E. J., & Ning, A. (2020, in review). <i>High-fidelity Modeling of Multirotor Aerodynamic Interactions for Aircraft Design</i>. AIAA Journal. <a href="https://byu.box.com/shared/static/s4h4w165x4vlxcmhgmxi05ngq0qab9o0.pdf"><b>[PDF]</b></a><br><br>
+  * Alvarez, E. J., & Ning, A. (2019). <i>Modeling Multirotor Aerodynamic Interactions Through the Vortex Particle Method</i>. AIAA AVIATION Forum. DOI: <a href="https://doi.org/10.2514/6.2019-2827 ">10.2514/6.2019-2827</a> <a href="http://edoalvar2.groups.et.byu.net/public/AlvarezNing_2019-AVIATION-Multirotor_aerodynamic_interactions_through_VPM-STATIC.pdf"><b>[SLIDES]</b></a><a href="https://scholarsarchive.byu.edu/facpub/3191/"><b>[PDF]</b></a><br><br>
+  * Alvarez, E. J., & Ning, A. (2018). <i>Development of a Vortex Particle Code for the Modeling of Wake Interaction in Distributed Propulsion</i>. AIAA AVIATION Forum. DOI: <a href="https://doi.org/10.2514/6.2018-3646 ">10.2514/6.2018-3646</a> <a href="http://www.et.byu.edu/~edoalvar/public/AlvarezNing_2018-AIAA-VPM_distibuted_propulsion-SLIDE-static.pdf"><b>[SLIDES]</b></a><a href="https://scholarsarchive.byu.edu/facpub/2116/"><b>[PDF]</b></a><br><br>
+
 # Authorship
   * Author    : Eduardo J Alvarez
   * Email     : Edo.AlvarezR@gmail.com
