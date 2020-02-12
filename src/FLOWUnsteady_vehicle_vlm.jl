@@ -292,20 +292,12 @@ function save_vtk(self::VLMVehicle, filename; path=nothing, num=nothing,
             # Loading file
             save_gammas = [[vlm.get_blade(rotor, i).sol["Gamma"]
                                       for i in 1:rotor.B] for rotor in rotors]
+            # NOTE TO SELF: Ftot is a force per unit length
             save_Ftot = [[vlm.get_blade(rotor, i).sol["Ftot"]
-                                      for i in 1:rotor.B] for rotor in rotors]
-
-            # NOTE: Here I'm not sure whether I should be dividing by the span-wise
-            # length or the actual length
-            save_ftot = [[[vlm.get_blade(rotor, i).sol["Ftot"][j] / norm(
-                                vlm.getHorseshoe(vlm.get_blade(rotor, i), j)[2] -
-                                vlm.getHorseshoe(vlm.get_blade(rotor, i), j)[3] )
-                                for j in 1:vlm.get_m(vlm.get_blade(rotor, i))]
                                       for i in 1:rotor.B] for rotor in rotors]
             loadfname = "loading_Sys$(si)"*(num!=nothing ? ".$num" : "")*".jld"
             JLD.save(joinpath(path, loadfname), "rotorgammas", save_gammas,
-                                                        "Ftot", save_Ftot,
-                                                        "ftot", save_ftot)
+                                                        "Ftot", save_Ftot)
         end
     end
 

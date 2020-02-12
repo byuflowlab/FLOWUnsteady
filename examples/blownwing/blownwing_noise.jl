@@ -246,7 +246,7 @@ function postprocessing_noise(
         for (si, rotors) in enumerate(rotorsystems)     # Iterate over systems
             uns.generate_wopwoploading(read_path, case_name, num0:numf;
                         # INPUT OPTIONS
-                        filename="loading_Sys$(si)", fieldname="ftot",
+                        filename="loading_Sys$(si)", fieldname="Ftot",
                         filenameout=rotor_name*"_Sys$(si)",
                         # PROCESSING OPTIONS
                         period=nothing,
