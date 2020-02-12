@@ -28,7 +28,7 @@ NOTE2: `dt` must be the same time step than specified in the PSU-WOPWOP driver.
 function generate_wopwoploading(read_path, save_path, nums;
                                 # INPUT OPTIONS
                                 # nums=collect(0:72*6-1),
-                                filename="loading_Sys1", fieldname="ftot",
+                                filename="loading_Sys1", fieldname="Ftot",
                                 filenameout="singlerotor_Sys1",
                                 # OUTPUT OPTIONS
                                 # save_path=extdrive_path*"val_piv_single16_cont3_wopwop01/",
