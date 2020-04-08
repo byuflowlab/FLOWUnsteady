@@ -1,0 +1,8 @@
+property,file,description
+chorddist,propturbo-M600_chorddist.csv, Chord distribution
+pitchdist,propturbo-M600_pitchdist.csv, Pitch distribution
+sweepdist,propturbo-M600_sweepdist.csv, LE sweep distribution
+heightdist,propturbo-M600_heightdist.csv, LE height distribution
+airfoil_files,propturbo-M600_airfoils.csv, Airfoil distribution
+spl_k,4,  Spline order
+spl_s,5.0e-7, Spline smoothing

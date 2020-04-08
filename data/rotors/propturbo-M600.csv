@@ -1,0 +1,5 @@
+property,file,description
+Rtip,1.0, (m) Radius of blade tip
+Rhub,0.212, (m) Radius of hub
+B,3, Number of blades
+blade,propturbo-M600_blade.csv, Blade file
