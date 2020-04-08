@@ -89,7 +89,7 @@ function generate_maneuver_windcraft_kinematic(nrevs;
         tsr = 4.0
         R = 1.0
 
-        v = Vaircraft(t)
+        v = Vvehicle(t)
         vmag = sqrt(v[1]^2 + v[2]^2 + v[3]^2)
         omega = tsr*vmag/R
         rpm = omega*pi/30

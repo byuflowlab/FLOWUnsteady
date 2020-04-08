@@ -47,7 +47,7 @@ end
     Visualize kinematic maneuver of the windcraft: saves it as vtk files, and
     calls Paraview visualizing the vehicle path.
 """
-function visualize_maneuver_windcraft_kinematic(; save_path=extdrive_path*"windcraft_maneuver00/",
+function visualize_maneuver_windcraft_kinematic(; save_path=extdrive_path*"windcraft_maneuver01/",
                                                     prompt=true,
                                                     run_name="windcraft",
                                                     verbose=true, v_lvl=0,
@@ -55,18 +55,18 @@ function visualize_maneuver_windcraft_kinematic(; save_path=extdrive_path*"windc
 
     # Geometry parameters
     includewing     = true
-    includetail     = false
-    includepylons   = false
-    includerotors   = false
-    numrotors       = 1
-    inlinerotors    = false
+    includetail     = true
+    includepylons   = true
+    includerotors   = true
+    numrotors       = 8
+    inlinerotors    = true
     includecontrols = true
 
     # Maneuver parameters
     Vref            = 40.0              # (m/s) reference (maximum) velocity
     t_per_rev       = 15.0              # (s) time of one full revolution
     # t_per_rev       = pi*135.0/40.0
-    nrevs           = 2.5               # Revolutions to simulate
+    nrevs           = 2.0               # Revolutions to simulate
     RPMref          = 4.0*40.0*30/pi    # Reference RPM: 40m/s with tip speed ratio of 4
     ttot            = nrevs*t_per_rev   # (s) total time to perform maneuver
     nsteps          = 120               # Time steps
