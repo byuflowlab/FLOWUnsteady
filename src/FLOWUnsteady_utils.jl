@@ -227,7 +227,7 @@ function visualize_kinematics(sim::Simulation{V, KinematicManeuver{N, M}, R},
 
     # Tweak vtk string to be a time sequence
     if nsteps>1
-        strn = replace(strn, ".$(nsteps).", "...")
+        strn = replace(strn, ".$(nsteps-1).", "...")
     end
 
     # Call paraview

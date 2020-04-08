@@ -15,14 +15,14 @@ function generate_maneuver_windcraft_kinematic(; disp_plot=false,
                                                  includecontrols=true,
                                                  includerotors=true)
 
-    omegamax = pi/180 * maximum(omegastar.(linspace(0, 1, 361)))
+    omegamax = maximum(omegastar.(linspace(0, 1, 361)))
 
     ############################################################################
     # AIRCRAFT VELOCITY
     ############################################################################
     """
-     Receives a nondimensional time between 0 and 1, and returns the
-     vector of velocity of the vehicle at that instant.
+        Receives a nondimensional time between 0 and 1, and returns the
+        vector of velocity of the vehicle at that instant.
     """
     function Vvehicle(t)
 
@@ -158,6 +158,19 @@ function thetastar(tstar; theta0=0.0, thetan=360.0, omegan=[4.0/9.0;20.0/27.0;4.
 
     return theta
 end
+
+# function omegastar(tstar, omegan=[4.0/9.0;20.0/27.0;4.0/9.0], tn=[0.0;0.5;1.0])
+#     #initialize omega
+#     omega = 0.0
+#     for i=2:length(tn)
+#         if tstar == tn[1]
+#             omega = omegan[1]
+#         elseif tstar > tn[i-1] && tstar <= tn[i]
+#             omega = omegan[i-1] + (omegan[i]-omegan[i-1]) * (tstar-tn[i-1])/(tn[i]-tn[i-1])
+#         end
+#     end
+#     return omega
+# end
 
 function omegastar(tstar; h=1e-8, optargs...)
     return (thetastar(tstar+h; optargs...)-thetastar(tstar; optargs...))/h
