@@ -13,7 +13,7 @@
     Generates the geometry of M600 windcraft
 """
 function generate_geometry_windcraft(;  # INCLUSION OPTIONS:
-                                        circlepath      = false,
+                                        circlepath      = true,
                                         includewing     = true,
                                         wingalpha       = 4.0,
                                         includetail     = true,
@@ -349,7 +349,7 @@ function generate_geometry_windcraft(;  # INCLUSION OPTIONS:
 
     #make dummy rotor in case there aren't any
     rotors = vlm.Rotor[]
-    rotors_systems = ()
+    rotor_systems = ()
 
     #if we want rotors, generate them and add them to the wing system here
     if includerotors == true
@@ -412,7 +412,7 @@ function generate_geometry_windcraft(;  # INCLUSION OPTIONS:
         # --- Define rotor system --- #
         gt.verbalize("Creating Rotor System...", v_lvl, verbose)
         # Rotors grouped by systems of the same RPM
-        rotors_systems = (rotors,)
+        rotor_systems = (rotors,)
     end #if adding rotors
 
 
@@ -529,12 +529,21 @@ function generate_geometry_windcraft(;  # INCLUSION OPTIONS:
     # Tilting systems
     gt.verbalize("Creating Tilting System...", v_lvl, verbose)
     if includetail == true
-        tilting_systems = (rightaileron,rightflap,leftflap,leftaileron,rudder,horizontalstabilizer)
+        tilting_wings = (rightaileron,rightflap,leftflap,leftaileron,rudder,horizontalstabilizer)
     elseif includewing == true && includecontrols == true
-        tilting_systems = (rightaileron,rightflap,leftflap,leftaileron)
+        tilting_wings = (rightaileron,rightflap,leftflap,leftaileron)
     else
-        tilting_systems = ()
+        tilting_wings = ()
     end
+
+    # Convert the Wings into WingSystems
+    tilting_systems = []
+    for (wi, wing) in enumerate(tilting_wings)
+        sys = vlm.WingSystem()
+        vlm.addwing(sys, "TiltWing$wi", wing)
+        push!(tilting_systems, sys)
+    end
+    tilting_systems = Tuple(tilting_systems)
 
 
     gt.verbalize("Creating Wake System...", v_lvl, verbose)
@@ -557,8 +566,7 @@ function generate_geometry_windcraft(;  # INCLUSION OPTIONS:
         mainwinghorshoeypos = []
     end
 
-
-    return (system, rotors, tilting_systems, rotors_systems, vlm_system, wake_system, mainwing, mainwingspan, mainwingAR, mainwinghorshoeypos)
+    return (system, vlm_system, rotors, tilting_systems, rotor_systems, wake_system)
 
 end
 
