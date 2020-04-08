@@ -9,27 +9,30 @@
   * License   : MIT
 =###############################################################################
 
-function generate_maneuver_windcraft_kinematic(; disp_plot=false,
+function generate_maneuver_windcraft_kinematic(nrevs;
+                                                 disp_plot=false,
                                                  includetail=true,
                                                  includewing=true,
                                                  includecontrols=true,
                                                  includerotors=true)
 
+    omegamax = pi/180 * maximum(omegastar.(linspace(0, 1, 361), nrevs))
+
     ############################################################################
     # AIRCRAFT VELOCITY
     ############################################################################
     """
-        Receives a nondimensional time between 0 and 1, and returns the
-        vector of velocity of the vehicle at that instant.
+     Receives a nondimensional time between 0 and 1, and returns the
+     vector of velocity of the vehicle at that instant.
     """
     function Vvehicle(t)
 
-        omega = omegastar(t)*pi/180
-        Vmag = (omega*135.0/2.0)/40.0           # V = omega*r/Vref
-        theta = thetastar(t)*pi/180
+        theta = thetastar_periodic(t, nrevs)*pi/180
+        omega = omegastar(t, nrevs)*pi/180
+        scaling = omega/omegamax                # Scales velocity to a maximum value of 1
 
         Vcomp = [0.0, cos(theta), -sin(theta)]  # Counter-clockwise rotation
-        return Vmag*Vcomp
+        return scaling*Vcomp
     end
 
     ############################################################################
@@ -42,9 +45,9 @@ function generate_maneuver_windcraft_kinematic(; disp_plot=false,
     """
     function anglevehicle(t)
 
-        angle = [0.0, 0.0, thetastar(abs(t))]
+        angle = [0.0, 0.0, thetastar_periodic(abs(t), nrevs)]
 
-        if t <=0.0
+        if t < 0.0
             return -angle
         else
             return angle
@@ -157,19 +160,16 @@ function thetastar(tstar; theta0=0.0, thetan=360.0, omegan=[4.0/9.0;20.0/27.0;4.
     return theta
 end
 
-# function omegastar(tstar, omegan=[4.0/9.0;20.0/27.0;4.0/9.0], tn=[0.0;0.5;1.0])
-#     #initialize omega
-#     omega = 0.0
-#     for i=2:length(tn)
-#         if tstar == tn[1]
-#             omega = omegan[1]
-#         elseif tstar > tn[i-1] && tstar <= tn[i]
-#             omega = omegan[i-1] + (omegan[i]-omegan[i-1]) * (tstar-tn[i-1])/(tn[i]-tn[i-1])
-#         end
-#     end
-#     return omega
-# end
+"""
+Transform time of thetastar and make it periodic to extend the angle output
+outside the range [0, 360]
+"""
+function thetastar_periodic(t, nrevs; optargs...)
+    tstar = (t*nrevs)%1    # Convert general time to time of one revolution
+    return 360*floor(t*nrevs) + thetastar(tstar; optargs...)
+end
 
-function omegastar(tstar; h=1e-8, optargs...)
-    return (thetastar(tstar+h; optargs...)-thetastar(tstar; optargs...))/h
+function omegastar(tstar, nrevs; h=1e-8, optargs...)
+    return (thetastar_periodic(tstar+h, nrevs; optargs...)
+                - thetastar_periodic(tstar, nrevs; optargs...))/h
 end

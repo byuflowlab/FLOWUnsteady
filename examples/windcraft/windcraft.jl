@@ -63,19 +63,18 @@ function visualize_maneuver_windcraft_kinematic(; save_path=extdrive_path*"windc
     includecontrols = true
 
     # Maneuver parameters
-    R               = 135/2             # (m) Radius of circular path
-    t_per_rev       = 22.0              # (s) time of one full revolution
-    revs            = 3.0               # Revolutions to simulate
-
-    Vref            = 40.0              # (m/s) reference velocity
+    Vref            = 40.0              # (m/s) reference (maximum) velocity
+    t_per_rev       = 15.0              # (s) time of one full revolution
+    # t_per_rev       = pi*135.0/40.0
+    nrevs           = 2.5               # Revolutions to simulate
     RPMref          = 4.0*40.0*30/pi    # Reference RPM: 40m/s with tip speed ratio of 4
-    ttot            = pi*135.0/40.0     # (s) total time to perform maneuver
+    ttot            = nrevs*t_per_rev   # (s) total time to perform maneuver
     nsteps          = 120               # Time steps
 
     # Generate maneuver
     gt.verbalize("MANEUVER GENERATION", v_lvl, verbose)
 
-    maneuver = generate_maneuver_windcraft_kinematic(t_per_rev, revs;
+    maneuver = generate_maneuver_windcraft_kinematic(nrevs;
                                                        disp_plot        = false,
                                                        includetail      = includetail,
                                                        includewing      = includewing,
