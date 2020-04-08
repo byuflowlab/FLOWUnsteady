@@ -29,7 +29,7 @@ using PyPlot
 
 # ------------ GLOBAL VARIABLES ------------------------------------------------
 # Default path where to save data
-extdrive_path = "/media/edoalvar/MyExtDrive/simulationdata6/"
+extdrive_path = "/media/edoalvar/MyExtDrive/simulationdata7/"
 # extdrive_path = "temps/"
 
 
@@ -47,7 +47,7 @@ end
     Visualize kinematic maneuver of the windcraft: saves it as vtk files, and
     calls Paraview visualizing the vehicle path.
 """
-function visualize_maneuver_windcraft_kinematic(; save_path=extdrive_path*"windcraft_maneuver01/",
+function visualize_maneuver_windcraft_kinematic(; save_path=extdrive_path*"windcraft_maneuver03/",
                                                     prompt=true,
                                                     run_name="windcraft",
                                                     verbose=true, v_lvl=0,
@@ -63,13 +63,20 @@ function visualize_maneuver_windcraft_kinematic(; save_path=extdrive_path*"windc
     includecontrols = true
 
     # Maneuver parameters
-    Vref            = 40.0              # (m/s) reference (maximum) velocity
-    t_per_rev       = 15.0              # (s) time of one full revolution
-    # t_per_rev       = pi*135.0/40.0
+    R               = 135/2             # (m) radius of circle
+    t_per_rev       = 11.0              # (s) time of one full revolution
     nrevs           = 2.0               # Revolutions to simulate
     RPMref          = 4.0*40.0*30/pi    # Reference RPM: 40m/s with tip speed ratio of 4
+
+    Vmean           = 2*pi*R/t_per_rev  # (m/s) mean velocity along a full circle
     ttot            = nrevs*t_per_rev   # (s) total time to perform maneuver
     nsteps          = 120               # Time steps
+
+    # Circular path parameters
+    theta0          = 0.0
+    thetan          = 360.0
+    omegan          = [4.0/9.0, 20.0/27.0, 4.0/9.0]
+    tn              = [0.0, 0.5, 1.0]
 
     # Generate maneuver
     gt.verbalize("MANEUVER GENERATION", v_lvl, verbose)
@@ -79,7 +86,11 @@ function visualize_maneuver_windcraft_kinematic(; save_path=extdrive_path*"windc
                                                        includetail      = includetail,
                                                        includewing      = includewing,
                                                        includecontrols  = includecontrols,
-                                                       includerotors    = includerotors)
+                                                       includerotors    = includerotors,
+                                                       theta0           = theta0,
+                                                       thetan           = thetan,
+                                                       omegan           = omegan,
+                                                       tn               = tn)
 
     # Plot maneuver path and controls
     uns.plot_maneuver(maneuver; tstages=[])
@@ -115,6 +126,7 @@ function visualize_maneuver_windcraft_kinematic(; save_path=extdrive_path*"windc
     # Simulation setup
     gt.verbalize("SIMULATION GENERATION", v_lvl, verbose)
 
+    Vref = Vmean                            # (m/s) reference velocity
     Vinit = Vref*maneuver.Vvehicle(0)       # (m/s) initial vehicle velocity
                                             # (rad/s) initial vehicle angular velocity
     Winit = pi/180 * (maneuver.anglevehicle(0+1e-12)-maneuver.anglevehicle(0))/(ttot*1e-12)

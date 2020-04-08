@@ -14,9 +14,10 @@ function generate_maneuver_windcraft_kinematic(nrevs;
                                                  includetail=true,
                                                  includewing=true,
                                                  includecontrols=true,
-                                                 includerotors=true)
+                                                 includerotors=true,
+                                                 optargs...)
 
-    omegamax = pi/180 * maximum(omegastar.(linspace(0, 1, 361), nrevs))
+    omegamean = pi/180 * mean(omegastar.(linspace(0, 1, 361); optargs...))
 
     ############################################################################
     # AIRCRAFT VELOCITY
@@ -27,9 +28,9 @@ function generate_maneuver_windcraft_kinematic(nrevs;
     """
     function Vvehicle(t)
 
-        theta = thetastar_periodic(t, nrevs)*pi/180
-        omega = omegastar(t, nrevs)*pi/180
-        scaling = omega/omegamax                # Scales velocity to a maximum value of 1
+        theta = thetastar_periodic(t, nrevs; optargs...)*pi/180
+        omega = omegastar_periodic(t, nrevs; optargs...)*pi/180
+        scaling = omega/omegamean               # Scales velocity to a maximum value of 1
 
         Vcomp = [0.0, cos(theta), -sin(theta)]  # Counter-clockwise rotation
         return scaling*Vcomp
@@ -45,7 +46,7 @@ function generate_maneuver_windcraft_kinematic(nrevs;
     """
     function anglevehicle(t)
 
-        angle = [0.0, 0.0, thetastar_periodic(abs(t), nrevs)]
+        angle = [0.0, 0.0, thetastar_periodic(abs(t), nrevs; optargs...)]
 
         if t < 0.0
             return -angle
@@ -160,6 +161,10 @@ function thetastar(tstar; theta0=0.0, thetan=360.0, omegan=[4.0/9.0;20.0/27.0;4.
     return theta
 end
 
+function omegastar(tstar; h=1e-8, optargs...)
+    return (thetastar(tstar+h; optargs...) - thetastar(tstar; optargs...))/h
+end
+
 """
 Transform time of thetastar and make it periodic to extend the angle output
 outside the range [0, 360]
@@ -169,7 +174,7 @@ function thetastar_periodic(t, nrevs; optargs...)
     return 360*floor(t*nrevs) + thetastar(tstar; optargs...)
 end
 
-function omegastar(tstar, nrevs; h=1e-8, optargs...)
+function omegastar_periodic(tstar, nrevs; h=1e-8, optargs...)
     return (thetastar_periodic(tstar+h, nrevs; optargs...)
                 - thetastar_periodic(tstar, nrevs; optargs...))/h
 end
