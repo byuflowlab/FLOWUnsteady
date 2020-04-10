@@ -1,8 +1,21 @@
+#=##############################################################################
+# DESCRIPTION
+    Vehicle with vortex-lattice method (VLM) and VPM-based propeller models
+    shedding VPM wakes.
+
+# AUTHORSHIP
+  * Author    : Eduardo J. Alvarez
+  * Email     : Edo.AlvarezR@gmail.com
+  * Created   : Oct 2019
+  * License   : MIT
+=###############################################################################
+
+
 ################################################################################
 # VLM VEHICLE TYPE
 ################################################################################
 """
-    `Vehicle(system; optargs...)`
+    `VLMVehicle(system; optargs...)`
 
 Type handling all geometries and subsystems that define a flight vehicle made
 out of VLM (Wing, WingSystem, Rotor) components.
