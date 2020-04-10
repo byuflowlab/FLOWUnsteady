@@ -29,7 +29,7 @@ using PyPlot
 
 # ------------ GLOBAL VARIABLES ------------------------------------------------
 # Default path where to save data
-extdrive_path = "/media/edoalvar/MyExtDrive/simulationdata7/"
+extdrive_path = extdrive_path = "/Volumes/Visuals/" #"/media/edoalvar/MyExtDrive/simulationdata7/"
 # extdrive_path = "temps/"
 
 
@@ -59,7 +59,7 @@ function visualize_maneuver_windcraft_kinematic(; save_path=extdrive_path*"windc
     includepylons   = true
     includerotors   = true
     numrotors       = 8
-    inlinerotors    = true
+    inlinerotors    = false
     includecontrols = true
 
     # Maneuver parameters
