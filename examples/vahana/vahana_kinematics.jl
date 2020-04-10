@@ -10,7 +10,7 @@
 =###############################################################################
 
 
-function generate_maneuver_vahana1(; disp_plot=false)
+function generate_maneuver_vahana1(; disp_plot=false, add_rotors=true)
 
     # NOTE: All of the following number are non-dimensional and scaled between
     # 0 and 1, with 0 and 1 beginning and end of simulation, or a scaling
@@ -350,9 +350,11 @@ function generate_maneuver_vahana1(; disp_plot=false)
     # MANEUVER OBJECT
     ############################################################################
     angle = (angle_main, angle_tandem)
-    warn("Remember to add rotors RPM")
-    # RPM = (RPM_main, RPM_tandem)
-    RPM = ()
+    if add_rotors
+        RPM = (RPM_main, RPM_tandem)
+    else
+        RPM = ()
+    end
     Vvehicle = Vaircraft
     anglevehicle = angleaircraft
 

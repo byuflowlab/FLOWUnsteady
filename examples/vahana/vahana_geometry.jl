@@ -51,9 +51,10 @@ function generate_geometry_vahana(;
                                     # AIRCRAFT OPTIONS
                                     rotor_file="apc10x7Vahana.csv", # Rotor
                                     # rotor_file="DJI-IIVahana.csv",
-                                    data_path=data_path,
+                                    data_path=uns.def_data_path,
                                     xfoil=true,                     # Run XFOIL
                                     n_factor::Int=1,                # Refinement factor
+                                    add_rotors=true,
                                     # OUTPUT OPTIONS
                                     run_name="vahana",
                                     verbose=true, v_lvl=0)
@@ -162,20 +163,22 @@ function generate_geometry_vahana(;
 
     # ------------ ROTORS ------------------------------------------------
     # Generates base propellers (one on each rotation orientation)
-    propellers = vlm.Rotor[]
-    if verbose; println("\t"^(v_lvl+1)*"Generating first propeller..."); end;
-    push!(propellers, uns.generate_rotor(rotor_file; pitch=pitch,
-                                            n=n_ccb, CW=!CW_w, ReD=ReD,
-                                            verbose=verbose, xfoil=xfoil,
-                                            data_path=data_path, plot_disc=false))
-    if verbose; println("\t"^(v_lvl+1)*"Generating second propeller..."); end;
-    # push!(propellers, generate_rotor(pitch; n=n_ccb, CW=CW_w, ReD=ReD,
-    #                         verbose=verbose, xfoil=xfoil, rotor_file=rotor_file))
-    push!(propellers, vlm.Rotor(!propellers[1].CW, propellers[1].r,
-                              propellers[1].chord, propellers[1].theta,
-                              propellers[1].LE_x, propellers[1].LE_z,
-                              propellers[1].B, propellers[1].airfoils))
-    vlm.initialize(propellers[2], propellers[1].m)
+    if add_rotors
+        propellers = vlm.Rotor[]
+        if verbose; println("\t"^(v_lvl+1)*"Generating first propeller..."); end;
+        push!(propellers, uns.generate_rotor(rotor_file; pitch=pitch,
+                                                n=n_ccb, CW=!CW_w, ReD=ReD,
+                                                verbose=verbose, xfoil=xfoil,
+                                                data_path=data_path, plot_disc=false))
+        if verbose; println("\t"^(v_lvl+1)*"Generating second propeller..."); end;
+        # push!(propellers, generate_rotor(pitch; n=n_ccb, CW=CW_w, ReD=ReD,
+        #                         verbose=verbose, xfoil=xfoil, rotor_file=rotor_file))
+        push!(propellers, vlm.Rotor(!propellers[1].CW, propellers[1].r,
+                                  propellers[1].chord, propellers[1].theta,
+                                  propellers[1].LE_x, propellers[1].LE_z,
+                                  propellers[1].B, propellers[1].airfoils))
+        vlm.initialize(propellers[2], propellers[1].m)
+    end
 
 
     # ------------ MAIN WING ---------------------------------------------
@@ -228,29 +231,31 @@ function generate_geometry_vahana(;
     vlm.setcoordsystem(winglet_L, O_wl_L, Oaxis_wl_L)
 
     ## Generates propellers on wing (from right to left)
-    if verbose; println("\t"^(v_lvl+2)*"Generating main wing propellers..."); end;
-    O_prop_w = [ ypos*[tan(lambda_w*pi/180), 1, tan(gamma_w*pi/180)] + [-xoc_offset*AR_w/b_w, 0, 0]
-                                              for ypos in y_pos_prop_w]
-    props_w = vlm.Rotor[]
-    for i in 1:2*np_w
-        right = i<=np_w    # Indicates wich side of the wing
-        copy_prop = propellers[1+i%2]
-        this_prop = deepcopy(copy_prop) # Alternates rotation orientation
-        this_O = O_prop_w[ right ? i : np_w-(i-np_w-1)] # Chooses position
-        this_O = [1 0 0; 0 (-1)^!right 0; 0 0 1]*this_O   # Places it in correct side
+    if add_rotors
+        if verbose; println("\t"^(v_lvl+2)*"Generating main wing propellers..."); end;
+        O_prop_w = [ ypos*[tan(lambda_w*pi/180), 1, tan(gamma_w*pi/180)] + [-xoc_offset*AR_w/b_w, 0, 0]
+                                                  for ypos in y_pos_prop_w]
+        props_w = vlm.Rotor[]
+        for i in 1:2*np_w
+            right = i<=np_w    # Indicates which side of the wing
+            copy_prop = propellers[1+i%2]
+            this_prop = deepcopy(copy_prop) # Alternates rotation orientation
+            this_O = O_prop_w[ right ? i : np_w-(i-np_w-1)] # Chooses position
+            this_O = [1 0 0; 0 (-1)^!right 0; 0 0 1]*this_O   # Places it in correct side
 
-        vlm.setcoordsystem(this_prop, this_O, Float64[1 0 0; 0 1 0; 0 0 1]; user=true)
+            vlm.setcoordsystem(this_prop, this_O, Float64[1 0 0; 0 1 0; 0 0 1]; user=true)
 
-        # Rotates props to be tip to tip
-        vlm.rotate(this_prop, (-1)^(!CW_w) * init_ori_prop)
+            # Rotates props to be tip to tip
+            vlm.rotate(this_prop, (-1)^(!CW_w) * init_ori_prop)
 
-        # Adds the original polars that don't get copied in deepcopy
-        this_prop.airfoils = copy_prop.airfoils
-        this_prop._polars = copy_prop._polars
-        this_prop._polarroot = copy_prop._polarroot
-        this_prop._polartip = copy_prop._polartip
+            # Adds the original polars that don't get copied in deepcopy
+            this_prop.airfoils = copy_prop.airfoils
+            this_prop._polars = copy_prop._polars
+            this_prop._polarroot = copy_prop._polarroot
+            this_prop._polartip = copy_prop._polartip
 
-        push!(props_w, this_prop)
+            push!(props_w, this_prop)
+        end
     end
 
     # Assembles moving sections of the wing
@@ -259,10 +264,11 @@ function generate_geometry_vahana(;
     vlm.addwing(main_wing_moving, "WingletR", winglet_R)
     vlm.addwing(main_wing_moving, "WingL", wing_L)
     vlm.addwing(main_wing_moving, "WingletL", winglet_L)
-    warn("Add prop1")
-    # for (i, prop) in enumerate(props_w)
-    #     vlm.addwing(main_wing_moving, "Prop$i", prop)
-    # end
+    if add_rotors
+        for (i, prop) in enumerate(props_w)
+            vlm.addwing(main_wing_moving, "Prop$i", prop)
+        end
+    end
 
     # offset to align with pivot line
     x_off_w = pivot_w*b_w/AR_w
@@ -333,39 +339,42 @@ function generate_geometry_vahana(;
                                     _ign1=true)
 
     ## Generates propellers on tandem wing (from right to left)
-    if verbose; println("\t"^(v_lvl+2)*"Generating tandem wing propellers..."); end;
-    O_prop_tw = [ ypos*[tan(lambda_tw*pi/180), 1, tan(gamma_tw*pi/180)] + [-xoc_offset*AR_tw/b_tw, 0, 0]
-                                              for ypos in y_pos_prop_tw]
-    props_tw = vlm.Rotor[]
-    for i in 1:2*np_tw
-        right = i<=np_tw    # Indicates wich side of the wing
-        copy_prop = propellers[1+(i+(CW_tw!=CW_w))%2]
-        this_prop = deepcopy(copy_prop)       # Alternates rotation orientation
-        this_O = O_prop_tw[ right ? i : np_tw-(i-np_tw-1)] # Chooses position
-        this_O = [1 0 0; 0 (-1)^!right 0; 0 0 1]*this_O   # Places it in correct side
+    if add_rotors
+        if verbose; println("\t"^(v_lvl+2)*"Generating tandem wing propellers..."); end;
+        O_prop_tw = [ ypos*[tan(lambda_tw*pi/180), 1, tan(gamma_tw*pi/180)] + [-xoc_offset*AR_tw/b_tw, 0, 0]
+                                                  for ypos in y_pos_prop_tw]
+        props_tw = vlm.Rotor[]
+        for i in 1:2*np_tw
+            right = i<=np_tw    # Indicates which side of the wing
+            copy_prop = propellers[1+(i+(CW_tw!=CW_w))%2]
+            this_prop = deepcopy(copy_prop)       # Alternates rotation orientation
+            this_O = O_prop_tw[ right ? i : np_tw-(i-np_tw-1)] # Chooses position
+            this_O = [1 0 0; 0 (-1)^!right 0; 0 0 1]*this_O   # Places it in correct side
 
-        vlm.setcoordsystem(this_prop, this_O, Float64[1 0 0; 0 1 0; 0 0 1]; user=true)
+            vlm.setcoordsystem(this_prop, this_O, Float64[1 0 0; 0 1 0; 0 0 1]; user=true)
 
-        # Rotates props to be tip to tip
-        vlm.rotate(this_prop, (-1)^(!CW_tw) * init_ori_prop)
+            # Rotates props to be tip to tip
+            vlm.rotate(this_prop, (-1)^(!CW_tw) * init_ori_prop)
 
-        # Adds the original polars that don't get copied in deepcopy
-        this_prop.airfoils = copy_prop.airfoils
-        this_prop._polars = copy_prop._polars
-        this_prop._polarroot = copy_prop._polarroot
-        this_prop._polartip = copy_prop._polartip
+            # Adds the original polars that don't get copied in deepcopy
+            this_prop.airfoils = copy_prop.airfoils
+            this_prop._polars = copy_prop._polars
+            this_prop._polarroot = copy_prop._polarroot
+            this_prop._polartip = copy_prop._polartip
 
-        push!(props_tw, this_prop)
+            push!(props_tw, this_prop)
+        end
     end
 
     # Assembles moving sections of the wing
     tandem_wing_moving = vlm.WingSystem()
     vlm.addwing(tandem_wing_moving, "WingR", twing_R)
     vlm.addwing(tandem_wing_moving, "WingL", twing_L)
-    warn("Add prop2")
-    # for (i, prop) in enumerate(props_tw)
-    #     vlm.addwing(tandem_wing_moving, "Prop$i", prop)
-    # end
+    if add_rotors
+        for (i, prop) in enumerate(props_tw)
+            vlm.addwing(tandem_wing_moving, "Prop$i", prop)
+        end
+    end
 
     # offset to align with pivot line
     x_off_tw = pivot_tw*b_tw/AR_tw
@@ -417,7 +426,9 @@ function generate_geometry_vahana(;
     vlm.addwing(system, "MainWing", main_wing)
     vlm.addwing(system, "TandemWing", tandem_wing)
 
-    rotors = vcat(props_w, props_tw)
+    if add_rotors
+        rotors = vcat(props_w, props_tw)
+    end
 
     # ------------ GROUND SURFACE ----------------------------------------
     ground1 = generate_ground_vahana(l_f)          # Take-off pad
@@ -431,9 +442,11 @@ function generate_geometry_vahana(;
     tilting_systems = (main_wing_moving, tandem_wing_moving)
 
     # Rotors grouped by systems of the same RPM
-    warn("Remember to add rotor systems")
-    # rotor_systems = (props_w, props_tw)
-    rotor_systems = ()
+    if add_rotors
+        rotor_systems = (props_w, props_tw)
+    else
+        rotor_systems = ()
+    end
 
     # System to solve through the VLM solver
     vlm_system = vlm.WingSystem()
@@ -446,11 +459,12 @@ function generate_geometry_vahana(;
 
     # Wake-shedding system (`vlm_system`+`rotors`)
     wake_system = vlm.WingSystem()
-    # vlm.addwing(wake_system, "SolveVLM", vlm_system)
-    warn("Remember to add rotors to wake system")
-    # for (i, rotor) in enumerate(rotors)
-    #     vlm.addwing(wake_system, "Rotor$i", rotor)
-    # end
+    vlm.addwing(wake_system, "SolveVLM", vlm_system)
+    if add_rotors
+        for (i, rotor) in enumerate(rotors)
+            vlm.addwing(wake_system, "Rotor$i", rotor)
+        end
+    end
 
     # Dummy grids that are rotated and translated along with the vehicle
     grids = [fuselage]
