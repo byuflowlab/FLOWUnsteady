@@ -35,12 +35,15 @@ attempting to shed separation wakes.
 For validation and numerical recommendations, check this notebook in the
 documentation: [`docs/validation.ipynb`](https://nbviewer.jupyter.org/github/byuflowlab/FlightVehicleSim/blob/master/docs/validation.ipynb).
 
+For example simulations, check this notebook: [`docs/examples.ipynb`](https://nbviewer.jupyter.org/github/byuflowlab/FlightVehicleSim/blob/master/docs/examples.ipynb).
+
 # Folders and Files
   * `src/`: Source code.
   * `examples/`: Example simulations.
   * `docs/`: Documentation (open Jupyter notebooks with [nbviewer](https://nbviewer.jupyter.org/)).
     - `docs/instructions-setup.md`: Instructions for setting up this package.
-    - [`docs/validation.ipynb`](https://nbviewer.jupyter.org/github/byuflowlab/FlightVehicleSim/blob/master/docs/validation.ipynb): Validation of models implemented in this package, and numeric observations.
+    - [`docs/validation.ipynb`](https://nbviewer.jupyter.org/github/byuflowlab/FlightVehicleSim/blob/master/docs/validation.ipynb): Validation of models implemented in this package and numeric observations.
+    - [`docs/examples.ipynb`](https://nbviewer.jupyter.org/github/byuflowlab/FlightVehicleSim/blob/master/docs/examples.ipynb): Results of example simulations.
 
 # Dependencies
   * [`GeometricTools`](https://github.com/byuflowlab/GeometricTools.jl)
