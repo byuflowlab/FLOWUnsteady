@@ -286,6 +286,7 @@ function bertin_kinematic(;   # TEST OPTIONS
                         surf_fsgm=0.046,
                         p_per_step = 1,
                         vlm_rlx = -1,
+                        VehicleType=uns.VLMVehicle,
                         # OUTPUT OPTIONS
                         save_path=nothing,
                         run_name="bertins",
@@ -377,7 +378,7 @@ function bertin_kinematic(;   # TEST OPTIONS
     wake_system = system        # System that will shed a VPM wake
 
     # Vehicle definition
-    vehicle = uns.VLMVehicle(   system;
+    vehicle = VehicleType(      system;
                                 vlm_system=vlm_system,
                                 wake_system=wake_system
                              )
@@ -493,7 +494,9 @@ function bertin_kinematic(;   # TEST OPTIONS
             if wake_coupled && PFIELD.nt!=0
                 subplot(122)
                 plot(y2b, norm.(wing.sol["Vkin"])/magVinf, "-", label="FLOWVLM", alpha=0.5, color=[clr[1], 1, clr[3]])
-                plot(y2b, norm.(wing.sol["Vvpm"]), "-", label="FLOWVLM", alpha=0.5, color=clr)
+                if VehicleType==uns.VLMVehicle
+                    plot(y2b, norm.(wing.sol["Vvpm"]), "-", label="FLOWVLM", alpha=0.5, color=clr)
+                end
                 plot(y2b, [norm(Vinf(vlm.getControlPoint(wing, i), T)) for i in 1:vlm.get_m(wing)],
                                                             "-k", label="FLOWVLM", alpha=0.5)
             end

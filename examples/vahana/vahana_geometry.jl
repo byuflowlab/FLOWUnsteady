@@ -55,6 +55,7 @@ function generate_geometry_vahana(;
                                     xfoil=true,                     # Run XFOIL
                                     n_factor::Int=1,                # Refinement factor
                                     add_rotors=true,
+                                    VehicleType=uns.VLMVehicle,     # Type of vehicle to generate
                                     # OUTPUT OPTIONS
                                     run_name="vahana",
                                     verbose=true, v_lvl=0)
@@ -470,7 +471,7 @@ function generate_geometry_vahana(;
     grids = [fuselage]
 
     # FVS's Vehicle object
-    vehicle = uns.VLMVehicle(   system;
+    vehicle = VehicleType(   system;
                                 tilting_systems=tilting_systems,
                                 rotor_systems=rotor_systems,
                                 vlm_system=vlm_system,

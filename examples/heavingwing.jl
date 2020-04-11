@@ -24,14 +24,15 @@ using PyPlot
 
 # ------------ GLOBAL VARIABLES ------------------------------------------------
 # Default path where to save data
-extdrive_path = "/media/edoalvar/MyExtDrive/simulationdata5/"
+extdrive_path = "/media/edoalvar/MyExtDrive/simulationdata7/"
 
 
 
 # ------------ DRIVERS ---------------------------------------------------------
 function run_heavingwing()
     heavingwing(; nsteps=400, p_per_step=1, vlm_rlx=0.75,
-                    save_path=extdrive_path*"bertinsheaving12/",
+                    VehicleType=uns.QVLMVehicle,
+                    save_path=extdrive_path*"bertinsheaving20/",
                     verbose=true, disp_plot=true)
 end
 
@@ -42,6 +43,7 @@ end
     heaving motion.
 """
 function heavingwing(;   # TEST OPTIONS
+                        VehicleType=uns.VLMVehicle,
                         tol=0.025,
                         wake_coupled=true,
                         nsteps=150,
@@ -126,7 +128,7 @@ function heavingwing(;   # TEST OPTIONS
     wake_system = system        # System that will shed a VPM wake
 
     # Vehicle definition
-    vehicle = uns.VLMVehicle(   system;
+    vehicle = VehicleType(      system;
                                 vlm_system=vlm_system,
                                 wake_system=wake_system
                              )
@@ -290,7 +292,9 @@ function heavingwing(;   # TEST OPTIONS
             if wake_coupled && PFIELD.nt!=0
                 subplot(122)
                 plot(y2b, norm.(wing.sol["Vkin"])/magVinf, "-", label="FLOWVLM", alpha=0.5, color=[clr[1], 1, clr[3]])
-                plot(y2b, norm.(wing.sol["Vvpm"]), "-", label="FLOWVLM", alpha=0.5, color=clr)
+                if VehicleType==uns.VLMVehicle
+                    plot(y2b, norm.(wing.sol["Vvpm"]), "-", label="FLOWVLM", alpha=0.5, color=clr)
+                end
                 plot(y2b, [norm(Vinf(vlm.getControlPoint(wing, i), T)) for i in 1:vlm.get_m(wing)],
                                                             "-k", label="FLOWVLM", alpha=0.5)
             end
