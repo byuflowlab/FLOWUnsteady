@@ -1,131 +1,88 @@
 #=##############################################################################
 # DESCRIPTION
-    Vehicle with vortex-lattice method (VLM) and VPM-based propeller models
-    shedding VPM wakes.
+    Vehicles based on FLOWVLM (VLM and blade-element) models.
 
 # AUTHORSHIP
   * Author    : Eduardo J. Alvarez
   * Email     : Edo.AlvarezR@gmail.com
-  * Created   : Oct 2019
+  * Created   : Apr 2020
   * License   : MIT
 =###############################################################################
 
-
 ################################################################################
-# VLM VEHICLE TYPE
+# ABSTRACT VLM VEHICLE TYPE
 ################################################################################
 """
-    `VLMVehicle(system; optargs...)`
+    `AbstractVLMVehicle{N, M, R} <: AbstractVehicle{N, M, R}`
 
-Type handling all geometries and subsystems that define a flight vehicle made
-out of VLM (Wing, WingSystem, Rotor) components.
+Implementations of `AbstractUVLMVehicle` are expected to have the following
+fields:
 
-# ARGUMENTS
-* `system::vlm.WingSystem`:        System of all FLOWVLM objects. This system
-                                    is considered as the entire vehicle. Not all
-                                    components in this system will be solved,
-                                    but they will all be rotated and translated
-                                    during maneuver.
-# OPTIONAL ARGUMENTS
-* `tilting_systems::Tuple(vlm.WingSystem, ...)`:   Tuple of all FLOWVLM
-                                    tilting objects, where `tilting_systems[i]`
-                                    contains the i-th FLOWVLM system of lifting
-                                    surfaces and rotors that tilt together.
-* `rotors_systems::Tuple(Array{vlm.Rotor,1}, ...)`:   Tuple of groups of Rotors
-                                    that share a common RPM.
-* `vlm_system::vlm.WingSystem`:    System of all FLOWVLM objects to be solved
-                                    through the VLM solver.
-* `wake_system::vlm.WingSystem`:   System of all FLOWVLM objects that will
-                                    shed a VPM wake.
-* `grids::Array{gt.GridTypes, 1}`: Array of grids that will be translated and
-                                    rotated along with `system`.
+# Required inputs
+* `system::vlm.WingSystem`
+
+# Optional inputs
+* `tilting_systems::NTuple{N, vlm.WingSystem}`
+* `rotor_systems::NTuple{M, Array{vlm.Rotor, 1}}`
+* `vlm_system::vlm.WingSystem`
+* `wake_system::vlm.WingSystem`
+* `grids::Array{gt.GridTypes, 1}`
+
+# Internal properties
+* `V::Array{R, 1}`                          # Current vehicle velocity
+* `W::Array{R, 1}`                          # Current vehicle angular velocity
+* `prev_data::Array{Any, 1}`                # Information about previous step
+* `grid_O::Array{Array{R, 1}, 1}`           # Origin of every grid
+
+They also need to implement the following functions required by
+`AbstractVehicle`:
+
+* `shed_wake(...)`
+* `generate_static_particle_fun(...)`
+* `save_vtk(...)`
+
+See the documentation and code of `AbstractVehicle` for more details.
+
+In general, in order for implementation to work correctly, it is required that
+the components of `wake_system` are also components of either `vlm_system` or
+`rotor_systems`, and that none of the components of `rotor_systems` are also
+components of `vlm_system`.
 """
-struct VLMVehicle{N, M, R} <: AbstractVehicle{N, M, R}
+abstract type AbstractVLMVehicle{N, M, R} <: AbstractVehicle{N, M, R} end
 
-    # Required inputs
-    system::vlm.WingSystem
-
-    # Optional inputs
-    tilting_systems::NTuple{N, vlm.WingSystem}
-    rotor_systems::NTuple{M, Array{vlm.Rotor, 1}}
-    vlm_system::vlm.WingSystem
-    wake_system::vlm.WingSystem
-    grids::Array{gt.GridTypes, 1}
-
-    # Internal properties
-    V::Array{R, 1}                          # Current vehicle velocity
-    W::Array{R, 1}                          # Current vehicle angular velocity
-    prev_data::Array{Any, 1}                # Information about previous step
-    grid_O::Array{Array{R, 1}, 1}           # Origin of every grid
-
-
-    VLMVehicle{N, M, R}(
-                    system;
-                    tilting_systems=NTuple{0, vlm.WingSystem}(),
-                    rotor_systems=NTuple{0, Array{vlm.Rotor, 1}}(),
-                    vlm_system=vlm.WingSystem(),
-                    wake_system=vlm.WingSystem(),
-                    grids=Array{gt.GridTypes, 1}(),
-                    V=zeros(3), W=zeros(3),
-                    prev_data=[deepcopy(vlm_system), deepcopy(wake_system),
-                                                    deepcopy(rotor_systems)],
-                    grid_O=Array{Array{Float64, 1}, 1}(),
-                ) where {N, M, R} = new(
-                    system,
-                    tilting_systems,
-                    rotor_systems,
-                    vlm_system,
-                    wake_system,
-                    grids,
-                    V, W,
-                    prev_data,
-                    grid_O,
-                )
+# Implementations
+for header_name in ["unsteady", "quasisteady"]
+  include("FLOWUnsteady_vehicle_vlm_"*header_name*".jl")
 end
-
-# Implicit N and M constructor
-VLMVehicle(system::vlm.WingSystem;
-        V::Array{R, 1}=zeros(3), W::Array{R, 1}=zeros(3),
-        tilting_systems::NTuple{N, vlm.WingSystem}=NTuple{0, vlm.WingSystem}(),
-        rotor_systems::NTuple{M, Array{vlm.Rotor, 1}}=NTuple{0, Array{vlm.Rotor, 1}}(),
-        grids=Array{gt.GridTypes, 1}(),
-        optargs...
-        ) where {N, M, R} = VLMVehicle{N, M, R}( system;
-                                V=V, W=W,
-                                tilting_systems=tilting_systems,
-                                rotor_systems=rotor_systems,
-                                grids=Array{gt.GridTypes, 1}(grids),
-                                grid_O=[zeros(R, 3) for i in 1:length(grids)],
-                                optargs...)
 
 
 ##### FUNCTIONS  ###############################################################
-get_ntltsys(self::VLMVehicle) = typeof(self).parameters[1]
+get_ntltsys(self::AbstractVLMVehicle) = typeof(self).parameters[1]
 
-get_nrtrsys(self::VLMVehicle) = typeof(self).parameters[2]
+get_nrtrsys(self::AbstractVLMVehicle) = typeof(self).parameters[2]
 
 
-function add_dV(self::VLMVehicle, dV)
+function add_dV(self::AbstractVLMVehicle, dV)
     self.V .+= dV
     return nothing
 end
 
-function add_dW(self::VLMVehicle, dW)
+function add_dW(self::AbstractVLMVehicle, dW)
     self.W .+= dW
     return nothing
 end
 
-function set_V(self::VLMVehicle, V)
+function set_V(self::AbstractVLMVehicle, V)
     self.V .= V
     return nothing
 end
 
-function set_W(self::VLMVehicle, W)
+function set_W(self::AbstractVLMVehicle, W)
     self.W .= W
     return nothing
 end
 
-function tilt_systems(self::VLMVehicle{N,M,R}, angles::NTuple{N, Array{R2, 1}}
+function tilt_systems(self::AbstractVLMVehicle{N,M,R}, angles::NTuple{N, Array{R2, 1}}
                                                     ) where{N, M, R, R2<:Real}
     # Iterate over tilting system
     for i in 1:get_ntltsys(self)
@@ -135,12 +92,12 @@ function tilt_systems(self::VLMVehicle{N,M,R}, angles::NTuple{N, Array{R2, 1}}
     end
     return nothing
 end
-function tilt_systems(self::VLMVehicle{0,M,R}, angles::Tuple{})  where{M, R}
+function tilt_systems(self::AbstractVLMVehicle{0,M,R}, angles::Tuple{})  where{M, R}
     return nothing
 end
 
 
-function nextstep_kinematic(self::VLMVehicle, dt::Real)
+function nextstep_kinematic(self::AbstractVLMVehicle, dt::Real)
     dX = dt*self.V                  # Translation
     dA = 180/pi * dt*self.W         # Angular rotation (degrees)
 
@@ -173,14 +130,12 @@ function nextstep_kinematic(self::VLMVehicle, dt::Real)
     return nothing
 end
 
-
 """
 Precalculations before calling the solver.
 
-Calculates kinematic and wake-induced velocity on VLM an adds them as a
-solution field
+Calculates kinematic velocity on VLM an adds them as a solution field
 """
-function precalculations(self::VLMVehicle, Vinf::Function,
+function precalculations(self::AbstractVLMVehicle, Vinf::Function,
                                 pfield::vpm.ParticleField, t::Real, dt::Real)
 
     if t!=0
@@ -226,62 +181,8 @@ function precalculations(self::VLMVehicle, Vinf::Function,
     return nothing
 end
 
-function shed_wake(self::VLMVehicle, Vinf::Function,
-                            pfield::vpm.ParticleField, dt::Real; t=0.0,
-                            unsteady_shedcrit=-1.0, p_per_step=1,
-                            sigmafactor=1.0, overwrite_sigma=nothing)
-    if t!=0
-        VLM2VPM(self.wake_system, pfield, dt, Vinf; t=t,
-                    prev_system=_get_prev_wake_system(self),
-                    unsteady_shedcrit=unsteady_shedcrit,
-                    p_per_step=p_per_step, sigmafactor=sigmafactor,
-                    overwrite_sigma=overwrite_sigma, check=false)
-    end
-end
-
-
-
-function generate_static_particle_fun(self::VLMVehicle, sigma::Real)
-
-    if sigma<=0
-        error("Invalid smoothing radius $sigma.")
-    end
-
-    function static_particles_function(args...)
-        out = Array{Float64, 1}[]
-
-        # Particles from vlm system
-        _static_particles(self.vlm_system, sigma; out=out)
-
-        # Particles from rotor systems
-        for rotors in self.rotor_systems
-            for rotor in rotors
-                _static_particles(rotor, sigma; out=out)
-            end
-        end
-
-        return out
-    end
-
-    return static_particles_function
-end
-
-function _static_particles(system::Union{vlm.Wing, vlm.WingSystem, vlm.Rotor},
-                                    sigma::Real; out=Array{Float64, 1}[])
-
-    # Adds a particle for every bound vortex of the VLM
-    for i in 1:vlm.get_m(system)
-        (Ap, A, B, Bp, _, _, _, Gamma) = vlm.getHorseshoe(system, i)
-        for (i,(x1, x2)) in enumerate([(Ap,A), (A,B), (B,Bp)])
-            push!(out, vcat((x1+x2)/2, Gamma*(x2-x1), sigma, 0))
-        end
-    end
-
-    return out
-end
-
-function save_vtk(self::VLMVehicle, filename; path=nothing, num=nothing,
-                                            save_wopwopin=false, optargs...)
+function save_vtk_base(self::AbstractVLMVehicle, filename; path=nothing,
+                                   num=nothing, save_wopwopin=false, optargs...)
     strn = vlm.save(self.system, filename; path=path, num=num, optargs...)
 
     for (i, grid) in enumerate(self.grids)
@@ -317,25 +218,29 @@ function save_vtk(self::VLMVehicle, filename; path=nothing, num=nothing,
     return strn
 end
 
+
+
+
+
 ##### INTERNAL FUNCTIONS  ######################################################
 
-_get_prev_vlm_system(self::VLMVehicle) = self.prev_data[1]
-_get_prev_wake_system(self::VLMVehicle) = self.prev_data[2]
-_get_prev_rotor_systems(self::VLMVehicle) = self.prev_data[3]
-function _update_prev_vlm_system(self::VLMVehicle, system)
+_get_prev_vlm_system(self::AbstractVLMVehicle) = self.prev_data[1]
+_get_prev_wake_system(self::AbstractVLMVehicle) = self.prev_data[2]
+_get_prev_rotor_systems(self::AbstractVLMVehicle) = self.prev_data[3]
+function _update_prev_vlm_system(self::AbstractVLMVehicle, system)
     self.prev_data[1] = system
 end
-function _update_prev_wake_system(self::VLMVehicle, system)
+function _update_prev_wake_system(self::AbstractVLMVehicle, system)
     self.prev_data[2] = system
 end
-function _update_prev_rotor_systems(self::VLMVehicle, rotor_systems)
+function _update_prev_rotor_systems(self::AbstractVLMVehicle, rotor_systems)
     self.prev_data[3] = rotor_systems
 end
 
 """
 Returns the local translational velocity of every control point in `vlm_system`.
 """
-function _Vkinematic_vlm(self::VLMVehicle, args...; optargs...)
+function _Vkinematic_vlm(self::AbstractVLMVehicle, args...; optargs...)
     return _Vkinematic(self.vlm_system, _get_prev_vlm_system(self), args...;
                                                                     optargs...)
 end
@@ -343,7 +248,7 @@ end
 """
 Returns the local translational velocity of every control point in `wake_system`.
 """
-function _Vkinematic_wake(self::VLMVehicle, args...; optargs...)
+function _Vkinematic_wake(self::AbstractVLMVehicle, args...; optargs...)
     return _Vkinematic(self.wake_system, _get_prev_wake_system(self), args...;
                                                                     optargs...)
 end
@@ -470,6 +375,10 @@ end
 function _extraVinf2(i, t; wing=nothing)
     if wing==nothing; error("Logic error!"); end;
     return wing.sol["Vvpm"][i] + wing.sol["Vkin"][i]
+end
+function _extraVinf3(i, t; wing=nothing)
+    if wing==nothing; error("Logic error!"); end;
+    return wing.sol["Vind"][i] + wing.sol["Vkin"][i]
 end
 
 
@@ -647,4 +556,4 @@ function VLM2VPM(system::Union{vlm.Wing, vlm.WingSystem, vlm.Rotor}, pfield, dt,
     prev_HS = HS
   end
 end
-##### END OF VEHICLE ###########################################################
+##### END OF ABSTRACT VLM VEHICLE ##############################################

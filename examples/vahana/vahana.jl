@@ -41,7 +41,7 @@ end
 
 # ------------ DRIVERS ---------------------------------------------------------
 
-function run_simulation_vahana(;    save_path=extdrive_path*"vahana_sim00",
+function run_simulation_vahana(;    save_path=extdrive_path*"vahana_sim01",
                                     prompt=true,
                                     run_name="vahana",
                                     verbose=true, v_lvl=1)
@@ -79,6 +79,7 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana_sim00",
     vlm_sigma = R
     surf_sigma = vlm_sigma                  # Surface regularization
     shed_unsteady = false                   # Shed unsteady-loading particles
+    VehicleType = uns.QVLMVehicle           # Type of vehicle to generate
 
 
     # ----------------- MANEUVER DEFINITION ------------------------------------
@@ -95,16 +96,11 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana_sim00",
                                                     xfoil=false,
                                                     data_path=data_path,
                                                     run_name=run_name,
-                                                    add_rotors=add_rotors)
+                                                    add_rotors=add_rotors,
+                                                    VehicleType=VehicleType)
 
     # Move landing pad to landing area
     gt.lintransform!(grounds[2], eye(3), Vcruise*telapsed*[-0.25, 0, -0.0025])
-
-    # Save ground
-    for (i, ground) in enumerate(grounds)
-        gt.save(ground, run_name*"_Ground$i"; path=save_path)
-    end
-
 
     # ----------------- SIMULATION SETUP ---------------------------------------
     Vref = Vcruise
@@ -141,6 +137,11 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana_sim00",
                                       verbose=verbose, v_lvl=v_lvl,
                                       save_code=splitdir(@__FILE__)[1]
                                       )
+
+    # Save ground
+    for (i, ground) in enumerate(grounds)
+        gt.save(ground, run_name*"_Ground$i"; path=save_path)
+    end
 
     return simulation, pfield
 end
