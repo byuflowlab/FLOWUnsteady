@@ -331,7 +331,7 @@ function _parse_midXs(rotor_systems::NTuple{M, Array{vlm.Rotor, 1}},
 
     # Find lower bound of midXs belonging to rotor ri
     i_low = 1
-    for (sj, rotors) in enumerate(rotor_systems[1:(si-1)])   # Iterate over rotor systems
+    for (sj, rotors) in enumerate(rotor_systems[1:si])       # Iterate over rotor systems
         for (rj, rotor) in enumerate(rotors)                 # Iterative over rotors
             if sj==si && rj==ri
                 break
