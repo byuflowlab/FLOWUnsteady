@@ -27,6 +27,11 @@ out of VLM (Wing, WingSystem, Rotor) components.
 NOTE: For the solver to work correctly, all components in `wake_system` (if any)
 need to be also components of `vlm_system`.
 
+NOTE: It is recommended that `wake_system` doesn't include any Rotor object.
+Otherwise, blades will generate a wake going straight out of every blade
+trailing edge pointing oposite to the direction of rotation instead of
+generating a streamtube.
+
 # ARGUMENTS
 * `system::vlm.WingSystem`:        System of all FLOWVLM objects. This system
                                     is considered as the entire vehicle. Not all

@@ -10,7 +10,7 @@
 =###############################################################################
 
 
-function generate_maneuver_vahana1(; disp_plot=false, add_rotors=true)
+function generate_maneuver_vahana1(; disp_plot=false, add_rotors=true, V0=0.001)
 
     # NOTE: All of the following number are non-dimensional and scaled between
     # 0 and 1, with 0 and 1 beginning and end of simulation, or a scaling
@@ -60,7 +60,7 @@ function generate_maneuver_vahana1(; disp_plot=false, add_rotors=true)
             # Weibull acceleration to target climb
             if t<t1/2
                 val = t / (t1/2)
-                Vz = V1*(1-exp(-(2*val)^5))
+                Vz = V0 + V1*(1-exp(-(2*val)^5))
             # Weibull decceleration to hover
             else
                 val = 1 - (t-t1/2) / (t1/2)
@@ -112,7 +112,7 @@ function generate_maneuver_vahana1(; disp_plot=false, add_rotors=true)
             # Weibull decceleration to hover
             else
                 val = 1 - ((t-t4) - (1-t4)*0.35) / ((1-t4)*(1-0.35))
-                Vz = V5*(1-exp(-(2*val)^10))
+                Vz = V0 + V5*(1-exp(-(2*val)^10))
             end
 
             return [0, 0, -Vz]

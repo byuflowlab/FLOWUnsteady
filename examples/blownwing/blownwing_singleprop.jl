@@ -175,7 +175,7 @@ function generate_monitor_prop(J, rho, RPM, nsteps; save_path=nothing,
     function extra_runtime_function(sim::uns.Simulation{V, M, R},
                                     PFIELD::uns.vpm.ParticleField,
                                     T::Real, DT::Real
-                                   ) where{V<:uns.VLMVehicle, M, R}
+                                   ) where{V<:uns.AbstractVLMVehicle, M, R}
 
         rotors = vcat(sim.vehicle.rotor_systems...)
         angle = T*360*RPM/60

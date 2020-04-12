@@ -31,7 +31,7 @@ extdrive_path = "/media/edoalvar/MyExtDrive/simulationdata7/"
 # ------------ DRIVERS ---------------------------------------------------------
 function run_heavingwing()
     heavingwing(; nsteps=400, p_per_step=1, vlm_rlx=0.75,
-                    VehicleType=uns.QVLMVehicle,
+                    VehicleType=uns.VLMVehicle,
                     save_path=extdrive_path*"bertinsheaving20/",
                     verbose=true, disp_plot=true)
 end

@@ -420,7 +420,9 @@ function generate_monitor_wing(wing, b, ar, nsteps, Vinf, rhoinf, qinf, magVinf,
             if wake_coupled && PFIELD.nt!=0
                 subplot(122)
                 plot(y2b, norm.(wing.sol["Vkin"])/magVinf, "-", label="FLOWVLM", alpha=0.5, color=[clr[1], 1, clr[3]])
-                plot(y2b, norm.(wing.sol["Vvpm"]), "-", label="FLOWVLM", alpha=0.5, color=clr)
+                if "Vvpm" in keys(wing.sol)
+                    plot(y2b, norm.(wing.sol["Vvpm"]), "-", label="FLOWVLM", alpha=0.5, color=clr)
+                end
                 plot(y2b, [norm(Vinf(vlm.getControlPoint(wing, i), T)) for i in 1:vlm.get_m(wing)],
                                                             "-k", label="FLOWVLM", alpha=0.5)
             end
