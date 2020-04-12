@@ -12,6 +12,9 @@
 function blownwing(; xfoil=true,
                         pos_bs=[-0.5, 0.5],  # Position on the semispan of every rotor
                         CWs=[false, false],  # Clock-wise rotation of every rotor
+                        VehicleType=uns.VLMVehicle,   # Vehicle type
+                        add_wing=true,
+                        nrevs=30,            # Number of revolutions in simulation
                         # OUTPUT OPTIONS
                         save_path=nothing,
                         run_name="blownwing",
@@ -81,10 +84,10 @@ function blownwing(; xfoil=true,
 
 
     # Solver parameters
-    nrevs = 30                          # Number of revolutions in simulation
+    # nrevs = 30                        # Number of revolutions in simulation
     nsteps_per_rev = 72                 # Time steps per revolution
     # nsteps_per_rev = 36
-    p_per_step = 2                    # Sheds per time step
+    p_per_step = 2                      # Sheds per time step
     # p_per_step = 1
     ttot = nrevs/(RPM/60)               # (s) total simulation time
     nsteps = nrevs*nsteps_per_rev       # Number of time steps
@@ -234,7 +237,7 @@ function blownwing(; xfoil=true,
     # ----- VEHICLE DEFINITION
     # System of all FLOWVLM objects
     system = vlm.WingSystem()
-    vlm.addwing(system, "Wing", wing)
+    if add_wing; vlm.addwing(system, "Wing", wing); end;
     for (ri, rotor) in enumerate(rotors)
         vlm.addwing(system, "Rotor$ri", rotor)
     end
@@ -244,13 +247,24 @@ function blownwing(; xfoil=true,
 
     # System solved through VLM solver
     vlm_system = vlm.WingSystem()
-    vlm.addwing(vlm_system, "Wing", wing)
+    if add_wing; vlm.addwing(vlm_system, "Wing", wing); end;
 
     # Wake-shedding system
-    wake_system = system
+    wake_system = vlm.WingSystem()
+    if add_wing; vlm.addwing(wake_system, "Wing", wing); end;
+
+    if VehicleType != uns.QVLMVehicle
+        for (ri, rotor) in enumerate(rotors)
+            vlm.addwing(system, "Rotor$ri", rotor)
+        end
+    else
+        # Mute colinear warnings. This is needed since the quasi-steady solver
+        #   will probe induced velocities at the lifting line of the blade
+        uns.vlm.VLMSolver._mute_warning(true)
+    end
 
     # FVS's Vehicle object
-    vehicle = uns.VLMVehicle(   system;
+    vehicle = VehicleType(   system;
                                 vlm_system=vlm_system,
                                 rotor_systems=rotor_systems,
                                 wake_system=wake_system
@@ -281,10 +295,10 @@ function blownwing(; xfoil=true,
     monitor_rotor = generate_monitor_prop(J, rho, RPM, nsteps; save_path=save_path,
                                                     run_name=run_name*"_rotors")
     monitor_wing = generate_monitor_wing(wing, b, ar, nsteps, Vinf, rhoinf, qinf,
-                                                    magVinf, wake_coupled;
-                                                    save_path=save_path,
-                                                    run_name=run_name*"_wing")
-    monitor(args...) = monitor_rotor(args...) || monitor_wing(args...)
+                                                magVinf, wake_coupled;
+                                                save_path=save_path,
+                                                run_name=run_name*"_wing")
+    monitor(args...) = monitor_rotor(args...) || (add_wing ? monitor_wing(args...) : false)
 
     # ------------- RUN SIMULATION ---------------------------------------------
     if verbose; println("\t"^(v_lvl+1)*"Running simulation..."); end;

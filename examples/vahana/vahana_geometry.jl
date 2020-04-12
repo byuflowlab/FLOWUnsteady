@@ -462,8 +462,14 @@ function generate_geometry_vahana(;
     wake_system = vlm.WingSystem()
     vlm.addwing(wake_system, "SolveVLM", vlm_system)
     if add_rotors
-        for (i, rotor) in enumerate(rotors)
-            vlm.addwing(wake_system, "Rotor$i", rotor)
+        if VehicleType==uns.VLMVehicle
+            for (i, rotor) in enumerate(rotors)
+                vlm.addwing(wake_system, "Rotor$i", rotor)
+            end
+        else
+            # Mute colinear warnings. This is needed since the quasi-steady solver
+            #   will probe induced velocities at the lifting line of the blade
+            uns.vlm.VLMSolver._mute_warning(true)
         end
     end
 
