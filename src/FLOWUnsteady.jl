@@ -59,7 +59,7 @@ def_data_path = joinpath(module_path, "../data/")   # Default path to data folde
 for module_name in ["vehicle", "vehicle_vlm",
                     "maneuver", "rotor",
                     "simulation_types", "simulation", "utils",
-                    "processing", "noise"]
+                    "processing", "noise", "monitors"]
     include("FLOWUnsteady_"*module_name*".jl")
 end
 
