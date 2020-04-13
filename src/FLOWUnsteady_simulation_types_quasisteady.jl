@@ -152,7 +152,7 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
                                 keep_sol=true, vortexsheet=(X,t)->zeros(3))
 
         # Relaxes (rlx->1) or stiffens (rlx->0) the VLM solution
-        if rlx > 0
+        if rlx >= 0
             rlxd_Gamma = rlx*vhcl.vlm_system.sol["Gamma"] +
                                 (1-rlx)*_get_prev_vlm_system(vhcl).sol["Gamma"]
             vlm._addsolution(vhcl.vlm_system, "Gamma", rlxd_Gamma)

@@ -41,7 +41,7 @@ end
 
 # ------------ DRIVERS ---------------------------------------------------------
 
-function run_simulation_vahana(;    save_path=extdrive_path*"vahana_sim01",
+function run_simulation_vahana(;    save_path=extdrive_path*"vahana_sim04",
                                     prompt=true,
                                     run_name="vahana",
                                     verbose=true, v_lvl=1)
@@ -49,8 +49,8 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana_sim01",
     # ----------------- PARAMETERS ---------------------------------------------
 
     # Geometry options
-    n_factor = 5                            # Refinement factor
-    add_rotors = false                      # Whether to include rotors
+    n_factor = 1                            # Refinement factor
+    add_rotors = true                       # Whether to include rotors
 
     # # Maneuver to perform
     # Vcruise = 0.125 * 125*0.44704         # Cruise speed
@@ -60,8 +60,8 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana_sim01",
 
     # Maneuver to perform
     Vcruise = 0.25 * 125*0.44704            # Cruise speed
-    # Vinf(x,t) = 1e-5*[1,0,-1]             # (m/s) freestream velocity, if 0 the simulation will crash
-    Vinf(x,t) = 1.0*[1,0,-1]
+    Vinf(x,t) = 1e-5*[1,0,-1]             # (m/s) freestream velocity, if 0 the simulation will crash
+    # Vinf(x,t) = 1.0*[1,0,-1]
     # RPMh_w = 200                          # RPM of main wing rotors in hover
     RPMh_w = 20
     telapsed = 30.0                         # Total time to perform maneuver
@@ -76,8 +76,10 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana_sim01",
     p_per_step = 4                          # Particle sheds per time step
     overwrite_sigma = lambda * (2*pi*RPMh_w/60*R + Vcruise)*dt / p_per_step
     # vlm_sigma = R/25                      # VLM regularization
-    vlm_sigma = R
-    surf_sigma = vlm_sigma                  # Surface regularization
+    # vlm_sigma = R
+    vlm_sigma = -1
+    vlm_rlx = 0.75                          # VLM relaxation (deactivated with -1)
+    surf_sigma = R/10                       # Surface regularization
     shed_unsteady = false                   # Shed unsteady-loading particles
     VehicleType = uns.QVLMVehicle           # Type of vehicle to generate
 
@@ -127,6 +129,7 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana_sim01",
                                       p_per_step=p_per_step,
                                       overwrite_sigma=overwrite_sigma,
                                       vlm_sigma=vlm_sigma,
+                                      vlm_rlx=vlm_rlx,
                                       surf_sigma=surf_sigma,
                                       max_particles=max_particles,
                                       shed_unsteady=shed_unsteady,
