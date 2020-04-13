@@ -450,13 +450,18 @@ function generate_geometry_vahana(;
     end
 
     # System to solve through the VLM solver
+    vlm_system_m = vlm.WingSystem()
+    vlm.addwing(vlm_system_m, "R", wing_R)
+    vlm.addwing(vlm_system_m, "letR", winglet_R)
+    vlm.addwing(vlm_system_m, "L", wing_L)
+    vlm.addwing(vlm_system_m, "letL", winglet_L)
+    vlm_system_t = vlm.WingSystem()
+    vlm.addwing(vlm_system_t, "R", twing_R)
+    vlm.addwing(vlm_system_t, "L", twing_L)
+
     vlm_system = vlm.WingSystem()
-    vlm.addwing(vlm_system, "MWingR", wing_R)
-    vlm.addwing(vlm_system, "MWingletR", winglet_R)
-    vlm.addwing(vlm_system, "MWingL", wing_L)
-    vlm.addwing(vlm_system, "MWingletL", winglet_L)
-    vlm.addwing(vlm_system, "TWingR", twing_R)
-    vlm.addwing(vlm_system, "TWingL", twing_L)
+    vlm.addwing(vlm_system, "MWing", vlm_system_m)
+    vlm.addwing(vlm_system, "TWing", vlm_system_t)
 
     # Wake-shedding system (`vlm_system`+`rotors`)
     wake_system = vlm.WingSystem()

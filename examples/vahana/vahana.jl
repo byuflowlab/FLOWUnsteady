@@ -34,14 +34,14 @@ extdrive_path = "/media/edoalvar/MyExtDrive/simulationdata7/"
 data_path = joinpath(splitdir(@__FILE__)[1], "../../data/")
 
 # ------------ HEADERS ---------------------------------------------------------
-for header_name in ["geometry", "kinematics"]
+for header_name in ["geometry", "kinematics", "monitor"]
     include("vahana_"*header_name*".jl")
 end
 
 
 # ------------ DRIVERS ---------------------------------------------------------
 
-function run_simulation_vahana(;    save_path=extdrive_path*"vahana_sim04",
+function run_simulation_vahana(;    save_path=extdrive_path*"vahana_sim08",
                                     prompt=true,
                                     run_name="vahana",
                                     verbose=true, v_lvl=1)
@@ -49,8 +49,8 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana_sim04",
     # ----------------- PARAMETERS ---------------------------------------------
 
     # Geometry options
-    n_factor = 1                            # Refinement factor
-    add_rotors = true                       # Whether to include rotors
+    n_factor = 5                            # Refinement factor
+    add_rotors = !true                       # Whether to include rotors
 
     # # Maneuver to perform
     # Vcruise = 0.125 * 125*0.44704         # Cruise speed
@@ -60,15 +60,19 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana_sim04",
 
     # Maneuver to perform
     Vcruise = 0.25 * 125*0.44704            # Cruise speed
-    Vinf(x,t) = 1e-5*[1,0,-1]             # (m/s) freestream velocity, if 0 the simulation will crash
-    # Vinf(x,t) = 1.0*[1,0,-1]
+    Vinf(x,t) = 1e-5*[1,0,-1]               # (m/s) freestream velocity, if 0 the simulation might crash
     # RPMh_w = 200                          # RPM of main wing rotors in hover
-    RPMh_w = 20
+    # RPMh_w = 20
+    RPMh_w = 100
     telapsed = 30.0                         # Total time to perform maneuver
     nsteps = 1500                           # Time steps
     # nsteps = 100
 
     dt = telapsed/nsteps
+
+    # Simulation options
+    rho = 1.225                             # (kg/m^3) air density
+    mu = 1.81e-5                            # Air dynamic viscosity
 
     # Solver options
     R = 0.75                                # (m) blade radius as a reference
@@ -82,6 +86,7 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana_sim04",
     surf_sigma = R/10                       # Surface regularization
     shed_unsteady = false                   # Shed unsteady-loading particles
     VehicleType = uns.QVLMVehicle           # Type of vehicle to generate
+
 
 
     # ----------------- MANEUVER DEFINITION ------------------------------------
@@ -118,13 +123,15 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana_sim04",
     simulation = uns.Simulation(vehicle, maneuver, Vref, RPMref, ttot;
                                                     Vinit=Vinit, Winit=Winit)
 
-
-
+    # ----------------- SIMULATION MONITOR -------------------------------------
+    monitor = generate_monitor_vahana(vehicle, rho, RPMref, nsteps, save_path, Vinf)
 
     # ----------------- RUN SIMULATION -----------------------------------------
     pfield = uns.run_simulation(simulation, nsteps;
                                       # SIMULATION OPTIONS
                                       Vinf=Vinf,
+                                      rho=rho,
+                                      mu=mu,
                                       # SOLVERS OPTIONS
                                       p_per_step=p_per_step,
                                       overwrite_sigma=overwrite_sigma,
@@ -133,6 +140,7 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana_sim04",
                                       surf_sigma=surf_sigma,
                                       max_particles=max_particles,
                                       shed_unsteady=shed_unsteady,
+                                      extra_runtime_function=monitor,
                                       # OUTPUT OPTIONS
                                       save_path=save_path,
                                       run_name=run_name,
