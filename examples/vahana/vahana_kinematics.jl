@@ -10,7 +10,7 @@
 =###############################################################################
 
 
-function generate_maneuver_vahana1(; disp_plot=false, add_rotors=true, V0=0.001)
+function generate_maneuver_vahana1(; disp_plot=false, add_rotors=true, V0=0.1)
 
     # NOTE: All of the following number are non-dimensional and scaled between
     # 0 and 1, with 0 and 1 beginning and end of simulation, or a scaling
