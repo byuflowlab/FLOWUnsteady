@@ -41,7 +41,7 @@ end
 
 # ------------ DRIVERS ---------------------------------------------------------
 
-function run_simulation_vahana(;    save_path=extdrive_path*"vahana_sim08",
+function run_simulation_vahana(;    save_path=extdrive_path*"vahana_sim09",
                                     prompt=true,
                                     run_name="vahana",
                                     verbose=true, v_lvl=1)
@@ -49,8 +49,8 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana_sim08",
     # ----------------- PARAMETERS ---------------------------------------------
 
     # Geometry options
-    n_factor = 5                            # Refinement factor
-    add_rotors = !true                       # Whether to include rotors
+    n_factor = 1                            # Refinement factor
+    add_rotors = true                       # Whether to include rotors
 
     # # Maneuver to perform
     # Vcruise = 0.125 * 125*0.44704         # Cruise speed
