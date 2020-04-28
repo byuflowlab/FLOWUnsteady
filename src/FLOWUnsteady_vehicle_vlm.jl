@@ -136,9 +136,10 @@ Precalculations before calling the solver.
 Calculates kinematic velocity on VLM an adds them as a solution field
 """
 function precalculations(self::AbstractVLMVehicle, Vinf::Function,
-                                pfield::vpm.ParticleField, t::Real, dt::Real)
+                                pfield::vpm.ParticleField, t::Real, dt::Real,
+                                nt::Int)
 
-    if t!=0
+    if nt!=0
         # ---------- 1) Recalculate wake horseshoes with kinematic velocity -
         # Calculate kinematic velocity at every control point
         Vkin = _Vkinematic_wake(self, dt; t=t, targetX="CP")

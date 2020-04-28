@@ -103,10 +103,10 @@ const VLMVehicle = UVLMVehicle
 
 ##### FUNCTIONS  ###############################################################
 function shed_wake(self::VLMVehicle, Vinf::Function,
-                            pfield::vpm.ParticleField, dt::Real; t=0.0,
+                            pfield::vpm.ParticleField, dt::Real, nt::Int; t=0.0,
                             unsteady_shedcrit=-1.0, p_per_step=1,
                             sigmafactor=1.0, overwrite_sigma=nothing)
-    if t!=0
+    if nt!=0
         VLM2VPM(self.wake_system, pfield, dt, Vinf; t=t,
                     prev_system=_get_prev_wake_system(self),
                     unsteady_shedcrit=unsteady_shedcrit,

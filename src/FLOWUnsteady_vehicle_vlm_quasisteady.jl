@@ -113,7 +113,7 @@ QVLMVehicle(system::vlm.WingSystem;
 
 ##### FUNCTIONS  ###############################################################
 function shed_wake(self::QVLMVehicle, Vinf::Function, pfield::vpm.ParticleField,
-                                                        dt::Real; optargs...)
+                                                dt::Real, nt::Int; optargs...)
     nothing
 end
 

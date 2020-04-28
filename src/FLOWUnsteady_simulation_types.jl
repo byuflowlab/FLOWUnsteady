@@ -119,7 +119,7 @@ function precalculations(self::Simulation, Vinf::Function,
     rotate_rotors(self, dt)
 
     # Calculate kinematic velocities
-    precalculations(self.vehicle, Vinf, pfield, t, dt)
+    precalculations(self.vehicle, Vinf, pfield, t, dt, self.nt)
 
     # # Bring the rotors back to their initial positions. This is needed to avoid
     # # double accounting for the RPM when the solver is run
