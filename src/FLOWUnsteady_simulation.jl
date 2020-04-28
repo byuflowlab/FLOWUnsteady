@@ -113,7 +113,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
         precalculations(sim, Vinf, PFIELD, T, DT)
 
         # Shed semi-infinite wake
-        shed_wake(sim.vehicle, Vinf, PFIELD, DT; t=T,
+        shed_wake(sim.vehicle, Vinf, PFIELD, DT, sim.nt; t=T,
                             unsteady_shedcrit=-1,
                             p_per_step=p_per_step, sigmafactor=sigmafactor,
                             overwrite_sigma=overwrite_sigma)
@@ -124,7 +124,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
 
         # Shed unsteady-loading wake with new solution
         if shed_unsteady
-            shed_wake(sim.vehicle, Vinf, PFIELD, DT; t=T,
+            shed_wake(sim.vehicle, Vinf, PFIELD, DT, sim.nt; t=T,
                         unsteady_shedcrit=unsteady_shedcrit,
                         p_per_step=p_per_step, sigmafactor=sigmafactor,
                         overwrite_sigma=overwrite_sigma)

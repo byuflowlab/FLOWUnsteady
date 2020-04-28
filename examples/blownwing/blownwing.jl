@@ -58,8 +58,8 @@ function run_isolatedwing(; prompt=true)
 end
 
 function run_blownwing(; xfoil=true, prompt=true)
-    blownwing(; xfoil=xfoil, save_path=extdrive_path*"blownwing_test03/",
-                                     VehicleType=uns.QVLMVehicle, nrevs=10, prompt=prompt)
+    blownwing(; xfoil=xfoil, save_path=extdrive_path*"blownwing_test05/",
+                                     VehicleType=uns.VLMVehicle, nrevs=10, prompt=prompt)
 end
 
 function run_noise(; )

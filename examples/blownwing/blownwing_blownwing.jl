@@ -255,7 +255,7 @@ function blownwing(; xfoil=true,
 
     if VehicleType != uns.QVLMVehicle
         for (ri, rotor) in enumerate(rotors)
-            vlm.addwing(system, "Rotor$ri", rotor)
+            vlm.addwing(wake_system, "Rotor$ri", rotor)
         end
     else
         # Mute colinear warnings. This is needed since the quasi-steady solver
