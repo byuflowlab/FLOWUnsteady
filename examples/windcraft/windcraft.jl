@@ -47,7 +47,7 @@ end
     Visualize kinematic maneuver of the windcraft: saves it as vtk files, and
     calls Paraview visualizing the vehicle path.
 """
-function visualize_maneuver_windcraft_kinematic(; save_path=extdrive_path*"windcraft_maneuver08/",
+function visualize_maneuver_windcraft_kinematic(; save_path=extdrive_path*"windcraft_maneuver09/",
                                                     prompt=true,
                                                     run_name="windcraft",
                                                     verbose=true, v_lvl=0,
@@ -65,14 +65,15 @@ function visualize_maneuver_windcraft_kinematic(; save_path=extdrive_path*"windc
     # Maneuver parameters
     R               = 135/2             # (m) radius of circle
     t_per_rev       = 3.0               # (s) time of one full revolution
-    nrevs           = 1.00              # Revolutions to simulate
+    nrevs           = 0.75              # Revolutions to simulate
     RPMref          = 4.0*40.0*30/pi    # Reference RPM: 40m/s with tip speed ratio of 4
 
-    Vmean           = 2*pi*R/t_per_rev/nrevs  # (m/s) mean velocity along a full circle
+    Vmean           = 2*pi*R/(nrevs*t_per_rev) # (m/s) mean velocity along a full circle
     ttot            = nrevs*t_per_rev   # (s) total time to perform maneuver
     nsteps          = 60                # Time steps
 
-    tinit           = 0.00              # (s) initial time (sim time by end will be tinit+ttot)
+    revinit         = 0.00              # Part of revolution where to start the simulation
+    tinit           = revinit*t_per_rev # (s) initial time (sim time by end will be tinit+ttot)
 
     # Circular path parameters
     theta0          = 0.0
@@ -129,7 +130,7 @@ function visualize_maneuver_windcraft_kinematic(; save_path=extdrive_path*"windc
     gt.verbalize("SIMULATION GENERATION", v_lvl, verbose)
 
     Vref = Vmean                            # (m/s) reference velocity
-    Vinit = Vref*maneuver.Vvehicle(tinit)   # (m/s) initial vehicle velocity
+    Vinit = Vref*maneuver.Vvehicle(tinit/ttot)   # (m/s) initial vehicle velocity
                                             # (rad/s) initial vehicle angular velocity
     angle1 = maneuver.anglevehicle(tinit/ttot)
     angle2 = maneuver.anglevehicle(tinit/ttot + 1e-12)
