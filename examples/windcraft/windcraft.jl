@@ -29,7 +29,7 @@ using PyPlot
 
 # ------------ GLOBAL VARIABLES ------------------------------------------------
 # Default path where to save data
-extdrive_path = extdrive_path = "/Volumes/Visuals/" #"/media/edoalvar/MyExtDrive/simulationdata7/"
+extdrive_path = "/media/edoalvar/MyExtDrive/simulationdata7/"
 # extdrive_path = "temps/"
 
 
@@ -47,7 +47,7 @@ end
     Visualize kinematic maneuver of the windcraft: saves it as vtk files, and
     calls Paraview visualizing the vehicle path.
 """
-function visualize_maneuver_windcraft_kinematic(; save_path=extdrive_path*"windcraft_maneuver03/",
+function visualize_maneuver_windcraft_kinematic(; save_path=extdrive_path*"windcraft_maneuver08/",
                                                     prompt=true,
                                                     run_name="windcraft",
                                                     verbose=true, v_lvl=0,
@@ -55,22 +55,24 @@ function visualize_maneuver_windcraft_kinematic(; save_path=extdrive_path*"windc
 
     # Geometry parameters
     includewing     = true
-    includetail     = true
-    includepylons   = true
-    includerotors   = true
+    includetail     = false
+    includepylons   = false
+    includerotors   = false
     numrotors       = 8
     inlinerotors    = false
-    includecontrols = true
+    includecontrols = false
 
     # Maneuver parameters
     R               = 135/2             # (m) radius of circle
-    t_per_rev       = 11.0              # (s) time of one full revolution
-    nrevs           = 2.0               # Revolutions to simulate
+    t_per_rev       = 3.0               # (s) time of one full revolution
+    nrevs           = 1.00              # Revolutions to simulate
     RPMref          = 4.0*40.0*30/pi    # Reference RPM: 40m/s with tip speed ratio of 4
 
-    Vmean           = 2*pi*R/t_per_rev  # (m/s) mean velocity along a full circle
+    Vmean           = 2*pi*R/t_per_rev/nrevs  # (m/s) mean velocity along a full circle
     ttot            = nrevs*t_per_rev   # (s) total time to perform maneuver
-    nsteps          = 120               # Time steps
+    nsteps          = 60                # Time steps
+
+    tinit           = 0.00              # (s) initial time (sim time by end will be tinit+ttot)
 
     # Circular path parameters
     theta0          = 0.0
@@ -127,12 +129,14 @@ function visualize_maneuver_windcraft_kinematic(; save_path=extdrive_path*"windc
     gt.verbalize("SIMULATION GENERATION", v_lvl, verbose)
 
     Vref = Vmean                            # (m/s) reference velocity
-    Vinit = Vref*maneuver.Vvehicle(0)       # (m/s) initial vehicle velocity
+    Vinit = Vref*maneuver.Vvehicle(tinit)   # (m/s) initial vehicle velocity
                                             # (rad/s) initial vehicle angular velocity
-    Winit = pi/180 * (maneuver.anglevehicle(0+1e-12)-maneuver.anglevehicle(0))/(ttot*1e-12)
+    angle1 = maneuver.anglevehicle(tinit/ttot)
+    angle2 = maneuver.anglevehicle(tinit/ttot + 1e-12)
+    Winit = pi/180 * (angle2-angle1)/(ttot*1e-12)
 
     simulation = uns.Simulation(vehicle, maneuver, Vref, RPMref, ttot;
-                                                    Vinit=Vinit, Winit=Winit)
+                                            Vinit=Vinit, Winit=Winit, t=tinit)
 
     save_vtk_optsargs = [(:save_horseshoes, false)]
 
