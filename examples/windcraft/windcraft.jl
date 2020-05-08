@@ -47,7 +47,7 @@ end
     Visualize kinematic maneuver of the windcraft: saves it as vtk files, and
     calls Paraview visualizing the vehicle path.
 """
-function visualize_maneuver_windcraft_kinematic(; save_path=extdrive_path*"windcraft_maneuver09/",
+function visualize_maneuver_windcraft_kinematic(; save_path=extdrive_path*"windcraft_maneuver11/",
                                                     prompt=true,
                                                     run_name="windcraft",
                                                     verbose=true, v_lvl=0,
@@ -72,7 +72,7 @@ function visualize_maneuver_windcraft_kinematic(; save_path=extdrive_path*"windc
     ttot            = nrevs*t_per_rev   # (s) total time to perform maneuver
     nsteps          = 60                # Time steps
 
-    revinit         = 0.00              # Part of revolution where to start the simulation
+    revinit         = 0.25              # Part of revolution where to start the simulation
     tinit           = revinit*t_per_rev # (s) initial time (sim time by end will be tinit+ttot)
 
     # Circular path parameters
