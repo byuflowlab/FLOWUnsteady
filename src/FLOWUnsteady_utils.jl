@@ -199,6 +199,7 @@ function visualize_kinematics(sim::Simulation{V, KinematicManeuver{N, M}, R},
         if i!=0
             # Move tilting systems, and translate and rotate vehicle
             nextstep_kinematic(sim, dt)
+            rotate_rotors(sim, dt)
         end
 
         # Verbose
