@@ -183,24 +183,28 @@ function visualize_kinematics(sim::Simulation{V, KinematicManeuver{N, M}, R},
         println("\t"^(v_lvl)*"*"^(73-7*v_lvl))
 
         figure(run_name, figsize=[7*2, 5*1])
-        subplot(121)
+        subplot(131)
         xlabel("Simulation time")
         ylabel("Velocity")
         Vlbls = [L"V_x", L"V_y", L"V_z"]
-        subplot(122)
+        subplot(132)
         xlabel("Simulation time")
         ylabel(L"Angular velocity ($^\circ/t$)")
         Wlbls = [L"\Omega_x", L"\Omega_y", L"\Omega_z"]
+        subplot(133)
+        xlabel("Simulation time")
+        ylabel(L"$O$ position")
+        Olbls = [L"O_x", L"O_y", L"O_z"]
     end
 
     # Time stepping
     for i in 0:nsteps
 
-        if i!=0
+        # if i!=0
             # Move tilting systems, and translate and rotate vehicle
             nextstep_kinematic(sim, dt)
             rotate_rotors(sim, dt)
-        end
+        # end
 
         # Verbose
         if verbose && i%verbose_nsteps==0
@@ -208,16 +212,19 @@ function visualize_kinematics(sim::Simulation{V, KinematicManeuver{N, M}, R},
         end
         if verbose
             for j in 1:3
-                subplot(121)
+                subplot(131)
                 plot(sim.t, sim.vehicle.V[j], ".", label=Vlbls[j], alpha=0.8,
                                                                 color=clrs[j])
-                subplot(122)
+                subplot(132)
                 plot(sim.t, sim.vehicle.W[j], ".", label=Wlbls[j], alpha=0.8,
+                                                                color=clrs[j])
+                subplot(133)
+                plot(sim.t, sim.vehicle.system.O[j], ".", label=Olbls[j], alpha=0.8,
                                                                 color=clrs[j])
             end
             if i==0
-                for j in 1:2
-                    subplot(120+j)
+                for j in 1:3
+                    subplot(130+j)
                     legend(loc="best", frameon=false)
                 end
             end
@@ -228,7 +235,7 @@ function visualize_kinematics(sim::Simulation{V, KinematicManeuver{N, M}, R},
 
     # Tweak vtk string to be a time sequence
     if nsteps>1
-        strn = replace(strn, ".$(nsteps-1).", "...")
+        strn = replace(strn, ".$(nsteps).", "...")
     end
 
     # Call paraview
