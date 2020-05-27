@@ -364,3 +364,46 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
         return false
     end
 end
+
+
+function generate_monitor_statevariables(; figname="monitor_statevariables")
+
+    figure(figname, figsize=[7*2, 5*1])
+    subplot(131)
+    xlabel("Simulation time")
+    ylabel("Velocity")
+    Vlbls = [L"V_x", L"V_y", L"V_z"]
+    subplot(132)
+    xlabel("Simulation time")
+    ylabel(L"Angular velocity ($^\circ/t$)")
+    Wlbls = [L"\Omega_x", L"\Omega_y", L"\Omega_z"]
+    subplot(133)
+    xlabel("Simulation time")
+    ylabel(L"$\mathop{O}$ position")
+    Olbls = [L"O_x", L"O_y", L"O_z"]
+
+
+    function extra_runtime_function(sim, PFIELD, T, DT)
+        for j in 1:3
+            subplot(131)
+            plot(sim.t, sim.vehicle.V[j], ".", label=Vlbls[j], alpha=0.8,
+                                                            color=clrs[j])
+            subplot(132)
+            plot(sim.t, sim.vehicle.W[j], ".", label=Wlbls[j], alpha=0.8,
+                                                            color=clrs[j])
+            subplot(133)
+            plot(sim.t, sim.vehicle.system.O[j], ".", label=Olbls[j], alpha=0.8,
+                                                            color=clrs[j])
+        end
+        if sim.nt==0
+            for j in 1:2
+                subplot(130+j)
+                legend(loc="best", frameon=false)
+            end
+        end
+
+        return false
+    end
+
+    return extra_runtime_function
+end
