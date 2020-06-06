@@ -82,6 +82,8 @@ For example simulations, check this notebook: [`docs/examples.ipynb`](https://nb
 <img src="docs/img/flowunstrady_diagram03.png" alt="Pic here" style="width: 900px;"/>
 
 # Publications
+  * Alvarez, E. J., & Ning, A. (2021, draft). <i>Unsteady Mixed-fidelity Aerodynamics Solver
+for Maneuvering Multirotor Aircraft</i>. AIAA SciTech Forum. <a href="https://github.com/byuflowlab/FLOWUnsteady/blob/master/docs/AlvarezNing_2021-SciTechAbstract-FLOWUnsteady_solver.pdf"><b>[PDF]</b></a><br><br>
   * Alvarez, E. J., (2020). <i>Quasi-steady Aerodynamics Solver for a High-fidelity Controls Framework</i>. FLOWUnsteady Documentation. <a href="https://github.com/byuflowlab/FLOWUnsteady/blob/master/docs/quasisteadysolver.pdf"><b>[PDF]</b></a><br><br>
   * Alvarez, E. J., & Ning, A. (2020, in review). <i>High-fidelity Modeling of Multirotor Aerodynamic Interactions for Aircraft Design</i>. AIAA Journal. <a href="https://byu.box.com/shared/static/s4h4w165x4vlxcmhgmxi05ngq0qab9o0.pdf"><b>[PDF]</b></a><br><br>
   * Alvarez, E. J., & Ning, A. (2019). <i>Modeling Multirotor Aerodynamic Interactions Through the Vortex Particle Method</i>. AIAA AVIATION Forum. DOI: <a href="https://doi.org/10.2514/6.2019-2827 ">10.2514/6.2019-2827</a> <a href="http://edoalvar2.groups.et.byu.net/public/AlvarezNing_2019-AVIATION-Multirotor_aerodynamic_interactions_through_VPM-STATIC.pdf"><b>[SLIDES]</b></a><a href="https://scholarsarchive.byu.edu/facpub/3191/"><b>[PDF]</b></a><br><br>
