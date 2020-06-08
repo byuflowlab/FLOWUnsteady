@@ -86,25 +86,27 @@ And now we can view our wing in Paraview using the command ```run(`paraview --da
 
 Now that we have a basic wing, let's go ahead and add a rotor.  We'll use some data for the rotor that already exists in FLOWUnsteady.  You can visit the How-to guides for more information on creating your own rotor database.
 
-```@example tut
+```
 rotor_file = "apc10x7.csv"          # Rotor geometry
 data_path = uns.def_data_path       # Path to rotor database
 ```
 
-With the rotor data, we can generate our rotor. (This might take a minute or so to run.)
+With the rotor data, we can generate our rotor. This might take a minute or so to run. We supress the output here with a semi-colon as it prints a large output.
 
 ```@example tut
+rotor_file = "apc10x7.csv"          # hide
+data_path = uns.def_data_path       # hide
 rotor = uns.generate_rotor(rotor_file; pitch=0.0,
                                             n=10, CW=true, ReD=1.5e6,
                                             verbose=true, xfoil=false,
                                             data_path=data_path,
-                                            plot_disc=false)
+                                            plot_disc=false);
 ```
 
-And then we can generate a rotor object
+And then we can generate a rotor object, where we again supress the output.
 
 ```@example tut
-rotors = vlm.Rotor[rotor]
+rotors = vlm.Rotor[rotor];
 ```
 
 This will put the rotor at the default location and orientation which we will define here since we now need to move the rotor relative to the wing which is already at this location.
