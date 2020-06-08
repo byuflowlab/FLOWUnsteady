@@ -3,7 +3,8 @@ repo_url:         http://github.com/byuflowlab/FLOWUnsteady
 site_description: Aerodynamic Analysis Suite
 site_author:      juddmehr
 
-theme: cinder
+theme:
+name: 'gitbook'
 
 extra_css:
   - assets/Documenter.css
