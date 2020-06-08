@@ -1,2 +1,3 @@
 # Tutorials
 
+Here in the tutorials we go through step-by-step instructions for the basic usage of FLOWUnsteady.  Our goal here is to get you from little/no knowledge to a basic working knowledge of how to use the code.  Tutorials follow a pattern of copy/pasting commands and comparing expected output. The current list of tutorials can be found below, but before you get started, you need to install the code. In addition, the majority of graphical outputs are for visualization in Paraview.  Go to the [Getting Started](../how-to-guide/getting-started.md) an [Paraview Visualiztion](../how-to-guide/paraview-visualization.md) how-to guides to get everything set up, then come back here to learn how to start using FLOWUnsteady.
