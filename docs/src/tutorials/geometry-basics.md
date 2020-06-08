@@ -6,16 +6,23 @@ First things first, we need to include the FLOWUnsteady components
 ```@setup simplewing
 import FLOWUnsteady
 vlm = FLOWUnsteady.vlm
+
+span = 5.0
+aspectratio = 10.0
+taperratio = 0.5
+wingtwist = 0.0
+wingsweep = 10.0 #degrees
+wingdihedral = 7.0 #degrees
 ```
 
-```@example
+```
 import FLOWUnsteady
 vlm = FLOWUnsteady.vlm
 ```
 
 Let's begin with a single section, symmetric wing.  We'll start by defining some basic geometry.
 
-```@example simplewing
+```
 span = 5.0
 aspectratio = 10.0
 taperratio = 0.5
@@ -63,7 +70,7 @@ run(`mkdir $save_path`)
 
 Finally, we can save the files.
 
-```@example simplewing
+```
 vlm.save(system, run_name; path=save_path)
 ```
 
