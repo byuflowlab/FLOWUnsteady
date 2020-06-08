@@ -19,5 +19,5 @@ deploydocs(
             target = "./build",
             branch = "gh-pages",
             # devbranch = "master",
-            julia = "v0.6"
+            julia = "0.6"
         )
