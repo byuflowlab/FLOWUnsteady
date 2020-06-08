@@ -199,10 +199,15 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
                                 L_dir=[0,0,1],      # Direction of lift component
                                 D_dir=[-1,0,0],     # Direction of drag component
                                 # OUTPUT OPTIONS
+                                out_Lwing=nothing,
+                                out_Dwing=nothing,
+                                out_CLwing=nothing,
+                                out_CDwing=nothing,
                                 save_path=nothing,
                                 run_name="wing",
                                 figname="monitor_wing",
                                 disp_plot=true,
+                                title_lbl="",
                                 CL_lbl=L"Lift Coefficient $C_L$",
                                 CD_lbl=L"Drag Coefficient $C_D$",
                                 y2b_i=2,
@@ -233,35 +238,39 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
         aux = PFIELD.nt/nsteps_sim
         clr = (1-aux, 0, aux)
 
-        if PFIELD.nt==0 && (disp_plot || save_path!=nothing)
-            figure(figname, figsize=[7*2, 5*2]*figsize_factor)
-            subplot(221)
-            # xlim([-1,1])
-            xlabel(L"$\frac{2y}{b}$")
-            ylabel(L"$\frac{Cl}{CL}$")
-            title("Spanwise lift distribution")
+        if PFIELD.nt==0
 
-            subplot(222)
-            # xlim([-1,1])
-            xlabel(L"$\frac{2y}{b}$")
-            ylabel(L"$\frac{Cd}{CD}$")
-            title("Spanwise drag distribution")
+            if disp_plot
+                figure(figname, figsize=[7*2, 5*2]*figsize_factor)
+                suptitle(title_lbl)
+                subplot(221)
+                # xlim([-1,1])
+                xlabel(L"$\frac{2y}{b}$")
+                ylabel(L"$\frac{Cl}{CL}$")
+                title("Spanwise lift distribution")
 
-            subplot(223)
-            xlabel("Simulation time (s)")
-            ylabel(CL_lbl)
+                subplot(222)
+                # xlim([-1,1])
+                xlabel(L"$\frac{2y}{b}$")
+                ylabel(L"$\frac{Cd}{CD}$")
+                title("Spanwise drag distribution")
 
-            subplot(224)
-            xlabel("Simulation time (s)")
-            ylabel(CD_lbl)
+                subplot(223)
+                xlabel("Simulation time (s)")
+                ylabel(CL_lbl)
 
-            figure(figname*"_2", figsize=[7*2, 5*1]*figsize_factor)
-            subplot(121)
-            xlabel(L"$\frac{2y}{b}$")
-            ylabel(L"Circulation $\Gamma$")
-            subplot(122)
-            xlabel(L"$\frac{2y}{b}$")
-            ylabel(L"Effective velocity $V_\infty$")
+                subplot(224)
+                xlabel("Simulation time (s)")
+                ylabel(CD_lbl)
+
+                figure(figname*"_2", figsize=[7*2, 5*1]*figsize_factor)
+                subplot(121)
+                xlabel(L"$\frac{2y}{b}$")
+                ylabel(L"Circulation $\Gamma$")
+                subplot(122)
+                xlabel(L"$\frac{2y}{b}$")
+                ylabel(L"Effective velocity $V_\infty$")
+            end
 
             # Convergence file header
             if save_path!=nothing
@@ -271,8 +280,7 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
             end
         end
 
-        if PFIELD.nt>2 && PFIELD.nt%nsteps_plot==0 && (disp_plot || save_path!=nothing)
-            figure(figname)
+        if PFIELD.nt>2
 
             # Force at each VLM element
             Ftot = calc_aerodynamicforce(wing, prev_wing, PFIELD, Vinf, DT,
@@ -288,6 +296,9 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
                                         rho_ref; t=PFIELD.t, per_unit_span=true,
                                         lencrit=lencrit)
             l, d, s = decompose(ftot, L_dir, D_dir)
+            vlm._addsolution(wing, "l", l)
+            vlm._addsolution(wing, "d", d)
+            vlm._addsolution(wing, "s", s)
 
             # Lift of the wing
             Lwing = norm(sum(L))
@@ -302,61 +313,71 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
             vlm._addsolution(wing, "Cl/CL", ClCL)
             vlm._addsolution(wing, "Cd/CD", CdCD)
 
-            subplot(221)
-            if y2b_ref!=nothing && ClCL_ref!=nothing
-                plot(y2b_ref, ClCL_ref, ref_stl, label=ref_lbl)
-            end
-            plot(y2b, ClCL, "-", alpha=0.5, color=clr)
+            if out_Lwing!=nothing; push!(out_Lwing, Lwing); end;
+            if out_Dwing!=nothing; push!(out_Dwing, Dwing); end;
+            if out_CLwing!=nothing; push!(out_CLwing, CLwing); end;
+            if out_CDwing!=nothing; push!(out_CDwing, CDwing); end;
 
-            subplot(222)
-            if y2b_ref!=nothing && CdCD_ref!=nothing
-                plot(y2b_ref, CdCD_ref, ref_stl, label=ref_lbl)
-            end
-            plot(y2b, CdCD, "-", alpha=0.5, color=clr)
+            if PFIELD.nt%nsteps_plot==0 && disp_plot
+                figure(figname)
 
-            subplot(223)
-            if CL_ref!=nothing
-                plot([0, T], CL_ref*ones(2), ":k", label=ref_lbl)
-            end
-            plot([T], [CLwing], "o", alpha=0.5, color=clr)
+                subplot(221)
+                if y2b_ref!=nothing && ClCL_ref!=nothing
+                    plot(y2b_ref, ClCL_ref, ref_stl, label=ref_lbl)
+                end
+                plot(y2b, ClCL, "-", alpha=0.5, color=clr)
 
-            subplot(224)
-            if CD_ref!=nothing
-                plot([0, T], CD_ref*ones(2), ":k", label=ref_lbl)
-            end
-            plot([T], [CDwing], "o", alpha=0.5, color=clr)
+                subplot(222)
+                if y2b_ref!=nothing && CdCD_ref!=nothing
+                    plot(y2b_ref, CdCD_ref, ref_stl, label=ref_lbl)
+                end
+                plot(y2b, CdCD, "-", alpha=0.5, color=clr)
 
-            figure(figname*"_2")
-            subplot(121)
-            plot(y2b, wing.sol["Gamma"], "-", alpha=0.5, color=clr)
-            subplot(122)
-            if "Vkin" in keys(wing.sol)
-                plot(y2b, norm.(wing.sol["Vkin"]), "-", alpha=0.5, color=[clr[1], 1, clr[3]])
-            end
-            if "Vvpm" in keys(wing.sol)
-                plot(y2b, norm.(wing.sol["Vvpm"]), "-", alpha=0.5, color=clr)
-            elseif "Vind" in keys(wing.sol)
-                plot(y2b, norm.(wing.sol["Vind"]), "-", alpha=0.5, color=clr)
-            end
-            plot(y2b, [norm(Vinf(vlm.getControlPoint(wing, i), T)) for i in 1:vlm.get_m(wing)],
-                                                        "-k", alpha=0.5)
+                subplot(223)
+                if CL_ref!=nothing
+                    plot([0, T], CL_ref*ones(2), ":k", label=ref_lbl)
+                end
+                plot([T], [CLwing], "o", alpha=0.5, color=clr)
 
-            if save_path!=nothing
+                subplot(224)
+                if CD_ref!=nothing
+                    plot([0, T], CD_ref*ones(2), ":k", label=ref_lbl)
+                end
+                plot([T], [CDwing], "o", alpha=0.5, color=clr)
 
+                figure(figname*"_2")
+                subplot(121)
+                plot(y2b, wing.sol["Gamma"], "-", alpha=0.5, color=clr)
+                subplot(122)
+                if "Vkin" in keys(wing.sol)
+                    plot(y2b, norm.(wing.sol["Vkin"]), "-", alpha=0.5, color=[clr[1], 1, clr[3]])
+                end
+                if "Vvpm" in keys(wing.sol)
+                    plot(y2b, norm.(wing.sol["Vvpm"]), "-", alpha=0.5, color=clr)
+                elseif "Vind" in keys(wing.sol)
+                    plot(y2b, norm.(wing.sol["Vind"]), "-", alpha=0.5, color=clr)
+                end
+                plot(y2b, [norm(Vinf(vlm.getControlPoint(wing, i), T)) for i in 1:vlm.get_m(wing)],
+                                                            "-k", alpha=0.5)
+
+                if save_path!=nothing
+                    # Save figures
+                    if PFIELD.nt%nsteps_savefig==0
+                        figure(figname)
+                        savefig(joinpath(save_path, run_name*"_convergence.png"),
+                                                                transparent=false)
+                        figure(figname*"_2")
+                        savefig(joinpath(save_path, run_name*"_convergence2.png"),
+                                                                transparent=false)
+                    end
+                end
+            end
+
+            if save_path != nothing
                 # Write rotor position and time on convergence file
                 f = open(fname, "a")
                 print(f, T, ",", CLwing, ",", CDwing, "\n")
                 close(f)
-
-                # Save figures
-                if PFIELD.nt%nsteps_savefig==0
-                    figure(figname)
-                    savefig(joinpath(save_path, run_name*"_convergence.png"),
-                                                            transparent=false)
-                    figure(figname*"_2")
-                    savefig(joinpath(save_path, run_name*"_convergence2.png"),
-                                                            transparent=false)
-                end
             end
         end
 
