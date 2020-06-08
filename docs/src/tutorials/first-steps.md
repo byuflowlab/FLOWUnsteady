@@ -1,4 +1,6 @@
-# Geometry Basics
+# First Steps
+
+## Geometry Basics
 
 In this tutorial, we'll begin by defining the geometry for a simple wing.  Note that all the functions used are described in the Reference section of this documentation if you would like further information at any point.  Before you begin this tutorial, it is expected that you've already installed the necessary components of FLOWUnsteady, and that you are familiar with visualization in Paraview.
 
@@ -77,3 +79,8 @@ vlm.save(system, run_name; path=save_path)
 And now we can view our wing in Paraview using the command ```run(`paraview --data="$(save_path)/$(run_name)_mainwing_vlm.vtk"`)``` (assuming you've set up an alias for paraview on your computer).
 
 ![alt text](https://media.githubusercontent.com/media/byuflowlab/FLOWUnsteady/master/docs/src/assets/tutorialfigs/geometry-basics.gif)
+
+## Adding a Rotor
+
+
+##
