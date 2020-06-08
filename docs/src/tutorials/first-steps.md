@@ -109,20 +109,20 @@ rotors = vlm.Rotor[rotor]
 
 This will put the rotor at the default location and orientation which we will define here since we now need to move the rotor relative to the wing which is already at this location.
 
-```
+```@example tut
 vehicleorigin = [0.0; 0.0; 0.0]
 vehicleaxis = [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0]
 ```
 
 To move the rotor, we need to define a new origin point.
 
-```
+```@example tut
 rotororigin = [-0.1; 0.0; 0.0]
 ```
 
 Then we can use that origin to set the rotor coordinate system in order to move the rotor.
 
-```
+```@example tut
 for rotor in rotors
     vlm.setcoordsystem(rotor, rotororigin, vehicleaxis; user=true)
 end
