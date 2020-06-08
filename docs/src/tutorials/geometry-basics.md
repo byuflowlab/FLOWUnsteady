@@ -69,4 +69,4 @@ vlm.save(system, run_name; path=save_path)
 
 And now we can view our wing in Paraview using the command ```run(`paraview --data="$(save_path)/$(run_name)_mainwing_vlm.vtk"`)``` (assuming you've set up an alias for paraview on your computer).
 
-![alt text](https://github.com/byuflowlab/FLOWUnsteady/tree/master/docs/src/assets/geometry-basics.gif)
+![alt text](https://github.com/byuflowlab/FLOWUnsteady/blob/master/docs/src/assets/tutorialfigs/geometry-basics.gif)
