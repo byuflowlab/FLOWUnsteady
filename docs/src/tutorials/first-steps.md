@@ -133,7 +133,7 @@ end
 which we can put in a tuple that stores our rotor system(s).
 
 ```@example tut
-rotors_system = (rotor,)
+rotors_system = (rotor,);
 ```
 
 We also need to add it to our overall system.
