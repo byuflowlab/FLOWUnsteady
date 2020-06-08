@@ -5,11 +5,12 @@
 In this tutorial, we'll begin by defining the geometry for a simple wing.  Note that all the functions used are described in the Reference section of this documentation if you would like further information at any point.  Before you begin this tutorial, it is expected that you've already installed the necessary components of FLOWUnsteady, and that you are familiar with visualization in Paraview.
 
 First things first, we need to include the FLOWUnsteady components
-```@setup simplewing
+```@setup tut
 import FLOWUnsteady
-vlm = FLOWUnsteady.vlm
+uns = FLOWUnsteady
+vlm = uns.vlm
 
-span = 5.0
+span = 1.0
 aspectratio = 10.0
 taperratio = 0.5
 wingtwist = 0.0
@@ -19,13 +20,14 @@ wingdihedral = 7.0 #degrees
 
 ```
 import FLOWUnsteady
-vlm = FLOWUnsteady.vlm
+uns = FLOWUnsteady
+vlm = uns.vlm
 ```
 
 Let's begin with a single section, symmetric wing.  We'll start by defining some basic geometry.
 
 ```
-span = 5.0
+span = 1.0
 aspectratio = 10.0
 taperratio = 0.5
 wingtwist = 0.0
@@ -33,9 +35,9 @@ wingsweep = 10.0 #degrees
 wingdihedral = 7.0 #degrees
 ```
 
-Then we'll call the ```simpleWing()``` function to create a simple wing object.
+Then we'll call the ```tut()``` function to create a simple wing object.
 
-```@example simplewing
+```@example tut
 mainwing = vlm.simpleWing(span,aspectratio,taperratio,wingtwist,wingsweep,wingdihedral)
 ```
 
@@ -43,26 +45,26 @@ Congratulations! You've created your first wing object.  If you want, you can ta
 
 Next, let's create a wing system.
 
-```@example simplewing
+```@example tut
 system = vlm.WingSystem()
 ```
 
 You now have an empty wing system, so let's add our mainwing object to it with the name "mainwing."
 
-```@example simplewing
+```@example tut
 vlm.addwing(system,"mainwing",mainwing)
 ```
 
 Now that we have a wing system, let's save it as a .vtk file so we can view it in paraview.  In order to do so, we are required to define a freestream velocity.
 
-```@example simplewing
+```@example tut
 Vinf(x,t) = [1,0,0]
 vlm.setVinf(system, Vinf)
 ```
 
 We will also want to set some parameters for saving files and set up our file system to put the files where we want.
 
-```@example simplewing
+```@example tut
 run_name = "tutorial"
 save_path = "./simplewing/"
 
@@ -82,5 +84,86 @@ And now we can view our wing in Paraview using the command ```run(`paraview --da
 
 ## Adding a Rotor
 
+Now that we have a basic wing, let's go ahead and add a rotor.  We'll use some data for the rotor that already exists in FLOWUnsteady.  You can visit the How-to guides for more information on creating your own rotor database.
 
-##
+```@example tut
+rotor_file = "apc10x7.csv"          # Rotor geometry
+data_path = uns.def_data_path       # Path to rotor database
+```
+
+With the rotor data, we can generate our rotor. (This might take a minute or so to run.)
+
+```@example tut
+rotor = uns.generate_rotor(rotor_file; pitch=0.0,
+                                            n=10, CW=true, ReD=1.5e6,
+                                            verbose=true, xfoil=false,
+                                            data_path=data_path,
+                                            plot_disc=false)
+```
+
+And then we can generate a rotor object
+
+```@example tut
+rotors = vlm.Rotor[rotor]
+```
+
+This will put the rotor at the default location and orientation which we will define here since we now need to move the rotor relative to the wing which is already at this location.
+
+```
+vehicleorigin = [0.0; 0.0; 0.0]
+vehicleaxis = [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0]
+```
+
+To move the rotor, we need to define a new origin point.
+
+```
+rotororigin = [-0.1; 0.0; 0.0]
+```
+
+Then we can use that origin to set the rotor coordinate system in order to move the rotor.
+
+```
+for rotor in rotors
+    vlm.setcoordsystem(rotor, rotororigin, vehicleaxis; user=true)
+end
+```
+
+which we can put in a tuple that stores our rotor system(s).
+
+```@example tut
+rotors_system = (rotor,)
+```
+
+We also need to add it to our overall system.
+
+```@example tut
+for rotor in rotors; vlm.addwing(system, run_name, rotor); end;
+```
+
+Like setting the Vinf parameter for the main wing, we need to give our rotor an RPM as well.
+
+```@example tut
+for rotor in rotors; vlm.setRPM(rotor, 6000); end;
+```
+
+We should now be able to visualize our wing with a rotor.
+
+```
+run(`rm -rf $save_path`)
+run(`mkdir $save_path`)
+
+vlm.save(system, run_name; path=save_path)
+run(`paraview --data="$(save_path)/tutorial_mainwing_vlm.vtk;tutorial_tutorial_Blade1_vlm.vtk;tutorial_tutorial_Blade2_vlm.vtk;tutorial_tutorial_Blade1_loft.vtk;tutorial_tutorial_Blade2_loft.vtk;"`)
+```
+
+![alt text](https://media.githubusercontent.com/media/byuflowlab/FLOWUnsteady/master/docs/src/assets/tutorialfigs/add-rotor.gif)
+
+
+## Other Systems
+
+
+### VLM Systems
+
+### Wake Systems
+
+### Tilting Systems

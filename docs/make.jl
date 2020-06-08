@@ -12,7 +12,7 @@ makedocs(
                         "reference/VPM.md",
                         "reference/FLOWUnsteady.md",
                     "Tutorials" => "tutorials/tutorials.md",
-                        "tutorials/geometry-basics.md",
+                        "tutorials/first-steps.md",
                     "How-to-Guide" => "how-to-guide/how-to.md",
                         "how-to-guide/getting-started.md",
                         "how-to-guide/paraview-visualization.md",
