@@ -4,7 +4,7 @@ site_description: Aerodynamic Analysis Suite
 site_author:      juddmehr
 
 theme:
-  name: 'bootstrap'
+  name: 'gitbook'
 
 extra_css:
   - assets/Documenter.css
