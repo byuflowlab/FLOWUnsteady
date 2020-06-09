@@ -83,5 +83,6 @@ wing = vlm.Wing(x_tip, -y_tip, z_tip, c_tip, twist_tip)
 
 
 ### `SimpleWing`
+asdasd
 
 ### `ComplexWing`
