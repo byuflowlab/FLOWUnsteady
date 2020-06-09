@@ -104,6 +104,9 @@ With the rotor data, we can generate our rotor. This might take a minute or so t
 ```@example tut
 rotor_file = "apc10x7.csv"          # hide
 data_path = uns.def_data_path       # hide
+
+R, B = uns.read_rotor(rotor_file; data_path=data_path)[[1,3]] #get the radius for later
+
 rotor = uns.generate_rotor(rotor_file; pitch=0.0,
                                             n=10, CW=true, ReD=1.5e6,
                                             verbose=true, xfoil=true,
@@ -266,7 +269,7 @@ In addition, we still need to define a reference velocity, the total time for th
 ```@example tut
 Vref = 10.0         #define a reference velocity for the vehicle
 ttot = 1.0          #define a total simulation time, in seconds
-nsteps = 300        #define the number of steps the simulation will take
+nsteps = 100        #define the number of steps the simulation will take
 
 #initial conditions
 tinit = 0.0                                  #initial time
@@ -293,3 +296,33 @@ run(`paraview --data="$save_path/$files"`)
 ```
 
  ![alt text](../assets/tutorialfigs/kinematic-maneuver.gif)
+
+
+ ## Running the Simulation
+
+We also now run the simulation and use Paraview to look at the outputs.
+
+!!! note "Outputs"
+
+    We are only outputting the basic pressure field here. In order to have additional outputs, it is necessary to write some extra runtime functions, see [Set up run-time Functions](@ref) and [Set up run-time Monitors](@ref) for more information.
+
+!!! note "Run Time"
+
+    Running simulations typcially takes a while.
+
+```
+nullfunc(args...) = false
+pfield = uns.run_simulation(simulation, nsteps;
+                                    surf_sigma=R/10,
+                                    Vinf=Vinf,
+                                    save_path=save_path,
+                                    run_name=run_name,
+                                    prompt=false,
+                                    verbose=true,
+                                    extra_runtime_function=nullfunc
+                                    )
+
+run(`paraview --data="$save_path/$(files);tutorial_pfield...vtk"`)
+```
+
+![alt text](../assets/tutorialfigs/pfield.gif)
