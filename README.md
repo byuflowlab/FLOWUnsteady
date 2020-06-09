@@ -91,8 +91,8 @@ for Maneuvering Multirotor Aircraft</i>. AIAA SciTech Forum. <a href="https://gi
 
 
 # Authorship
-  * Author    : Eduardo J Alvarez
-  * Email     : Edo.AlvarezR@gmail.com
-  * Website   : [edoalvarez.com](https://www.edoalvarez.com/)
-  * Created   : Oct 2019
-  * License   : MIT License
+  * Main developer    : Eduardo J Alvarez
+  * Email             : Edo.AlvarezR@gmail.com
+  * Website           : [edoalvarez.com](https://www.edoalvarez.com/)
+  * Created           : Oct 2019
+  * License           : MIT License
