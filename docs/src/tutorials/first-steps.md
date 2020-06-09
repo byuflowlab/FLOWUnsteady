@@ -68,7 +68,7 @@ vlm.setVinf(system, Vinf)
 
 We will also want to set some parameters for saving files and set up our file system to put the files where we want.
 
-!!! danger "Be careful with ```rm```"
+!!! danger "Be careful with rm"
 
     Make sure you have set your save_path to something non-important so the ```rm``` command doesn't delete anything you'll miss.
 
