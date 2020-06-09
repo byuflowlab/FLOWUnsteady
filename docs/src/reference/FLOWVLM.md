@@ -7,7 +7,8 @@ In this section we describe how wing geometries are defined, how multiple wings 
 ## Wing Definition
 A `FLOWVLM.Wing` object is simply a data structure that encapsulates a collection of horseshoes vortices (or a vortex lattice).
 A horseshoe vortex is made out of one bound vortex located at the quarter-chord position, two trailing bound vortices going back to the trailing edge, and two semi-infinite vortices extending from the trailing edge out in the direction of the freestream, as shown below.
-<img src="../assets/referencefigs/horseshoe00.png" alt="Pic here" width="400x"/>
+<!-- <img src="../assets/referencefigs/horseshoe00.png" alt="Pic here" width="400x"/> -->
+![](../assets/referencefigs/horseshoe00.png){: style="width:400px"}
 A control point is associated to every horseshoe, which is located at the three-quarter chord position.
 At this point, the no-flow-through boundary condition is imposed, canceling the component of the freestream that is normal to the surface.
 
