@@ -23,6 +23,4 @@ markdown_extensions:
   - admonition
   - attr_list
 
-word-wrap: break-word;
-
 docs_dir: 'build'
