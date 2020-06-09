@@ -41,7 +41,11 @@ Then we'll call the ```simpleWing()``` function to create a simple wing object.
 mainwing = vlm.simpleWing(span,aspectratio,taperratio,wingtwist,wingsweep,wingdihedral)
 ```
 
-Congratulations! You've created your first wing object.  If you want, you can take a moment to explore the contents of your newly created ```mainwing```.  You can do so using ```fieldnames(mainwing)``` and poking around. The Reference section will have more info on the contents of the wing object.
+Congratulations! You've created your first wing object.
+
+!!! info "Exploring wing objects"
+
+    If you want, you can take a moment to explore the contents of your newly created ```mainwing```.  You can do so using ```fieldnames(mainwing)``` and poking around. The Reference section will have more info on the contents of the wing object.
 
 Next, let's create a wing system.
 
@@ -63,6 +67,10 @@ vlm.setVinf(system, Vinf)
 ```
 
 We will also want to set some parameters for saving files and set up our file system to put the files where we want.
+
+!!! danger "Be careful with ```rm```"
+
+    Make sure you have set your save_path to something non-important so the ```rm``` command doesn't delete anything you'll miss.
 
 ```@example tut
 run_name = "tutorial"
