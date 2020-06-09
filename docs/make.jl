@@ -6,7 +6,7 @@ makedocs(
             source  = "./src",
             build   = "./build",
             authors = "Eduardo J. Alvarez, Ryan Anderson, Adam Cardoza, Tyler Critchfield, Judd Mehr",
-            sitename="FLOWUnsteady",
+            sitename= "FLOWUnsteady",
             pages = ["Home" => "index.md",
                     "Reference" => "reference/theory.md",
                         "reference/FLOWVLM.md",

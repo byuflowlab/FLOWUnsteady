@@ -35,7 +35,7 @@ wingsweep = 10.0 #degrees
 wingdihedral = 7.0 #degrees
 ```
 
-Then we'll call the ```tut()``` function to create a simple wing object.
+Then we'll call the ```simpleWing()``` function to create a simple wing object.
 
 ```@example tut
 mainwing = vlm.simpleWing(span,aspectratio,taperratio,wingtwist,wingsweep,wingdihedral)
