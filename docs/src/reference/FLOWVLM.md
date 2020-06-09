@@ -13,7 +13,9 @@ A horseshoe vortex is made out of one bound vortex located at the quarter-chord 
 A control point is associated to every horseshoe, which is located at the three-quarter chord position.
 At this point, the no-flow-through boundary condition is imposed, canceling the component of the freestream that is normal to the surface.
 
-!!! note In the unsteady solver of FLOWUnsteady, semi-infinite trailing vortices of the horseshoes are replaced by vortex particles that are shed off the trailing edge at every time step.
+!!! Unsteady wake
+
+    In the unsteady solver of FLOWUnsteady, semi-infinite trailing vortices of the horseshoes are replaced by vortex particles that are shed off the trailing edge at every time step.
 
 There are three ways of defining a VLM wing. The first one is to manually add chord stations along the wing and discretize the sections in between into horseshoes.
 This approach is tedious and is rarely used.
