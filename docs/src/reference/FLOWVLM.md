@@ -8,12 +8,12 @@ In this section we describe how wing geometries are defined, how multiple wings 
 A `FLOWVLM.Wing` object is simply a data structure that encapsulates a collection of horseshoes vortices (or a vortex lattice).
 A horseshoe vortex is made out of one bound vortex located at the quarter-chord position, two trailing bound vortices going back to the trailing edge, and two semi-infinite vortices extending from the trailing edge out in the direction of the freestream, as shown below.
 
-![](../assets/referencefigs/horseshoe00.png){: style="width:400px"}
+![](../assets/referencefigs/horseshoe00.png =400x)
 
 A control point is associated to every horseshoe, which is located at the three-quarter chord position.
 At this point, the no-flow-through boundary condition is imposed, canceling the component of the freestream that is normal to the surface.
 
-!!! Unsteady wake
+!!! note "Unsteady wake"
 
     In the unsteady solver of FLOWUnsteady, semi-infinite trailing vortices of the horseshoes are replaced by vortex particles that are shed off the trailing edge at every time step.
 
