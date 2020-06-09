@@ -7,11 +7,13 @@ theme:
   name: cinder
 
 extra_css:
-  - assets/Documenter.css
+  - assets/documenter.css
 
 extra_javascript:
   - https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML
   - assets/mathjaxhelper.js
+  - documenter.js
+  - search.js
 
 markdown_extensions:
   - extra
@@ -21,6 +23,6 @@ markdown_extensions:
   - admonition
   - attr_list
 
-word-wrap: 'break-word'
+word-wrap: break-word;
 
 docs_dir: 'build'
