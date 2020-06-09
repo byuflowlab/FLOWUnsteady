@@ -1,4 +1,5 @@
 using Documenter, FLOWUnsteady
+import FLOWVLM
 
 makedocs(
             root    = ".",
