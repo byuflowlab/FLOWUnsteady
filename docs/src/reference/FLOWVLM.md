@@ -79,7 +79,7 @@ wing = vlm.Wing(x_tip, -y_tip, z_tip, c_tip, twist_tip)
   Notice that we placed the root at the `(0, 0, 0)` position.
   This doesn't always have to be this way, but remember to move the other chord stations accordingly if you want to place the nose somewhere else.
 
-!!! Tip "Build wings from left to right"
+!!! tip "Build wings from left to right"
     It is recommended that wings are build from left to right, or from $-y$ to $+y$.
     Otherwise, the normals of the surface will point down in the negative $z$-direction and the circulation of the wing will be negative when generating upwards lift (positive $z$-direction).
     This is not a problem for the solver, but could be difficult to wrap your head around a negative circulation being associated to a positive lift.
