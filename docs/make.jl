@@ -6,13 +6,13 @@ makedocs(
     format = Documenter.HTML(),
     # modules = [FLOWUnsteady],
     pages = ["Home" => "index.md",
-            "Reference" => "reference/theory.md",
+            "Reference" => Any[
                 "reference/FLOWVLM.md",
                 "reference/VPM.md",
-                "reference/FLOWUnsteady.md",
-            "Tutorials" => "tutorials/tutorials.md",
-                "tutorials/first-steps.md",
-            "How-to-Guide" => "how-to-guide/how-to.md",
+                "reference/FLOWUnsteady.md",],
+            "Tutorials" => Any[
+                "tutorials/first-steps.md",],
+            "How-to-Guide" => Any[
                 "how-to-guide/getting-started.md",
                 "how-to-guide/paraview-visualization.md",
                 "how-to-guide/defining-systems.md",
@@ -21,7 +21,7 @@ makedocs(
                 "how-to-guide/select-a-solver.md",
                 "how-to-guide/calculate-aerodynamic-forces.md",
                 "how-to-guide/set-up-runtime-functions.md",
-                "how-to-guide/set-up-monitors.md",
+                "how-to-guide/set-up-monitors.md",],
             ]
 )
 
