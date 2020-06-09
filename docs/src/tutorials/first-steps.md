@@ -10,12 +10,12 @@ import FLOWUnsteady
 uns = FLOWUnsteady
 vlm = uns.vlm
 
-span = 1.0
-aspectratio = 10.0
-taperratio = 0.5
-wingtwist = 0.0
-wingsweep = 10.0 #degrees
-wingdihedral = 7.0 #degrees
+span = 1.0              #wing span
+aspectratio = 10.0      #wing aspect ratio
+taperratio = 0.5        #wing taper ratio
+wingtwist = 0.0         #wing twist
+wingsweep = 10.0        #wing sweep in degrees
+wingdihedral = 7.0      #wing dihedral in degrees
 ```
 
 ```
@@ -27,12 +27,12 @@ vlm = uns.vlm
 Let's begin with a single section, symmetric wing.  We'll start by defining some basic geometry.
 
 ```
-span = 1.0
-aspectratio = 10.0
-taperratio = 0.5
-wingtwist = 0.0
-wingsweep = 10.0 #degrees
-wingdihedral = 7.0 #degrees
+span = 1.0              #wing span
+aspectratio = 10.0      #wing aspect ratio
+taperratio = 0.5        #wing taper ratio
+wingtwist = 0.0         #wing twist
+wingsweep = 10.0        #wing sweep in degrees
+wingdihedral = 7.0      #wing dihedral in degrees
 ```
 
 Then we'll call the ```simpleWing()``` function to create a simple wing object.
@@ -62,8 +62,8 @@ vlm.addwing(system,"mainwing",mainwing)
 Now that we have a wing system, let's save it as a .vtk file so we can view it in paraview.  In order to do so, we are required to define a freestream velocity.
 
 ```@example tut
-Vinf(x,t) = [1,0,0]
-vlm.setVinf(system, Vinf)
+Vinf(x,t) = [1,0,0]         #non-dimensional function defining free stream velocity
+vlm.setVinf(system, Vinf)   #set freestream velocity for the system
 ```
 
 We will also want to set some parameters for saving files and set up our file system to put the files where we want.
@@ -73,22 +73,22 @@ We will also want to set some parameters for saving files and set up our file sy
     Make sure you have set your save_path to something non-important so the ```rm``` command doesn't delete anything you'll miss.
 
 ```@example tut
-run_name = "tutorial"
-save_path = "./simplewing/"
+run_name = "tutorial"           #define identifier at beginning of file names
+save_path = "./simplewing/"     #define directory where files will be saved
 
-run(`rm -rf $save_path`)
-run(`mkdir $save_path`)
+run(`rm -rf $save_path`)        #clear out directory where files will be saved
+run(`mkdir $save_path`)         #re-create directory fresh
 ```
 
 Finally, we can save the files.
 
 ```
-vlm.save(system, run_name; path=save_path)
+vlm.save(system, run_name; path=save_path)  #save geometry in a .vtk file format
 ```
 
 And now we can view our wing in Paraview using the command ```run(`paraview --data="$(save_path)/$(run_name)_mainwing_vlm.vtk"`)``` (assuming you've set up an alias for paraview on your computer).
 
-![alt text](https://media.githubusercontent.com/media/byuflowlab/FLOWUnsteady/master/docs/src/assets/tutorialfigs/geometry-basics.gif)
+![alt text](../assets/tutorialfigs/geometry-basics.gif)
 
 ## Adding a Rotor
 
@@ -106,7 +106,7 @@ rotor_file = "apc10x7.csv"          # hide
 data_path = uns.def_data_path       # hide
 rotor = uns.generate_rotor(rotor_file; pitch=0.0,
                                             n=10, CW=true, ReD=1.5e6,
-                                            verbose=true, xfoil=false,
+                                            verbose=true, xfoil=true,
                                             data_path=data_path,
                                             plot_disc=false);
 ```
@@ -141,7 +141,7 @@ end
 which we can put in a tuple that stores our rotor system(s).
 
 ```@example tut
-rotors_system = (rotor,);
+rotor_systems = (rotors,);
 ```
 
 We also need to add it to our overall system.
@@ -153,7 +153,8 @@ for rotor in rotors; vlm.addwing(system, run_name, rotor); end;
 Like setting the Vinf parameter for the main wing, we need to give our rotor an RPM as well.
 
 ```@example tut
-for rotor in rotors; vlm.setRPM(rotor, 6000); end;
+RPMref = 6000       #reference RPM
+for rotor in rotors; vlm.setRPM(rotor, RPMref); end;
 ```
 
 We should now be able to visualize our wing with a rotor.
@@ -166,20 +167,129 @@ vlm.save(system, run_name; path=save_path)
 run(`paraview --data="$(save_path)/tutorial_mainwing_vlm.vtk;tutorial_tutorial_Blade1_vlm.vtk;tutorial_tutorial_Blade2_vlm.vtk;tutorial_tutorial_Blade1_loft.vtk;tutorial_tutorial_Blade2_loft.vtk;"`)
 ```
 
-![alt text](https://media.githubusercontent.com/media/byuflowlab/FLOWUnsteady/master/docs/src/assets/tutorialfigs/add-rotor.gif)
+![alt text](../assets/tutorialfigs/add-rotor.gif)
 
 
 ## Other Systems
 
+In order run an analysis with our little airplane, we're going to have to add a few more systems
 
 ### VLM Systems
+First let's create a VLM system and add our main wing to it.
+
+```@example tut
+vlm_system = vlm.WingSystem()
+
+vlm.addwing(vlm_system, "mainwing", mainwing)
+```
 
 ### Wake Systems
+Next, let's create a wake system and add both the VLM system and rotor.
+
+```@example tut
+wake_system = vlm.WingSystem()
+
+vlm.addwing(wake_system, "SolveVLM", vlm_system)
+
+for rotor in rotors; vlm.addwing(wake_system, run_name, rotor); end;
+```
 
 ### Tilting Systems
+We'll also need to identify tilting objects, but since we don't have any tilting components yet, we'll just initialize an empty tuple. For more information on adding tilting objects (like control surfaces, or tilt-wings) see [Define Systems](@ref).
 
+```@example tut
+tilting_systems = ();
+```
 
 ## Kinematic Maneuvers
+Now let's define our maneuver. For now, let's just have the airplane fly in a straight and level. We are going to have to define non-dimensional functions for the velocity for the vehicle, the angle for the vehicle, the angles for our tilting systems, and the rotation rate for the rotor(s).
 
+!!! info "Non-dimensionalized Functions"
+
+    The functions that define the kinematic maneuver must be defined non-dimensionally. For more information on this, see [Define Kinematic Maneuvers](@ref).
+
+We'll start with the vehicle velocity function.
+
+```@example tut
+Vvehicle(t) = [-1.0,0.0,0.0]
+```
+
+Next, let's define the vehicle angle.
+
+```@example tut
+anglevehicle(t) = zeros(3)
+```
+
+Now the angle of the titling systems (we don't have any, so it's just empty again).
+
+```@example tut
+angle = ();
+```
+
+Lastly, we need to define a rotation rate function for each of the rotors.
+
+```@example
+RPM_fun(t) = 1.0
+
+RPM = (RPM_fun, );
+```
+
+With all the individual elements defined, we can create a maneuver
+
+```@example tut
+maneuver = uns.KinematicManeuver(angle, RPM, Vvehicle, anglevehicle)
+```
+
+We can also plot the maneuver to quickly see what we made.
+
+```@example tut
+uns.plot_maneuver(maneuver)
+```
+
+A plot of the maneuver is helpful, but visualizing in Paraview can also be helpful. In order to do that, however, we first need to set up a simulation.
 
 ## Setting up a Basic Simulation
+
+We already have most of the elements we need to define a simulation, but need to create a vehicle to be used in the simulation with the systems we've already defined.
+
+```@example tut
+vehicle = uns.VLMVehicle(   system;
+                            tilting_systems = tilting_systems,
+                            rotor_systems   = rotor_systems,
+                            vlm_system      = vlm_system,
+                            wake_system     = wake_system,
+                        );
+```
+
+In addition, we still need to define a reference velocity, the total time for the simulation, and a few initial conditions.
+
+```@example tut
+Vref = 10.0         #define a reference velocity for the vehicle
+ttot = 1.0          #define a total simulation time, in seconds
+nsteps = 300        #define the number of steps the simulation will take
+
+#initial conditions
+tinit = 0.0                                  #initial time
+Vinit = Vref*maneuver.Vvehicle(tinit/ttot)   #initial linear velocity
+Winit = zeros(3)                             #initial angular velocity
+```
+
+With everything now defined, we can create a simulation
+
+```
+simulation = uns.Simulation(vehicle, maneuver, Vref, RPMref, ttot; Vinit=Vinit, Winit=Winit, t=tinit);
+```
+
+Finally, we can visualize the maneuver in Paraview.
+
+```
+files = uns.visualize_kinematics(   simulation, nsteps, save_path;
+                                    run_name=run_name,
+                                    prompt=false,
+                                    paraview=false
+                                )
+
+run(`paraview --data="$save_path/$files"`)
+```
+
+ ![alt text](../assets/tutorialfigs/kinematic-maneuver.gif)
