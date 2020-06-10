@@ -11,9 +11,9 @@ makedocs(
                 "reference/VPM.md",
                 "reference/FLOWUnsteady.md",],
             "Tutorials" => Any[
+                "tutorials/getting-started.md",
                 "tutorials/first-steps.md",],
             "How-to-Guide" => Any[
-                "how-to-guide/getting-started.md",
                 "how-to-guide/paraview-visualization.md",
                 "how-to-guide/define-complex-wings.md",
                 "how-to-guide/define-complex-systems.md",
