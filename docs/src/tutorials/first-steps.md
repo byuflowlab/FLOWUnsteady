@@ -88,7 +88,7 @@ vlm.save(system, run_name; path=save_path)  #save geometry in a .vtk file format
 
 And now we can view our wing in Paraview using the command ```run(`paraview --data="$(save_path)/$(run_name)_mainwing_vlm.vtk"`)``` (assuming you've set up an alias for paraview on your computer).
 
-![alt text](../assets/tutorialfigs/geometry-basics.gif)
+![basic wing](../assets/tutorialfigs/geometry-basics.gif)
 
 ## Adding a Rotor
 
@@ -170,7 +170,7 @@ vlm.save(system, run_name; path=save_path)
 run(`paraview --data="$(save_path)/tutorial_mainwing_vlm.vtk;tutorial_tutorial_Blade1_vlm.vtk;tutorial_tutorial_Blade2_vlm.vtk;tutorial_tutorial_Blade1_loft.vtk;tutorial_tutorial_Blade2_loft.vtk;"`)
 ```
 
-![alt text](../assets/tutorialfigs/add-rotor.gif)
+![wing with rotor](../assets/tutorialfigs/add-rotor.gif)
 
 
 ## Other Systems
@@ -295,7 +295,7 @@ files = uns.visualize_kinematics(   simulation, nsteps, save_path;
 run(`paraview --data="$save_path/$files"`)
 ```
 
- ![alt text](../assets/tutorialfigs/kinematic-maneuver.gif)
+ ![moving wing and rotor](../assets/tutorialfigs/kinematic-maneuver.gif)
 
 
  ## Running the Simulation
@@ -325,4 +325,4 @@ pfield = uns.run_simulation(simulation, nsteps;
 run(`paraview --data="$save_path/$(files);tutorial_pfield...vtk"`)
 ```
 
-![alt text](../assets/tutorialfigs/pfield.gif)
+![pressure field](../assets/tutorialfigs/pfield.gif)
