@@ -198,7 +198,7 @@ for rotor in rotors; vlm.addwing(wake_system, run_name, rotor); end;
 ```
 
 ### Tilting Systems
-We'll also need to identify tilting objects, but since we don't have any tilting components yet, we'll just initialize an empty tuple. For more information on adding tilting objects (like control surfaces, or tilt-wings) see [Define Systems](@ref).
+We'll also need to identify tilting objects, but since we don't have any tilting components yet, we'll just initialize an empty tuple. For more information on adding tilting objects (like control surfaces, or tilt-wings) see [Define Complex Systems](@ref).
 
 ```@example tut
 tilting_systems = ();
@@ -269,7 +269,7 @@ In addition, we still need to define a reference velocity, the total time for th
 ```@example tut
 Vref = 10.0         #define a reference velocity for the vehicle
 ttot = 1.0          #define a total simulation time, in seconds
-nsteps = 100        #define the number of steps the simulation will take
+nsteps = 300        #define the number of steps the simulation will take
 
 #initial conditions
 tinit = 0.0                                  #initial time
@@ -308,7 +308,7 @@ We also now run the simulation and use Paraview to look at the outputs.
 
 !!! note "Run Time"
 
-    Running simulations typcially takes a while.
+    Running simulations typcially takes a while.  You may want to reduce ```nsteps```, but the visual below shows results for 300 steps.
 
 ```
 nullfunc(args...) = false
