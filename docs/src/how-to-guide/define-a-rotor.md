@@ -233,7 +233,7 @@ It is likely that the rotors defined in the repository database do not match you
 
 
 
-1. Create you custom rotor files - [Creating a Custom Rotor](@ref custromrotor)
+1. Create your [custom rotor files](@ref custromrotor)
 2. Add them to the correct [directories](@ref rotordatabasestructure)
 
 #### If using a custom database...
