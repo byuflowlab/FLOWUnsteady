@@ -15,7 +15,8 @@ makedocs(
             "How-to-Guide" => Any[
                 "how-to-guide/getting-started.md",
                 "how-to-guide/paraview-visualization.md",
-                "how-to-guide/defining-systems.md",
+                "how-to-guid/define-complex-wings.md",
+                "how-to-guide/define-complex-systems.md",
                 "how-to-guide/define-a-rotor.md",
                 "how-to-guide/define-kinematic-maneuvers.md",
                 "how-to-guide/select-a-solver.md",
