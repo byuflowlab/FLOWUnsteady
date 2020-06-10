@@ -1,5 +1,7 @@
 # FLOW Unsteady Aerodynamics Suite
 
+[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://flow.byu.edu/FLOWUnsteady/)
+
 <img src="resources/img/blownwing00.png" alt="Pic here" style="width: 900px;"/>
 
 Simulation engine of mixed-fidelity unsteady aerodynamics and aeroacoustics.
