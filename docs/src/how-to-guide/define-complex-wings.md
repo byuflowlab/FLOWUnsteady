@@ -19,10 +19,10 @@ Now let's define the parameters of each chord.  Note that position is normalized
 Also Since we are creating a symmetric wing, we only need information from the center to the tip of the wing, postive indicating along the positive axis for the wing system.
 
 ```
-poschord = [0.0; 0.5; 1.0]./span                #postion of chord stations
-lengthtipchord = 0.3                            #length of tip chord
-lengthchord = [0.5; 0.4; 0.3]./lengthtipchord   #length of chords
-twistchord = [0.0; 0.0; -3.0]                   #twist of chords, in degrees
+poschord = [0.0; 0.5; 1.0]./span                    #postion of chord stations
+lengthtipchord = 0.03                               #length of tip chord
+lengthchord = [0.075; 0.05; 0.03]./lengthtipchord   #length of chords
+twistchord = [0.0; 0.0; -3.0]                       #twist of chords, in degrees
 ```
 
 Then let's define the parameters of each section between chord definitions.
@@ -41,27 +41,27 @@ aspectratio = span/lengthtipchord
 With this, we can call the ```complexWing()``` function for a symmetric wing.
 
 ```
-mainwing = vlm.compleWing(span, aspectratio, numlattice, poschord, lengthchord, twistchord, sweepsection, dihedralsection; symmetric=true)
+mainwing = vlm.complexWing(span, aspectratio, numlattice, poschord, lengthchord, twistchord, sweepsection, dihedralsection; symmetric=true)
 ```
 
-![symmetric wing](../assets/howtofigs/sym-wing.gif)
+![symmetric wing](../assets/howtofigs/symmetric-wing.gif)
 
 ## Define a Non-symmetric Wing
 
 A good example of a non-symmetric wing is something like a vertical stabilizer. The definitions are basically the same, we just set the symmetric flag to false when creating the wing.
 
 ```
-span = 0.15                                     #length of full span
-numlattice = 5                                  #number of lattice elements on half-span
-poschord = [0.0; 0.5; 1.0]./span                #postion of chord stations
-lengthtipchord = 0.025                          #length of tip chord
-lengthchord = [0.03; 0.025]./lengthtipchord     #length of chords
-twistchord = [0.0; 0.0]                         #twist of chords, in degrees
-sweepsection = [10.0; 5.0]                      #sweep of sections between chords, in degrees
-dihedralsection = [0.0; 7.0]                    #dihedral of sections between chords, in degrees
-aspectratio = span/lengthtipchord
+span = 0.25                             #length of full span
+numlattice = 5                          #number of lattice elements on half-span
+poschord = [0.0; 1.0]                   #postion of chord stations
+lengthtipchordvstab = 0.05              #length of tip chord
+lengthchordvstab = [1.25; 1.0]          #length of chords
+twistchord = [0.0; 0.0]                 #twist of chords, in degrees
+sweepsection = [0.0]                    #sweep of sections between chords, in degrees
+dihedralsection = [0.0]                 #dihedral of sections between chords, in degrees
+aspectratio = span/lengthtipchordvstab
 
-verticalstabilizer = vlm.compleWing(span, aspectratio, numlattice, poschord, lengthchord, twistchord, sweepsection, dihedralsection; symmetric=false, chordalign=1.0)
+verticalstabilizer = vlm.complexWing(span, aspectratio, numlattice, poschord, lengthchordvstab, twistchord, sweepsection, dihedralsection; symmetric=false, chordalign=1.0)
 ```
 
 !!! note "Chord Alignment"
@@ -85,4 +85,97 @@ vlm.setcoordsystem(verticalstabilizer,originvstab,csysvstab)
 
 ## Define Control Surfaces
 
-There is no automatic way to define control surfaces. Each control surface will need to be defined as its own wing object and placed manually.
+There is no automatic way to define control surfaces. Each control surface will need to be defined as its own wing object and placed manually. Therefore, you must adjust based on the objects already in place. Let's add a rudder to our verticle stabilizer.
+
+```
+span = 0.25                        #length of full span
+numlattice = 5                     #number of lattice elements on half-span
+poschord = [0.0; 0.25; 1.0]        #postion of chord stations
+lengthtipchord = 0.03              #length of tip chord
+lengthchord = [1.25; 1.5; 1.0]     #length of chords
+twistchord = [0.0; 0.0; 0.0]       #twist of chords, in degrees
+sweepsection = [0.0; 0.0]          #sweep of sections between chords, in degrees
+dihedralsection = [0.0; 0.0]       #dihedral of sections between chords, in degrees
+aspectratio = span/lengthtipchord
+
+rudder = vlm.complexWing(span, aspectratio, numlattice, poschord, lengthchord, twistchord, sweepsection, dihedralsection; symmetric=false, chordalign=0.0)
+
+lengthrootchordvstab = lengthchordvstab[1]*lengthtipchordvstab
+originrudder = [0.5+lengthrootchordvstab; 0.0; 0.0]  #account for vstab position and chord
+csysrudder = [1.0 0.0 0.0; 0.0 0.0 1.0; 0.0 1.0 0.0] #csys rotated 90 degrees from default
+vlm.setcoordsystem(rudder,originrudder,csysrudder)
+```
+
+![rudder](../assets/howtofigs/rudder.gif)
+
+
+```@setup all
+span = 1.0                      #length of full span
+numlattice = 10                 #number of lattice elements on half-span
+
+poschord = [0.0; 0.5; 1.0]./span                #postion of chord stations
+lengthtipchord = 0.03                            #length of tip chord
+lengthchord = [0.075; 0.05; 0.03]./lengthtipchord   #length of chords
+twistchord = [0.0; 0.0; -3.0]                   #twist of chords, in degrees
+sweepsection = [10.0; 5.0]      #sweep of sections between chords, in degrees
+dihedralsection = [0.0; 7.0]    #dihedral of sections between chords, in degrees
+aspectratio = span/lengthtipchord
+
+mainwing = vlm.complexWing(span, aspectratio, numlattice, poschord, lengthchord, twistchord, sweepsection, dihedralsection; symmetric=true)
+
+
+span = 0.25                                     #length of full span
+numlattice = 5                                  #number of lattice elements on half-span
+poschord = [0.0; 1.0]                #postion of chord stations
+lengthtipchordvstab = 0.05                          #length of tip chord
+lengthchordvstab = [1.25; 1.0]     #length of chords
+twistchord = [0.0; 0.0]                         #twist of chords, in degrees
+sweepsection = [0.0]                      #sweep of sections between chords, in degrees
+dihedralsection = [0.0]                    #dihedral of sections between chords, in degrees
+aspectratio = span/lengthtipchordvstab
+
+verticalstabilizer = vlm.complexWing(span, aspectratio, numlattice, poschord, lengthchordvstab, twistchord, sweepsection, dihedralsection; symmetric=false, chordalign=1.0)
+
+originvstab = [0.5; 0.0; 0.0]                       #origin moved 0.5 in positive x-direction
+csysvstab = [1.0 0.0 0.0; 0.0 0.0 1.0; 0.0 1.0 0.0] #csys rotated 90 degrees from default
+vlm.setcoordsystem(verticalstabilizer,originvstab,csysvstab)
+
+
+
+span = 0.25                                     #length of full span
+numlattice = 5                                  #number of lattice elements on half-span
+poschord = [0.0; 0.25; 1.0]                #postion of chord stations
+lengthtipchord = 0.03                          #length of tip chord
+lengthchord = [1.25; 1.5; 1.0]     #length of chords
+twistchord = [0.0; 0.0; 0.0]                         #twist of chords, in degrees
+sweepsection = [0.0; 0.0]                      #sweep of sections between chords, in degrees
+dihedralsection = [0.0; 0.0]                    #dihedral of sections between chords, in degrees
+aspectratio = span/lengthtipchord
+
+rudder = vlm.complexWing(span, aspectratio, numlattice, poschord, lengthchord, twistchord, sweepsection, dihedralsection; symmetric=false, chordalign=0.0)
+
+lengthrootchordvstab = lengthchordvstab[1]*lengthtipchordvstab
+originrudder = [0.5+lengthrootchordvstab; 0.0; 0.0]                       #account for vstab position and chord
+csysrudder = [1.0 0.0 0.0; 0.0 0.0 1.0; 0.0 1.0 0.0] #csys rotated 90 degrees from default
+vlm.setcoordsystem(rudder,originrudder,csysrudder)
+
+
+system = vlm.WingSystem()
+vlm.addwing(system,"mainwing",mainwing)
+vlm.addwing(system,"vstab",verticalstabilizer)
+vlm.addwing(system,"rudder",rudder)
+
+Vinf(x,t) = [1,0,0]         #non-dimensional function defining free stream velocity
+vlm.setVinf(system, Vinf)   #set freestream velocity for the system
+
+run_name = "tutorial"           #define identifier at beginning of file names
+save_path = "./simplewing/"     #define directory where files will be saved
+
+run(`rm -rf $save_path`)        #clear out directory where files will be saved
+run(`mkdir $save_path`)         #re-create directory fresh
+
+vlm.save(system, run_name; path=save_path)  #save geometry in a .vtk file format
+run(`paraview`)
+```
+
+## Define things Manually
