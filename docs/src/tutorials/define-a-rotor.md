@@ -1,4 +1,4 @@
-# Define a Rotor
+# Advanced Rotor Definition
 
 
 
@@ -9,7 +9,7 @@ Modules used:
 
 
 
-If you'd like to simulate any type of rotor, say a propeller, fan or turbine, you define your parameters, setup the simulation and then run the simulation. As with previous tasks, here we go through each step, but adding two rotors to the hershey bar wing. 
+If you'd like to simulate any type of rotor, say a propeller, fan or turbine, you define your parameters, setup the simulation and then run the simulation. As with previous tasks, here we go through each step, but adding two rotors to the hershey bar wing.
 
 
 
@@ -17,7 +17,7 @@ If you'd like to simulate any type of rotor, say a propeller, fan or turbine, yo
 
 First you will need to define all of the parameters that dictate the geometry and aerodynamic qualities of your rotor. Most of the information that defines your rotor is included in a database. FlowUnsteady includes a modest database of rotors including propellers and turbine blades. If you need a rotor outside of the database, see below on how to add a custom rotor.
 
-1. Initialize FlowUnsteady and define the rotor file, input and output paths, and run name. 
+1. Initialize FlowUnsteady and define the rotor file, input and output paths, and run name.
 
 ```julia
 import FLOWUnsteady
@@ -37,9 +37,9 @@ run_name = "singlerotor"
 
 
 
-2. Define rotor parameters. 
+2. Define rotor parameters.
 
-   *Note that the parameters must match what is given in the rotor definition files, otherwise the simulation will fail or provide incorrect results.* 
+   *Note that the parameters must match what is given in the rotor definition files, otherwise the simulation will fail or provide incorrect results.*
 
 ``` julia
 pitch = 0.0 						#(deg) collective blade pitch
@@ -75,11 +75,11 @@ ReD = 2*pi*RPM/60*R * rho/mu * 2*R  # Tip-based Reynolds number
 Vinf(x,t) = [20, 0, 0] 							#(m/s) freestream velocity [soley x direction]
 ```
 
-*Note that this function can describe the free stream dependent on distance or time, here we simply declare a constant freestream velocity.* 
+*Note that this function can describe the free stream dependent on distance or time, here we simply declare a constant freestream velocity.*
 
 
 
-5. Define the solver parameters. 
+5. Define the solver parameters.
 
 ```julia
 # Solver parameters
@@ -103,9 +103,9 @@ verbose = true 											# Echo status periodically
 
 
 
-## Simulation Setup 
+## Simulation Setup
 
-6. Now using all of the parameters previously defined, generate the rotor system. 
+6. Now using all of the parameters previously defined, generate the rotor system.
 
    *Every object must be added to a wing system, so here we create an empty wing system and add the rotor. Objects included in the wing system will not explicitly be included in the solution, but will be included in visualization.*
 
@@ -130,7 +130,7 @@ vlm.addwing(system, run_name, rotor)
 
 
 
-7. Create a wake_system. 
+7. Create a wake_system.
 
    *Any object that sheds a wake must be added to the wake_system.*
 
@@ -149,7 +149,7 @@ end
 
 
 
-8. Generate a vehicle object out of the rotor system and wake. 
+8. Generate a vehicle object out of the rotor system and wake.
 
    *If you were generating other bodies such as wings, an aircraft body or a turbine tower, you would first create those and generate the vehicle object with those included.*
 
@@ -163,7 +163,7 @@ vehicle = VehicleType(   system;
 
 
 
-9. Generate maneuver definition. 
+9. Generate maneuver definition.
 
    *The simulation needs a maneuver, which is covered in a different guide. Here we simply create a maneuver that will keep the rotor at a constant RPM, not tilt, or translate.*
 
@@ -221,7 +221,7 @@ Call the simulation function on the parameters and options you've defined.
 
 
 
-After visualization, you should get a result similar to this. 
+After visualization, you should get a result similar to this.
 
 
 
@@ -229,7 +229,7 @@ After visualization, you should get a result similar to this.
 
 ## Adding a Custom Rotor
 
-It is likely that the rotors defined in the repository database do not match your needs, in that case, you will need to provide all of the information to define the rotor in a series of files. The files must be defined in the correct format and directory structure for FlowUnsteady to find it all. If you are unfamiliar with creating file trees, I suggest adding your files directly to the correct directories, however a seperate file structure can easily be used. 
+It is likely that the rotors defined in the repository database do not match your needs, in that case, you will need to provide all of the information to define the rotor in a series of files. The files must be defined in the correct format and directory structure for FlowUnsteady to find it all. If you are unfamiliar with creating file trees, I suggest adding your files directly to the correct directories, however a seperate file structure can easily be used.
 
 
 
@@ -241,11 +241,11 @@ It is likely that the rotors defined in the repository database do not match you
 1. Create the data structure shown below.
 2. Complete the steps above.
 
-3. When initializing the data path (step 1 of defining a rotor), set the data path to the address of the "data" directory 
+3. When initializing the data path (step 1 of defining a rotor), set the data path to the address of the "data" directory
 
 <img src="../assets/howtofigs/directories1.png" alt="directories" style="zoom:60%;" />
 
-The database can be found as a subdirectory of the FlowUnsteady package. 
+The database can be found as a subdirectory of the FlowUnsteady package.
 
 ```shell
 ../FlowUnsteady/data
