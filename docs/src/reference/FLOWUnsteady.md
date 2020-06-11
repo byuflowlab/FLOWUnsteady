@@ -1,28 +1,18 @@
 # FLOWUnsteady
 
 ```@contents
-
+Pages = ["FLOWUnsteady.md"]
 ```
 
-Pages = ["FLOWUnstead.md"]
+## Creating a Custom Rotor
 
-```
+If you do not already have the rotor files to describe your rotor, then you will need to create them. Here we will go through each file type and what to put in them. It is important to note that file name and types are not important, however they must be comma delimited.  We will use the DJI-II from the FLOWUnsteady database as an example.
 
-```
-
-
-
-
-
-## [Creating a Custom Rotor](@id custromrotor)
-
-If you do not already have the rotor files to describe your rotor, then you will need to create them. Here we will go through each file type and what to put in them. It is important to note that file name and types are not important, however they must be comma delimited.  We will use the DJI-II from the FLOWUnsteady database as an example. 
-
-It is important to note that if XFOIL is not run (marked false), then airfoil polars must be provided. The files that affect solution outcome are the chord distribution, pitch distribution, leading edge distribution, and airfoil polar files. If XFOIL is marked to run, all of the geometric material must be accurate. 
+It is important to note that if XFOIL is not run (marked false), then airfoil polars must be provided. The files that affect solution outcome are the chord distribution, pitch distribution, leading edge distribution, and airfoil polar files. If XFOIL is marked to run, all of the geometric material must be accurate.
 
 #### MainFile.csv
 
-The main file describes the overall rotor, and points to the blade file that describes one of the blades. 
+The main file describes the overall rotor, and points to the blade file that describes one of the blades.
 
 | property | file             | description             |
 | -------- | ---------------- | ----------------------- |
@@ -31,11 +21,11 @@ The main file describes the overall rotor, and points to the blade file that des
 | B        | 3                | Number of blades        |
 | blade    | DJI-II_blade.csv | Blade file              |
 
- 
+
 
 #### Blade.csv
 
-The main file points to all of the files that desribe the blade and spline parameters. 
+The main file points to all of the files that desribe the blade and spline parameters.
 
 | property      | file                  | description            |
 | ------------- | --------------------- | ---------------------- |
@@ -51,7 +41,7 @@ The main file points to all of the files that desribe the blade and spline param
 
 #### ChordDist.csv
 
-This file provides the distribution of the chord along the blade, normalized by the radius of the blade. The file must go in order of root to tip. The root need not be defined, but the tip must be. The file can have any number of paired numbers. Any values used by the solver that are not provided will be interpolated. 
+This file provides the distribution of the chord along the blade, normalized by the radius of the blade. The file must go in order of root to tip. The root need not be defined, but the tip must be. The file can have any number of paired numbers. Any values used by the solver that are not provided will be interpolated.
 
 | r/R       | c/R       |
 | --------- | --------- |
@@ -64,7 +54,7 @@ This file provides the distribution of the chord along the blade, normalized by 
 
 #### PitchDist.csv
 
-This file describes the twist of the blade along the blade. The file can have any number of paired numbers. Any values used by the solver that are not provided will be interpolated. 
+This file describes the twist of the blade along the blade. The file can have any number of paired numbers. Any values used by the solver that are not provided will be interpolated.
 
 | r/R       | twist (deg) |
 | --------- | ----------- |
@@ -77,7 +67,7 @@ This file describes the twist of the blade along the blade. The file can have an
 
 #### SweepDist.csv
 
-This file describes the sweep distribution. This is also known as the leading edge distribution, it describes the distance of the the leading edge from a line coming from the center of the hub. These lines change depending on how many blades are included on a rotor (see photo below for example of a the rotor with 3 blades). The file can have any number of paired numbers. Any values used by the solver that are not provided will be interpolated. 
+This file describes the sweep distribution. This is also known as the leading edge distribution, it describes the distance of the the leading edge from a line coming from the center of the hub. These lines change depending on how many blades are included on a rotor (see photo below for example of a the rotor with 3 blades). The file can have any number of paired numbers. Any values used by the solver that are not provided will be interpolated.
 
 <img src="../assets/howtofigs/sweepdist.png" alt="sweepdist" style="zoom:33%;" />
 
@@ -92,7 +82,7 @@ This file describes the sweep distribution. This is also known as the leading ed
 
 #### HeightDist.csv
 
-This file describes the height distribution, also known as anhedral (or precode for turbines). This describes the height of the leading edge from the top face of the hub. The file can have any number of paired numbers. Any values used by the solver that are not provided will be interpolated. 
+This file describes the height distribution, also known as anhedral (or precode for turbines). This describes the height of the leading edge from the top face of the hub. The file can have any number of paired numbers. Any values used by the solver that are not provided will be interpolated.
 
 <img src="../assets/howtofigs/precone.png" alt="precone" style="zoom:12%;" />
 
@@ -107,7 +97,7 @@ This file describes the height distribution, also known as anhedral (or precode 
 
 #### Airfoil_Files.csv
 
-This file describes the airfoils along the blade and the paired aero file that goes with the contour file. The contour file is a file of the geometric shape of the airfoil. The aero file is the airfoil polar, the file that has the coefficient of lift, drag and moment for a given set of angles of attack for the airfoil. Note that the information is interpolated, so airfoils between two stated airfoils will be an interpolation between the two. If XFOIL is marked to run, then the aero files will not be used. As many pairs of airfoil files as desired may be used. 
+This file describes the airfoils along the blade and the paired aero file that goes with the contour file. The contour file is a file of the geometric shape of the airfoil. The aero file is the airfoil polar, the file that has the coefficient of lift, drag and moment for a given set of angles of attack for the airfoil. Note that the information is interpolated, so airfoils between two stated airfoils will be an interpolation between the two. If XFOIL is marked to run, then the aero files will not be used. As many pairs of airfoil files as desired may be used.
 
 | r/R  | Contour file | Aero file               |
 | ---- | ------------ | ----------------------- |
@@ -119,7 +109,7 @@ This file describes the airfoils along the blade and the paired aero file that g
 
 #### AirfoilGeoFile.csv
 
-This file describes the geometry of the airfoil by giving x and y coordinates of the airfoil surface. These coordinates are normalized by the chord length. The order of the points should be trailing edge, upper surface, leading edge, lower surface, then trailing edge. As many coordinate pairs as desired may be used, all other points used will be interpolated. 
+This file describes the geometry of the airfoil by giving x and y coordinates of the airfoil surface. These coordinates are normalized by the chord length. The order of the points should be trailing edge, upper surface, leading edge, lower surface, then trailing edge. As many coordinate pairs as desired may be used, all other points used will be interpolated.
 
 | x/c     | y/c     |
 | ------- | ------- |
@@ -132,7 +122,7 @@ This file describes the geometry of the airfoil by giving x and y coordinates of
 
 #### AirfoilPolarFile.dat
 
-This file contains all of the airfoils' coefficients of lift, drag and moment for a given set of angles of attack for the airfoil. Values that are required but not given will be interpolated. Note that the polar should match the general Reynolds number that the given section will experience. If XFOIL is set to run, this file will not be used. This is the only file that is not a comma delimited file. 
+This file contains all of the airfoils' coefficients of lift, drag and moment for a given set of angles of attack for the airfoil. Values that are required but not given will be interpolated. Note that the polar should match the general Reynolds number that the given section will experience. If XFOIL is set to run, this file will not be used. This is the only file that is not a comma delimited file.
 
 ```shell
 DU21 airfoil with an aspect ratio of 17.  Original -180 to 180deg Cl, Cd, and Cm versus AOA data taken from Appendix A of DOWEC document 10046_009.pdf (numerical values obtained from Koert Lindenburg of ECN).
@@ -158,7 +148,7 @@ one more line
 
 ## [Rotor Database Structure](@id rotordatabasestructure)
 
-The database can be found as a subdirectory of the FlowUnsteady package. 
+The database can be found as a subdirectory of the FlowUnsteady package.
 
 ```shell
 ../FlowUnsteady/data
