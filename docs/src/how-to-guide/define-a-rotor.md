@@ -1,14 +1,5 @@
 # How to Define a Custom Rotor
 
-
-
-Modules used:
-
-- GeometricTools
-- VLM
-
-
-
 If you'd like to simulate any type of rotor, say a propeller, fan or turbine, you define your parameters, setup the simulation and then run the simulation. As with previous tasks, here we go through each step, but adding two rotors to the hershey bar wing.
 
 
@@ -17,7 +8,7 @@ If you'd like to simulate any type of rotor, say a propeller, fan or turbine, yo
 
 First you will need to define all of the parameters that dictate the geometry and aerodynamic qualities of your rotor. Most of the information that defines your rotor is included in a database. FlowUnsteady includes a modest database of rotors including propellers and turbine blades. If you need a rotor outside of the database, see below on how to add a custom rotor.
 
-1. Initialize FlowUnsteady and define the rotor file, input and output paths, and run name.
+##### Initialize FlowUnsteady and define the rotor file and I/O 
 
 ```julia
 import FLOWUnsteady
@@ -37,9 +28,9 @@ run_name = "singlerotor"
 
 
 
-2. Define rotor parameters.
+##### Define rotor parameters
 
-   *Note that the parameters must match what is given in the rotor definition files, otherwise the simulation will fail or provide incorrect results.*
+*Note that the parameters must match what is given in the rotor definition files, otherwise the simulation will fail or provide incorrect results.*
 
 ``` julia
 pitch = 0.0 						#(deg) collective blade pitch
@@ -57,7 +48,7 @@ R, B = uns.read_rotor(rotor_file; data_path=data_path)[[1,3]]
 
 
 
-3. Define simulation parameters according to your situation:
+##### Define simulation parameters according to your situation
 
 ```julia
 RPM = 5000                          # RPM
@@ -69,7 +60,7 @@ ReD = 2*pi*RPM/60*R * rho/mu * 2*R  # Tip-based Reynolds number
 
 
 
-4. Define a function that describes freestream velocity.
+##### Define a function that describes freestream velocity
 
 ```julia
 Vinf(x,t) = [20, 0, 0] 							#(m/s) freestream velocity [soley x direction]
@@ -79,7 +70,7 @@ Vinf(x,t) = [20, 0, 0] 							#(m/s) freestream velocity [soley x direction]
 
 
 
-5. Define the solver parameters.
+##### Define the solver parameters
 
 ```julia
 # Solver parameters
@@ -105,9 +96,9 @@ verbose = true 											# Echo status periodically
 
 ## Simulation Setup
 
-6. Now using all of the parameters previously defined, generate the rotor system.
+##### Now using all of the parameters previously defined, generate the rotor system
 
-   *Every object must be added to a wing system, so here we create an empty wing system and add the rotor. Objects included in the wing system will not explicitly be included in the solution, but will be included in visualization.*
+*Every object must be added to a wing system, so here we create an empty wing system and add the rotor. Objects included in the wing system will not explicitly be included in the solution, but will be included in visualization.*
 
 ```julia
 # ------------ SIMULATION SETUP --------------------------------------------
@@ -130,9 +121,9 @@ vlm.addwing(system, run_name, rotor)
 
 
 
-7. Create a wake_system.
+##### Create a wake_system.
 
-   *Any object that sheds a wake must be added to the wake_system.*
+*Any object that sheds a wake must be added to the wake_system.*
 
 ```julia
 # Wake-shedding system (doesn't include the rotor if quasi-steady vehicle)
@@ -149,9 +140,9 @@ end
 
 
 
-8. Generate a vehicle object out of the rotor system and wake.
+##### Generate a vehicle object out of the rotor system and wake.
 
-   *If you were generating other bodies such as wings, an aircraft body or a turbine tower, you would first create those and generate the vehicle object with those included.*
+*If you were generating other bodies such as wings, an aircraft body or a turbine tower, you would first create those and generate the vehicle object with those included.*
 
 ```julia
 # FVS's Vehicle object
@@ -163,9 +154,9 @@ vehicle = VehicleType(   system;
 
 
 
-9. Generate maneuver definition.
+##### Generate maneuver definition.
 
-   *The simulation needs a maneuver, which is covered in a different guide. Here we simply create a maneuver that will keep the rotor at a constant RPM, not tilt, or translate.*
+*The simulation needs a maneuver, which is covered in a different guide. Here we simply create a maneuver that will keep the rotor at a constant RPM, not tilt, or translate.*
 
 ```julia
     # ----- MANEUVER DEFINITION
@@ -183,7 +174,7 @@ vehicle = VehicleType(   system;
 
 
 
-10. Create a simulation object for the simulator to run.
+##### Create a simulation object for the simulator to run.
 
 ```julia
     # ----- SIMULATION DEFINITION
@@ -196,7 +187,7 @@ vehicle = VehicleType(   system;
 
 ## Run Simulation
 
-Call the simulation function on the parameters and options you've defined.
+##### Call the simulation function on the parameters and options you've defined.
 
 ```julia
     # ------------ RUN SIMULATION ----------------------------------------------
@@ -233,7 +224,7 @@ It is likely that the rotors defined in the repository database do not match you
 
 
 
-1. Create your [custom rotor files](@ref custromrotor)
+1. Create your [custom rotor files](@ref createcustromrotor)
 2. Add them to the correct [directories](@ref rotordatabasestructure)
 
 #### If using a custom database...
