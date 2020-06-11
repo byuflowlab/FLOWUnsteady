@@ -198,7 +198,7 @@ for rotor in rotors; vlm.addwing(wake_system, run_name, rotor); end;
 ```
 
 ### Tilting Systems
-We'll also need to identify tilting objects, but since we don't have any tilting components yet, we'll just initialize an empty tuple. For more information on adding tilting objects (like control surfaces, or tilt-wings) see [Advanced System Definition](@ref).
+We'll also need to identify tilting objects, but since we don't have any tilting components yet, we'll just initialize an empty tuple. For more information on adding tilting objects (like control surfaces, or tilt-wings) see [How to Define Vehicle Systems](@ref).
 
 ```@example tut
 tilting_systems = ();
@@ -209,7 +209,7 @@ Now let's define our maneuver. For now, let's just have the airplane fly in a st
 
 !!! info "Non-dimensionalized Functions"
 
-    The functions that define the kinematic maneuver must be defined non-dimensionally. For more information on this, see [Advanced Kinematic Maneuver Definition](@ref).
+    The functions that define the kinematic maneuver must be defined non-dimensionally. For more information on this, see [How to Define Kinematic Maneuvers](@ref).
 
 We'll start with the vehicle velocity function.
 
@@ -304,7 +304,7 @@ We also now run the simulation and use Paraview to look at the outputs.
 
 !!! note "Outputs"
 
-    We are only outputting the basic pressure field here. In order to have additional outputs, it is necessary to write some extra runtime functions, see [Set up run-time Functions](@ref) and [Set up run-time Monitors](@ref) for more information.
+    We are only outputting the basic pressure field here. In order to have additional outputs, it is necessary to write some extra runtime functions, see [How to Set up Run-time Functions](@ref) for more information.
 
 !!! note "Run Time"
 
