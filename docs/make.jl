@@ -10,10 +10,6 @@ makedocs(
                 "tutorials/getting-started.md",
                 "tutorials/first-steps.md",
                 ],
-            "Reference" => Any[
-                "reference/FLOWVLMfunctions.md",
-                "reference/VPMfunctions.md",
-                "reference/FLOWUnsteadyfunctions.md",],
             "How to " => Any[
                 "how-to-guide/paraview-visualization.md",
                 "how-to-guide/define-complex-wings.md",
@@ -24,6 +20,11 @@ makedocs(
                 "how-to-guide/select-a-solver.md",
                 "how-to-guide/calculate-aerodynamic-forces.md",
                 "how-to-guide/wake-stability.md",],
+            "Reference" => Any[
+                "reference/FLOWVLMfunctions.md",
+                "reference/VPMfunctions.md",
+                "reference/FLOWUnsteadyfunctions.md",],
+
             "Theory" => Any[
                 "theory/FLOWVLMtheory.md",
                 "theory/VPMtheory.md",
