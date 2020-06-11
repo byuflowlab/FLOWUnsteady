@@ -12,17 +12,18 @@ makedocs(
                 "reference/FLOWUnsteady.md",],
             "Tutorials" => Any[
                 "tutorials/getting-started.md",
-                "tutorials/first-steps.md",],
+                "tutorials/first-steps.md",
+                "tutorials/define-complex-wings.md",
+                "tutorials/define-complex-systems.md",
+                "tutorials/define-a-rotor.md",
+                "tutorials/define-kinematic-maneuvers.md",],
             "How-to-Guide" => Any[
                 "how-to-guide/paraview-visualization.md",
-                "how-to-guide/define-complex-wings.md",
-                "how-to-guide/define-complex-systems.md",
-                "how-to-guide/define-a-rotor.md",
-                "how-to-guide/define-kinematic-maneuvers.md",
                 "how-to-guide/select-a-solver.md",
                 "how-to-guide/calculate-aerodynamic-forces.md",
                 "how-to-guide/set-up-runtime-functions.md",
-                "how-to-guide/set-up-monitors.md",],
+                "how-to-guide/set-up-monitors.md",
+                "how-to-guide/wake-stability.md"],
             ]
 )
 
