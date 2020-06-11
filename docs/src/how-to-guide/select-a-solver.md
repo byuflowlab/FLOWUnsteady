@@ -1,1 +1,1 @@
-# Selecting a Solver
+# Select a Solver
