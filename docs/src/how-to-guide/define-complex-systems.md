@@ -180,6 +180,8 @@ Finally, we need to create our rotor system, which is actually just a tuple of t
 rotor_systems = (rotors, )
 ```
 
+![](../assets/howtofigs/complex-systems.gif)
+
 ## Tilting Systems
 
 A tilting system is simply a tuple of all the wing systems that will be rotating according to specific definitions beyond the overall aircraft orientations. In our case, that would just be the rudder.
