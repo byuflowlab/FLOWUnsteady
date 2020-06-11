@@ -6,23 +6,28 @@ makedocs(
     format = Documenter.HTML(),
     # modules = [FLOWUnsteady],
     pages = ["Home" => "index.md",
-            "Reference" => Any[
-                "reference/FLOWVLM.md",
-                "reference/VPM.md",
-                "reference/FLOWUnsteady.md",],
             "Tutorials" => Any[
                 "tutorials/getting-started.md",
                 "tutorials/first-steps.md",
-                "tutorials/define-complex-wings.md",
-                "tutorials/define-complex-systems.md",
-                "tutorials/define-a-rotor.md",
-                "tutorials/define-kinematic-maneuvers.md",
-                "tutorials/set-up-runtime-functions.md",],
-            "How-to-Guide" => Any[
+                ],
+            "Reference" => Any[
+                "reference/FLOWVLMfunctions.md",
+                "reference/VPMfunctions.md",
+                "reference/FLOWUnsteadyfunctions.md",],
+            "How to " => Any[
                 "how-to-guide/paraview-visualization.md",
+                "hot-to-guide/define-complex-wings.md",
+                "hot-to-guide/define-complex-systems.md",
+                "hot-to-guide/define-a-rotor.md",
+                "hot-to-guide/define-kinematic-maneuvers.md",
+                "hot-to-guide/set-up-runtime-functions.md",
                 "how-to-guide/select-a-solver.md",
                 "how-to-guide/calculate-aerodynamic-forces.md",
-                "how-to-guide/wake-stability.md"],
+                "how-to-guide/wake-stability.md",],
+            "Theory" => Any[
+                "theory/FLOWVLMtheory.md",
+                "theory/VPMtheory.md",
+                "theory/FLOWUnsteadytheory.md",],
             ]
 )
 
