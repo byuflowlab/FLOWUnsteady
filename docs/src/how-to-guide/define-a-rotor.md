@@ -1,4 +1,4 @@
-# Advanced Rotor Definition
+# How to Define a Custom Rotor
 
 
 
