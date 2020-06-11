@@ -1,14 +1,5 @@
 # Advanced Rotor Definition
 
-
-
-Modules used:
-
-- GeometricTools
-- VLM
-
-
-
 If you'd like to simulate any type of rotor, say a propeller, fan or turbine, you define your parameters, setup the simulation and then run the simulation. As with previous tasks, here we go through each step, but adding two rotors to the hershey bar wing.
 
 
@@ -233,7 +224,7 @@ It is likely that the rotors defined in the repository database do not match you
 
 
 
-1. Create your [custom rotor files](@ref custromrotor)
+1. Create your [custom rotor files](@ref createcustromrotor)
 2. Add them to the correct [directories](@ref rotordatabasestructure)
 
 #### If using a custom database...
