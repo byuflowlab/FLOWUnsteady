@@ -4,7 +4,7 @@
 Pages = ["FLOWUnsteady.md"]
 ```
 
-## Creating a Custom Rotor
+## [Creating a Custom Rotor](@id createcustomrotor)
 
 If you do not already have the rotor files to describe your rotor, then you will need to create them. Here we will go through each file type and what to put in them. It is important to note that file name and types are not important, however they must be comma delimited.  We will use the DJI-II from the FLOWUnsteady database as an example.
 
