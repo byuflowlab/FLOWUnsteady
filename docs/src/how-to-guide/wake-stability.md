@@ -1,1 +1,1 @@
-# Approach Wake Stability Issues
+# How to Approach Wake Stability Issues

@@ -1,1 +1,0 @@
-# Advanced Kinematic Maneuver Definition

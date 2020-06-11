@@ -1,4 +1,4 @@
-# Advanced Wing Definition
+# How to define complex Wings
 
 In the tutorial [First Steps](@ref) we introduced the ```simpleWing()``` function.  In this guide, we look at creating more complex wings using the ```complexWing()``` function. Note that this is a how to guide, showing how to use the ```complexWing()``` function. For details on this function implementation, please refer to the refernce section of this documentation.
 
