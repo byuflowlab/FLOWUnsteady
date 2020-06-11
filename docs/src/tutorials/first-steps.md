@@ -198,7 +198,7 @@ for rotor in rotors; vlm.addwing(wake_system, run_name, rotor); end;
 ```
 
 ### Tilting Systems
-We'll also need to identify tilting objects, but since we don't have any tilting components yet, we'll just initialize an empty tuple. For more information on adding tilting objects (like control surfaces, or tilt-wings) see [Define Complex Systems](@ref).
+We'll also need to identify tilting objects, but since we don't have any tilting components yet, we'll just initialize an empty tuple. For more information on adding tilting objects (like control surfaces, or tilt-wings) see [Advanced System Definition](@ref).
 
 ```@example tut
 tilting_systems = ();
@@ -209,7 +209,7 @@ Now let's define our maneuver. For now, let's just have the airplane fly in a st
 
 !!! info "Non-dimensionalized Functions"
 
-    The functions that define the kinematic maneuver must be defined non-dimensionally. For more information on this, see [Define Kinematic Maneuvers](@ref).
+    The functions that define the kinematic maneuver must be defined non-dimensionally. For more information on this, see [Advanced Kinematic Maneuver Definition](@ref).
 
 We'll start with the vehicle velocity function.
 

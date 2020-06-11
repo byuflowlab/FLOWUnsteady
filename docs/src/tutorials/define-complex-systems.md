@@ -1,10 +1,10 @@
-# Define Complex Systems
+# Advanced System Definition
 
 In this guide, we will cover how to define complex systems. Basic system definitions were presented in the [First Steps](@ref) tutorial, but applications quickly become more complex than a simple, control-free wing.
 
 ## Wing Subsystems
 
-We will first cover creating wing subsystems.  The key here is that any system can be a sub-system. Take, for example, the vertical stabilizer and rudder from [Define Complex Wings](@ref) which we can define a add to a wing system.
+We will first cover creating wing subsystems.  The key here is that any system can be a sub-system. Take, for example, the vertical stabilizer and rudder from [Advanced Wing Definition](@ref) which we can define a add to a wing system.
 
 ```
 #Vertical Stabilizer
@@ -99,7 +99,7 @@ vlm.addwing(wake_system,"tail",tail)
 
 ## Rotor Systems
 
-Rotor systems begin with rotors, the definition of which is covered in [Define a Rotor](@ref).  Once you have rotors defined with their respetive databases, you can create rotor systems.  Let's add two rotors to our airplane in this guide to see how it is done.
+Rotor systems begin with rotors, the definition of which is covered in [Advanced Rotor Definition](@ref).  Once you have rotors defined with their respetive databases, you can create rotor systems.  Let's add two rotors to our airplane in this guide to see how it is done.
 
 First let's decide where we want to place the rotors.
 
