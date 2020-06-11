@@ -1,1 +1,1 @@
-# Define Kinematic Maneuvers
+# Advanced Kinematic Maneuver Definition
