@@ -69,7 +69,9 @@ This file describes the twist of the blade along the blade. The file can have an
 
 This file describes the sweep distribution. This is also known as the leading edge distribution, it describes the distance of the the leading edge from a line coming from the center of the hub. These lines change depending on how many blades are included on a rotor (see photo below for example of a the rotor with 3 blades). The file can have any number of paired numbers. Any values used by the solver that are not provided will be interpolated.
 
+```@raw html
 <img src="../assets/howtofigs/sweepdist.png" alt="sweepdist" style="zoom:33%;" />
+```
 
 | r/R       | y/R (y-distance of LE from the middle point of hub) |
 | --------- | --------------------------------------------------- |
@@ -84,7 +86,9 @@ This file describes the sweep distribution. This is also known as the leading ed
 
 This file describes the height distribution, also known as anhedral (or precode for turbines). This describes the height of the leading edge from the top face of the hub. The file can have any number of paired numbers. Any values used by the solver that are not provided will be interpolated.
 
-<img src="../assets/howtofigs/precone.png" alt="precone" style="zoom:12%;" />
+```@raw html
+<img src="../assets/howtofigs/precone.png" alt="precone" width="400" />
+```
 
 | r/R       | z/R (height of LE from the top face of hub) |
 | --------- | ------------------------------------------- |
