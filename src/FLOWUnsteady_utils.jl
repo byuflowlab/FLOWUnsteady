@@ -35,7 +35,7 @@ function plot_maneuver(maneuver::KinematicManeuver;
 
     Vvhcl = maneuver.Vvehicle
     avhcl = maneuver.anglevehicle
-    ts = linspace(ti, tf, vis_nsteps)
+    ts = range(ti, tf, length=vis_nsteps)
 
     # -------------------- Vehicle velocity history ----------------------------
     figure(figname*"-kinematics", figsize=[7*3, 5*1])

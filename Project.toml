@@ -1,0 +1,21 @@
+name = "FLOWUnsteady"
+uuid = "b491798d-ac6e-455f-a27c-49c10bb0a666"
+authors = ["Eduardo J. Alvarez <Edo.AlvarezR@gmail.com>"]
+version = "2.0.0"
+
+[deps]
+PyPlot = "d330b81b-6aea-500a-939a-2ce795aea3ee"
+Dierckx = "39dd38d3-220a-591b-8e3c-4c3a8c710a94"
+CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
+JLD = "4138dd39-2aa7-5051-a626-17a0bb65d9c8"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+GeometricTools = "83792f5e-c6a1-11e8-2e0a-93511f02ae5f"
+FLOWVLM = "1a3ff0be-0410-4572-aa62-b496bdd1f33b"
+# MyVPM = "asdsd"
+
+
+[compat]
+julia = "1.4"
+GeometricTools = "2.0.0"
+FLOWVLM = "2.0.0"
+# MyVPM = "2.0.0"

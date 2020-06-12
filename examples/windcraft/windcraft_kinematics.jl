@@ -17,7 +17,7 @@ function generate_maneuver_windcraft_kinematic(nrevs;
                                                  includerotors=true,
                                                  optargs...)
 
-    omegamean = pi/180 * mean(omegastar.(linspace(0, 1, 361); optargs...))
+    omegamean = pi/180 * mean(omegastar.(range(0, 1, length=361); optargs...))
 
     ############################################################################
     # AIRCRAFT VELOCITY

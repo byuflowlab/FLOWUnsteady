@@ -80,7 +80,7 @@ function get_angle(self::AbstractManeuver, i::Int, t::Real)
         error("Invalid tilting system #$i (max is $(get_ntltsys(self))).")
     end
     if t<0 || t>1
-        warn("Got non-dimensionalized time $(t).")
+        @warn("Got non-dimensionalized time $(t).")
     end
     return self.angle[i](t)
 end
@@ -104,7 +104,7 @@ function get_RPM(self::AbstractManeuver, i::Int, t::Real)
         error("Invalid rotor system #$i (max is $(get_nrtrsys(self))).")
     end
     if t<0 || t>1
-        warn("Got non-dimensionalized time $(t).")
+        @warn("Got non-dimensionalized time $(t).")
     end
     return self.RPM[i](t)
 end

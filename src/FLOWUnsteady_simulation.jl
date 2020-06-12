@@ -53,11 +53,11 @@ function run_simulation(sim::Simulation, nsteps::Int;
 
 
     if wake_coupled==false
-        warn("Running wake-decoupled simulation")
+        @warn("Running wake-decoupled simulation")
     end
 
     if shed_unsteady==false
-        warn("Unsteady wake shedding is off!")
+        @warn("Unsteady wake shedding is off!")
     end
 
     if surf_sigma<=0
@@ -225,7 +225,7 @@ function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs::Array{T, 1},
             Vvpm = vpm.conv(pfield, "ExaFMM"; Uprobes=Xs,
                                             static_particles=static_particles)[2]
         else
-            warn("Evaluating VPM-on-VLM velocity without FMM")
+            @warn("Evaluating VPM-on-VLM velocity without FMM")
             if length(static_particles)!=0
                 error("$vpm_solver has no implementation with static particles.")
             end
