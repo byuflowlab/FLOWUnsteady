@@ -9,7 +9,7 @@ A `FLOWVLM.Wing` object is simply a data structure that encapsulates a collectio
 A horseshoe vortex is made out of one bound vortex located at the quarter-chord position, two trailing bound vortices going back to the trailing edge, and two semi-infinite vortices extending from the trailing edge out in the direction of the freestream, as shown below.
 
 ```@raw html
-<img src="../assets/referencefigs/horseshoe00.png" alt="horseshoes" style="width:400px;"/>
+<img src="../assets/theoryfigs/horseshoe00.png" alt="drawing" width="400" />
 ```
 
 A control point is associated to every horseshoe, which is located at the three-quarter chord position.

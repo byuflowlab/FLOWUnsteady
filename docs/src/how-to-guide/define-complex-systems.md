@@ -6,7 +6,7 @@ In this guide, we will cover how to define complex systems. Basic system definit
 
 We will first cover creating wing subsystems.  The key here is that any system can be a sub-system. Take, for example, the vertical stabilizer and rudder from [How to define Complex Wings](@ref) which we can define a add to a wing system.
 
-```
+```julia
 #Vertical Stabilizer
 span = 0.25                                     #length of full span
 numlattice = 5                                  #number of lattice elements on half-span
@@ -52,7 +52,7 @@ vlm.addwing(tail,"rudder",rudder)
 
 Now we might want that tail system to be part of a full system, so let's define the main wing and add both it and the tail system to the full system.
 
-```
+```julia
 #Main Wing
 span = 1.0                      #length of full span
 numlattice = 10                 #number of lattice elements on half-span
@@ -80,7 +80,7 @@ And that's all there is to it. The main wing and tail system are now both compon
 
 Anything that will be solved using the VLM (see Reference) needs to be identified as such. In our case, all the wings fall under this category.
 
-```
+```julia
 vlm_system = vlm.WingSystem()
 vlm.addwing(vlm_system,"mainwing",mainwing)
 vlm.addwing(vlm_system,"tail",tail)
@@ -90,7 +90,7 @@ vlm.addwing(vlm_system,"tail",tail)
 
 You need to tell the solver which of the systems you've created need to be included in the wake simulation.  In this case, we want everything to be in our wake system, which is defined just like before.
 
-```
+```julia
 wake_system = vlm.WingSystem()
 vlm.addwing(wake_system,"mainwing",mainwing)
 vlm.addwing(wake_system,"tail",tail)
@@ -103,7 +103,7 @@ Rotor systems begin with rotors, the definition of which is covered in [How to D
 
 First let's decide where we want to place the rotors.
 
-```
+```julia
 posrotorplus = [0.0; 0.25; 0.0]      #xyz position of rotor in positive y-direction
 posrotorminus = -posrotorplus       #xyz position of rotor in negative y-direction
 vehicleaxis = [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0]   #default coordinate system
@@ -111,7 +111,7 @@ vehicleaxis = [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0]   #default coordinate syst
 
 We need a few more parameters for defining rotors as well.
 
-```
+```julia
 rotor_file = "apc10x7.csv"          # data file for rotor
 data_path = uns.def_data_path       # data path to find file
 
@@ -129,7 +129,7 @@ rotorpitch = 0.0                    #rotor pitch
 
 Now we are ready to define some propellers.
 
-```
+```julia
 rotors = vlm.Rotor[]
 
 push!(rotors,
@@ -162,7 +162,7 @@ vlm.setcoordsystem(rotors[2], posrotorplus, vehicleaxis; user=true)
 
 Now that we have defined our rotors, we can add them to the other systems
 
-```
+```julia
 for (i, rotor) in enumerate(rotors)
     vlm.addwing(system, "rotor$i", rotor)
     vlm.addwing(wake_system, "Rotor$i", rotor)
@@ -176,7 +176,7 @@ end
 
 Finally, we need to create our rotor system, which is actually just a tuple of the rotor object we've already created.
 
-```
+```julia
 rotor_systems = (rotors, )
 ```
 
@@ -186,7 +186,7 @@ rotor_systems = (rotors, )
 
 A tilting system is simply a tuple of all the wing systems that will be rotating according to specific definitions beyond the overall aircraft orientations. In our case, that would just be the rudder.
 
-```
+```julia
 tilting_systems = (rudder, )
 ```
 
