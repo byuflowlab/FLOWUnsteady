@@ -1,1 +1,0 @@
-# How to Calculate Aerodynamic Forces
