@@ -107,16 +107,16 @@ function isolatedwing(; xfoil=true,
         println("\t"^(v_lvl+2)*"J:\t\t$(J)")
         println("\t"^(v_lvl+2)*"ReD07:\t\t$(ReD07)")
         println("\t"^(v_lvl+2)*"RPM:\t\t$(ceil(Int, RPM))")
-        println("\t"^(v_lvl+2)*"Mtip:\t\t$(round(Mtip, 3))")
-        println("\t"^(v_lvl+2)*"Minf:\t\t$(round(Minf, 3))")
-        println("\t"^(v_lvl+2)*"R/b:\t\t$(round(Rob, 3))")
-        println("\t"^(v_lvl+2)*"b:\t\t$(round(b, 2)) m")
-        println("\t"^(v_lvl+2)*"c:\t\t$(round(chord, 2)) m")
+        println("\t"^(v_lvl+2)*"Mtip:\t\t$(round(Mtip, digits=3))")
+        println("\t"^(v_lvl+2)*"Minf:\t\t$(round(Minf, digits=3))")
+        println("\t"^(v_lvl+2)*"R/b:\t\t$(round(Rob, digits=3))")
+        println("\t"^(v_lvl+2)*"b:\t\t$(round(b, digits=2)) m")
+        println("\t"^(v_lvl+2)*"c:\t\t$(round(chord, digits=2)) m")
         println("\t"^(v_lvl+2)*"Reb:\t\t$(ceil(Int, Reb))")
         println("\t"^(v_lvl+2)*"Rec:\t\t$(ceil(Int, Rec))")
         println("\t"^(v_lvl+2)*"Solution time: "*
-            "$(round(magVinf*nrevs/(RPM/60)/b, 3)) spans ($nrevs revolutions)")
-        println("\t"^(v_lvl+2)*"vlm_fsgm:\t\t$(round(vlm_sigma/b, 6))")
+            "$(round(magVinf*nrevs/(RPM/60)/b, digits=3)) spans ($nrevs revolutions)")
+        println("\t"^(v_lvl+2)*"vlm_fsgm:\t\t$(round(vlm_sigma/b, digits=6))")
     end
 
     # ------------ GENERATING GEOMETRY -----------------------------------------

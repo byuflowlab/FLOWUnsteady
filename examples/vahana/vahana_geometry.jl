@@ -547,10 +547,10 @@ function generatefuselage_vahana(fuselage_length; ncells=20)
 
 
     ss = [
-            collect(linspace(0, 1, ncells)),
-            collect(linspace(0, 1, ncells)),
-            collect(linspace(0, 1, ncells)),
-            collect(linspace(0, 1, ncells))
+            collect(range(0, 1, length=ncells)),
+            collect(range(0, 1, length=ncells)),
+            collect(range(0, 1, length=ncells)),
+            collect(range(0, 1, length=ncells))
          ]
 
     points = vlm.vtk.conic_cross_section(Ps, CPs, rhos, ss)
@@ -584,10 +584,10 @@ function generatefuselage_vahana(fuselage_length; ncells=20)
     scaling = 2.0
 
     ss = [
-            collect(linspace(0, 1, ncells)),
-            collect(linspace(0, 1, ncells)),
-            collect(linspace(0, 1, ncells)),
-            collect(linspace(0, 1, ncells))
+            collect(range(0, 1, length=ncells)),
+            collect(range(0, 1, length=ncells)),
+            collect(range(0, 1, length=ncells)),
+            collect(range(0, 1, length=ncells))
          ]
 
     points = vlm.vtk.conic_cross_section(Ps, CPs, rhos, ss)
@@ -621,10 +621,10 @@ function generatefuselage_vahana(fuselage_length; ncells=20)
     scaling = 1.0
 
     ss = [
-            collect(linspace(0, 1, ncells)),
-            collect(linspace(0, 1, ncells)),
-            collect(linspace(0, 1, ncells)),
-            collect(linspace(0, 1, ncells))
+            collect(range(0, 1, length=ncells)),
+            collect(range(0, 1, length=ncells)),
+            collect(range(0, 1, length=ncells)),
+            collect(range(0, 1, length=ncells))
          ]
 
     points = vlm.vtk.conic_cross_section(Ps, CPs, rhos, ss)
@@ -658,10 +658,10 @@ function generatefuselage_vahana(fuselage_length; ncells=20)
     scaling = 1.0
 
     ss = [
-            collect(linspace(0, 1, ncells)),
-            collect(linspace(0, 1, ncells)),
-            collect(linspace(0, 1, ncells)),
-            collect(linspace(0, 1, ncells))
+            collect(range(0, 1, length=ncells)),
+            collect(range(0, 1, length=ncells)),
+            collect(range(0, 1, length=ncells)),
+            collect(range(0, 1, length=ncells))
          ]
 
     points = vlm.vtk.conic_cross_section(Ps, CPs, rhos, ss)
@@ -695,10 +695,10 @@ function generatefuselage_vahana(fuselage_length; ncells=20)
     scaling = 1.0
 
     ss = [
-            collect(linspace(0, 1, ncells)),
-            collect(linspace(0, 1, ncells)),
-            collect(linspace(0, 1, ncells)),
-            collect(linspace(0, 1, ncells))
+            collect(range(0, 1, length=ncells)),
+            collect(range(0, 1, length=ncells)),
+            collect(range(0, 1, length=ncells)),
+            collect(range(0, 1, length=ncells))
          ]
 
     points = vlm.vtk.conic_cross_section(Ps, CPs, rhos, ss)
@@ -732,10 +732,10 @@ function generatefuselage_vahana(fuselage_length; ncells=20)
     scaling = 1.0
 
     ss = [
-            collect(linspace(0, 1, ncells)),
-            collect(linspace(0, 1, ncells)),
-            collect(linspace(0, 1, ncells)),
-            collect(linspace(0, 1, ncells))
+            collect(range(0, 1, length=ncells)),
+            collect(range(0, 1, length=ncells)),
+            collect(range(0, 1, length=ncells)),
+            collect(range(0, 1, length=ncells))
          ]
     points = vlm.vtk.conic_cross_section(Ps, CPs, rhos, ss)
     points = scaling*points
@@ -767,10 +767,10 @@ function generatefuselage_vahana(fuselage_length; ncells=20)
     scaling = 0.1
 
     ss = [
-            collect(linspace(0, 1, ncells)),
-            collect(linspace(0, 1, ncells)),
-            collect(linspace(0, 1, ncells)),
-            collect(linspace(0, 1, ncells))
+            collect(range(0, 1, length=ncells)),
+            collect(range(0, 1, length=ncells)),
+            collect(range(0, 1, length=ncells)),
+            collect(range(0, 1, length=ncells))
          ]
     points = vlm.vtk.conic_cross_section(Ps, CPs, rhos, ss)
     points = scaling*points
@@ -797,11 +797,11 @@ function generatefuselage_vahana(fuselage_length; ncells=20)
     # Dummy parameters
     b_pos = [sec[1] for sec in crosssections]
     chords = (1/bscale)*ones(b_pos)
-    twists = zeros(b_pos)
-    LE_x = zeros(b_pos)
-    LE_z = zeros(b_pos)
+    twists = zeros(size(b_pos))
+    LE_x = zeros(size(b_pos))
+    LE_z = zeros(size(b_pos))
 
-    tilt_y = zeros(b_pos)
+    tilt_y = zeros(size(b_pos))
     # tilt_y[2] = 45
 
     grid_fuselage = vlm.vtk.generate_loft(crosssections, bscale,
@@ -839,7 +839,7 @@ function generate_ground_vahana(bscale; verify_spline=false, spl_s=0.001,
     a, b = lx, ly
     perimeter = [ a*b/sqrt((b*cos(tht))^2 + (a*sin(tht))^2
                     ) * [fx*cos(tht), fy*sin(tht), 0] + [cx, cy, cz] for
-                                                tht in linspace(0, 2*pi, 179)]
+                                            tht in range(0, 2*pi, length=179)]
 
     # Fluid domain
     NDIVSx = 50              # Cells in the parametric x-direction
@@ -947,13 +947,13 @@ function generate_perimetergrid(perimeter::Array{Array{T, 1}, 1},
   lower2 = [[x for x in lower[1][splt_low:end]], [y for y in lower[2][splt_low:end]]]
 
   # Parameterize both sides independently
-  fun_upper1 = gt.parameterize(upper1[1], upper1[2], zeros(upper1[1]); inj_var=1,
+  fun_upper1 = gt.parameterize(upper1[1], upper1[2], zeros(size(upper1[1])); inj_var=1,
                                                       s=spl_s, kspl=spl_k)
-  fun_upper2 = gt.parameterize(upper2[1], upper2[2], zeros(upper2[1]); inj_var=1,
+  fun_upper2 = gt.parameterize(upper2[1], upper2[2], zeros(size(upper2[1])); inj_var=1,
                                                       s=spl_s, kspl=spl_k)
-  fun_lower1 = gt.parameterize(lower1[1], lower1[2], zeros(lower1[1]); inj_var=1,
+  fun_lower1 = gt.parameterize(lower1[1], lower1[2], zeros(size(lower1[1])); inj_var=1,
                                                       s=spl_s, kspl=spl_k)
-  fun_lower2 = gt.parameterize(lower2[1], lower2[2], zeros(lower2[1]); inj_var=1,
+  fun_lower2 = gt.parameterize(lower2[1], lower2[2], zeros(size(lower2[1])); inj_var=1,
                                                       s=spl_s, kspl=spl_k)
   # Discretizes both sides
   if NDIVSx==multidiscrtype

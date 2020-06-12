@@ -165,7 +165,7 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
 
         for (i,(pos, polar)) in enumerate(airfoils)
             vlm.ap.plot(polar; geometry=true, label="pos=$pos, Re=$(vlm.ap.get_Re(polar))"*
-                                        (Mas!=nothing ? ", Ma=$(round(Mas[i],2))" : ""),
+                                        (Mas!=nothing ? ", Ma=$(round(Mas[i], digits=2))" : ""),
                     cdpolar=false, fig_id="prelim_curves", title_str="Re sweep")
         end
     end

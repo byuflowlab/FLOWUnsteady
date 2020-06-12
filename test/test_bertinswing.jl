@@ -110,8 +110,8 @@ function bertin_VLM(;   # TEST OPTIONS
 
     if verbose
         println("\t"^(v_lvl+1)*"Core overlap:\t\t$(lambda_vpm)")
-        println("\t"^(v_lvl+1)*"Core size:\t\t$(round(overwrite_sigma/b, 3))*b")
-        println("\t"^(v_lvl+1)*"Time step translation:\t$(round(magVinf * (telapsed/nsteps)/b, 3))*b")
+        println("\t"^(v_lvl+1)*"Core size:\t\t$(round(overwrite_sigma/b, digits=3))*b")
+        println("\t"^(v_lvl+1)*"Time step translation:\t$(round(magVinf * (telapsed/nsteps)/b, digits=3))*b")
     end
 
 
@@ -385,8 +385,8 @@ function bertin_kinematic(;   # TEST OPTIONS
 
     if verbose
         println("\t"^(v_lvl+1)*"Core overlap:\t\t$(lambda_vpm)")
-        println("\t"^(v_lvl+1)*"Core size:\t\t$(round(overwrite_sigma/b, 3))*b")
-        println("\t"^(v_lvl+1)*"Time step translation:\t$(round(magVinf * (telapsed/nsteps)/b, 3))*b")
+        println("\t"^(v_lvl+1)*"Core size:\t\t$(round(overwrite_sigma/b, digits=3))*b")
+        println("\t"^(v_lvl+1)*"Time step translation:\t$(round(magVinf * (telapsed/nsteps)/b, digits=3))*b")
     end
 
 
