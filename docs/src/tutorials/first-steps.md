@@ -18,7 +18,7 @@ wingsweep = 10.0        #wing sweep in degrees
 wingdihedral = 7.0      #wing dihedral in degrees
 ```
 
-```
+```julia
 import FLOWUnsteady
 uns = FLOWUnsteady
 vlm = uns.vlm
@@ -26,7 +26,7 @@ vlm = uns.vlm
 
 Let's begin with a single section, symmetric wing.  We'll start by defining some basic geometry.
 
-```
+```julia
 span = 1.0              #wing span
 aspectratio = 10.0      #wing aspect ratio
 taperratio = 0.5        #wing taper ratio
@@ -82,7 +82,7 @@ run(`mkdir $save_path`)         #re-create directory fresh
 
 Finally, we can save the files.
 
-```
+```julia
 vlm.save(system, run_name; path=save_path)  #save geometry in a .vtk file format
 ```
 
@@ -94,7 +94,7 @@ And now we can view our wing in Paraview using the command ```run(`paraview --da
 
 Now that we have a basic wing, let's go ahead and add a rotor.  We'll use some data for the rotor that already exists in FLOWUnsteady.  You can visit the How-to guides for more information on creating your own rotor database.
 
-```
+```julia
 rotor_file = "apc10x7.csv"          # Rotor geometry
 data_path = uns.def_data_path       # Path to rotor database
 ```
@@ -162,7 +162,7 @@ for rotor in rotors; vlm.setRPM(rotor, RPMref); end;
 
 We should now be able to visualize our wing with a rotor.
 
-```
+```julia
 run(`rm -rf $save_path`)
 run(`mkdir $save_path`)
 
@@ -279,13 +279,13 @@ Winit = zeros(3)                             #initial angular velocity
 
 With everything now defined, we can create a simulation
 
-```
+```julia
 simulation = uns.Simulation(vehicle, maneuver, Vref, RPMref, ttot; Vinit=Vinit, Winit=Winit, t=tinit);
 ```
 
 Finally, we can visualize the maneuver in Paraview.
 
-```
+```julia
 files = uns.visualize_kinematics(   simulation, nsteps, save_path;
                                     run_name=run_name,
                                     prompt=false,
@@ -310,7 +310,7 @@ We also now run the simulation and use Paraview to look at the outputs.
 
     Running simulations typcially takes a while.  You may want to reduce ```nsteps```, but the visual below shows results for 300 steps.
 
-```
+```julia
 nullfunc(args...) = false
 pfield = uns.run_simulation(simulation, nsteps;
                                     surf_sigma=R/10,
