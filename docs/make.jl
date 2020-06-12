@@ -18,7 +18,6 @@ makedocs(
                 "how-to-guide/define-kinematic-maneuvers.md",
                 "how-to-guide/set-up-runtime-functions.md",
                 "how-to-guide/select-a-solver.md",
-                "how-to-guide/calculate-aerodynamic-forces.md",
                 "how-to-guide/wake-stability.md",],
             "Reference" => Any[
                 "reference/FLOWVLMfunctions.md",
