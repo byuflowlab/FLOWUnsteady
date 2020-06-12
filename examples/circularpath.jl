@@ -74,9 +74,9 @@ function circularpath(;   # TEST OPTIONS
     qinf = 0.5*rhoinf*magVinf^2     # (Pa) static pressure
 
     if verbose
-        println("\t"^(v_lvl+1)*"RPM:\t\t\t$(round(60*wcirc/(2*pi), 1))")
-        println("\t"^(v_lvl+1)*"Inflow AOA:\t\t$(round(180/pi*atan2(magVinf, wcirc*Rcirc), 1)) deg")
-        println("\t"^(v_lvl+1)*"Effective AOA:\t\t$(round(180/pi*atan2(magVinf, wcirc*Rcirc)+alpha, 1)) deg")
+        println("\t"^(v_lvl+1)*"RPM:\t\t\t$(round(60*wcirc/(2*pi), digits=1))")
+        println("\t"^(v_lvl+1)*"Inflow AOA:\t\t$(round(180/pi*atan(magVinf, wcirc*Rcirc), digits=1)) deg")
+        println("\t"^(v_lvl+1)*"Effective AOA:\t\t$(round(180/pi*atan(magVinf, wcirc*Rcirc)+alpha, digits=1)) deg")
     end
 
     # Geometry
@@ -147,8 +147,8 @@ function circularpath(;   # TEST OPTIONS
 
     if verbose
         println("\t"^(v_lvl+1)*"Core overlap:\t\t$(lambda_vpm)")
-        println("\t"^(v_lvl+1)*"Core size:\t\t$(round(overwrite_sigma/b, 3))*b")
-        println("\t"^(v_lvl+1)*"Time step translation:\t$(round(magVinf * (telapsed/nsteps)/b, 3))*b")
+        println("\t"^(v_lvl+1)*"Core size:\t\t$(round(overwrite_sigma/b, digits=3))*b")
+        println("\t"^(v_lvl+1)*"Time step translation:\t$(round(magVinf * (telapsed/nsteps)/b, digits=3))*b")
     end
 
 

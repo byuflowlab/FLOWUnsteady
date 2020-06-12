@@ -29,7 +29,7 @@ try
     import FLOWNoise
     noise = FLOWNoise
 catch e
-    warn("FLOWNoise not loaded: $e")
+    @warn("FLOWNoise not loaded: $e")
     println("FLOWNoise not loaded: $e")
 end
 

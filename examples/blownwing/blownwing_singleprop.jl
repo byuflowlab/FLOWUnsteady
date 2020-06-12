@@ -54,8 +54,8 @@ function singleprop(; xfoil=true,
         println("\t"^(v_lvl+2)*"J:\t\t$(J)")
         println("\t"^(v_lvl+2)*"ReD07:\t\t$(ReD07)")
         println("\t"^(v_lvl+2)*"RPM:\t\t$(ceil(Int, RPM))")
-        println("\t"^(v_lvl+2)*"Mtip:\t\t$(round(Mtip, 3))")
-        println("\t"^(v_lvl+2)*"Minf:\t\t$(round(Minf, 3))")
+        println("\t"^(v_lvl+2)*"Mtip:\t\t$(round(Mtip, digits=3))")
+        println("\t"^(v_lvl+2)*"Minf:\t\t$(round(Minf, digits=3))")
     end
 
     Vinf(X,t) = magVinf*[1.0,0,0]       # (m/s) freestream velocity
