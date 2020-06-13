@@ -14,17 +14,20 @@ import Dierckx
 import CSV
 import JLD
 using PyPlot
-using LinearAlgebra: norm, dot, cross
+using LinearAlgebra: norm, dot, cross, I
 
 # ------------ FLOW CODES ------------------------------------------------------
 # FLOWVLM https://github.com/byuflowlab/FLOWVLM
 import FLOWVLM
 const vlm = FLOWVLM
 
-# # MyVPM https://github.com/EdoAlvarezR/MyVPM
-# import MyVPM
-# const vpm = MyVPM
-const vpm = nothing
+# MyVPM https://github.com/EdoAlvarezR/MyVPM
+try                     # Load MyVPM if available
+    import MyVPM
+catch e                 # Otherwise load a dummy version of MyVPM
+    include("FLOWUnsteady_dummy_MyVPM.jl")
+end
+const vpm = MyVPM
 
 # GeometricTools https://github.com/byuflowlab/GeometricTools.jl
 import GeometricTools
