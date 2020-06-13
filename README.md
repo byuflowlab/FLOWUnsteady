@@ -35,17 +35,17 @@ attempting to shed separation wakes.
 
 
 For validation and numerical recommendations, check this notebook in the
-documentation: [`docs/resources/validation.ipynb`](https://nbviewer.jupyter.org/github/byuflowlab/FlightVehicleSim/blob/master/docs/resources/validation.ipynb).
+documentation: [`docs/resources/validation.ipynb`](https://nbviewer.jupyter.org/github/byuflowlab/FLOWUnsteady/blob/master/docs/resources/validation.ipynb).
 
-For example simulations, check this notebook: [`docs/resources/examples.ipynb`](https://nbviewer.jupyter.org/github/byuflowlab/FlightVehicleSim/blob/master/docs/resources/examples.ipynb).
+For example simulations, check this notebook: [`docs/resources/examples.ipynb`](https://nbviewer.jupyter.org/github/byuflowlab/FLOWUnsteady/blob/master/docs/resources/examples.ipynb).
 
 # Folders and Files
   * `src/`: Source code.
   * `examples/`: Example simulations.
   * `docs/resources/`: Documentation (open Jupyter notebooks with [nbviewer](https://nbviewer.jupyter.org/)).
     - `docs/resources/instructions-setup.md`: Instructions for setting up this package.
-    - [`docs/resources/validation.ipynb`](https://nbviewer.jupyter.org/github/byuflowlab/FlightVehicleSim/blob/master/docs/resources/validation.ipynb): Validation of models implemented in this package and numeric observations.
-    - [`docs/resources/examples.ipynb`](https://nbviewer.jupyter.org/github/byuflowlab/FlightVehicleSim/blob/master/docs/resources/examples.ipynb): Results of example simulations.
+    - [`docs/resources/validation.ipynb`](https://nbviewer.jupyter.org/github/byuflowlab/FLOWUnsteady/blob/master/docs/resources/validation.ipynb): Validation of models implemented in this package and numeric observations.
+    - [`docs/resources/examples.ipynb`](https://nbviewer.jupyter.org/github/byuflowlab/FLOWUnsteady/blob/master/docs/resources/examples.ipynb): Results of example simulations.
 
 # Dependencies
   * [`GeometricTools`](https://github.com/byuflowlab/GeometricTools.jl)
