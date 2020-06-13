@@ -12,8 +12,7 @@ wing in heaving motion.
 
 # ------------ MODULES ---------------------------------------------------------
 # Load simulation engine
-# import FLOWUnsteady
-reload("FLOWUnsteady")
+import FLOWUnsteady
 uns = FLOWUnsteady
 vlm = uns.vlm
 
@@ -21,6 +20,7 @@ import GeometricTools
 gt = GeometricTools
 
 using PyPlot
+using LinearAlgebra: I
 
 # ------------ GLOBAL VARIABLES ------------------------------------------------
 # Default path where to save data
@@ -32,6 +32,7 @@ extdrive_path = "temps/"
 # ------------ DRIVERS ---------------------------------------------------------
 function run_tandemheavingwing()
     tandemheavingwing(; nsteps=400, p_per_step=1, vlm_rlx=0.75,
+                    VehicleType=uns.VLMVehicle,
                     save_path=extdrive_path*"tandemheaving04/",
                     verbose=true, disp_plot=true)
 end
@@ -49,6 +50,7 @@ function tandemheavingwing(;   # TEST OPTIONS
                         vlm_fsgm=-1,
                         p_per_step=1,
                         vlm_rlx=-1,
+                        VehicleType=uns.VLMVehicle,
                         # OUTPUT OPTIONS
                         save_path=nothing,
                         run_name="bertins",
@@ -111,7 +113,7 @@ function tandemheavingwing(;   # TEST OPTIONS
 
     # Place tandem wing relative to main wing
     O = [-x_tw, 0, 0]               # Coordinate system origin
-    Oaxis = eye(3)                  # Coordinate system axes
+    Oaxis = Array(1.0I, 3, 3)       # Coordinate system axes
     vlm.setcoordsystem(tandemwing, O, Oaxis)
 
     # System definitions
@@ -131,7 +133,7 @@ function tandemheavingwing(;   # TEST OPTIONS
     wake_system = system        # System that will shed a VPM wake
 
     # Vehicle definition
-    vehicle = uns.VLMVehicle(   system;
+    vehicle = VehicleType(   system;
                                 tilting_systems=tilting_systems,
                                 vlm_system=vlm_system,
                                 wake_system=wake_system

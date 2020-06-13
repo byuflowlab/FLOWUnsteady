@@ -118,10 +118,10 @@ function nextstep_kinematic(self::AbstractVLMVehicle, dt::Real)
         self.grid_O[i] .+= dX
 
         # Translation
-        gt.lintransform!(self.grids[i], eye(3), dX)
+        gt.lintransform!(self.grids[i], Array(1.0I, 3, 3) , dX)
 
         # Brings the grid back to the global origin
-        gt.lintransform!(self.grids[i], eye(3), -self.grid_O[i])
+        gt.lintransform!(self.grids[i], Array(1.0I, 3, 3) , -self.grid_O[i])
 
         # Rotation and brings the grid back to its position
         gt.lintransform!(self.grids[i], M, self.grid_O[i])
