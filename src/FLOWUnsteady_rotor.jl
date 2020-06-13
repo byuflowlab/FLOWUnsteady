@@ -203,9 +203,9 @@ function read_rotor(rotor_file::String; data_path=def_data_path)
     rotor_path = joinpath(data_path, "rotors")
 
     data = CSV.read(joinpath(rotor_path, rotor_file))
-    Rtip = parse(data[1, 2])
-    Rhub = parse(data[2, 2])
-    B = parse(data[3, 2])
+    Rtip = Meta.parse(data[1, 2])
+    Rhub = Meta.parse(data[2, 2])
+    B = Meta.parse(data[3, 2])
     blade_file = data[4, 2]
 
     return Rtip, Rhub, B, blade_file
@@ -223,8 +223,8 @@ function read_blade(blade_file::String; data_path=def_data_path)
     sweepdist = CSV.read(joinpath(rotor_path, files[3, 2]))
     heightdist = CSV.read(joinpath(rotor_path, files[4, 2]))
     airfoil_files = CSV.read(joinpath(rotor_path, files[5, 2]))
-    spl_k = parse(files[6, 2])
-    spl_s = parse(files[7, 2])
+    spl_k = Meta.parse(files[6, 2])
+    spl_s = Meta.parse(files[7, 2])
 
     # Convert DataFrames to concrete types
     chorddist = Array{Float64, 2}(chorddist)
@@ -240,7 +240,7 @@ function read_blade(blade_file::String; data_path=def_data_path)
 end
 
 """
-    Given a diameter-based Reynolds number \mathrm{Re}_D(r) at a certain
+    Given a diameter-based Reynolds number \$\\mathrm{Re}_D(r)\$ at a certain
 radial position r and an advance ratio J, return the rotational speed
 """
 calc_n(ReD, J, r, D, nu) = nu/( D * sqrt( (2*pi*r)^2 + (J*D)^2 ) ) * ReD

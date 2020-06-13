@@ -12,8 +12,7 @@ heaving motion
 
 # ------------ MODULES ---------------------------------------------------------
 # Load simulation engine
-# import FLOWUnsteady
-reload("FLOWUnsteady")
+import FLOWUnsteady
 uns = FLOWUnsteady
 vlm = uns.vlm
 
@@ -21,10 +20,12 @@ import GeometricTools
 gt = GeometricTools
 
 using PyPlot
+using LinearAlgebra: norm, dot, cross
 
 # ------------ GLOBAL VARIABLES ------------------------------------------------
 # Default path where to save data
-extdrive_path = "/media/edoalvar/MyExtDrive/simulationdata7/"
+# extdrive_path = "/media/edoalvar/MyExtDrive/simulationdata7/"
+extdrive_path = "temps/"
 
 
 
@@ -32,7 +33,7 @@ extdrive_path = "/media/edoalvar/MyExtDrive/simulationdata7/"
 function run_heavingwing()
     heavingwing(; nsteps=400, p_per_step=1, vlm_rlx=0.75,
                     VehicleType=uns.VLMVehicle,
-                    save_path=extdrive_path*"bertinsheaving20/",
+                    save_path=extdrive_path*"bertinsheaving30/",
                     verbose=true, disp_plot=true)
 end
 

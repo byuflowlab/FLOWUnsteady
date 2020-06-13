@@ -131,7 +131,7 @@ function plot_maneuver(maneuver::KinematicManeuver;
             end
 
             xlabel("Non-dimensional time")
-            ylabel("Angle "*(i==1? L"\theta_x" : i==2 ? L"\theta_y" : L"\theta_z") * L" ($^\circ$)")
+            ylabel("Angle "*(i==1 ? L"\theta_x" : i==2 ? L"\theta_y" : L"\theta_z") * L" ($^\circ$)")
             legend(loc="best", frameon=false)
         end
     end
@@ -235,7 +235,7 @@ function visualize_kinematics(sim::Simulation{V, KinematicManeuver{N, M}, R},
 
     # Tweak vtk string to be a time sequence
     if nsteps>1
-        strn = replace(strn, ".$(nsteps).", "...")
+        strn = replace(strn, ".$(nsteps)."=>"...")
     end
 
     # Call paraview
