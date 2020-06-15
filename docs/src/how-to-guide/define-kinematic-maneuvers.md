@@ -323,19 +323,6 @@ The initial state of the vehicle must be defined.
 
     # ----------------- RUN SIMULATION -----------------------------------------
     pfield = uns.run_simulation(simulation, nsteps;
-                                      # SIMULATION OPTIONS
-                                      Vinf=Vinf,
-                                      rho=rho,
-                                      mu=mu,
-                                      # SOLVERS OPTIONS
-                                      p_per_step=p_per_step,
-                                      overwrite_sigma=overwrite_sigma,
-                                      vlm_sigma=vlm_sigma,
-                                      vlm_rlx=vlm_rlx,
-                                      surf_sigma=surf_sigma,
-                                      max_particles=max_particles,
-                                      shed_unsteady=shed_unsteady,
-                                      extra_runtime_function=monitor,
                                       # OUTPUT OPTIONS
                                       save_path=save_path,
                                       run_name=run_name,
