@@ -1,4 +1,6 @@
-# How to Define Kinematic ManeuversThere are two ways to generate a maneuver in FLOWUnsteady, prescribing a kinematic maneuver and prescribing actions to generate motion. Prescribing a kinematic maneuver, you inform the simulator where the aircraft is moving and the simulator determines the effects. When you prescribe an action, like running the rotors, to the simulator, the simulator then determines the forces on the aircraft that generate motion. 
+# How to Define Kinematic Maneuvers
+
+There are two ways to generate a maneuver in FLOWUnsteady, prescribing a kinematic maneuver and prescribing actions to generate motion. Prescribing a kinematic maneuver, you inform the simulator where the aircraft is moving and the simulator determines the effects. When you prescribe an action, like running the rotors, to the simulator, the simulator then determines the forces on the aircraft that generate motion.
 
 
 
