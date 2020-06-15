@@ -16,7 +16,7 @@ numlattice = 10                 #number of lattice elements on half-span
 Now let's define the parameters of each chord.  Note that position is normalized by the span, and length is normalized by the tip chord. It is generally easiest to define things absolutely and then normalize.
 
 
-Also Since we are creating a symmetric wing, we only need information from the center to the tip of the wing, postive indicating along the positive axis for the wing system.
+Also, since we are creating a symmetric wing, we only need information from the center to the tip of the wing, postive indicating along the positive axis for the wing system.
 
 ```julia
 poschord = [0.0; 0.5; 1.0]./span                    #postion of chord stations
@@ -32,7 +32,7 @@ sweepsection = [10.0; 5.0]      #sweep of sections between chords, in degrees
 dihedralsection = [0.0; 7.0]    #dihedral of sections between chords, in degrees
 ```
 
-We also need to define the aspect ration of the wing, which is simply the absolute span over the absolute tip chord length.
+We also need to define the aspect ratio of the wing, which is simply the absolute span over the absolute tip chord length.
 
 ```julia
 aspectratio = span/lengthtipchord
@@ -66,7 +66,7 @@ verticalstabilizer = vlm.complexWing(span, aspectratio, numlattice, poschord, le
 
 !!! note "Chord Alignment"
 
-    The user can choose where to align the chords. A value of 0.0 aligns along the leading edge, while a value of 1.0 aligns along the trailing edge. Values between 0.0 and 1.0 will align along that ratio of the chord lengths.  For example, if you wanted to align the wing along the quarter-chord postition, you would set ```cordalign = 0.25```
+    The user can choose where to align the chords. A value of 0.0 aligns along the leading edge, while a value of 1.0 aligns along the trailing edge. Values between 0.0 and 1.0 will align along that ratio of the chord lengths.  For example, if you wanted to align the wing along the quarter-chord postition, you would set ```chordalign = 0.25```
 
 Now our verticle stabilizer is defined, but it's not really verticle yet, and it is positioned at the default location, where our main wing is as well.  To make it a verticle stabilizer, we'll need to rotate and translate it.  To do so, we need to define an origin and coordinate system for the verticle stabilizer wing object.
 
