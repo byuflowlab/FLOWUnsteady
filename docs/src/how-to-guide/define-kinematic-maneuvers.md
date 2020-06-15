@@ -285,9 +285,13 @@ The maneuver is an object that returns the angle of tilting surfaces, RPM of rot
     maneuver = uns.KinematicManeuver(angle, RPM, Vvehicle, anglevehicle)
 ```
 
-!!! warning
+!!! warning "Note"
 
-​    The simulator modifies the velocity and angle of the vehicle by using the derivative velocity and angle functions respectively. The angle, RPM, tilt angle, and velocity functions do not directly define the current motion. This also means that the derivative of each of these functions must be defined (The plot of each function must be continuous.).
+```
+    The simulator modifies the velocity and angle of the vehicle by using the derivative velocity and angle functions respectively. The angle, RPM, tilt angle, and velocity functions do not directly define the current motion. This also means that the derivative of each of these functions must be defined (The plot of each function must be continuous.).
+```
+
+
 
 ##### Define initial velocity
 
@@ -300,9 +304,11 @@ The initial state of the vehicle must be defined.
                                           maneuver.anglevehicle(0))/(ttot*1e-12)
 ```
 
-!!! Tip
+!!! tip "Note"
 
-​    The initial position, tilt-angle and vehicle angle is defined when defining the geometry.  
+```
+The initial position, tilt-angle and vehicle angle is defined when defining the geometry.  
+```
 
 
 
