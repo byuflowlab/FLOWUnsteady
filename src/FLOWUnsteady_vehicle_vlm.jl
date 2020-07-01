@@ -441,7 +441,7 @@ function VLM2VPM(system::Union{vlm.Wing, vlm.WingSystem, vlm.Rotor}, pfield, dt,
       infD = -infDA                             # Direction of vorticity
       sigma = sigmafactor*V*dt                  # Vortex blob radius
       vol = pi*(norm(Bp-Ap)/2)^2*V*dt           # Volume of particle
-      l = -infD*V*dt                             # Distance the TE travels
+      l = -infD*V*dt                            # Distance the TE travels
 
       if unsteady_shedcrit<=0
           add_particle(pfield, X, gamma, dt, V, infD, sigma, vol,

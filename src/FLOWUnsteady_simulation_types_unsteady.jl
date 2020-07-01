@@ -41,7 +41,7 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
     # On the first time step (pfield.nt==0), it only does steps (5) and (7),
     # meaning that the unsteady wake of the first time step is never shed.
     if self.nt==0
-        # NOTE: VLMs and Rotors solutions are losely coupled
+        # NOTE: VLMs and Rotors solutions are loosely coupled
 
         # Set Vinf on system to get horseshoes
         vlm.setVinf(vhcl.system, Vinf)
@@ -158,6 +158,10 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
             RPM = self.RPMref*get_RPM(mnvr, si, t/self.ttot)
 
             for (ri, rotor) in enumerate(rotors)
+                # println("Sherlock! FLOWUnsteady_simulation_types_unsteady.jl : 161")
+                # println("\tRotor Index: ", ri)
+                # println("\tTime:        ", t)
+                # println("")
 
                 # Calculate kinematic velocities
                 Vkin = _Vkinematic_rotor(vhcl.rotor_systems,

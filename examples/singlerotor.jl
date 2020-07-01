@@ -27,7 +27,7 @@ using PyPlot
 
 # ------------ GLOBAL VARIABLES ------------------------------------------------
 # Default path where to save data
-extdrive_path = "/media/edoalvar/MyExtDrive/simulationdata7/"
+extdrive_path = "/Users/randerson/Box/BYU/FLOWResearch/data/"
 # extdrive_path = "temps/"
 
 

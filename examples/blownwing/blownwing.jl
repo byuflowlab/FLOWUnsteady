@@ -36,7 +36,7 @@ end
 
 # ------------ GLOBAL VARIABLES ------------------------------------------------
 # Default path where to save data
-extdrive_path = "/media/edoalvar/MyExtDrive/simulationdata7/"
+extdrive_path = "/Users/randerson/Box/BYU/FLOWResearch/data/"
 # extdrive_path = "temps/"
 
 
@@ -64,8 +64,8 @@ end
 
 function run_noise(; )
 
-    read_path = "/media/edoalvar/MyExtDrive/simulationdata5/fvs_blownwing11_alloutputs_noise/aero_rawoutputs/"
-    save_path = "/media/edoalvar/MyExtDrive/simulationdata5/fvs_blownwing11_alloutputs_noise/test_noise06/"
+    read_path = "/Users/randerson/Box/BYU/FLOWResearch/data/fvs_blownwing11_alloutputs_noise/aero_rawoutputs/"
+    save_path = "/Users/randerson/Box/BYU/FLOWResearch/data/fvs_blownwing11_alloutputs_noise/test_noise06/"
     postprocessing_noise(  save_path;
                             # ---------- AERO SIMULATION INFO ----------
                             num0=2,                         # First time step to analyze

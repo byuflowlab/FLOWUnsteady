@@ -20,7 +20,7 @@ function postprocessing_noise(
                                     ww_nummin=0,                    # Starts calculating acoustics after this time steps
                                     ww_numless=0,                   # It doesn't calculate acoustic on this last time steps
                                     # ---------- INPUT OPTIONS ---------------------
-                                    read_path="/media/edoalvar/MyExtDrive/simulationdata5/fvs_blownwing11_alloutputs_noise/aero_rawoutputs/",
+                                    read_path=extdrive_path = "/Users/randerson/Box/BYU/FLOWResearch/data/fvs_blownwing11_alloutputs_noise/aero_rawoutputs/",
                                     wopwopbin="/home/edoalvar/Dropbox/FLOWResearch/OtherCodes/PSU-WOPWOP_v3.4.3_B3385/wopwop3_serial", # WW binary
                                     # ---------- OUTPUT OPTIONS --------------------
                                     verbose=true, v_lvl=0,

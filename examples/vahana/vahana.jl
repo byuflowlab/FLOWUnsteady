@@ -28,7 +28,7 @@ gt = GeometricTools
 
 # ------------ GLOBAL VARIABLES ------------------------------------------------
 # Default path where to save data
-extdrive_path = "/media/edoalvar/MyExtDrive/simulationdata7/"
+extdrive_path = "/Users/randerson/Box/BYU/FLOWResearch/data/"
 
 # Default data path where to find rotor and airfoil data
 data_path = joinpath(splitdir(@__FILE__)[1], "../../data/")
