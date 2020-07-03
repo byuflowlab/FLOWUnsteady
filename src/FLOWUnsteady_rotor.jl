@@ -39,6 +39,7 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
                         pitch=0.0,
                         n=10, CW=true,
                         ReD=5*10^5, altReD=nothing, Matip=0.0,
+                        ncrit=9,
                         xfoil=false,
                         rotor_file="apc10x7.jl",
                         spline_k=5, spline_s=0.001, spline_bc="extrapolate",
@@ -120,11 +121,11 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
             push!(Mas, this_Ma)
 
             polar = vlm.ap.runXFOIL(x, y, this_Re;
-            alphas=[i for i in -20:1.0:20],
-            verbose=verbose, Mach=this_Ma,
-            iter=100, alpha_ite=10)
-            # Reads polars from files
-        else
+                                    alphas=[i for i in -20:1.0:20],
+                                    verbose=verbose, Mach=this_Ma,
+                                    iter=100, ncrit=ncrit)
+
+        else # Reads polars from files
             if verbose; println("\t"^(v_lvl+1)*"$file_name"); end;
             polar = vlm.ap.read_polar(file_name; path=data_path*"airfoils/", x=x, y=y)
         end

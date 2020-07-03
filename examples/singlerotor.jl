@@ -35,7 +35,7 @@ extdrive_path = "/media/edoalvar/MyExtDrive/simulationdata7/"
 # ------------ DRIVERS ---------------------------------------------------------
 function run_singlerotor_hover(; xfoil=true, prompt=true)
 
-    J = 0.15                # Advance ratio Vinf/(nD)
+    J = 0.00                # Advance ratio Vinf/(nD)
     angle = 0.0             # (deg) angle of freestream (0 == climb, 90==forward flight)
 
     singlerotor(;   xfoil=xfoil,
