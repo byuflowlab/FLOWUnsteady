@@ -13,7 +13,7 @@
 
 function run_simulation(sim::Simulation, nsteps::Int;
                              # SIMULATION OPTIONS
-                             rand_RPM=true,             # Randomize RPM fluctuations
+                             rand_RPM=false,            # Randomize RPM fluctuations
                              Vinf=(X,t)->zeros(3),      # Freestream velocity
                              sound_spd=343,             # (m/s) speed of sound
                              rho=1.225,                 # (kg/m^3) air density
@@ -39,7 +39,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
                              extra_runtime_function=(sim, PFIELD,T,DT)->false,
                              # OUTPUT OPTIONS
                              save_path="temps/vahanasimulation00",
-                             run_name="vahana",
+                             run_name="FLOWUsimulation",
                              create_savepath=true,      # Whether to create save_path
                              prompt=true,
                              verbose=true, v_lvl=1, verbose_nsteps=10,

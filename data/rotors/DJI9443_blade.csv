@@ -1,0 +1,8 @@
+property,file,description
+chorddist,DJI9443_chorddist.csv, Chord distribution
+pitchdist,DJI9443_pitchdist.csv, Pitch distribution
+sweepdist,DJI9443_sweepdist.csv, LE sweep distribution
+heightdist,DJI9443_heightdist.csv, LE height distribution
+airfoil_files,DJI9443_airfoils.csv, Airfoil distribution
+spl_k,5,  Spline order
+spl_s,1.0e-8, Spline smoothing
