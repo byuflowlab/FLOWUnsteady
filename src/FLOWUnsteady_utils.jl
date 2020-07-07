@@ -31,14 +31,14 @@ Plots the kinematics and controls of a `KinematicManeuver`.
 """
 function plot_maneuver(maneuver::KinematicManeuver;
                         ti::Real=0, tf::Real=1, vis_nsteps=300,
-                        figname="maneuver", tstages=[])
+                        figname="maneuver", tstages=[], size_factor=1.0)
 
     Vvhcl = maneuver.Vvehicle
     avhcl = maneuver.anglevehicle
     ts = range(ti, tf, length=vis_nsteps)
 
     # -------------------- Vehicle velocity history ----------------------------
-    figure(figname*"-kinematics", figsize=[7*3, 5*1])
+    figure(figname*"-kinematics", figsize=[7*3, 5*1]*size_factor)
     suptitle("VEHICLE KINEMATICS")
 
     subplot(131)
@@ -110,14 +110,21 @@ function plot_maneuver(maneuver::KinematicManeuver;
     angle_syss = [a.(ts) for a in maneuver.angle]    # Angles of every tilt sys
     RPM_syss = [rpm.(ts) for rpm in maneuver.RPM]    # RPM of every rotor system
 
+    nplots = 3*(length(angle_syss)!=0) + 1*(length(RPM_syss)!=0)
+    gdims = nplots==4 ? [2, 2] : nplots==3 ? [2, 2] :
+            nplots==1 ? [1, 1] : nplots==0 ? [0, 0] : [2, 2]
+    gnum = gdims[1]*100 + gdims[2]*10
+    ploti = 1
+
     if length(angle_syss)!=0 || length(RPM_syss)!=0
-        figure(figname*"-controls", figsize=[7*2, 5*2])
+        figure(figname*"-controls", figsize=[7, 5].*gdims * size_factor * (nplots==1 ? 3/6 : 2/3))
         suptitle("VEHICLE CONTROLS")
     end
 
     if length(angle_syss)!=0
         for i in 1:3
-            subplot(220+i)
+            subplot(gnum+ploti)
+            ploti += 1
 
              # i-th angle of every tilting system
             a_syss = [[a[i] for a in angle_sys] for angle_sys in angle_syss]
@@ -139,7 +146,8 @@ function plot_maneuver(maneuver::KinematicManeuver;
     # -------------------- Rotor systems history -------------------------------
 
     if length(RPM_syss)!=0
-        subplot(224)
+        subplot(gnum+ploti)
+        ploti += 1
 
         RPMmax = max([maximum(RPM_sys) for RPM_sys in RPM_syss]...)
         RPMmin = min([minimum(RPM_sys) for RPM_sys in RPM_syss]...)

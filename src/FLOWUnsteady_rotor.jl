@@ -46,8 +46,8 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
                         turbine_flag=false,
                         rfl_n_lower=15, rfl_n_upper=15,
                         # OUTPUT OPTIONS
-                        verbose=false,
-                        plot_disc=true, v_lvl=1)
+                        verbose=false, v_lvl=1,
+                        plot_disc=true, figsize_factor=2/3)
     if verbose; println("\t"^v_lvl*"Generating geometry..."); end;
     n_bem = n
 
@@ -138,10 +138,11 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
 
     vlm.initialize(propeller, n; verif=plot_disc,
                     genblade_args=[(:spl_k,spline_k), (:spl_s,spline_s)],
-                    rfl_n_lower=rfl_n_lower, rfl_n_upper=rfl_n_upper)
+                    rfl_n_lower=rfl_n_lower, rfl_n_upper=rfl_n_upper,
+                    figsize_factor=figsize_factor)
 
     if plot_disc
-        fig = figure("discretization_verif", figsize=(7*2,5*1))
+        fig = figure("discretization_verif", figsize=[7*2,5*1]*figsize_factor)
         suptitle("Discretization Verification")
 
         subplot(121)
@@ -167,7 +168,7 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
         for (i,(pos, polar)) in enumerate(airfoils)
             vlm.ap.plot(polar; geometry=true, label="pos=$pos, Re=$(vlm.ap.get_Re(polar))"*
                                         (Mas!=nothing ? ", Ma=$(round(Mas[i], digits=2))" : ""),
-                    cdpolar=false, fig_id="prelim_curves", title_str="Re sweep")
+                    cdpolar=false, fig_id="prelim_curves", title_str="Re sweep", rfl_figfactor=figsize_factor)
         end
     end
 
