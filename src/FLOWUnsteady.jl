@@ -13,6 +13,7 @@ module FLOWUnsteady
 import Dierckx
 import CSV
 import JLD
+import Dates
 using PyPlot
 using LinearAlgebra: norm, dot, cross, I
 
@@ -32,6 +33,9 @@ const vpm = MyVPM
 # GeometricTools https://github.com/byuflowlab/GeometricTools.jl
 import GeometricTools
 const gt = GeometricTools
+
+import FLOWNoise
+const noise = FLOWNoise
 
 # ------------ GLOBAL VARIABLES ------------------------------------------------
 const module_path = splitdir(@__FILE__)[1]                # Path to this module

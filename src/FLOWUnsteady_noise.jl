@@ -10,6 +10,477 @@
 =###############################################################################
 
 """
+Given the path of a FLOWUnsteady simulation, it runs the noise analysis on the
+rotors of the simulation. It uses PSU-WOPWOP to calculate the tonal noise from
+thickness and loading sources on the geometry and aerodynamic loading generated
+by FLOWUnsteady.
+
+NOTE: This function will call the PSU-WOPWOP binary indicated through
+`wopwopbin`. This binary is not included with FLOWUnsteady and must be provided
+by the user. This function has been tested on PSU-WOPWOP v3.4.2.
+
+NOTE2: Make sure that the simulation was run with `nsteps_save=1`, otherwise the
+time in PSU-WOPWOP will get messed up.
+
+"""
+function run_noise_wopwop(read_path::String,                        # Path from where to read aerodynamic data (FLOWUnsteady simulation)
+                                    run_name,                       # Run name (prefix of rotor files to read)
+                                    RPM::Real,                      # RPM is just a reference value to go from nrevs to simulation time
+                                    rho::Real, speedofsound::Real,
+                                    rotorsystems,# =[[2, 2]],       # rotorsystems[si][ri] is the number of blades of the ri-th rotor in the si-th system
+                                    ww_nrevs,                       # Number of revolutions in WW
+                                    ww_nsteps_per_rev,              # Number of steps per revolution in WW
+                                    save_path::String,              # Where to save WW results
+                                    wopwopbin;                      # Path to PSU-WOPWOP binary
+                                    nrevs=nothing,                  # Number of revolutions to read (defaults to ww_nrevs)
+                                    nsteps_per_rev=nothing,         # Number of steps per revolution to read (default to ww's)
+                                    # ---------- OBSERVERS -------------------------
+                                    Vobserver=nothing, # =23.384*[-1, 0, 0],    # Velocity of observer
+                                    sph_R=1.5*6.5, sph_nR=0, sph_ntht=24, # Sphere definition
+                                    sph_nphi=24, sph_phimax=180,
+                                    sph_rotation=[0, 90, 0],
+                                    sph_thtmin=5, sph_thtmax=175,
+                                    sph_C=zeros(3),
+                                    microphoneX=nothing,            # If given, replaces sphere with one observer at this position
+                                    highpass=nothing, lowpass=nothing, # Low and high pass filters
+                                    windowing=nothing,
+                                    # ---------- SIMULATION OPTIONS ----------------
+                                    periodic=true,                  # Periodic loading and translation
+                                    # ---------- INPUT OPTIONS ---------------------
+                                    num_min=0,                      # Start reading loading files from this number
+                                    # wopwopbin=joinpath(module_path, "wopwop3_serial"), # WW binary
+                                    # ---------- OUTPUT OPTIONS --------------------
+                                    verbose=true, v_lvl=0,
+                                    prompt=true, debug_paraview=false,
+                                    debuglvl=1,                     # WW debug level
+                                    observerf_name="observergrid",  # .xyz file with observer grid
+                                    case_name="runcase",            # Name of case to create and run
+                                    )
+
+    if num_min==0
+        @warn("Got `num_min=0`, and the first step of a simulation is typically under-resolved!"*
+                " It is recommended that you start from any other step instead"*
+                " (this is specially important in periodic solutions).")
+    end
+
+    ww_nt = ceil(Int, ww_nrevs *  ww_nsteps_per_rev)  # Number of time steps in PSU-WOPWOP
+    ww_tMax = ww_nrevs/(RPM/60)     # (s) end time in PSU-WOPWOP
+    ww_dt = ww_tMax/ww_nt           # (s) time step size in PSU-WOPWOP
+    ww_samplerate = ww_nsteps_per_rev * RPM/60
+
+    _nsteps_per_rev = nsteps_per_rev!=nothing ? nsteps_per_rev : ww_nsteps_per_rev
+    _nrevs = nrevs!=nothing ? nrevs : ww_nrevs
+    nt = ceil(Int, _nrevs *  _nsteps_per_rev)     # Number of time steps to read
+    tMax = _nrevs/(RPM/60)                       # (s) end time to read
+    dt = tMax/nt                                # (s) time step size to read
+
+    # num_max = num_min + (ww_nt-1)
+    # num_max = num_min + (ww_nt-1) + 1
+    num_max = num_min + (nt-1) + 1
+
+    org_pwd = pwd()
+    cd(org_pwd)
+
+    f = nothing
+
+try
+
+    def_wopwopbin = "wopwop3"       # Copy wopwopbin with this name
+
+    if periodic
+        @warn("Running periodic solution. Make sure that loading is indeed periodic")
+    end
+
+
+    ############################################################################
+    # WORK-DIRECTORY SETUP
+    ############################################################################
+    if verbose; println("\t"^(v_lvl)*"Creating work directory..."); end;
+
+    # Create path where to run this case
+    gt.create_path(save_path, prompt)
+
+    # Copy PSU-WOPWOP binary
+    cp(wopwopbin, joinpath(save_path, def_wopwopbin); force=true)
+
+    # Make that path the work directory
+    cd(save_path)
+
+    # Create file with cases to run
+    f = open("cases.nam", "w")
+    print(f,
+    """
+    &casename
+    globalFolderName='./$(case_name)/'
+    caseNameFile='$(case_name).nam'
+    /
+    """
+    )
+    close(f)
+
+    # Create directory of case to run
+    mkdir(case_name)
+
+    # String of VTKs
+    prv_str = case_name*"/"
+
+
+    # Create file case driver
+    f = open(joinpath(case_name, "$(case_name).nam"), "w")
+
+    # Environment
+    str =
+    """
+    &EnvironmentIn
+
+      nbContainer=1
+      ASCIIOutputFlag=.true.
+      audioFlag=.false.
+
+      OASPLdBFlag = .true.
+      OASPLdBAFlag = .true.
+      spectrumFlag = .true.
+      SPLdBFlag = .true.
+      SPLdBAFlag = .true.
+      acousticPressureFlag=.true.
+      pressureGradient1AFlag = .false.
+
+      debugLevel = $debuglvl
+
+      thicknessNoiseFlag=.true.
+      loadingNoiseFlag=.true.
+      totalNoiseFlag=.true.
+
+    /
+    &EnvironmentConstants
+      rho   = $rho
+      c     = $speedofsound
+    /
+    """
+    print(f, str)
+
+
+    ############################################################################
+    # SPHERE/MICROPHONE OBSERVER SETUP
+    ############################################################################
+    hilopass = ""
+    if highpass != nothing
+        hilopass *=
+        """
+            highPassFrequency = $highpass
+        """
+    end
+    if lowpass != nothing
+        hilopass *=
+        """
+            lowPassFrequency = $lowpass
+        """
+    end
+    if windowing != nothing
+        hilopass *=
+        """
+            windowFunction = '$windowing'
+        """
+    end
+
+    if microphoneX != nothing
+        # Declare observer in case file
+        str =
+        """
+         &ObserverIn
+           nbBase = $(Vobserver!=nothing ? 2 : 0)
+           nt   = $(ww_nt)
+           xLoc = $(microphoneX[1])
+           yLoc = $(microphoneX[2])
+           zLoc = $(microphoneX[3])
+           tMin = 0.0
+           tMax = $(ww_tMax)
+           $(hilopass)
+         /
+        """
+        print(f, str)
+
+    else
+        if verbose; println("\t"^(v_lvl)*"Creating spherical observer grid..."); end;
+        grid = noise.observer_sphere(sph_R, sph_nR, sph_ntht, sph_nphi;
+                                    phimax=sph_phimax,
+                                    save_path=case_name,
+                                    file_name=observerf_name,
+                                    rotation=sph_rotation,
+                                    thtmin=sph_thtmin, thtmax=sph_thtmax,
+                                    C=sph_C,
+                                    fmt="plot3d")
+
+        # Declare observer in case file
+        str =
+        """
+         &ObserverIn
+           nbBase = $(Vobserver!=nothing ? 1 : 0)
+           nt   = $(ww_nt)
+           fileName = "$(observerf_name).xyz"
+           tMin = 0.0
+           tMax = $(ww_tMax)
+           $(hilopass)
+         /
+        """
+        print(f, str)
+
+        if debug_paraview
+
+            gt.save(grid, observerf_name; path=case_name*"/")
+            prv_str *= observerf_name*".vtk;"
+
+            # run(`paraview --data=$prv_str`)
+        end
+    end
+
+    # Translates the observer with the velocity of the vehicle
+    if Vobserver != nothing
+        str =
+        """
+         &CB
+           Title='ObserverTranslation'
+           iB=1
+           TranslationType='KnownFunction'
+           Y0=0,0,0
+           VH=$(observer[1]),$(observer[2]),$(observer[3])
+         /
+        """
+        print(f, str)
+    end
+
+
+    ############################################################################
+    # GEOMETRY PRE-PROCESSING
+    ############################################################################
+    if verbose; println("\t"^(v_lvl)*"Generating WOPWOP geometry files..."*
+                        " (reading num range $(num_min):$(num_max))"); end;
+
+    # # Collect all loft VTKs into one WOPWOP file per blade
+    # for (si, rotors) in enumerate(rotorsystems)     # Iterate over systems
+    #     for (ri, nBlades) in enumerate(rotors)      # Iterate over rotors
+    #         for bi in 1:nBlades
+    #
+    #             fname = rotorsys_suffs*"_Rotor$(ri)_Blade$(bi)_loft"
+    #             fnameout = "Sys$(si)_Rotor$(ri)_Blade$(bi)_loft"
+    #
+    #             if verbose; println("\t"^(v_lvl+1)*"file $(fname)..."); end;
+    #
+    #             noise.vtk2wopwop(fname, fnameout*".wop";
+    #                                 read_path=read_path, save_path=case_name*"/",
+    #                                 # nums=vcat(0:(ww_nt-1), 0),
+    #                                 nums=num_min:num_max,
+    #                                 t0=0.0, tf=tMax, period=periodic ? tMax : nothing)
+    #         end
+    #     end
+    # end
+
+    # Unique prefixes of blade loft files (one string per blade)
+    loftfiles = unique([fn[1:findfirst('.', fn)-1]
+                         for fn in readdir(read_path)
+                         if occursin("_Blade", fn) && occursin("_loft", fn)])
+
+    nlofts = size(loftfiles, 1)       # Number of lofts
+
+    # Iterate over loft files converting into WOPWOP thickness files
+    for fname in loftfiles
+        if verbose; println("\t"^(v_lvl+1)*"file $(fname)..."); end;
+
+        noise.vtk2wopwop(fname, fname*".wop";
+                            read_path=read_path, save_path=case_name*"/",
+                            # nums=vcat(0:(ww_nt-1), 0),
+                            nums=num_min:num_max,
+                            t0=0.0, tf=tMax, period=periodic ? tMax : nothing)
+    end
+
+    # Collect all lifting-line VTKs into one WOPWOP file per blade
+    for (si, rotors) in enumerate(rotorsystems)     # Iterate over systems
+        for (ri, nBlades) in enumerate(rotors)      # Iterate over rotors
+            for bi in 1:nBlades
+
+                fname    = run_name*"_Sys$(si)_Rotor$(ri)_Blade$(bi)_compact"
+                fnameout = run_name*"_Sys$(si)_Rotor$(ri)_Blade$(bi)_compact"
+
+                if verbose; println("\t"^(v_lvl+1)*"file $(fname)..."); end;
+
+                noise.vtk2wopwop(fname, fnameout*".wop";
+                                    read_path=read_path, save_path=case_name,
+                                    # nums=vcat(0:(ww_nt-1), 0),
+                                    nums=num_min:num_max,
+                                    t0=0.0, tf=tMax, period=periodic ? tMax : nothing,
+                                    compact=true)
+            end
+        end
+    end
+
+    # # Unique prefixes of blade compact files (one string per blade)
+    # compactfiles = unique([fn[1:findfirst('.', fn)-1]
+    #                         for fn in readdir(read_path)
+    #                         if occursin("_compact", fn)])
+    #
+    # ncompacts = size(compactfiles, 1)       # Number of compact patches
+    #
+    # # Collect all lifting-line VTKs into one WOPWOP file per blade
+    # for fname in compactfiles
+    #     if verbose; println("\t"^(v_lvl+1)*"file $(fname)..."); end;
+    #
+    #     noise.vtk2wopwop(fname, fname*".wop";
+    #                         read_path=read_path, save_path=case_name*"/",
+    #                         # nums=vcat(0:(ww_nt-1), 0),
+    #                         nums=num_min:num_max,
+    #                         t0=0.0, tf=tMax, period=periodic ? tMax : nothing,
+    #                         compact=true)
+    # end
+
+    if verbose; println("\t"^(v_lvl)*"Generating WOPWOP loading files..."); end;
+
+    # Collect all loading files into one WOPWOP loading file per blade
+    for (si, rotors) in enumerate(rotorsystems)     # Iterate over systems
+        generate_wopwoploading(read_path, case_name, num_min:num_max;
+                                    # INPUT OPTIONS
+                                    filename="loading_Sys$(si)", fieldname="Ftot",
+                                    filenameout=run_name*"_Sys$(si)",
+                                    # PROCESSING OPTIONS
+                                    period=periodic ? tMax : nothing,
+                                    t0=0.0, dt=tMax/nt,
+                                    structured=false
+                                   )
+    end
+
+    # # Collect all loading files into one WOPWOP loading file per blade
+    # generate_wopwoploading(read_path;
+    #                             # INPUT OPTIONS
+    #                             # nums=vcat(0:(ww_nt-1), 0),
+    #                             nums=num_min:num_max,
+    #                             run_name=run_name,
+    #                             filename="gammas", fieldname="Ftot",
+    #                             # OUTPUT OPTIONS
+    #                             save_path=case_name,
+    #                             # PROCESSING OPTIONS
+    #                             period=periodic ? tMax : nothing,
+    #                             t0=0.0, dt=tMax/nt,
+    #                             structured=false
+    #                            )
+
+
+    ############################################################################
+    # SPECIFY ROTOR FILES IN PSU-WOPWOP
+    ############################################################################
+
+    # Count total number of blades
+    totnblades = 0
+    for (si, rotors) in enumerate(rotorsystems)     # Iterate over systems
+        for (ri, nBlades) in enumerate(rotors)      # Iterate over rotors
+            totnblades += nBlades
+        end
+    end
+    ncompacts = totnblades
+    nbcontainer = nlofts + ncompacts
+
+    # NOTE: should this be ww_dt or dt?
+    str =
+    """
+    &ContainerIn
+      dTau        = $(ww_dt)
+      nbBase      = 0
+      nbContainer = $(nbcontainer)
+    /
+    """
+    for fname in loftfiles
+        # Loft surface patch for thickness
+        str *=
+        """
+        &ContainerIn
+          patchGeometryFile="$(fname).wop"
+          nbBase=0
+        /
+        """
+    end
+    # for fname in compactfiles
+    #     # Compact patch for loading
+    #     loading_fname = fname[1:find(k->fname[k:end]=="_compact", 1:length(fname))[1]-1]*
+    #                         "_loading_"*(periodic ? "periodic" : "aperiodic")
+    #     str *=
+    #     """
+    #     &ContainerIn
+    #       patchGeometryFile="$(fname).wop"
+    #       patchLoadingFile="$(loading_fname).wop"
+    #       nbBase=0
+    #     /
+    #     """
+    # end
+
+    for (si, rotors) in enumerate(rotorsystems)     # Iterate over systems
+        for (ri, nBlades) in enumerate(rotors)      # Iterate over rotors
+            for bi in 1:nBlades
+                # # Loft surface patch for thickness
+                # str *=
+                # """
+                # &ContainerIn
+                #   patchGeometryFile="$(run_name)_Sys$(si)_Rotor$(ri)_Blade$(bi)_loft.wop"
+                #   nbBase=0
+                # /
+                # """
+                str *=
+                """
+                &ContainerIn
+                  patchGeometryFile="$(run_name)_Sys$(si)_Rotor$(ri)_Blade$(bi)_compact.wop"
+                  patchLoadingFile="$(run_name)_Sys$(si)_Rotor$(ri)_Blade$(bi)_loading_$((periodic ? "" : "a")*"periodic").wop"
+                  nbBase=0
+                /
+                """
+            end
+        end
+    end
+    print(f, str)
+
+
+    if debug_paraview
+        if verbose
+            println("\t"^(v_lvl)*"Showing Grid before running WOPWOP...")
+            println("")
+            println("\t"^(v_lvl+1)*"CLOSE PARAVIEW TO CONTINUE")
+            println("")
+        end
+        run(`paraview --data=$prv_str`)
+    end
+
+
+    #######################################################################
+    # Run PSU-WOPWOP
+    #######################################################################
+    if verbose; println("\t"^(v_lvl)*"Running PSU-WOPWOP..."); end;
+
+    # Close case file
+    close(f)
+
+    # Run PSU-WOPWOP
+    run(`chmod +x $(def_wopwopbin)`)
+    run(`./$(def_wopwopbin)`)
+
+catch e
+    for (exc, bt) in Base.catch_stack()
+       showerror(stdout, exc, bt)
+       println()
+    end
+
+    # f = open(joinpath(save_path, case_name, "$(case_name).nam"), "w")
+    # print(f, "asd")
+    if f != nothing; close(f); end;
+    cd(org_pwd)
+    # println(joinpath(save_path, case_name, "$(case_name).nam"))
+    throw(e)
+end
+
+    cd(org_pwd)
+
+    return microphoneX == nothing ? grid : nothing
+end
+
+
+
+
+"""
     Generates loading files for PSU-WOPWOP from the indicated simulation in
 `read_path` using the steps `nums`. If `woptype=Constant`, only one step must
 be specified; if `woptype=Periodic`, it is assumed that the specified steps make
