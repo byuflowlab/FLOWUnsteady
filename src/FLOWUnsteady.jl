@@ -37,6 +37,9 @@ const gt = GeometricTools
 import FLOWNoise
 const noise = FLOWNoise
 
+# BPM https://github.com/byuflowlab/BPM.jl
+import BPM
+
 # ------------ GLOBAL VARIABLES ------------------------------------------------
 const module_path = splitdir(@__FILE__)[1]                # Path to this module
 const def_data_path = joinpath(module_path, "../data/")   # Default path to data folder
@@ -47,7 +50,8 @@ const def_data_path = joinpath(module_path, "../data/")   # Default path to data
 for module_name in ["vehicle", "vehicle_vlm",
                     "maneuver", "rotor",
                     "simulation_types", "simulation", "utils",
-                    "processing", "noise", "monitors"]
+                    "processing", "monitors",
+                    "noise_wopwop", "noise_bpm"]
     include("FLOWUnsteady_"*module_name*".jl")
 end
 

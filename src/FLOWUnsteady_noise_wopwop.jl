@@ -1,6 +1,7 @@
 #=##############################################################################
 # DESCRIPTION
-    Noise analysis and processing
+    Coupling of FLOWUnsteady with PSU-WOPWOP v3.4.2 for aeroacoustic tonal
+    noise.
 
 # AUTHORSHIP
   * Author    : Eduardo J. Alvarez
