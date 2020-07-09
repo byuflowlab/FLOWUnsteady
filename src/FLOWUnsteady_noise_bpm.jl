@@ -34,8 +34,7 @@ function run_noise_bpm(rotors::Array{vlm.Rotor, 1},
                                 TE_thickness::Union{Float64, Array{Float64, 1}}=16.15,  # TE thickness (in degrees)
                                 freq_bins=BPM.default_f,        # Frequency bins
                                 # ---------- OUTPUT OPTIONS --------------------
-                                prompt=true,
-                                run_name="broadbandnoise_BPM"       # Rotor name for vtks
+                                prompt=true
                                 )
 
 
@@ -129,8 +128,8 @@ function run_noise_bpm(rotors::Array{vlm.Rotor, 1},
     ############################################################################
 
     # write OASPL
-    ext = "_OASPLdB.tec"
-    f1 = open(joinpath(save_path, run_name*ext), "w") #.tec file similar to wopwop outputs
+    filename = "OASPLdB.tec"
+    f1 = open(joinpath(save_path, filename), "w") #.tec file similar to wopwop outputs
     header = " TITLE='BPM OASPL' " # Title
     header = string(header, "\n", "VARIABLES= 'OASPL at each observer node'")
     header = string(header, "\n", "")
@@ -139,8 +138,8 @@ function run_noise_bpm(rotors::Array{vlm.Rotor, 1},
     write(f1, header)
 
     # write A-OASPL
-    ext = "_OASPLdBA.tec"
-    f2 = open(joinpath(save_path, run_name*ext), "w") #.tec file similar to wopwop outputs
+    filename = "OASPLdBA.tec"
+    f2 = open(joinpath(save_path, filename), "w") #.tec file similar to wopwop outputs
     header = " TITLE='BPM A-weighted OASPL' " # Title
     header = string(header, "\n", "VARIABLES= 'A-OASPL at each observer node'")
     header = string(header, "\n", "")
@@ -149,20 +148,20 @@ function run_noise_bpm(rotors::Array{vlm.Rotor, 1},
     write(f2, header)
 
     # write SPLf (non-weighted)
-    ext = "_SPLf.tec"
-    f3 = open(joinpath(save_path, run_name*ext), "w") #.tec file similar to wopwop outputs
-    header = " TITLE='BPM SPLf' " # Title
-    header = string(header, "\n", "VARIABLES= 'SPLf at each observer node (nfrequency rows and nobserver columns)'")
+    filename = "spl_spectrum.tec"
+    f3 = open(joinpath(save_path, filename), "w") #.tec file similar to wopwop outputs
+    header = " TITLE='BPM SPL' " # Title
+    header = string(header, "\n", "VARIABLES= 'SPL at each observer node (nfrequency rows and nobserver columns)'")
     header = string(header, "\n", "")
     header = string(header, "\n", "")
     header = string(header, "\n", "")
     write(f3, header)
 
     # write SPLfA (A-weighted)
-    ext = "_SPLfA.tec"
-    f4 = open(joinpath(save_path, run_name*ext), "w") #.tec file similar to wopwop outputs
+    filename = "splA_spectrum.tec"
+    f4 = open(joinpath(save_path, filename), "w") #.tec file similar to wopwop outputs
     header = " TITLE='BPM A-weighted SPL' " # Title
-    header = string(header, "\n", "VARIABLES= 'SPLfA at each observer node (nfrequency rows and nobserver columns)'")
+    header = string(header, "\n", "VARIABLES= 'SPLA at each observer node (nfrequency rows and nobserver columns)'")
     header = string(header, "\n", "")
     header = string(header, "\n", "")
     header = string(header, "\n", "")

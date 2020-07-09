@@ -12,11 +12,11 @@ strip theory solver), [`CCBlade`](https://github.com/byuflowlab/CCBlade.jl)
 (blade element momentum solver),
 [`MyPanel`](https://github.com/EdoAlvarezR/MyPanel.jl) (3D inviscid panel
 solver), and `FLOWVPM` (viscous vortex particle method). The aeroacoustic
-solver integrates PSU-WOPWOP (FW-H solver) and [`FLOWNoise`](https://github.com/byuflowlab/FLOWNoise).
+solver integrates PSU-WOPWOP (FW-H solver) and [`FLOWNoise`](https://github.com/byuflowlab/FLOWNoise), obtaining both tonal and broadband acoustic noise.
 
+This package is written for Julia 1.4.2.
 
-This module is written in Julia 0.6.4 since most of the codes are still using
-Julia 0.6.4 as they are pending for a major revamp.
+Official documentation: [https://flow.byu.edu/FLOWUnsteady/](https://flow.byu.edu/FLOWUnsteady/)
 
 **FEATURES**
 * Viscous, unsteady wake mixing of rotors and lifting surfaces.
@@ -46,6 +46,7 @@ For example simulations, check this notebook: [`docs/resources/examples.ipynb`](
     - `docs/resources/instructions-setup.md`: Instructions for setting up this package.
     - [`docs/resources/validation.ipynb`](https://nbviewer.jupyter.org/github/byuflowlab/FLOWUnsteady/blob/master/docs/resources/validation.ipynb): Validation of models implemented in this package and numeric observations.
     - [`docs/resources/examples.ipynb`](https://nbviewer.jupyter.org/github/byuflowlab/FLOWUnsteady/blob/master/docs/resources/examples.ipynb): Results of example simulations.
+  * [`examples/rotornoise/singlerotor.ipynb`](https://nbviewer.jupyter.org/github/byuflowlab/FLOWUnsteady/blob/master/examples/rotornoise/singlerotor.ipynb): Rotor aeroacoustic noise validation and example.
 
 # Dependencies
   * [`GeometricTools`](https://github.com/byuflowlab/GeometricTools.jl)
@@ -79,6 +80,10 @@ For example simulations, check this notebook: [`docs/resources/examples.ipynb`](
 
 **eVTOL TRANSITION:** `examples/vahana/vahana.jl` (in progress)
 [![Vid here](docs/resources/img/play00_wide.png)](https://youtu.be/-xTHvwIe_34)
+
+**Rotor Aeroacoustic Noise:** [`examples/rotornoise/singlerotor.ipynb`](https://nbviewer.jupyter.org/github/byuflowlab/FLOWUnsteady/blob/master/examples/rotornoise/singlerotor.ipynb)
+<img src="docs/resources/vid/cfdnoise_ningdji_multi_005D_03_15.gif" alt="Vid here" style="width: 400px;"/>
+<img src="docs/resources/vid/cfdnoise_ningdji_multi_005D_03_18.gif" alt="Vid here" style="width: 400px;"/>
 
 # Framework Flowchart
 <img src="docs/resources/img/flowunstrady_diagram03.png" alt="Pic here" style="width: 900px;"/>
