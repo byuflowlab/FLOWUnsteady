@@ -12,7 +12,7 @@ strip theory solver), [`CCBlade`](https://github.com/byuflowlab/CCBlade.jl)
 (blade element momentum solver),
 [`MyPanel`](https://github.com/EdoAlvarezR/MyPanel.jl) (3D inviscid panel
 solver), and `FLOWVPM` (viscous vortex particle method). The aeroacoustic
-solver integrates PSU-WOPWOP (FW-H solver) and [`FLOWNoise`](https://github.com/byuflowlab/FLOWNoise), obtaining both tonal and broadband acoustic noise.
+solver integrates PSU-WOPWOP (FW-H solver), [FLOW's BPM](https://github.com/byuflowlab/BPM.jl), and [`FLOWNoise`](https://github.com/byuflowlab/FLOWNoise), obtaining both tonal and broadband acoustic noise.
 
 This package is written for Julia 1.4.2.
 
