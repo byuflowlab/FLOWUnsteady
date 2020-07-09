@@ -62,15 +62,15 @@ attempting to shed separation wakes.
 [![Vid here](assets/img/blownwingplay03.png)](https://youtu.be/3REcIdIXrZA)
 
 **Wind-harvesting Aircraft:** `examples/windcraft/windcraft.jl` (in progress)
-[![Vid here](docs/resources/img/windcraftwake.jpg)](https://youtu.be/iFM3B4_N2Ls)
+[![Vid here](assets/img/windcraftwake.jpg)](https://youtu.be/iFM3B4_N2Ls)
 
 **eVTOL TRANSITION:** `examples/vahana/vahana.jl` (in progress)
 [![Vid here](assets/img/play00_wide.png)](https://youtu.be/f_AkQW37zqs)
 
 **Rotor Aeroacoustic Noise:** [`examples/rotornoise/singlerotor.ipynb`](https://nbviewer.jupyter.org/github/byuflowlab/FLOWUnsteady/blob/master/examples/rotornoise/singlerotor.ipynb)
-<img src="docs/resources/vid/cfdnoise_ningdji_multi_005D_03_15.gif" alt="Vid here" style="width: 400px;"/>
-<img src="docs/resources/vid/cfdnoise_ningdji_multi_005D_03_18.gif" alt="Vid here" style="width: 400px;"/>
-<img src="docs/resources/img/rotornoise01.png" alt="Pic here" style="width: 400px;"/>
+![Vid](assets/vid/cfdnoise_ningdji_multi_005D_03_15.gif)
+![Vid](assets/vid/cfdnoise_ningdji_multi_005D_03_18.gif)
+![Vid](assets/img/rotornoise01.png)
 
 # Framework Flowchart
 ![Img](assets/img/flowunstrady_diagram03.png)
