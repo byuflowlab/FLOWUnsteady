@@ -1,6 +1,8 @@
 # Welcome to FLOWUnsteady
 
-![blown wing](assets/img/blownwing00.png)
+```@raw html
+<img src="assets/img/blownwing00.png" alt="Vid" width="700px"/>
+```
 
 FLOWUnsteady is a simulation engine of mixed-fidelity unsteady aerodynamics and aeroacoustics.
 This suite brings together mid and high-fidelity
@@ -61,6 +63,7 @@ attempting to shed separation wakes.
 **BLOWN WING:** `examples/blownwing/blownwing.jl`
 [![Vid here](assets/img/blownwingplay03.png)](https://youtu.be/3REcIdIXrZA)
 
+
 **Wind-harvesting Aircraft:** `examples/windcraft/windcraft.jl` (in progress)
 [![Vid here](assets/img/windcraftwake.jpg)](https://youtu.be/iFM3B4_N2Ls)
 
@@ -68,9 +71,16 @@ attempting to shed separation wakes.
 [![Vid here](assets/img/play00_wide.png)](https://youtu.be/f_AkQW37zqs)
 
 **Rotor Aeroacoustic Noise:** [`examples/rotornoise/singlerotor.ipynb`](https://nbviewer.jupyter.org/github/byuflowlab/FLOWUnsteady/blob/master/examples/rotornoise/singlerotor.ipynb)
-![Vid](assets/vid/cfdnoise_ningdji_multi_005D_03_15.gif)
-![Vid](assets/vid/cfdnoise_ningdji_multi_005D_03_18.gif)
-![Vid](assets/img/rotornoise01.png)
+
+```@raw html
+<img src="assets/img/rotornoise01.png" alt="Vid" width="400px"/>
+```
+```@raw html
+<img src="assets/vid/cfdnoise_ningdji_multi_005D_03_15.gif" alt="Vid" width="600px"/>
+```
+```@raw html
+<img src="assets/vid/cfdnoise_ningdji_multi_005D_03_18.gif" alt="Vid" width="600px"/>
+```
 
 # Framework Flowchart
 ![Img](assets/img/flowunstrady_diagram03.png)
