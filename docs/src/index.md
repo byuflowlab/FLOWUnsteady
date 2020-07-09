@@ -1,6 +1,6 @@
 # Welcome to FLOWUnsteady
 
-![blown wing](../resources/img/blownwing00.png)
+![blown wing](assets/img/blownwing00.png)
 
 FLOWUnsteady is a simulation engine of mixed-fidelity unsteady aerodynamics and aeroacoustics.
 This suite brings together mid and high-fidelity
@@ -42,36 +42,35 @@ attempting to shed separation wakes.
 
 # Examples
 **HEAVING WING:** `examples/heavingwing.jl`
-![blown wing](../resources/vid/bertinsheaving00.gif)
+![blown wing](assets/vid/bertinsheaving00.gif)
 
 **CROSS-WIND CIRCULAR PATH:** `examples/circularpath.jl`
-![blown wing](../resources/vid/circularpath03_1.gif)
+![blown wing](assets/vid/circularpath03_1.gif)
 
 **HOVERING ROTOR:** `examples/singlerotor.jl`
-![blown wing](../resources/vid/fvs_singlerotor02.gif)
+![blown wing](assets/vid/fvs_singlerotor02.gif)
 
 **INTERACTING TANDEM HEAVING WING:** `examples/tandemheavingwing.jl`
-[![Vid here](../resources/img/play01_wide.png)](https://youtu.be/Pch94bKpjrQ)
+[![Vid here](assets/img/play01_wide.png)](https://youtu.be/Pch94bKpjrQ)
 
 
 **BLOWN WING:** `examples/blownwing/blownwing.jl`
-[![Vid here](../resources/img/blownwingplay03.png)](https://youtu.be/3REcIdIXrZA)
+[![Vid here](assets/img/blownwingplay03.png)](https://youtu.be/3REcIdIXrZA)
 
 
 **eVTOL TRANSITION:** `examples/vahana/vahana.jl` (in progress)
-[![Vid here](../resources/img/play00_wide.png)](https://youtu.be/-xTHvwIe_34)
+[![Vid here](assets/img/play00_wide.png)](https://youtu.be/-xTHvwIe_34)
 
 # Framework Flowchart
-<img src=".../resources/img/flowunstrady_diagram03.png" alt="Pic here" style="width: 900px;"/>
+<img src="assets/img/flowunstrady_diagram03.png" alt="Pic here" style="width: 900px;"/>
 
 # Publications
-  * Alvarez, E. J., & Ning, A. (2021, in progress). <i>Unsteady Mixed-fidelity Aerodynamics Solver
-for Maneuvering Multirotor Aircraft</i>. AIAA SciTech Forum. <a href="https://github.com/byuflowlab/FLOWUnsteady/blob/master/docs/resources/AlvarezNing_2021-SciTechAbstract-FLOWUnsteady_solver.pdf"><b>[PDF]</b></a><br><br>
-  * Alvarez, E. J., Schenk, A., Critchfield, T., and Ning, A. (2020, in review). <i>Rotor-on-Rotor Aeroacoustic Interactions of Multirotor in Hover</i>. Journal of the American Helicopter Society. <br><br>
-  * Alvarez, E. J., (2020). <i>Quasi-steady Aerodynamics Solver for a High-fidelity Controls Framework</i>. FLOWUnsteady Documentation. <a href="https://github.com/byuflowlab/FLOWUnsteady/blob/master/docs/resources/quasisteadysolver.pdf"><b>[PDF]</b></a><br><br>
-  * Alvarez, E. J., & Ning, A. (2020, accepted). <i>High-fidelity Modeling of Multirotor Aerodynamic Interactions for Aircraft Design</i>. AIAA Journal. <a href="https://byu.box.com/shared/static/s4h4w165x4vlxcmhgmxi05ngq0qab9o0.pdf"><b>[PDF]</b></a><br><br>
-  * Alvarez, E. J., & Ning, A. (2019). <i>Modeling Multirotor Aerodynamic Interactions Through the Vortex Particle Method</i>. AIAA AVIATION Forum. DOI: <a href="https://doi.org/10.2514/6.2019-2827 ">10.2514/6.2019-2827</a> <a href="http://edoalvar2.groups.et.byu.net/public/AlvarezNing_2019-AVIATION-Multirotor_aerodynamic_interactions_through_VPM-STATIC.pdf"><b>[SLIDES]</b></a><a href="https://scholarsarchive.byu.edu/facpub/3191/"><b>[PDF]</b></a><br><br>
-  * Alvarez, E. J., & Ning, A. (2018). <i>Development of a Vortex Particle Code for the Modeling of Wake Interaction in Distributed Propulsion</i>. AIAA AVIATION Forum. DOI: <a href="https://doi.org/10.2514/6.2018-3646 ">10.2514/6.2018-3646</a> <a href="http://www.et.byu.edu/~edoalvar/public/AlvarezNing_2018-AIAA-VPM_distibuted_propulsion-SLIDE-static.pdf"><b>[SLIDES]</b></a><a href="https://scholarsarchive.byu.edu/facpub/2116/"><b>[PDF]</b></a><br><br>
+  * Alvarez, E. J., & Ning, A. (2021, in progress). *Unsteady Mixed-fidelity Aerodynamics Solver for Maneuvering Multirotor Aircraft*. AIAA SciTech Forum. [\[PDF\]](https://github.com/byuflowlab/FLOWUnsteady/blob/master/docs/resources/AlvarezNing_2021-SciTechAbstract-FLOWUnsteady_solver.pdf)
+  * Alvarez, E. J., Schenk, A., Critchfield, T., and Ning, A. (2020, in review). *Rotor-on-Rotor Aeroacoustic Interactions of Multirotor in Hover*. Journal of the American Helicopter Society.
+  * Alvarez, E. J., (2020). *Quasi-steady Aerodynamics Solver for a High-fidelity Controls Framework*. FLOWUnsteady Documentation. [\[PDF\]](https://github.com/byuflowlab/FLOWUnsteady/blob/master/docs/resources/quasisteadysolver.pdf)
+  * Alvarez, E. J., & Ning, A. (2020, accepted). *High-fidelity Modeling of Multirotor Aerodynamic Interactions for Aircraft Design*. AIAA Journal. [\[PDF\]](https://byu.box.com/shared/static/s4h4w165x4vlxcmhgmxi05ngq0qab9o0.pdf)
+  * Alvarez, E. J., & Ning, A. (2019). *Modeling Multirotor Aerodynamic Interactions Through the Vortex Particle Method*. AIAA AVIATION Forum. DOI: [10.2514/6.2019-2827](https://doi.org/10.2514/6.2019-2827)[\[SLIDES\]](http://edoalvar2.groups.et.byu.net/public/AlvarezNing_2019-AVIATION-Multirotor_aerodynamic_interactions_through_VPM-STATIC.pdf)[\[PDF\]](https://scholarsarchive.byu.edu/facpub/3191/)
+  * Alvarez, E. J., & Ning, A. (2018). *Development of a Vortex Particle Code for the Modeling of Wake Interaction in Distributed Propulsion*. AIAA AVIATION Forum. DOI: [10.2514/6.2018-3646](https://doi.org/10.2514/6.2018-3646)[\[SLIDES\]](http://www.et.byu.edu/~edoalvar/public/AlvarezNing_2018-AIAA-VPM_distibuted_propulsion-SLIDE-static.pdf)[\[PDF\]](https://scholarsarchive.byu.edu/facpub/2116/)
 
 
 # Authorship
