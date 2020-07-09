@@ -1,6 +1,6 @@
 # Welcome to FLOWUnsteady
 
-<img src="../resources/img/blownwing00.png" alt="Pic here" style="width: 900px;"/>
+![blown wing](../resources/img/blownwing00.png)
 
 FLOWUnsteady is a simulation engine of mixed-fidelity unsteady aerodynamics and aeroacoustics.
 This suite brings together mid and high-fidelity
@@ -42,24 +42,24 @@ attempting to shed separation wakes.
 
 # Examples
 **HEAVING WING:** `examples/heavingwing.jl`
-<img src=".../resources/vid/bertinsheaving00.gif" alt="Vid here" style="width: 900px;"/>
+![blown wing](../resources/vid/bertinsheaving00.gif)
 
 **CROSS-WIND CIRCULAR PATH:** `examples/circularpath.jl`
-[<img src=".../resources/img/circlesim_wide.jpg" alt="Vid here" style="width: 900px;"/>](.../resources/vid/circularpath03_1.gif)
+![blown wing](../resources/vid/circularpath03_1.gif)
 
 **HOVERING ROTOR:** `examples/singlerotor.jl`
-<img src=".../resources/vid/fvs_singlerotor02.gif" alt="Vid here" style="width: 900px;"/>
+![blown wing](../resources/vid/fvs_singlerotor02.gif)
 
 **INTERACTING TANDEM HEAVING WING:** `examples/tandemheavingwing.jl`
-[![Vid here](.../resources/img/play01_wide.png)](https://youtu.be/Pch94bKpjrQ)
+[![Vid here](../resources/img/play01_wide.png)](https://youtu.be/Pch94bKpjrQ)
 
 
 **BLOWN WING:** `examples/blownwing/blownwing.jl`
-[![Vid here](.../resources/img/blownwingplay03.png)](https://youtu.be/3REcIdIXrZA)
+[![Vid here](../resources/img/blownwingplay03.png)](https://youtu.be/3REcIdIXrZA)
 
 
 **eVTOL TRANSITION:** `examples/vahana/vahana.jl` (in progress)
-[![Vid here](.../resources/img/play00_wide.png)](https://youtu.be/-xTHvwIe_34)
+[![Vid here](../resources/img/play00_wide.png)](https://youtu.be/-xTHvwIe_34)
 
 # Framework Flowchart
 <img src=".../resources/img/flowunstrady_diagram03.png" alt="Pic here" style="width: 900px;"/>
