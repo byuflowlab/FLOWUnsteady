@@ -1,6 +1,10 @@
 # Getting Started
 
-Before we install `FLOWUnsteady.jl`, let's install some of its dependencies.
+In order to install `FLOWUnsteady.jl`, first set Julia up in your system (download from [https://julialang.org/downloads/](https://julialang.org/downloads/)), and take care of the dependencies listed here below.
+
+
+!!! note "Julia version"
+    FLOWUnsteady has been developed and tested in Julia v1.4.2, hence we recommend using this version.
 
 ## Setting up PyCall
 
@@ -28,8 +32,13 @@ v"2.7.16"
 
 ## `Paraview`
 
-To visualize your simulations, we need to install the open-source visualization engine `Paraview`, which may be downloaded for free [here](https://www.paraview.org/download/). Versions `5.5.2` and `5.7.0` have been proven to work well. If you're using MacOS, you may need to export the folder with your `Paraview` executable to your path by running:
+To visualize your simulations, we need to install the open-source visualization engine `Paraview`, which may be downloaded for free [here](https://www.paraview.org/download/). Any version will work well.
 
+Some of the examples call Paraview through the Julia command `run(\`paraview\`)`, which is equivalent to calling Paraview from the terminal by typing `paraview`. In order to be able to call Paraview through `paraview`, if you are using a Linux distribution, you will add the Paraview binary to the user-level `bin` folder through a symbolic link:
+```bash
+sudo ln -s /path/to/your/paraview /usr/local/bin/paraview
+```
+If you're using MacOS, you will need to export the folder with your `Paraview` executable to your path by running:
 ```bash
 export PATH=$PATH:/path/to/your/paraview/
 ```
@@ -55,51 +64,24 @@ simple_box2()
 
 `Paraview` should open a rendering of a cube. You'll have to click the "eye" icon in the file tree next to `temp_vtk_example.vtk` to make it visible.
 
-```@raw html
-<img src="https://media.githubusercontent.com/media/byuflowlab/FLOWUnsteady/master/docs/src/assets/howtofigs/simple_cube.png" width="750"/>
-```
-## [FLOWVLM](https://github.com/byuflowlab/FLOWVLM)
+![Img](../assets/howtofigs/simple_cube.png)
 
-Additional Dependencies for FLOWVLM:
-- [CCBlade](https://github.com/byuflowlab/CCBlade.jl)
-- [airfoil](https://github.com/EdoAlvarezR/airfoil)
 
-### Getting CCBlade in the right version
-To get CCBlade, clone the package in Julia
+## FLOW's Unregistered Dependencies
 
-```Pkg.clone("https://github.com/byuflowlab/CCBlade.jl.git")```
+The following dependencies are unregistered Julia packages that need to be added manually through the command `] add github-url-to-the-package` in the Julia REPL.
 
-You'll then need to go find your .julia/v0.6 directory (where all your v0.6 packages are stored, and go into the CCBlade directory and checkout the last commit before CCBlade was updated to v1.0
+* GeometricTools: [github.com/byuflowlab/GeometricTools.jl](https://github.com/byuflowlab/GeometricTools.jl)
+* AirfoilPrep: [github.com/byuflowlab/AirfoilPrep.jl](https://github.com/byuflowlab/AirfoilPrep.jl)
+* FLOWVLM: [github.com/byuflowlab/FLOWVLM](https://github.com/byuflowlab/FLOWVLM)
+* BPM: [github.com/byuflowlab/BPM.jl](https://github.com/byuflowlab/BPM.jl)
+* FLOWNoise: [github.com/byuflowlab/FLOWNoise](https://github.com/byuflowlab/FLOWNoise)
+* MyVPM: Contact Eduardo Alvarez ([edoalvarez.com](https://edoalvarez.com)) or the FLOW Lab ([flow.byu.edu](http://flow.byu.edu/)).
+* (Optional) MyPanel: [github.com/EdoAlvarezR/MyPanel.jl](https://github.com/EdoAlvarezR/MyPanel.jl)
 
-```git checkout bb897066c46bd10d0cad934af3fb677e4f9d0061```
+## Install FLOWUnsteady
 
-### Getting airfoil
-To get airfoil, clone the repo (not in Julia) and put it somewhere good for you
-
-```git clone https://github.com/EdoAlvarezR/airfoil.git```
-
-You will then need to go into the airfoil/src/jxlight directory and build the Fortran binary. If using MacOS, do
-
-```make gfortran```
-
-and that should be sufficient to build it.
-
-Finally, clone the FLOWVLM repo in Julia
-
-```Pkg.clone("https://github.com/byuflowlab/FLOWVLM.git")```
-
-In addition, you will need to make a change in FLOWVLM.jl to make sure FLOWVLM is pointed to the airfoil code correctly. In FLOWVLM.jl (in the src folder of the FLOWVLM repo which is now in your .julia/v0.6 directory) change line 21 such that the airfoil_path is the path to the directory you just cloned.
-
-```airfoil_path = "/path_to_airfoil/"```
-
-## [MyPanel](https://github.com/EdoAlvarezR/MyPanel.jl/blob/master/src/MyPanel.jl)
-
-Additional Dependencies for MyPanel
-- ForwardDiff
-
-Clone the package using Julia
-
-```Pkg.clone("https://github.com/EdoAlvarezR/MyPanel.jl.git")```
+Now you are ready to install the FLOWUnsteady package through the following command in the Julia REPL: `] add https://github.com/byuflowlab/FLOWUnsteady`.
 
 # Setup Troubleshooting
 
@@ -114,9 +96,9 @@ in order to update your Homebrew.
 
 2. You're going to have to make sure that things are in place in your Julia settings. Having things like Conda, HDF5, etc. on your machine doesn't necessarily mean that the Julia implementation has them as well.
 
-3. If you don't have a fortran compiler, airfoil won't compile.  On MacOS, try `brew install gcc`
+3. If you don't have a fortran compiler, Xfoil (one of the dependencies of AirfoilPrep) won't compile.  On MacOS, try `brew install gcc`
 
-4. The airfoil compiler creates symbolic links. Right now, symbolic links do not work if you're trying to create them in [Box](http://box.byu.edu/), it won't work, you'll get the following error:
+4. The AirfoilPrep compiler creates symbolic links. Right now, symbolic links do not work if you're trying to create them in [Box](http://box.byu.edu/), it won't work, you'll get the following error:
 ```
 Linux - Gfortran
 rm -f common.mk
@@ -124,21 +106,35 @@ ln -s ./config/config.LINUX_GFORTRAN.mk common.mk
 ln: common.mk: Function not implemented
 make: *** [gfortran] Error 1
 ```
-So don't put airfoil in Box.
+So don't put AirfoilPrep in Box.
 
-# Running things:
+# Running The Examples
 
-0. Clone the simulation engine (https://github.com/byuflowlab/FLOWUnsteady) to whenever you want it
-1. Navigate to the fvs.jl file in the src/ directory.
-2. change the `global extdrive_path` variable to be the directory where you want the files to be saved. But you can put it wherever you want.
-3. If you don't yet have access to the VPM, you'll also need to comment out the lines:
+In order to test that all FLOWUnsteady and all dependencies were successfully installed, try running some of the examples under [`FLOWUnsteady/examples/`](https://github.com/byuflowlab/FLOWUnsteady/blob/master/examples/) (the outputs of some of the examples are shown in this notebook: [`docs/resources/examples.ipynb`](https://nbviewer.jupyter.org/github/byuflowlab/FLOWUnsteady/blob/master/docs/resources/examples.ipynb)).
+
+For instance, you can run the tandem heaving wing example, through the following commands in the Julia REPL:
+
+```julia
+
+import FLOWUnsteady
+
+# Path to examples folder
+path_to_examples = joinpath(dirname(pathof(FLOWUnsteady)), "..", "examples")
+
+# Include tandem heaving wing example
+include(joinpath(path_to_examples, "tandemheavingwing.jl"))
+
+# Include tandem heaving wing example
+include(joinpath(path_to_examples, "tandemheavingwing.jl"))
+
+# Run tandem heaving wing example
+tandemheavingwing(; VehicleType=uns.UVLMVehicle,
+                    save_path="tandemheaving-example/");
+
+# OPTIONAL: Call Paraview for visualization
+vtk_files = "tandemheaving-example/bertins_Main_vlm...vtk;bertins_Tilting_Tandem_vlm...vtk;bertins_pfield...vtk;"
+run(`paraview --data=$(vtk_files)`)
 ```
-import MyVPM
-vpm = MyVPM
-```
-4. Now all you need to do is to include and run the example drive under the 'examples' folder:
-```
-include("vahana.jl")
-visualize_maneuver_vahana()
-```
-and it should run, open an instance of paraview, and show the computed geometry and time steps. If you press play, you'll see the vahana evtol takeoff, cruise, and land!
+
+This will pull up Paraview showing the computed geometry and time steps. Sit back, press play, and enjoy the simulation that you have just run (it should look like the video shown below).
+[![Vid here](assets/img/play01_wide.png)](https://youtu.be/Pch94bKpjrQ)
