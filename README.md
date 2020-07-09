@@ -84,6 +84,7 @@ For example simulations, check this notebook: [`docs/resources/examples.ipynb`](
 **Rotor Aeroacoustic Noise:** [`examples/rotornoise/singlerotor.ipynb`](https://nbviewer.jupyter.org/github/byuflowlab/FLOWUnsteady/blob/master/examples/rotornoise/singlerotor.ipynb)
 <img src="docs/resources/vid/cfdnoise_ningdji_multi_005D_03_15.gif" alt="Vid here" style="width: 400px;"/>
 <img src="docs/resources/vid/cfdnoise_ningdji_multi_005D_03_18.gif" alt="Vid here" style="width: 400px;"/>
+<img src="img/resources/img/rotornoise00.png" alt="Pic here" style="width: 400px;"/>
 
 # Framework Flowchart
 <img src="docs/resources/img/flowunstrady_diagram03.png" alt="Pic here" style="width: 900px;"/>
