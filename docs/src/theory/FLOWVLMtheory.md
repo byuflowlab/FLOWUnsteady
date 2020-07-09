@@ -64,19 +64,18 @@ FLOWVLM.addchord
 
 ```
 import FLOWVLM
-vlm = FLOWVLM
 
 # Initialize the wing with the left tip chord
-wing = vlm.Wing(x_tip, -y_tip, z_tip, c_tip, twist_tip)
+wing = FLOWVLM.Wing(x_tip, -y_tip, z_tip, c_tip, twist_tip)
 ```
 
   Then we go on to add the root and the right tip chord.
 ```
   # Add the root chord
-  vlm.addchord(wing, 0.0, 0.0, 0.0, c_root, twist_root, n)
+  FLOWVLM.addchord(wing, 0.0, 0.0, 0.0, c_root, twist_root, n)
 
   # Add the right tip chord
-  vlm.addchord(wing, x_tip, y_tip, z_tip, c_tip, twist_tip, n)
+  FLOWVLM.addchord(wing, x_tip, y_tip, z_tip, c_tip, twist_tip, n)
 ```
   Notice that we placed the root at the `(0, 0, 0)` position.
   This doesn't always have to be this way, but remember to move the other chord stations accordingly if you want to place the nose somewhere else.

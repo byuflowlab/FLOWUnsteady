@@ -7,5 +7,5 @@ The example under [`examples/rotornoise/singlerotor.ipynb`](https://nbviewer.jup
 Further validation of rotor-on-rotor interactions is given in the following paper by the authors: Alvarez, E. J., Schenk, A., Critchfield, T., and Ning, A., “Rotor-on-Rotor Aeroacoustic Interactions of Multirotor in Hover,” Journal of the American Helicopter Society, Jul. 2020, (in review).
 
 
-![blown wing](../resources/vid/val_piv_multi16_005D_99_1_noise1_cropped00.gif)
-![blown wing](../resources/vid/cfdnoise_ningdji_multi_005D_03_20.gif)
+![blown wing](../assets/vid/val_piv_multi16_005D_99_1_noise1_cropped00.gif)
+![blown wing](../assets/vid/cfdnoise_ningdji_multi_005D_03_20.gif)
