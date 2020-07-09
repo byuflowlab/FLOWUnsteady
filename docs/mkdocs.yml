@@ -1,7 +1,7 @@
 site_name:        FLOWUnsteady
 repo_url:         http://github.com/byuflowlab/FLOWUnsteady
 site_description: Aerodynamic Analysis Suite
-site_author:      juddmehr
+site_author:      juddmehr and EdoAlvarezR
 
 theme:
   name: cinder

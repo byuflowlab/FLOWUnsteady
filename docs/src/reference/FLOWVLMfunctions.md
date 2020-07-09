@@ -1,6 +1,6 @@
 # Functions Contained in FLOWVLM
 
 ```@autodocs
-Modules = [FLOWUVLM]
+Modules = [FLOWVLM]
 Order   = [:function, :type]
 ```

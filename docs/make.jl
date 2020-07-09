@@ -1,13 +1,14 @@
 using Documenter
-using Xfoil, AirfoilPrep, GeometricTools, CCBlade, FLOWVLM, FLOWUnsteady
+using Xfoil, AirfoilPrep, GeometricTools, CCBlade, FLOWVLM, FLOWUnsteady, MyVPM
 vlm = FLOWVLM
 gt = GeometricTools
+vpm = MyVPM
 # using FLOWUnsteady
 
 makedocs(
     sitename = "FLOWUnsteady",
     format = Documenter.HTML(),
-    modules = [Xfoil, AirfoilPrep, GeometricTools, CCBlade, FLOWVLM, FLOWUnsteady],
+    modules = [Xfoil, AirfoilPrep, GeometricTools, CCBlade, FLOWVLM, FLOWUnsteady, MyVPM, vlm, vpm],
     # modules = [FLOWUnsteady],
     pages = ["Home" => "index.md",
             "Tutorials" => Any[
@@ -40,5 +41,5 @@ makedocs(
 # See "Hosting Documentation" and deploydocs() in the Documenter manual
 # for more information.
 deploydocs(
-    repo   = "https://github.com/byuflowlab/FLOWUnsteady.git",
+    repo   = "github.com/byuflowlab/FLOWUnsteady.git",
 )
