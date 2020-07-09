@@ -1,11 +1,13 @@
 using Documenter
-using Xfoil, AirfoilPrep, GeometriTools, CCBlade, FLOWVLM, FLOWUnsteady
+using Xfoil, AirfoilPrep, GeometricTools, CCBlade, FLOWVLM, FLOWUnsteady
+vlm = FLOWVLM
+gt = GeometricTools
 # using FLOWUnsteady
 
 makedocs(
     sitename = "FLOWUnsteady",
     format = Documenter.HTML(),
-    modules = [Xfoil, AirfoilPrep, GeometriTools, CCBlade, FLOWVLM, FLOWUnsteady],
+    modules = [Xfoil, AirfoilPrep, GeometricTools, CCBlade, FLOWVLM, FLOWUnsteady],
     # modules = [FLOWUnsteady],
     pages = ["Home" => "index.md",
             "Tutorials" => Any[
