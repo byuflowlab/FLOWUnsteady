@@ -62,7 +62,7 @@ attempting to shed separation wakes.
 [![Vid here](assets/img/play00_wide.png)](https://youtu.be/-xTHvwIe_34)
 
 # Framework Flowchart
-<img src="assets/img/flowunstrady_diagram03.png" alt="Pic here" style="width: 900px;"/>
+![blown wing](assets/img/flowunstrady_diagram03.png)
 
 # Publications
   * Alvarez, E. J., & Ning, A. (2021, in progress). *Unsteady Mixed-fidelity Aerodynamics Solver for Maneuvering Multirotor Aircraft*. AIAA SciTech Forum. [\[PDF\]](https://github.com/byuflowlab/FLOWUnsteady/blob/master/docs/resources/AlvarezNing_2021-SciTechAbstract-FLOWUnsteady_solver.pdf)
