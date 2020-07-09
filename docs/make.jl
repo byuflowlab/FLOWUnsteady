@@ -9,6 +9,7 @@ makedocs(
             "Tutorials" => Any[
                 "tutorials/getting-started.md",
                 "tutorials/first-steps.md",
+                "tutorials/aeroacoustics.md",
                 ],
             "How to " => Any[
                 "how-to-guide/paraview-visualization.md",

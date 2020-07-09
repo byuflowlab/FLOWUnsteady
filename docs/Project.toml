@@ -1,10 +1,10 @@
 [deps]
-AirfoilPrep = "008c61af-3522-4e14-81c5-9301d18a9f66"
+# AirfoilPrep = "008c61af-3522-4e14-81c5-9301d18a9f66"
 CCBlade = "e1828068-15df-11e9-03e4-ef195ea46fa4"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
-FLOWUnsteady = "b491798d-ac6e-455f-a27c-49c10bb0a666"
-FLOWVLM = "1a3ff0be-0410-4572-aa62-b496bdd1f33b"
-GeometricTools = "83792f5e-c6a1-11e8-2e0a-93511f02ae5f"
+# FLOWUnsteady = "b491798d-ac6e-455f-a27c-49c10bb0a666"
+# FLOWVLM = "1a3ff0be-0410-4572-aa62-b496bdd1f33b"
+# GeometricTools = "83792f5e-c6a1-11e8-2e0a-93511f02ae5f"
 Xfoil = "19641d66-a62d-11e8-2441-8f57a969a9c4"
 
 [compat]
