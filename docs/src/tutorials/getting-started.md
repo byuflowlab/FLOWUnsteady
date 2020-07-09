@@ -137,4 +137,4 @@ run(`paraview --data=$(vtk_files)`)
 ```
 
 This will pull up Paraview showing the computed geometry and time steps. Sit back, press play, and enjoy the simulation that you have just run (it should look like the video shown below).
-[![Vid here](assets/img/play01_wide.png)](https://youtu.be/Pch94bKpjrQ)
+[![Vid here](../assets/img/play01_wide.png)](https://youtu.be/Pch94bKpjrQ)
