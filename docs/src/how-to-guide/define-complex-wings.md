@@ -121,7 +121,7 @@ sweepsection = [10.0; 5.0]      #sweep of sections between chords, in degrees
 dihedralsection = [0.0; 7.0]    #dihedral of sections between chords, in degrees
 aspectratio = span/lengthtipchord
 
-mainwing = vlm.complexWing(span, aspectratio, numlattice, poschord, lengthchord, twistchord, sweepsection, dihedralsection; symmetric=true)
+mainwing = FLOWVLM.complexWing(span, aspectratio, numlattice, poschord, lengthchord, twistchord, sweepsection, dihedralsection; symmetric=true)
 
 
 span = 0.25                                     #length of full span
@@ -134,11 +134,11 @@ sweepsection = [0.0]                      #sweep of sections between chords, in 
 dihedralsection = [0.0]                    #dihedral of sections between chords, in degrees
 aspectratio = span/lengthtipchordvstab
 
-verticalstabilizer = vlm.complexWing(span, aspectratio, numlattice, poschord, lengthchordvstab, twistchord, sweepsection, dihedralsection; symmetric=false, chordalign=1.0)
+verticalstabilizer = FLOWVLM.complexWing(span, aspectratio, numlattice, poschord, lengthchordvstab, twistchord, sweepsection, dihedralsection; symmetric=false, chordalign=1.0)
 
 originvstab = [0.5; 0.0; 0.0]                       #origin moved 0.5 in positive x-direction
 csysvstab = [1.0 0.0 0.0; 0.0 0.0 1.0; 0.0 1.0 0.0] #csys rotated 90 degrees from default
-vlm.setcoordsystem(verticalstabilizer,originvstab,csysvstab)
+FLOWVLM.setcoordsystem(verticalstabilizer,originvstab,csysvstab)
 
 
 
@@ -152,21 +152,21 @@ sweepsection = [0.0; 0.0]                      #sweep of sections between chords
 dihedralsection = [0.0; 0.0]                    #dihedral of sections between chords, in degrees
 aspectratio = span/lengthtipchord
 
-rudder = vlm.complexWing(span, aspectratio, numlattice, poschord, lengthchord, twistchord, sweepsection, dihedralsection; symmetric=false, chordalign=0.0)
+rudder = FLOWVLM.complexWing(span, aspectratio, numlattice, poschord, lengthchord, twistchord, sweepsection, dihedralsection; symmetric=false, chordalign=0.0)
 
 lengthrootchordvstab = lengthchordvstab[1]*lengthtipchordvstab
 originrudder = [0.5+lengthrootchordvstab; 0.0; 0.0]                       #account for vstab position and chord
 csysrudder = [1.0 0.0 0.0; 0.0 0.0 1.0; 0.0 1.0 0.0] #csys rotated 90 degrees from default
-vlm.setcoordsystem(rudder,originrudder,csysrudder)
+FLOWVLM.setcoordsystem(rudder,originrudder,csysrudder)
 
 
-system = vlm.WingSystem()
-vlm.addwing(system,"mainwing",mainwing)
-vlm.addwing(system,"vstab",verticalstabilizer)
-vlm.addwing(system,"rudder",rudder)
+system = FLOWVLM.WingSystem()
+FLOWVLM.addwing(system,"mainwing",mainwing)
+FLOWVLM.addwing(system,"vstab",verticalstabilizer)
+FLOWVLM.addwing(system,"rudder",rudder)
 
 Vinf(x,t) = [1,0,0]         #non-dimensional function defining free stream velocity
-vlm.setVinf(system, Vinf)   #set freestream velocity for the system
+FLOWVLM.setVinf(system, Vinf)   #set freestream velocity for the system
 
 run_name = "tutorial"           #define identifier at beginning of file names
 save_path = "./simplewing/"     #define directory where files will be saved
@@ -174,7 +174,7 @@ save_path = "./simplewing/"     #define directory where files will be saved
 run(`rm -rf $save_path`)        #clear out directory where files will be saved
 run(`mkdir $save_path`)         #re-create directory fresh
 
-vlm.save(system, run_name; path=save_path)  #save geometry in a .vtk file format
+FLOWVLM.save(system, run_name; path=save_path)  #save geometry in a .vtk file format
 run(`paraview`)
 ```
 
