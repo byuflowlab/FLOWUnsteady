@@ -110,12 +110,11 @@ So don't put AirfoilPrep in Box.
 
 # Running The Examples
 
-In order to test that all FLOWUnsteady and all dependencies were successfully installed, try running some of the examples under [`FLOWUnsteady/examples/`](https://github.com/byuflowlab/FLOWUnsteady/blob/master/examples/) (the outputs of some of the examples are shown in this notebook: [`docs/resources/examples.ipynb`](https://nbviewer.jupyter.org/github/byuflowlab/FLOWUnsteady/blob/master/docs/resources/examples.ipynb)).
+In order to test that FLOWUnsteady and all dependencies were successfully installed, try running some of the examples under [`FLOWUnsteady/examples/`](https://github.com/byuflowlab/FLOWUnsteady/blob/master/examples/) (the outputs of some of the examples are shown in this notebook: [`docs/resources/examples.ipynb`](https://nbviewer.jupyter.org/github/byuflowlab/FLOWUnsteady/blob/master/docs/resources/examples.ipynb)).
 
-For instance, you can run the tandem heaving wing example, through the following commands in the Julia REPL:
+For instance, you can run the tandem heaving wing example through the following commands in the Julia REPL:
 
 ```julia
-
 import FLOWUnsteady
 
 # Path to examples folder
@@ -124,11 +123,8 @@ path_to_examples = joinpath(dirname(pathof(FLOWUnsteady)), "..", "examples")
 # Include tandem heaving wing example
 include(joinpath(path_to_examples, "tandemheavingwing.jl"))
 
-# Include tandem heaving wing example
-include(joinpath(path_to_examples, "tandemheavingwing.jl"))
-
 # Run tandem heaving wing example
-tandemheavingwing(; VehicleType=uns.UVLMVehicle,
+tandemheavingwing(; VehicleType=FLOWUnsteady.UVLMVehicle,
                     save_path="tandemheaving-example/");
 
 # OPTIONAL: Call Paraview for visualization
@@ -138,3 +134,7 @@ run(`paraview --data=$(vtk_files)`)
 
 This will pull up Paraview showing the computed geometry and time steps. Sit back, press play, and enjoy the simulation that you have just run (it should look like the video shown below).
 [![Vid here](../assets/img/play01_wide.png)](https://youtu.be/Pch94bKpjrQ)
+
+
+!!! note "Quasi-steady solver"
+    If you don't have access to the VPM code yet, you can run any of the examples with the quasi-steady solver. This is done by switching the vehicle type from the unsteady VLM (`FLOWUnsteady.UVLMVehicle`) to the quasi-steady VLM vehicle (`FLOWUnsteady.QVLMVehicle`). In the example above, you only need to change the `VehicleType` keyword argument to `VehicleType=FLOWUnsteady.QVLMVehicle`.
