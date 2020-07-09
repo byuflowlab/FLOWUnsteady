@@ -76,7 +76,7 @@ The following dependencies are unregistered Julia packages that need to be added
 * FLOWVLM: [github.com/byuflowlab/FLOWVLM](https://github.com/byuflowlab/FLOWVLM)
 * BPM: [github.com/byuflowlab/BPM.jl](https://github.com/byuflowlab/BPM.jl)
 * FLOWNoise: [github.com/byuflowlab/FLOWNoise](https://github.com/byuflowlab/FLOWNoise)
-* MyVPM: Contact Eduardo Alvarez ([edoalvarez.com](https://edoalvarez.com)) or the FLOW Lab ([flow.byu.edu](http://flow.byu.edu/)).
+* MyVPM: Contact Ed Alvarez ([edoalvarez.com](https://edoalvarez.com)) or the FLOW Lab ([flow.byu.edu](http://flow.byu.edu/)).
 * (Optional) MyPanel: [github.com/EdoAlvarezR/MyPanel.jl](https://github.com/EdoAlvarezR/MyPanel.jl)
 
 ## Install FLOWUnsteady

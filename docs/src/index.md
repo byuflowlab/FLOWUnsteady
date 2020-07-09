@@ -14,32 +14,27 @@ strip theory solver), [`CCBlade`](https://github.com/byuflowlab/CCBlade.jl)
 solver), and `FLOWVPM` (viscous vortex particle method). The aeroacoustic
 solver integrates PSU-WOPWOP (FW-H solver) and [`FLOWNoise`](https://github.com/byuflowlab/FLOWNoise) (BPM code).
 
-This package was written for Julia 1.4.2.
+If you are brand-new to FLOWUnsteady, you should begin with our [Getting Started](@ref) guide in the Tutorials.  You may then consider taking a glance at how to [Visualize with Paraview](@ref) in order to be prepared to visualize as you go. After getting the code set up, you'll be able to take your [First Steps](@ref) with FLOWUnsteady.
 
-If you are brand-new to FLOWUnsteady, you should begin with our [Getting Started](@ref) guide in the Tutorials.  You may then consider taking a glance at how to [Visualize with Paraview](@ref) in order to be prepared to visualize as you go.
+* For additional validation and numerical recommendations, check this notebook: [`docs/resources/validation.ipynb`](https://nbviewer.jupyter.org/github/byuflowlab/FLOWUnsteady/blob/master/docs/resources/validation.ipynb).
+* For example simulations, check this notebook: [`docs/resources/examples.ipynb`](https://nbviewer.jupyter.org/github/byuflowlab/FLOWUnsteady/blob/master/docs/resources/examples.ipynb).
+* For an example and validation of aeroacoustics, check this notebook: [`examples/rotornoise/singlerotor.ipynb`](https://nbviewer.jupyter.org/github/byuflowlab/FLOWUnsteady/blob/master/examples/rotornoise/singlerotor.ipynb).
 
-After getting the code set up, you'll be able to take your [First Steps](@ref) with FLOWUnsteady.
-
-For additional validation and numerical recommendations, check this notebook: [`docs/resources/validation.ipynb`](https://nbviewer.jupyter.org/github/byuflowlab/FLOWUnsteady/blob/master/docs/resources/validation.ipynb).
-
-For example simulations, check this notebook: [`docs/resources/examples.ipynb`](https://nbviewer.jupyter.org/github/byuflowlab/FLOWUnsteady/blob/master/docs/resources/examples.ipynb).
-
-For an example and validation of aeroacoustics, check this notebook: [`examples/rotornoise/singlerotor.ipynb`](https://nbviewer.jupyter.org/github/byuflowlab/FLOWUnsteady/blob/master/examples/rotornoise/singlerotor.ipynb).
-
-SOURCE CODE: [https://github.com/byuflowlab/FLOWUnsteady](https://github.com/byuflowlab/FLOWUnsteady)
+* SOURCE CODE: [https://github.com/byuflowlab/FLOWUnsteady](https://github.com/byuflowlab/FLOWUnsteady)
 
 !!! note "Vortex particle method (VPM) solver"
-    All aerodynamics codes used in FLOWUnsteady are opensource and available in Github, except for the VPM solver. Without the VPM, the user can still use all quasi-steady aerodynamic and aeroacoustic solvers in FLOWUnsteady. To get full access to the unsteady solver, please contact Eduardo Alvarez ([edoalvarez.com](https://edoalvarez.com)) or the FLOW Lab ([flow.byu.edu](http://flow.byu.edu/)).
+    All aerodynamics codes used in FLOWUnsteady are opensource and available in Github, except for the VPM solver. Without the VPM, the user can still use all quasi-steady aerodynamic and aeroacoustic solvers in FLOWUnsteady. To get full access to the unsteady solver, please contact Ed Alvarez ([edoalvarez.com](https://edoalvarez.com)) or the FLOW Lab ([flow.byu.edu](http://flow.byu.edu/)).
+
+!!! note "Julia language"   
+    This package was written in Julia 1.4.2.
 
 **FEATURES**
 * Viscous, unsteady wake mixing of rotors and lifting surfaces.
-* Fully resolved rotor-on-rotor, rotor-on-wing, wing-on-rotor, and wing-on-wing
-interactions.
+* Fully resolved rotor-on-rotor, rotor-on-wing, wing-on-rotor, and wing-on-wing interactions.
 * Fully resolved unsteady loads during prescribed kinematic maneuvers.
 
 **LIMITATIONS**
-* Viscous drag and separation is only captured through strip theory, without
-attempting to shed separation wakes.
+* Viscous drag and separation is only captured through strip theory, without attempting to shed separation wakes.
 * No viscous drag is captured through VLM and panel models.
 
 **FUTURE WORK**
