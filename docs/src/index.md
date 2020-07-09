@@ -24,6 +24,11 @@ For example simulations, check this notebook: [`docs/resources/examples.ipynb`](
 
 For an example and validation of aeroacoustics, check this notebook: [`examples/rotornoise/singlerotor.ipynb`](https://nbviewer.jupyter.org/github/byuflowlab/FLOWUnsteady/blob/master/examples/rotornoise/singlerotor.ipynb).
 
+SOURCE CODE: [https://github.com/byuflowlab/FLOWUnsteady](https://github.com/byuflowlab/FLOWUnsteady)
+
+!!! note "Vortex particle method (VPM) solver"
+    All aerodynamics codes used in FLOWUnsteady are opensource and available in Github, except for the VPM solver. Without the VPM, the user can still use all quasi-steady aerodynamic and aeroacoustic solvers in FLOWUnsteady. To get full access to the unsteady solver, please contact Eduardo Alvarez ([edoalvarez.com](https://edoalvarez.com)) or the FLOW Lab ([flow.byu.edu](http://flow.byu.edu/)).
+
 **FEATURES**
 * Viscous, unsteady wake mixing of rotors and lifting surfaces.
 * Fully resolved rotor-on-rotor, rotor-on-wing, wing-on-rotor, and wing-on-wing
@@ -42,27 +47,33 @@ attempting to shed separation wakes.
 
 # Examples
 **HEAVING WING:** `examples/heavingwing.jl`
-![blown wing](assets/vid/bertinsheaving00.gif)
+![Vid](assets/vid/bertinsheaving00.gif)
 
 **CROSS-WIND CIRCULAR PATH:** `examples/circularpath.jl`
-![blown wing](assets/vid/circularpath03_1.gif)
+![Vid](assets/vid/circularpath03_1.gif)
 
 **HOVERING ROTOR:** `examples/singlerotor.jl`
-![blown wing](assets/vid/fvs_singlerotor02.gif)
+![Vid](assets/vid/fvs_singlerotor02.gif)
 
 **INTERACTING TANDEM HEAVING WING:** `examples/tandemheavingwing.jl`
 [![Vid here](assets/img/play01_wide.png)](https://youtu.be/Pch94bKpjrQ)
 
-
 **BLOWN WING:** `examples/blownwing/blownwing.jl`
 [![Vid here](assets/img/blownwingplay03.png)](https://youtu.be/3REcIdIXrZA)
 
+**Wind-harvesting Aircraft:** `examples/windcraft/windcraft.jl` (in progress)
+[![Vid here](docs/resources/img/windcraftwake.jpg)](https://youtu.be/iFM3B4_N2Ls)
 
 **eVTOL TRANSITION:** `examples/vahana/vahana.jl` (in progress)
-[![Vid here](assets/img/play00_wide.png)](https://youtu.be/-xTHvwIe_34)
+[![Vid here](assets/img/play00_wide.png)](https://youtu.be/f_AkQW37zqs)
+
+**Rotor Aeroacoustic Noise:** [`examples/rotornoise/singlerotor.ipynb`](https://nbviewer.jupyter.org/github/byuflowlab/FLOWUnsteady/blob/master/examples/rotornoise/singlerotor.ipynb)
+<img src="docs/resources/vid/cfdnoise_ningdji_multi_005D_03_15.gif" alt="Vid here" style="width: 400px;"/>
+<img src="docs/resources/vid/cfdnoise_ningdji_multi_005D_03_18.gif" alt="Vid here" style="width: 400px;"/>
+<img src="docs/resources/img/rotornoise01.png" alt="Pic here" style="width: 400px;"/>
 
 # Framework Flowchart
-![blown wing](assets/img/flowunstrady_diagram03.png)
+![Img](assets/img/flowunstrady_diagram03.png)
 
 # Publications
   * Alvarez, E. J., & Ning, A. (2021, in progress). *Unsteady Mixed-fidelity Aerodynamics Solver for Maneuvering Multirotor Aircraft*. AIAA SciTech Forum. [\[PDF\]](https://github.com/byuflowlab/FLOWUnsteady/blob/master/docs/resources/AlvarezNing_2021-SciTechAbstract-FLOWUnsteady_solver.pdf)

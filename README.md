@@ -77,9 +77,11 @@ For example simulations, check this notebook: [`docs/resources/examples.ipynb`](
 **BLOWN WING:** `examples/blownwing/blownwing.jl`
 [![Vid here](docs/resources/img/blownwingplay03.png)](https://youtu.be/3REcIdIXrZA)
 
+**Wind-harvesting Aircraft:** `examples/windcraft/windcraft.jl` (in progress)
+[![Vid here](docs/resources/img/windcraftwake.jpg)](https://youtu.be/iFM3B4_N2Ls)
 
 **eVTOL TRANSITION:** `examples/vahana/vahana.jl` (in progress)
-[![Vid here](docs/resources/img/play00_wide.png)](https://youtu.be/-xTHvwIe_34)
+[![Vid here](docs/resources/img/play00_wide.png)](https://youtu.be/f_AkQW37zqs)
 
 **Rotor Aeroacoustic Noise:** [`examples/rotornoise/singlerotor.ipynb`](https://nbviewer.jupyter.org/github/byuflowlab/FLOWUnsteady/blob/master/examples/rotornoise/singlerotor.ipynb)
 <img src="docs/resources/vid/cfdnoise_ningdji_multi_005D_03_15.gif" alt="Vid here" style="width: 400px;"/>
