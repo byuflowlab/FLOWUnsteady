@@ -88,7 +88,7 @@ For example simulations, check this notebook: [`docs/resources/examples.ipynb`](
 <img src="docs/resources/vid/cfdnoise_ningdji_multi_005D_03_15.gif" alt="Vid here" style="width: 400px;"/>
 
 # Framework Flowchart
-<img src="docs/resources/img/flowunstrady_diagram03.png" alt="Pic here" style="width: 900px;"/>
+<img src="docs/resources/img/flowchart00.png" alt="Pic here" style="width: 900px;"/>
 
 # Publications
   * Alvarez, E. J., & Ning, A. (2021, in progress). <i>Unsteady Mixed-fidelity Aerodynamics Solver
