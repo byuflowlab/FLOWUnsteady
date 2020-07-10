@@ -72,6 +72,7 @@ simple_box2()
 The following dependencies are unregistered Julia packages that need to be added manually through the command `] add github-url-to-the-package` in the Julia REPL.
 
 * GeometricTools: [github.com/byuflowlab/GeometricTools.jl](https://github.com/byuflowlab/GeometricTools.jl)
+* Xfoil: [github.com/byuflowlab/Xfoil.jl](https://github.com/byuflowlab/Xfoil.jl)
 * AirfoilPrep: [github.com/byuflowlab/AirfoilPrep.jl](https://github.com/byuflowlab/AirfoilPrep.jl)
 * FLOWVLM: [github.com/byuflowlab/FLOWVLM](https://github.com/byuflowlab/FLOWVLM)
 * BPM: [github.com/byuflowlab/BPM.jl](https://github.com/byuflowlab/BPM.jl)
