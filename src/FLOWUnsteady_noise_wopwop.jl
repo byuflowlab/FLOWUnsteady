@@ -49,6 +49,9 @@ function run_noise_wopwop(read_path::String,                        # Path from 
                                     periodic=true,                  # Periodic loading and translation
                                     # ---------- INPUT OPTIONS ---------------------
                                     num_min=0,                      # Start reading loading files from this number
+                                    const_geometry=false,           # Whether to run PSW on constant geometry from num_min
+                                    axisrot="automatic",            # Axis of rotation to use for constant geometry (defaults to [1,0,0])
+                                    CW=true,                        # Clockwise or counter-clockwise rotation of constant geometry
                                     # wopwopbin=joinpath(module_path, "wopwop3_serial"), # WW binary
                                     # ---------- OUTPUT OPTIONS --------------------
                                     verbose=true, v_lvl=0,
@@ -62,6 +65,19 @@ function run_noise_wopwop(read_path::String,                        # Path from 
         @warn("Got `num_min=0`, and the first step of a simulation is typically under-resolved!"*
                 " It is recommended that you start from any other step instead"*
                 " (this is specially important in periodic solutions).")
+    end
+
+    _axisrot = nothing
+    if const_geometry
+        if axisrot=="automatic"
+            @warn("axisrot set to \"automatic\"; defaulting to [1, 0, 0].")
+        end
+
+        println("CW!")
+        # _axisrot = (-1)^(!CW) * Float64.( axisrot=="automatic" ? [1, 0, 0] : axisrot )
+        _axisrot = (-1)^(CW) * Float64.( axisrot=="automatic" ? [1, 0, 0] : axisrot )
+    elseif periodic
+        @warn("Running periodic solution. Make sure that loading is indeed periodic")
     end
 
     ww_nt = ceil(Int, ww_nrevs *  ww_nsteps_per_rev)  # Number of time steps in PSU-WOPWOP
@@ -87,10 +103,6 @@ function run_noise_wopwop(read_path::String,                        # Path from 
 try
 
     def_wopwopbin = "wopwop3"       # Copy wopwopbin with this name
-
-    if periodic
-        @warn("Running periodic solution. Make sure that loading is indeed periodic")
-    end
 
 
     ############################################################################
@@ -254,27 +266,10 @@ try
     ############################################################################
     # GEOMETRY PRE-PROCESSING
     ############################################################################
-    if verbose; println("\t"^(v_lvl)*"Generating WOPWOP geometry files..."*
-                        " (reading num range $(num_min):$(num_max))"); end;
+    nums = const_geometry ? nothing : num_min:num_max
 
-    # # Collect all loft VTKs into one WOPWOP file per blade
-    # for (si, rotors) in enumerate(rotorsystems)     # Iterate over systems
-    #     for (ri, nBlades) in enumerate(rotors)      # Iterate over rotors
-    #         for bi in 1:nBlades
-    #
-    #             fname = rotorsys_suffs*"_Rotor$(ri)_Blade$(bi)_loft"
-    #             fnameout = "Sys$(si)_Rotor$(ri)_Blade$(bi)_loft"
-    #
-    #             if verbose; println("\t"^(v_lvl+1)*"file $(fname)..."); end;
-    #
-    #             noise.vtk2wopwop(fname, fnameout*".wop";
-    #                                 read_path=read_path, save_path=case_name*"/",
-    #                                 # nums=vcat(0:(ww_nt-1), 0),
-    #                                 nums=num_min:num_max,
-    #                                 t0=0.0, tf=tMax, period=periodic ? tMax : nothing)
-    #         end
-    #     end
-    # end
+    if verbose; println("\t"^(v_lvl)*"Generating WOPWOP geometry files..."*
+                        " (reading num range $(num_min):$(const_geometry ? num_min : nums[end]))"); end;
 
     # Unique prefixes of blade loft files (one string per blade)
     loftfiles = unique([fn[1:findfirst('.', fn)-1]
@@ -287,10 +282,12 @@ try
     for fname in loftfiles
         if verbose; println("\t"^(v_lvl+1)*"file $(fname)..."); end;
 
-        noise.vtk2wopwop(fname, fname*".wop";
+        fnamein = const_geometry ? fname*".$(num_min)" : fname
+
+        noise.vtk2wopwop(fnamein, fname*".wop";
                             read_path=read_path, save_path=case_name*"/",
                             # nums=vcat(0:(ww_nt-1), 0),
-                            nums=num_min:num_max,
+                            nums=nums,
                             t0=0.0, tf=tMax, period=periodic ? tMax : nothing)
     end
 
@@ -300,44 +297,27 @@ try
             for bi in 1:nBlades
 
                 fname    = run_name*"_Sys$(si)_Rotor$(ri)_Blade$(bi)_compact"
-                fnameout = run_name*"_Sys$(si)_Rotor$(ri)_Blade$(bi)_compact"
+                fnamein  = const_geometry ? fname*".$(num_min)" : fname
 
                 if verbose; println("\t"^(v_lvl+1)*"file $(fname)..."); end;
 
-                noise.vtk2wopwop(fname, fnameout*".wop";
+                noise.vtk2wopwop(fnamein, fname*".wop";
                                     read_path=read_path, save_path=case_name,
                                     # nums=vcat(0:(ww_nt-1), 0),
-                                    nums=num_min:num_max,
+                                    nums=nums,
                                     t0=0.0, tf=tMax, period=periodic ? tMax : nothing,
                                     compact=true)
             end
         end
     end
 
-    # # Unique prefixes of blade compact files (one string per blade)
-    # compactfiles = unique([fn[1:findfirst('.', fn)-1]
-    #                         for fn in readdir(read_path)
-    #                         if occursin("_compact", fn)])
-    #
-    # ncompacts = size(compactfiles, 1)       # Number of compact patches
-    #
-    # # Collect all lifting-line VTKs into one WOPWOP file per blade
-    # for fname in compactfiles
-    #     if verbose; println("\t"^(v_lvl+1)*"file $(fname)..."); end;
-    #
-    #     noise.vtk2wopwop(fname, fname*".wop";
-    #                         read_path=read_path, save_path=case_name*"/",
-    #                         # nums=vcat(0:(ww_nt-1), 0),
-    #                         nums=num_min:num_max,
-    #                         t0=0.0, tf=tMax, period=periodic ? tMax : nothing,
-    #                         compact=true)
-    # end
-
     if verbose; println("\t"^(v_lvl)*"Generating WOPWOP loading files..."); end;
 
     # Collect all loading files into one WOPWOP loading file per blade
+    nums = const_geometry ? [num_min] : num_min:num_max
+
     for (si, rotors) in enumerate(rotorsystems)     # Iterate over systems
-        generate_wopwoploading(read_path, case_name, num_min:num_max;
+        generate_wopwoploading(read_path, case_name, nums;
                                     # INPUT OPTIONS
                                     filename="loading_Sys$(si)", fieldname="Ftot",
                                     filenameout=run_name*"_Sys$(si)",
@@ -347,21 +327,6 @@ try
                                     structured=false
                                    )
     end
-
-    # # Collect all loading files into one WOPWOP loading file per blade
-    # generate_wopwoploading(read_path;
-    #                             # INPUT OPTIONS
-    #                             # nums=vcat(0:(ww_nt-1), 0),
-    #                             nums=num_min:num_max,
-    #                             run_name=run_name,
-    #                             filename="gammas", fieldname="Ftot",
-    #                             # OUTPUT OPTIONS
-    #                             save_path=case_name,
-    #                             # PROCESSING OPTIONS
-    #                             period=periodic ? tMax : nothing,
-    #                             t0=0.0, dt=tMax/nt,
-    #                             structured=false
-    #                            )
 
 
     ############################################################################
@@ -383,10 +348,25 @@ try
     """
     &ContainerIn
       dTau        = $(ww_dt)
-      nbBase      = 0
+      nbBase      = $(const_geometry ? 1 : 0)
       nbContainer = $(nbcontainer)
     /
     """
+
+    if const_geometry
+        # Give RPM for PSU-WOPWOP to rotate the constant geometry
+        str *=
+        """
+        &CB
+          Title="Rotor angular velocity"
+          rotation=.true.
+          AngleType="KnownFunction"
+          Omega=$(2*pi*RPM/60)
+          AxisValue=$(_axisrot[1]),$(_axisrot[2]),$(_axisrot[3])
+        /
+        """
+    end
+
     for fname in loftfiles
         # Loft surface patch for thickness
         str *=
@@ -397,36 +377,18 @@ try
         /
         """
     end
-    # for fname in compactfiles
-    #     # Compact patch for loading
-    #     loading_fname = fname[1:find(k->fname[k:end]=="_compact", 1:length(fname))[1]-1]*
-    #                         "_loading_"*(periodic ? "periodic" : "aperiodic")
-    #     str *=
-    #     """
-    #     &ContainerIn
-    #       patchGeometryFile="$(fname).wop"
-    #       patchLoadingFile="$(loading_fname).wop"
-    #       nbBase=0
-    #     /
-    #     """
-    # end
+
+    loading_suf = const_geometry ? "constant" : (periodic ? "" : "a")*"periodic"
 
     for (si, rotors) in enumerate(rotorsystems)     # Iterate over systems
         for (ri, nBlades) in enumerate(rotors)      # Iterate over rotors
             for bi in 1:nBlades
-                # # Loft surface patch for thickness
-                # str *=
-                # """
-                # &ContainerIn
-                #   patchGeometryFile="$(run_name)_Sys$(si)_Rotor$(ri)_Blade$(bi)_loft.wop"
-                #   nbBase=0
-                # /
-                # """
+                # Loft surface patch for thickness
                 str *=
                 """
                 &ContainerIn
                   patchGeometryFile="$(run_name)_Sys$(si)_Rotor$(ri)_Blade$(bi)_compact.wop"
-                  patchLoadingFile="$(run_name)_Sys$(si)_Rotor$(ri)_Blade$(bi)_loading_$((periodic ? "" : "a")*"periodic").wop"
+                  patchLoadingFile="$(run_name)_Sys$(si)_Rotor$(ri)_Blade$(bi)_loading_$(loading_suf).wop"
                   nbBase=0
                 /
                 """
