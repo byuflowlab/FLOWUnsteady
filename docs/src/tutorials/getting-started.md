@@ -138,4 +138,8 @@ This will pull up Paraview showing the computed geometry and time steps. Sit bac
 
 
 !!! note "Quasi-steady solver"
-    If you don't have access to the VPM code yet, you can run any of the examples with the quasi-steady solver. This is done by switching the vehicle type from the unsteady VLM (`FLOWUnsteady.UVLMVehicle`) to the quasi-steady VLM vehicle (`FLOWUnsteady.QVLMVehicle`). In the example above, you only need to change the `VehicleType` keyword argument to `VehicleType=FLOWUnsteady.QVLMVehicle`.
+    If you don't have access to the VPM code yet, you can run any of the examples with the quasi-steady solver. This is done by switching the vehicle type from the unsteady VLM (`FLOWUnsteady.UVLMVehicle`) to the quasi-steady VLM vehicle (`FLOWUnsteady.QVLMVehicle`). In the example above, you only need to change the `VehicleType` keyword argument to `VehicleType=FLOWUnsteady.QVLMVehicle`. This is what the quasi-steady simulation looks like:
+
+```@raw html
+<img src="../../assets/vid/tandemheaving142_1.gif" alt="Vid" width="600px"/>
+```
