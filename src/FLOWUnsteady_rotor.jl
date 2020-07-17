@@ -35,14 +35,15 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
                         airfoil_files::Array{Tuple{Float64,String,String},1};
                         # INPUT OPTIONS
                         data_path=def_data_path,
+                        read_polar=vlm.ap.read_polar,
                         # PROCESSING OPTIONS
                         pitch=0.0,
-                        n=10, CW=true,
+                        n=10, CW=true, blade_r=1.0,
                         ReD=5*10^5, altReD=nothing, Matip=0.0,
                         ncrit=9,
                         xfoil=false,
                         rotor_file="apc10x7.jl",
-                        spline_k=5, spline_s=0.001, spline_bc="extrapolate",
+                        spline_k=5, spline_s=0.001, splines_s=nothing, spline_bc="extrapolate",
                         turbine_flag=false,
                         rfl_n_lower=15, rfl_n_upper=15,
                         # OUTPUT OPTIONS
@@ -68,16 +69,16 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
     # Splines
     _spl_chord = Dierckx.Spline1D(chorddist[:, 1]*Rtip, chorddist[:, 2]*Rtip;
                                         k= size(chorddist)[1]>2 ? spline_k : 1,
-                                        s=spline_s, bc=spline_bc)
+                                        s=splines_s!=nothing ? splines_s[1] : spline_s, bc=spline_bc)
     _spl_theta = Dierckx.Spline1D(pitchdist[:, 1]*Rtip, pitchdist[:, 2];
                                         k= size(pitchdist)[1]>2 ? spline_k : 1,
-                                        s=spline_s, bc=spline_bc)
+                                        s=splines_s!=nothing ? splines_s[2] : spline_s, bc=spline_bc)
     _spl_LE_x = Dierckx.Spline1D(sweepdist[:, 1]*Rtip, sweepdist[:, 2]*Rtip;
                                         k= size(sweepdist)[1]>2 ? spline_k : 1,
-                                        s=spline_s, bc=spline_bc)
+                                        s=splines_s!=nothing ? splines_s[3] : spline_s, bc=spline_bc)
     _spl_LE_z = Dierckx.Spline1D(heightdist[:, 1]*Rtip, heightdist[:, 2]*Rtip;
                                         k= size(heightdist)[1]>2 ? spline_k : 1,
-                                        s=spline_s, bc=spline_bc)
+                                        s=splines_s!=nothing ? splines_s[4] : spline_s, bc=spline_bc)
     spl_chord(x) = Dierckx.evaluate(_spl_chord, x)
     spl_theta(x) = pitch + Dierckx.evaluate(_spl_theta, x)
     spl_LE_x(x) = Dierckx.evaluate(_spl_LE_x, x)
@@ -127,7 +128,7 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
 
         else # Reads polars from files
             if verbose; println("\t"^(v_lvl+1)*"$file_name"); end;
-            polar = vlm.ap.read_polar(file_name; path=data_path*"airfoils/", x=x, y=y)
+            polar = read_polar(file_name; path=data_path*"airfoils/", x=x, y=y)
         end
 
         push!(airfoils, (pos, polar))
@@ -136,7 +137,7 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
     if verbose; println("\t"^v_lvl*"Generating FLOWVLM Rotor..."); end;
     propeller = vlm.Rotor(CW, r, chord, theta, LE_x, LE_z, B, airfoils, turbine_flag)
 
-    vlm.initialize(propeller, n; verif=plot_disc,
+    vlm.initialize(propeller, n; r_lat=blade_r, verif=plot_disc,
                     genblade_args=[(:spl_k,spline_k), (:spl_s,spline_s)],
                     rfl_n_lower=rfl_n_lower, rfl_n_upper=rfl_n_upper,
                     figsize_factor=figsize_factor)
