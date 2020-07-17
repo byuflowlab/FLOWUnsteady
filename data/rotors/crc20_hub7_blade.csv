@@ -1,0 +1,8 @@
+﻿property,file,description
+chorddist,crc20_hub7_chorddist.csv,Chord distribution
+pitchdist,crc20_hub7_pitchdist.csv,Pitch distribution
+sweepdist,crc20_hub7_sweepdist.csv,LE sweep distribution
+heightdist,crc20_hub7_heightdist.csv,LE height distribution
+airfoil_files,apc10x7_airfoils.csv,Airfoil distribution
+spl_k,1,Spline order
+spl_s,5.00E-07,Spline smoothing

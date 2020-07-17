@@ -9,8 +9,6 @@
   * License   : MIT
 =###############################################################################
 
-
-
 function run_simulation(sim::Simulation, nsteps::Int;
                              # SIMULATION OPTIONS
                              rand_RPM=true,             # Randomize RPM fluctuations
@@ -28,6 +26,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
                              p_per_step=1,              # Particle sheds per time step
                              sigmafactor=1.0,           # Particle core overlap
                              overwrite_sigma=nothing,   # Overwrite cores to this value (ignoring sigmafactor)
+                             sigmamin=nothing,          # minimum particle smoothing radius; if defined, defines the threshold for skipping particle sheds 
                              vlm_sigma=-1,              # VLM regularization
                              vlm_rlx=-1,                # VLM relaxation
                              vlm_init=false,            # Initialize the first step with the VLM semi-infinite wake solution
@@ -49,6 +48,8 @@ function run_simulation(sim::Simulation, nsteps::Int;
                              save_horseshoes=true,      # Save VLM horseshoes
                              save_static_particles=false,# Whether to save particles to represent the VLM
                              save_wopwopin=true,        # Generate inputs for PSU-WOPWOP
+                             save_rotor_v=false,        # whether to save rotor relative net swirl/axial velocity
+                             nsteps_save_rotor=10       # save rotor velocity every this many steps
                              )
 
 
@@ -95,6 +96,8 @@ function run_simulation(sim::Simulation, nsteps::Int;
     pfield = vpm.ParticleField(max_particles, Vinf, nothing, vpm_solver)
     pfield.nu = mu/rho                  # Kinematic viscosity
 
+    Uinds = save_rotor_v ? [] : nothing
+    Gamma = save_rotor_v ? [] : nothing
     # TODO: Add particle removal
 
     ############################################################################
@@ -119,9 +122,34 @@ function run_simulation(sim::Simulation, nsteps::Int;
                             overwrite_sigma=overwrite_sigma)
 
         # Solve aerodynamics of the vehicle
-        solve(sim, Vinf, PFIELD, wake_coupled, vpm_solver, DT, vlm_rlx,
-                surf_sigma, rho, sound_spd; init_sol=vlm_init)
+        thisUinds = PFIELD.nt%nsteps_save_rotor == 0 && save_rotor_v ? [] : nothing
 
+        solve(sim, Vinf, PFIELD, wake_coupled, vpm_solver, DT, vlm_rlx,
+                surf_sigma, rho, sound_spd; init_sol=vlm_init, Uinds=thisUinds)
+        println("PFIELD.nt = ",PFIELD.nt)
+        if PFIELD.nt%nsteps_save_rotor == 0 && save_rotor_v && PFIELD.nt > 0
+            println("Sherlock! updating Uinds")
+            # push!(Uinds, thisUinds)
+            # get Gamma
+            # thisGamma = []
+            # for rotorsystem in sim.vehicle.rotor_systems
+            #     for rotor in rotorsystem
+                    thisGamma = sim.vehicle.rotor_systems[1][1].sol["Gamma"]["field_data"][1] # just the first rotor, first blade
+                    # push!(thisGamma, rotor.sol["Gamma"]["field_data"])
+                    # println("\t\trotor.sol[""Gamma""][""field_data""] = ", rotor.sol["Gamma"]["field_data"])
+            #     end
+            # end
+            println("\tthisGamma = ", thisGamma)
+            println("")
+            println("\tthisUinds = ", thisUinds)
+            println("")
+            # push!(Gamma, thisGamma)
+            open(joinpath(save_path,"uinds.txt"), "w") do file
+                writedlm(file, thisUinds[1]) # only the first blade
+                writedlm(file, thisGamma')
+            end
+        end
+        
         # Shed unsteady-loading wake with new solution
         if shed_unsteady
             shed_wake(sim.vehicle, Vinf, PFIELD, DT, sim.nt; t=T,
@@ -182,7 +210,7 @@ function add_particle(pfield::vpm.ParticleField, X::Array{Float64, 1},
                         V::Float64, infD::Array{Float64, 1},
                         sigma::Float64, vol::Float64,
                         l::Array{T1, 1}, p_per_step::Int64;
-                        overwrite_sigma=nothing) where {T1<:Real}
+                        overwrite_sigma=nothing, nt=0) where {T1<:Real}
 
     Gamma = gamma*(V*dt)*infD       # Vectorial circulation
 
@@ -202,7 +230,7 @@ function add_particle(pfield::vpm.ParticleField, X::Array{Float64, 1},
     dX = l/pps
     for i in 1:pps
         particle = vcat(X + i*dX - dX/2, Gamma/pps, sigmap, vol/pps)
-        vpm.addparticle(pfield, particle)
+        vpm.addparticle(pfield, particle; timestep = nt)
     end
 end
 

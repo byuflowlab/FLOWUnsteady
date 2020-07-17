@@ -48,7 +48,7 @@ end
 
 
 # ------------ DRIVERS ---------------------------------------------------------
-function run_singleprop(; xfoil=true, prompt=true, save_path=extdrive_path*"unsExample_singleprop_xfoil/")
+function run_singleprop(; xfoil=true, prompt=true, save_path=extdrive_path*"unsExample_singleprop_xfoil_crc20_omitp_20200708/")
     singleprop(; xfoil=xfoil, save_path=save_path, prompt=prompt)
 end
 

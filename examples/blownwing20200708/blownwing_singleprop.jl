@@ -26,9 +26,9 @@ function singleprop(; xfoil=true,
     # ------------ PARAMETERS --------------------------------------------------
 
     # Rotor geometry
-    rotor_file = "apc10x7.csv"          # Rotor geometry
+    rotor_file = "crc20_hub7.csv"          # Rotor geometry
     data_path = uns.def_data_path       # Path to rotor database
-    pitch = 0.0                         # (deg) collective pitch of blades
+    pitch = 25.0                         # (deg) collective pitch of blades
     n = 10                              # Number of blade elements
     CW = false                          # Clock-wise rotation
     xfoil = xfoil                     # Whether to run XFOIL
@@ -37,7 +37,7 @@ function singleprop(; xfoil=true,
     R, B = uns.read_rotor(rotor_file; data_path=data_path)[[1,3]]
 
     # Simulation parameters
-    J = 0.6                             # Advance ratio Vinf/(nD)
+    J = 0.1                             # Advance ratio Vinf/(nD)
     ReD07 = 1.5e6                       # Diameter-based Reynolds at 70% span
     ReD = ReD07/0.7                     # Diameter-based Reynolds
     rho = 1.225                         # (kg/m^3) air density
@@ -85,7 +85,8 @@ function singleprop(; xfoil=true,
                                             n=n, CW=CW, ReD=ReD,
                                             verbose=verbose, xfoil=xfoil,
                                             data_path=data_path,
-                                            plot_disc=plot_disc)
+                                            plot_disc=plot_disc,
+                                            Matip=Mtip)
     # ----- VEHICLE DEFINITION
     # System of all FLOWVLM objects
     system = vlm.WingSystem()

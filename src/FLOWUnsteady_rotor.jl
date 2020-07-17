@@ -37,7 +37,7 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
                         data_path=def_data_path,
                         # PROCESSING OPTIONS
                         pitch=0.0,
-                        n=10, CW=true, r_lat=1, # RMA added r_lat=1.0
+                        n=10, CW=true, r_lat=1.0, r_lat_custom=[], # RMA added r_lat=1.0 and r_lat_custom=[]
                         ReD=5*10^5, altReD=nothing, Matip=0.0,
                         xfoil=false,
                         rotor_file="apc10x7.jl",
@@ -141,7 +141,7 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
     propeller = vlm.Rotor(CW, r, chord, theta, LE_x, LE_z, B, airfoils, turbine_flag)
 
     vlm.initialize(propeller, n; r_lat=r_lat, verif=plot_disc,
-                    genblade_args=[(:spl_k,spline_k), (:spl_s,spline_s)],
+                    genblade_args=[(:spl_k,spline_k), (:spl_s,spline_s), (:r_lat_custom, r_lat_custom)],
                     rfl_n_lower=rfl_n_lower, rfl_n_upper=rfl_n_upper)
 
     if plot_disc
@@ -180,7 +180,6 @@ end
 
 function generate_rotor(Rtip::Real, Rhub::Real, B::Int, blade_file::String;
                         data_path=def_data_path, optargs...)
-
     (chorddist, pitchdist,
      sweepdist, heightdist,
      airfoil_files, spl_k,

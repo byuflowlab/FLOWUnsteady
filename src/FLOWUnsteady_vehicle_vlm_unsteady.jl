@@ -111,7 +111,8 @@ function shed_wake(self::VLMVehicle, Vinf::Function,
                     prev_system=_get_prev_wake_system(self),
                     unsteady_shedcrit=unsteady_shedcrit,
                     p_per_step=p_per_step, sigmafactor=sigmafactor,
-                    overwrite_sigma=overwrite_sigma, check=false)
+                    overwrite_sigma=overwrite_sigma, check=false,
+                    nt=nt)
     end
 end
 

@@ -397,7 +397,8 @@ function VLM2VPM(system::Union{vlm.Wing, vlm.WingSystem, vlm.Rotor}, pfield, dt,
                     Vinf;
                     t=0.0, prev_system=nothing, unsteady_shedcrit=-1.0,
                     p_per_step=1, sigmafactor=1.0, overwrite_sigma=nothing,
-                    check=true, debug=false, tol=1e-6)
+                    check=true, debug=false, tol=1e-6,
+                    omit_hub_particles=false, nt=0)
 
   m = vlm.get_m(system)   # Number of lattices
 
@@ -442,11 +443,14 @@ function VLM2VPM(system::Union{vlm.Wing, vlm.WingSystem, vlm.Rotor}, pfield, dt,
       sigma = sigmafactor*V*dt                  # Vortex blob radius
       vol = pi*(norm(Bp-Ap)/2)^2*V*dt           # Volume of particle
       l = -infD*V*dt                            # Distance the TE travels
-
-      if unsteady_shedcrit<=0
+      opbool = true
+      if unsteady_shedcrit<=0 && !(omit_hub_particles)
           add_particle(pfield, X, gamma, dt, V, infD, sigma, vol,
-                                l, p_per_step; overwrite_sigma=overwrite_sigma)
+                                l, p_per_step; overwrite_sigma=overwrite_sigma, nt=nt)
+          opbool = false
+
       end
+      opbool ? println("Sherlock! 453 : Omitting hub particles...\n") : nothing
 
     # ----------- Case of wing tip on discontinuous wing --------
     elseif norm(Ap - prev_Bp) / norm(Bp - Ap) > tol
@@ -465,7 +469,7 @@ function VLM2VPM(system::Union{vlm.Wing, vlm.WingSystem, vlm.Rotor}, pfield, dt,
 
       if unsteady_shedcrit<=0
           add_particle(pfield, X, gamma, dt, V, infD, sigma, vol,
-                              l, p_per_step; overwrite_sigma=overwrite_sigma)
+                              l, p_per_step; overwrite_sigma=overwrite_sigma, nt=nt)
       end
 
       # Adds particle at Ap
@@ -476,12 +480,13 @@ function VLM2VPM(system::Union{vlm.Wing, vlm.WingSystem, vlm.Rotor}, pfield, dt,
       sigma = sigmafactor*V*dt                  # Vortex blob radius
       vol = pi*(norm(Bp-Ap)/2)^2*V*dt           # Volume of particle
       l = -infD*V*dt                             # Distance the TE travels
-
-      if unsteady_shedcrit<=0
+      opbool = true
+      if unsteady_shedcrit<=0 && !(omit_hub_particles)
           add_particle(pfield, X, gamma, dt, V, infD, sigma, vol,
-                                l, p_per_step; overwrite_sigma=overwrite_sigma)
+                                l, p_per_step; overwrite_sigma=overwrite_sigma, nt=nt)
+          opbool = false
       end
-
+    #   opbool ? println("Sherlock! 453 : Omitting hub particles...\n") : nothing
     # ----------- Case of contiguous horseshoes -----------------
     else
 
@@ -512,7 +517,7 @@ function VLM2VPM(system::Union{vlm.Wing, vlm.WingSystem, vlm.Rotor}, pfield, dt,
 
       if unsteady_shedcrit<=0
           add_particle(pfield, X, gamma, dt, V, infD, sigma, vol,
-                              l, p_per_step; overwrite_sigma=overwrite_sigma)
+                              l, p_per_step; overwrite_sigma=overwrite_sigma, nt=nt)
       end
 
 
@@ -529,7 +534,7 @@ function VLM2VPM(system::Union{vlm.Wing, vlm.WingSystem, vlm.Rotor}, pfield, dt,
 
         if unsteady_shedcrit<=0
             add_particle(pfield, X, gamma, dt, V, infD, sigma, vol,
-                            l, p_per_step; overwrite_sigma=overwrite_sigma)
+                            l, p_per_step; overwrite_sigma=overwrite_sigma, nt=nt)
         end
       end
     end
@@ -550,7 +555,7 @@ function VLM2VPM(system::Union{vlm.Wing, vlm.WingSystem, vlm.Rotor}, pfield, dt,
       # Adds particle only if difference is greater than 1%
       if abs(gamma/p_Gamma) > unsteady_shedcrit
         add_particle(pfield, X, gamma, 1.0, 1.0, infD, sigma, vol,
-                                        l, 1; overwrite_sigma=overwrite_sigma)
+                                        l, 1; overwrite_sigma=overwrite_sigma, nt=nt)
       end
     end
 
