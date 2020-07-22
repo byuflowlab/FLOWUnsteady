@@ -46,6 +46,7 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
                         spline_k=5, spline_s=0.001, splines_s=nothing, spline_bc="extrapolate",
                         turbine_flag=false,
                         rfl_n_lower=15, rfl_n_upper=15,
+                        rediscretize_airfoils=true,
                         # OUTPUT OPTIONS
                         verbose=false, v_lvl=1,
                         plot_disc=true, figsize_factor=2/3)
@@ -140,7 +141,8 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
     vlm.initialize(propeller, n; r_lat=blade_r, verif=plot_disc,
                     genblade_args=[(:spl_k,spline_k), (:spl_s,spline_s)],
                     rfl_n_lower=rfl_n_lower, rfl_n_upper=rfl_n_upper,
-                    figsize_factor=figsize_factor)
+                    figsize_factor=figsize_factor,
+                    rediscretize=rediscretize_airfoils)
 
     if plot_disc
         fig = figure("discretization_verif", figsize=[7*2,5*1]*figsize_factor)
