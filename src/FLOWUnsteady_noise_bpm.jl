@@ -244,9 +244,9 @@ function rotate_observers(obs, θ) # θ in degrees
 
     θ = θ * pi / 180
 
-    R = [1 0 0;
-        0 cos(θ) -sin(θ);
-        0 sin(θ) cos(θ)]
+    R = [cos(θ) -sin(θ) 0;
+        sin(θ) cos(θ) 0;
+        0 0 1]
 
     new_obs = R * obs
 
