@@ -45,6 +45,8 @@ function run_noise_wopwop(read_path::String,                        # Path from 
                                     microphoneX=nothing,            # If given, replaces sphere with one observer at this position
                                     highpass=nothing, lowpass=nothing, # Low and high pass filters
                                     windowing=nothing,
+                                    output_octaves=true,
+                                    Noctave=3,
                                     # ---------- SIMULATION OPTIONS ----------------
                                     periodic=true,                  # Periodic loading and translation
                                     # ---------- INPUT OPTIONS ---------------------
@@ -193,6 +195,14 @@ try
         hilopass *=
         """
             windowFunction = '$windowing'
+        """
+    end
+    if output_octaves
+        hilopass *=
+        """
+           octaveFlag = .$(output_octaves).
+           octaveNumber = $(Noctave)
+           octaveApproxFlag = .false.
         """
     end
 
