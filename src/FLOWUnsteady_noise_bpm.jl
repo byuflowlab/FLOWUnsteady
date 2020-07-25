@@ -33,8 +33,10 @@ function run_noise_bpm(rotors::Array{vlm.Rotor, 1},
                                 noise_correction=0.5,           # broadband calibration
                                 TE_thickness::Union{Float64, Array{Float64, 1}}=16.15,  # TE thickness (in degrees)
                                 freq_bins=BPM.default_f,        # Frequency bins
+                                db_offset=BPM.default_AdB,      # dB offset of every frequency for A-weighting
                                 # ---------- OUTPUT OPTIONS --------------------
-                                prompt=true
+                                prompt=true,
+                                verbose=true, v_lvl=0,
                                 )
 
 
@@ -82,12 +84,16 @@ function run_noise_bpm(rotors::Array{vlm.Rotor, 1},
     psi = typeof(TE_thickness)==Float64 ? fill(TE_thickness, nrotors) : TE_thickness
     nf = length(freq_bins)
 
+    if nf != length(db_offset)
+        error("Invalid dB offset. Expected $nf elements, got $(length(db_offset)).")
+    end
 
 
 
     ############################################################################
     # RUN BPM CODE
     ############################################################################
+    if verbose; println("\t"^v_lvl*"Calculating BPM noise..."); end;
     if typeof(observer) == GeometricTools.Grid
 
         OASPL = zeros(grid.nnodes, 1)
@@ -96,6 +102,8 @@ function run_noise_bpm(rotors::Array{vlm.Rotor, 1},
         SPLfA = zeros(grid.nnodes, nf)
 
         for i = 1:grid.nnodes
+            if verbose && ((i-1)%10==0 || i==grid.nnodes); println("\t"^(v_lvl+1)*"Observer $i out of $(grid.nnodes)"); end;
+
             obs = grid.nodes[:,i] + [0.0, 0.0, h]
             obs = rotate_observers(obs, 90)
 
@@ -105,7 +113,7 @@ function run_noise_bpm(rotors::Array{vlm.Rotor, 1},
                                     rad, c, c1, alpha,
                                     nu, c0,
                                     psi, AR,
-                                    noise_correction; f=freq_bins)
+                                    noise_correction; f=freq_bins, AdB=db_offset)
         end
 
     else
@@ -118,7 +126,7 @@ function run_noise_bpm(rotors::Array{vlm.Rotor, 1},
                                                     rad, c, c1, alpha,
                                                     nu, c0,
                                                     psi, AR,
-                                                    noise_correction; f=freq_bins)
+                                                    noise_correction; f=freq_bins, AdB=db_offset)
     end
 
 
@@ -167,6 +175,16 @@ function run_noise_bpm(rotors::Array{vlm.Rotor, 1},
     header = string(header, "\n", "")
     write(f4, header)
 
+    # write frequencies
+    filename = "frequencies.tec"
+    f5 = open(joinpath(save_path, filename), "w") #.tec file similar to wopwop outputs
+    header = " TITLE='BPM frequencies' " # Title
+    header = string(header, "\n", "VARIABLES= 'frequencies'")
+    header = string(header, "\n", "")
+    header = string(header, "\n", "")
+    header = string(header, "\n", "")
+    write(f5, header)
+
     for i = 1:length(OASPL) # number of observers
         data1 = OASPL[i]
         data2 = OASPLA[i]
@@ -182,15 +200,18 @@ function run_noise_bpm(rotors::Array{vlm.Rotor, 1},
             write(f3, string(" ", data3)) # space at beginning and between each spl
             write(f4, string(" ", data4))
         end
+        write(f5, string(" ", freq_bins[j]))
 
         write(f3, string("\n")) # go to next line for next frequency
         write(f4, string("\n"))
+        write(f5, string("\n"))
     end
 
     close(f1)
     close(f2)
     close(f3)
     close(f4)
+    close(f5)
 
     return observer
 end
