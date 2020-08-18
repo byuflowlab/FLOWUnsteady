@@ -38,7 +38,7 @@ function calc_aerodynamicforce(vlm_system::Union{vlm.Wing, vlm.WingSystem},
 
     # Evaluate VPM on each midpoint
     Xs = vcat(ApA, AB, BBp)
-    Vvpm = Vvpm_on_Xs(pfield, Xs, vpm_solver)
+    Vvpm = Vvpm_on_Xs(pfield, Xs; dt=dt)
 
     # Evaluate VLM on each midpoint
     Vvlm = vlm.Vind.(Ref(vlm_system), Xs; t=t, ign_col=true, ign_infvortex=true)

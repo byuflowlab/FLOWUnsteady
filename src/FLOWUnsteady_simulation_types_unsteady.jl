@@ -12,7 +12,7 @@
 
 function solve(self::Simulation{V, M, R}, Vinf::Function,
                 pfield::vpm.ParticleField, wake_coupled::Bool,
-                vpm_solver::String, dt::Real, rlx::Real, sigma::Real, rho::Real,
+                dt::Real, rlx::Real, sigma::Real, rho::Real,
                 speedofsound::Real; init_sol::Bool=false
                 ) where {V<:UVLMVehicle, M<:AbstractManeuver, R}
 
@@ -62,11 +62,10 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
         Xs = _get_midXs(vhcl.rotor_systems)
 
         ## Particles for VLM-on-Rotor induced velocity
-        static_particles = _static_particles(vhcl.vlm_system, sigma)
+        static_particles_fun(pfield, args...) = _static_particles(pfield, vhcl.vlm_system, sigma)
 
         ## Evaluate VPM-on-Rotor induced velocity + static particles
-        Vinds = Vvpm_on_Xs(pfield, Xs, vpm_solver;
-                                            static_particles=static_particles)
+        Vinds = Vvpm_on_Xs(pfield, Xs; static_particles_fun=static_particles_fun, dt=dt)
 
         # Solve Rotors
         for (si, rotors) in enumerate(vhcl.rotor_systems)
@@ -96,11 +95,9 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
         # Control points of VLM
         Xs = _get_Xs(vhcl.vlm_system, "CP"; t=t)
 
-        # Generate static particles
-        static_particles = Array{Float64, 1}[]
-
-        ### Particles for Rotor induced velocity
+        ### Stitches previous rotor solutions for blade induced velocity
         prev_rotor_systems = _get_prev_rotor_systems(vhcl)
+        allrotors = vlm.WingSystem()
 
         for (si, rotors) in enumerate(vhcl.rotor_systems)
             for (ri, rotor) in enumerate(rotors)
@@ -108,13 +105,17 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
                 vlm.getHorseshoe(rotor, 1)          # Force HS calculation
                 vlm._addsolution(rotor, "Gamma",    # Give previous solution
                                 prev_rotor_systems[si][ri]._wingsystem.sol["Gamma"])
-                _static_particles(rotor, sigma; out=static_particles)
+                vlm.add_wing(allrotors, "S$(si)R$(ri)", rotor)
 
             end
         end
 
-        # VPM-induced velocity (+ static particles) at every VLM control point
-        Vvpm = Vvpm_on_Xs(pfield, Xs, vpm_solver; static_particles=static_particles)
+        ## Particles for Rotor-on-VLM induced velocity
+        static_particles_fun2(pfield, args...) = _static_particles(pfield, allrotors, sigma)
+
+        ## VPM-induced velocity at every VLM control point
+        Vvpm = Vvpm_on_Xs(pfield, Xs; static_particles_fun=static_particles_fun2, dt=dt)
+
         vlm._addsolution(vhcl.vlm_system, "Vvpm", Vvpm; t=t)
 
 
@@ -125,11 +126,13 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
         ### Particles for VLM-on-Rotor induced velocity
         # NOTE: If I keep the rotor particles wouldn't I be double-counting
         # the blade induced velocity and make the solution unstable?
-        _static_particles(vhcl.vlm_system, sigma; out=static_particles)
+        function static_particles_fun3(pfield, args...)
+            static_particles_fun2(pfield, args...)
+            _static_particles(pfield, vhcl.vlm_system, sigma)
+        end
 
         ## Evaluate VPM-on-Rotor induced velocity + static particles
-        Vinds = Vvpm_on_Xs(pfield, Xs, vpm_solver;
-                                            static_particles=static_particles)
+        Vinds = Vvpm_on_Xs(pfield, Xs; static_particles_fun=static_particles_fun3, dt=dt)
 
         # ---------- 5) Solve VLM system -----------------------------------
         # Wake-coupled solution
