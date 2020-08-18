@@ -25,6 +25,7 @@ using LinearAlgebra: I, norm, dot
 # ------------ GLOBAL VARIABLES ------------------------------------------------
 # Default path where to save data
 # extdrive_path = "/media/edoalvar/MyExtDrive/simulationdata5/"
+# extdrive_path = "/media/edoalvar/Samsung_T5/simulationdata202006/"
 extdrive_path = "temps/"
 
 
@@ -32,9 +33,9 @@ extdrive_path = "temps/"
 # ------------ DRIVERS ---------------------------------------------------------
 function run_tandemheavingwing()
     tandemheavingwing(; nsteps=400, p_per_step=1, vlm_rlx=0.75,
-                    VehicleType=uns.QVLMVehicle,
-                    save_path=extdrive_path*"tandemheaving04/",
-                    verbose=true, disp_plot=true)
+                        VehicleType=uns.VLMVehicle,
+                        save_path=extdrive_path*"tandemheaving05/",
+                        verbose=true, disp_plot=true)
 end
 
 

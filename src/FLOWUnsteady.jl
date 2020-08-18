@@ -6,6 +6,11 @@ Mixed-fidelity unsteady aerodynamics simulation engine.
       * Email     : Edo.AlvarezR@gmail.com
       * Created   : Oct 2019
       * License   : MIT
+
+
+    # TODO
+      * [ ] Change Vvpm_on_Xs to use UJ_direct and calculate only VPM on CPs
+                interactions instead of the whole FMM tree.
 """
 module FLOWUnsteady
 
@@ -22,13 +27,13 @@ using LinearAlgebra: norm, dot, cross, I
 import FLOWVLM
 const vlm = FLOWVLM
 
-# MyVPM https://github.com/EdoAlvarezR/MyVPM
-try                     # Load MyVPM if available
-    import MyVPM
-catch e                 # Otherwise load a dummy version of MyVPM
-    include("FLOWUnsteady_dummy_MyVPM.jl")
+# FLOWVPM https://github.com/byuflowlab/FLOWVPM.jl
+try                     # Load FLOWVPM if available
+    import FLOWVPM
+catch e                 # Otherwise load a dummy version of FLOWVPM
+    include("FLOWUnsteady_dummy_FLOWVPM.jl")
 end
-const vpm = MyVPM
+const vpm = FLOWVPM
 
 # GeometricTools https://github.com/byuflowlab/GeometricTools.jl
 import GeometricTools
