@@ -12,7 +12,7 @@
 
 function solve(self::Simulation{V, M, R}, Vinf::Function,
                 pfield::vpm.ParticleField, wake_coupled::Bool,
-                vpm_solver::String, dt::Real, rlx::Real, sigma::Real, rho::Real,
+                dt::Real, rlx::Real, sigma::Real, rho::Real,
                 speedofsound::Real; init_sol::Bool=false
                 ) where {V<:QVLMVehicle, M<:AbstractManeuver, R}
 

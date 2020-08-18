@@ -116,26 +116,26 @@ function shed_wake(self::VLMVehicle, Vinf::Function,
 end
 
 
-function generate_static_particle_fun(self::VLMVehicle, sigma::Real)
+function generate_static_particle_fun(pfield::vpm.ParticleField,
+                                                self::VLMVehicle, sigma::Real)
 
     if sigma<=0
         error("Invalid smoothing radius $sigma.")
     end
 
-    function static_particles_function(args...)
-        out = Array{Float64, 1}[]
+    function static_particles_function(pfield, args...)
 
         # Particles from vlm system
-        _static_particles(self.vlm_system, sigma; out=out)
+        _static_particles(pfield, self.vlm_system, sigma)
 
         # Particles from rotor systems
         for rotors in self.rotor_systems
             for rotor in rotors
-                _static_particles(rotor, sigma; out=out)
+                _static_particles(pfield, rotor, sigma)
             end
         end
 
-        return out
+        return nothing
     end
 
     return static_particles_function
@@ -145,17 +145,16 @@ save_vtk(self::VLMVehicle, args...;
                         optargs...) = save_vtk_base(self, args...; optargs...)
 
 ##### INTERNAL FUNCTIONS  ######################################################
-function _static_particles(system::Union{vlm.Wing, vlm.WingSystem, vlm.Rotor},
-                                    sigma::Real; out=Array{Float64, 1}[])
+function _static_particles(pfield::vpm.ParticleField,
+                            system::Union{vlm.Wing, vlm.WingSystem, vlm.Rotor},
+                            sigma::Real)
 
     # Adds a particle for every bound vortex of the VLM
     for i in 1:vlm.get_m(system)
         (Ap, A, B, Bp, _, _, _, Gamma) = vlm.getHorseshoe(system, i)
-        for (i,(x1, x2)) in enumerate([(Ap,A), (A,B), (B,Bp)])
-            push!(out, vcat((x1+x2)/2, Gamma*(x2-x1), sigma, 0))
+        for (i,(x1, x2)) in enumerate(((Ap,A), (A,B), (B,Bp)))
+            vpm.add_particle(pfield, (x1+x2)/2, Gamma*(x2-x1), sigma; vol=0)
         end
     end
-
-    return out
 end
 ##### END OF VEHICLE ###########################################################

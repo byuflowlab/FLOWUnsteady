@@ -117,11 +117,10 @@ function shed_wake(self::QVLMVehicle, Vinf::Function, pfield::vpm.ParticleField,
     nothing
 end
 
-function generate_static_particle_fun(self::QVLMVehicle, sigma::Real)
+function generate_static_particle_fun(pfield, self::QVLMVehicle, sigma)
 
     function static_particles_function(args...)
-        out = Array{Float64, 1}[]
-        return out
+        return nothing
     end
 
     return static_particles_function
