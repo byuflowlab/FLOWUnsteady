@@ -1,8 +1,8 @@
 using Documenter
-using Xfoil, AirfoilPrep, GeometricTools, CCBlade, FLOWVLM, FLOWUnsteady, MyVPM
+using Xfoil, AirfoilPrep, GeometricTools, CCBlade, FLOWVLM, FLOWUnsteady, FLOWVPM
 vlm = FLOWVLM
 gt = GeometricTools
-vpm = MyVPM
+vpm = FLOWVPM
 # using FLOWUnsteady
 
 makedocs(
