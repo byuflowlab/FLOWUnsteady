@@ -259,7 +259,8 @@ function run_vpm!(pfield::ParticleField, dt::Real, nsteps::Int;
                       run_name::String="pfield",
                       save_code::String="",
                       prompt::Bool=true,
-                      verbose::Bool=true, verbose_nsteps::Int=10, v_lvl::Int=0)
+                      verbose::Bool=true, verbose_nsteps::Int=10, v_lvl::Int=0,
+                      optargs...)
 
     # Creates save path and save code
     if save_path!=nothing && create_savepath
