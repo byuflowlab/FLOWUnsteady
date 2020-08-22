@@ -48,7 +48,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
                              verbose=true, v_lvl=1, verbose_nsteps=10,
                              nsteps_save=1,             # Save vtks every this many steps
                              nsteps_restart=-1,         # Save jlds every this many steps
-                             save_code=module_path,     # Saves the source code in this path
+                             save_code="",              # Saves the source code in this path
                              save_horseshoes=false,     # Save VLM horseshoes
                              save_static_particles=false,# Whether to save particles to represent the VLM
                              save_wopwopin=true,        # Generate inputs for PSU-WOPWOP
@@ -84,7 +84,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
     # ---------------- SCHEMES -------------------------------------------------
     # Set up viscous scheme
     if vpm.isinviscid(vpm_viscous) == false
-        viscous.nu = mu/rho
+        vpm_viscous.nu = mu/rho
         if vpm.iscorespreading(vpm_viscous) && overwrite_sigma!=nothing
             vpm_viscous.sgm0 = overwrite_sigma
         end
