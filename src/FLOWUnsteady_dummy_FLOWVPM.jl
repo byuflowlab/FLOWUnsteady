@@ -189,7 +189,10 @@ mutable struct ParticleField{T, V<:ViscousScheme}
                   )
 end
 
-ParticleField(args...) = ParticleField{RealFMM, Inviscid{RealFMM}}(1, nothing, nothing, Inviscid())
+function ParticleField(maxparticles; viscous::V=Inviscid(),
+                                            optargs...) where {V<:ViscousScheme}
+    return ParticleField{RealFMM, Inviscid{RealFMM}}(maxparticles, nothing, nothing, viscous; optargs...)
+end
 
 function get_np(self::ParticleField)
   return self.np
