@@ -8,7 +8,7 @@ vpm = FLOWVPM
 makedocs(
     sitename = "FLOWUnsteady",
     format = Documenter.HTML(),
-    modules = [Xfoil, AirfoilPrep, GeometricTools, CCBlade, FLOWVLM, FLOWUnsteady, MyVPM, vlm, vpm],
+    modules = [Xfoil, AirfoilPrep, GeometricTools, CCBlade, FLOWVLM, FLOWUnsteady, FLOWVPM, vlm, vpm],
     # modules = [FLOWUnsteady],
     pages = ["Home" => "index.md",
             "Tutorials" => Any[
