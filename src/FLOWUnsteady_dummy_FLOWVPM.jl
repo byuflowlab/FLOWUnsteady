@@ -149,7 +149,7 @@ mutable struct ParticleField{T, V<:ViscousScheme}
     t::Float64                                  # Current time
 
     # Solver setting
-    kernel::Kernel                              # Vortex particle kernel
+    kernel                                      # Vortex particle kernel
     UJ::Function                                # Particle-to-particle calculation
 
     # Optional inputs
