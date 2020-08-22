@@ -142,8 +142,8 @@ iscorespreading(scheme::ViscousScheme
 mutable struct ParticleField{T, V<:ViscousScheme}
     # User inputs
     maxparticles::Int                           # Maximum number of particles
-    particles::Array{T, 1}                      # Array of particles
-    bodies::Any                                 # ExaFMM array of bodies
+    particles                                   # Array of particles
+    bodies                                      # ExaFMM array of bodies
     viscous::V                                  # Viscous scheme
 
     # Internal properties
@@ -188,6 +188,8 @@ mutable struct ParticleField{T, V<:ViscousScheme}
                         fmm,
                   )
 end
+
+ParticleField(args...) = ParticleField{RealFMM, Inviscid{RealFMM}}(1, nothing, nothing, Inviscid())
 
 function get_np(self::ParticleField)
   return self.np
