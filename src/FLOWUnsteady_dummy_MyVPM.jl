@@ -46,6 +46,9 @@ end
 
 viscousdiffusion(pfield, dt; optargs...
                     ) = viscousdiffusion(pfield, pfield.viscous, dt; optargs...)
+
+zeta_direct(args...) = nothing
+zeta_fmm(args...) = nothing
 ##### END OF ABSTRACT VISCOUS SCHEME ###########################################
 
 ################################################################################
