@@ -15,6 +15,9 @@ const gaussian = kernel_gaussian
 const gaussianerf = kernel_gaussianerf
 const winckelmans = kernel_winckelmans
 
+const rungekutta3 = (args...)->nothing
+const euler = (args...)->nothing
+
 mutable struct FMM
   # Optional user inputs
   p::Int32                        # Multipole expansion order
