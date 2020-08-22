@@ -45,7 +45,7 @@ export PATH=$PATH:/path/to/your/paraview/
 
 where your path likely looks like `/Applications/ParaView-5.5.2.app/Contents/MacOS/` (substituting `5.5.2` for your version number).
 
-To test if `Paraview` is working well, you can pull up one of the examples under `examples/` in the [`GeometricTools.jl` repo](https://github.com/byuflowlab/GeometricTools.jl.git):
+To test if `Paraview` is working well, you can pull up one of the examples under `examples/` in the [`GeometricTools.jl`](https://github.com/byuflowlab/GeometricTools.jl.git) repo:
 
 ```julia
 # type the `]` key to enter the package manager and add GeometricTools
@@ -92,22 +92,22 @@ Now you are ready to install the FLOWUnsteady package through the following comm
 Some things you might need to look out for:
 
 1. Make sure your Homebrew (in Julia) is up to date. You may need to run the following in order to update your Homebrew:
-> ```julia
-    using Homebrew
-    Homebrew.brew(`update-reset`)
-    ```
+```julia
+  using Homebrew
+  Homebrew.brew(`update-reset`)
+```
 
 2. You're going to have to make sure that things are in place in your Julia settings. Having things like Conda, HDF5, etc. on your machine doesn't necessarily mean that the Julia implementation has them as well.
 
 3. If you don't have a fortran compiler, Xfoil (one of the dependencies of AirfoilPrep) won't compile.  On MacOS, try `brew install gcc`
 
 4. The `AirfoilPrep.jl` compiler creates symbolic links. Symbolic links do not work if you're trying to create them in [Box](http://box.byu.edu/). You'll get the following error:
->```
-Linux - Gfortran
-rm -f common.mk
-ln -s ./config/config.LINUX_GFORTRAN.mk common.mk
-ln: common.mk: Function not implemented
-make: *** [gfortran] Error 1
+```bash
+  Linux - Gfortran
+  rm -f common.mk
+  ln -s ./config/config.LINUX_GFORTRAN.mk common.mk
+  ln: common.mk: Function not implemented
+  make: *** [gfortran] Error 1
 ```
 So don't put `AirfoilPrep.jl` in Box.
 
