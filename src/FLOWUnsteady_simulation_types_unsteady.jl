@@ -102,11 +102,10 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
         for (si, rotors) in enumerate(vhcl.rotor_systems)
             for (ri, rotor) in enumerate(rotors)
 
+                vlm.addwing(allrotors, "S$(si)R$(ri)", rotor; reset=false)
                 vlm.getHorseshoe(rotor, 1)          # Force HS calculation
                 vlm._addsolution(rotor, "Gamma",    # Give previous solution
                                 prev_rotor_systems[si][ri]._wingsystem.sol["Gamma"])
-                vlm.add_wing(allrotors, "S$(si)R$(ri)", rotor)
-
             end
         end
 

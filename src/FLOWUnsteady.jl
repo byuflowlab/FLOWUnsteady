@@ -6,11 +6,6 @@ Mixed-fidelity unsteady aerodynamics simulation engine.
       * Email     : Edo.AlvarezR@gmail.com
       * Created   : Oct 2019
       * License   : MIT
-
-
-    # TODO
-      * [ ] Change Vvpm_on_Xs to use UJ_direct and calculate only VPM on CPs
-                interactions instead of the whole FMM tree.
 """
 module FLOWUnsteady
 
@@ -31,6 +26,7 @@ const vlm = FLOWVLM
 try                     # Load FLOWVPM if available
     import FLOWVPM
 catch e                 # Otherwise load a dummy version of FLOWVPM
+    @warn("FLOWVPM module not found. Using dummy module instead.")
     include("FLOWUnsteady_dummy_FLOWVPM.jl")
 end
 const vpm = FLOWVPM
