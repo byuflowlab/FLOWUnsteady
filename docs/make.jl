@@ -12,8 +12,8 @@ makedocs(
     # modules = [FLOWUnsteady],
     pages = ["Home" => "index.md",
             "Tutorials" => Any[
+                "tutorials/installation-instructions.md",
                 "tutorials/getting-started.md",
-                "tutorials/first-steps.md",
                 "tutorials/aeroacoustics.md",
                 "tutorials/colab.md",
                 ],
