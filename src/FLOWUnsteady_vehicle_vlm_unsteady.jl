@@ -103,7 +103,7 @@ const VLMVehicle = UVLMVehicle
 
 ##### FUNCTIONS  ###############################################################
 function shed_wake(self::VLMVehicle, Vinf::Function,
-                            pfield::vpm.ParticleField, dt::Real, nt::Int; t=0.0,
+                            pfield::vpm.AbstractParticleField, dt::Real, nt::Int; t=0.0,
                             unsteady_shedcrit=-1.0, p_per_step=1,
                             sigmafactor=1.0, overwrite_sigma=nothing)
     if nt!=0
@@ -116,7 +116,7 @@ function shed_wake(self::VLMVehicle, Vinf::Function,
 end
 
 
-function generate_static_particle_fun(pfield::vpm.ParticleField,
+function generate_static_particle_fun(pfield::vpm.AbstractParticleField,
                                                 self::VLMVehicle, sigma::Real)
 
     if sigma<=0
@@ -154,6 +154,18 @@ function _static_particles(pfield::vpm.ParticleField,
         (Ap, A, B, Bp, _, _, _, Gamma) = vlm.getHorseshoe(system, i)
         for (i,(x1, x2)) in enumerate(((Ap,A), (A,B), (B,Bp)))
             vpm.add_particle(pfield, (x1+x2)/2, Gamma*(x2-x1), sigma; vol=0)
+        end
+    end
+end
+function _static_particles(pfield::vpm.ParticleFieldStretch,
+                            system::Union{vlm.Wing, vlm.WingSystem, vlm.Rotor},
+                            sigma::Real)
+
+    # Adds a particle for every bound vortex of the VLM
+    for i in 1:vlm.get_m(system)
+        (Ap, A, B, Bp, _, _, _, Gamma) = vlm.getHorseshoe(system, i)
+        for (i,(x1, x2)) in enumerate(((Ap,A), (A,B), (B,Bp)))
+            vpm.add_particle(pfield, (x1+x2)/2, Gamma, (x2-x1), sigma)
         end
     end
 end

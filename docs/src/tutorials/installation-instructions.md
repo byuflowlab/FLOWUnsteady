@@ -8,12 +8,12 @@ In order to install `FLOWUnsteady.jl`, set Julia up in your system (download fro
 
 ## Setting up PyCall
 
-The `airfoilprep.py` package (wrapped by the [`AirfoilPrep.jl`](https://github.com/byuflowlab/AirfoilPrep.jl) package) is written in Python 2.7, so make sure that the Python version linked to `PyCall.jl` is 2.7. After installing PyCall (`] add PyCall`), you can do this by running the following:
+The `airfoilprep.py` package (wrapped by the [`AirfoilPrep.jl`](https://github.com/byuflowlab/AirfoilPrep.jl) package) is written in Python 3.8, so make sure that the Python version linked to `PyCall.jl` is 3.8. After installing PyCall (`] add PyCall`), you can do this by running the following:
 
 ```julia
 import Pkg
 Pkg.add("PyCall")
-ENV["PYTHON"] = "path/to/your/python2"
+ENV["PYTHON"] = "path/to/your/python3"
 Pkg.build("PyCall")
 ```
 
@@ -27,7 +27,7 @@ PyCall.pyversion
 which should reveal your Python version:
 
 ```julia
-v"2.7.16"
+v"3.8"
 ```
 
 ## `Paraview`
