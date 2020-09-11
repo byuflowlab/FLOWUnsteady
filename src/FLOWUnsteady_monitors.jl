@@ -47,7 +47,7 @@ function generate_monitor_rotors( rotors::Array{vlm.Rotor, 1},
 
     # Function for run_vpm! to call on each iteration
     function extra_runtime_function(sim::Simulation{V, M, R},
-                                    PFIELD::vpm.ParticleField,
+                                    PFIELD::vpm.AbstractParticleField,
                                     T::Real, DT::Real
                                    ) where{V<:AbstractVLMVehicle, M, R}
 

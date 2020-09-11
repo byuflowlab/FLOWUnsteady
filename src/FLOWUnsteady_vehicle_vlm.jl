@@ -136,7 +136,7 @@ Precalculations before calling the solver.
 Calculates kinematic velocity on VLM an adds them as a solution field
 """
 function precalculations(self::AbstractVLMVehicle, Vinf::Function,
-                                pfield::vpm.ParticleField, t::Real, dt::Real,
+                                pfield::vpm.AbstractParticleField, t::Real, dt::Real,
                                 nt::Int)
 
     if nt!=0
