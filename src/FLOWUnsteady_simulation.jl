@@ -172,6 +172,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
                       nsteps_relax=vpm_nsteps_relax,
                       static_particles_function=static_particles_function,
                       save_static_particles=save_static_particles,
+                      save_time=false
                       )
 
     return pfield
