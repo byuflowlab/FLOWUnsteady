@@ -12,6 +12,7 @@ module FLOWUnsteady
 # ------------ GENERIC MODULES -------------------------------------------------
 import Dierckx
 import CSV
+import DataFrames
 import JLD
 import Dates
 using PyPlot
