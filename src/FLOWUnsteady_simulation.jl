@@ -184,6 +184,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
                       nsteps_relax=vpm_nsteps_relax,
                       static_particles_function=static_particles_function,
                       save_static_particles=save_static_particles,
+                      save_time=false
                       )
 
     return pfield
@@ -242,10 +243,10 @@ function add_particle(pfield::vpm.ParticleFieldStretch, X::Array{Float64, 1},
     end
 
 
-    # Adds p_per_step particles along line l
+    # Adds p_per_step particles along line
     dX = line/pps
     for i in 1:pps
-        vpm.add_particle(pfield, X + i*dX - dX/2, gamma, l, sigmap)
+        vpm.add_particle(pfield, X + i*dX - dX/2, gamma, l/pps, sigmap)
     end
 end
 
