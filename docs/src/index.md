@@ -44,13 +44,13 @@ If you are brand-new to FLOWUnsteady, you should begin with the [Installation In
 
 # Examples
 **HEAVING WING:** `examples/heavingwing.jl`
-![Vid](assets/vid/bertinsheaving00.gif)
+![Vid](http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/bertinsheaving00.gif)
 
 **CROSS-WIND CIRCULAR PATH:** `examples/circularpath.jl`
-![Vid](assets/vid/circularpath03_1.gif)
+![Vid](http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/circularpath03_1.gif)
 
 **HOVERING ROTOR:** `examples/singlerotor.jl`
-![Vid](assets/vid/fvs_singlerotor02.gif)
+![Vid](http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/fvs_singlerotor02.gif)
 
 **INTERACTING TANDEM HEAVING WING:** `examples/tandemheavingwing.jl`
 [![Vid here](assets/img/play01_wide.png)](https://youtu.be/Pch94bKpjrQ)
@@ -71,10 +71,10 @@ If you are brand-new to FLOWUnsteady, you should begin with the [Installation In
 <img src="assets/img/rotornoise01.png" alt="Vid" width="400px"/>
 ```
 ```@raw html
-<img src="assets/vid/cfdnoise_ningdji_multi_005D_03_15.gif" alt="Vid" width="600px"/>
+<img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/cfdnoise_ningdji_multi_005D_03_15.gif" alt="Vid" width="600px"/>
 ```
 ```@raw html
-<img src="assets/vid/cfdnoise_ningdji_multi_005D_03_18.gif" alt="Vid" width="600px"/>
+<img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/cfdnoise_ningdji_multi_005D_03_18.gif" alt="Vid" width="600px"/>
 ```
 
 # Framework Flowchart
