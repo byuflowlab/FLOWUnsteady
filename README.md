@@ -62,13 +62,13 @@ For example simulations, check this notebook: [`docs/resources/examples.ipynb`](
 
 # Examples
 **HEAVING WING:** `examples/heavingwing.jl`
-<img src="docs/resources/vid/bertinsheaving00.gif" alt="Vid here" style="width: 900px;"/>
+<img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/bertinsheaving00.gif" alt="Vid here" style="width: 900px;"/>
 
 **CROSS-WIND CIRCULAR PATH:** `examples/circularpath.jl`
-[<img src="docs/resources/img/circlesim_wide.jpg" alt="Vid here" style="width: 900px;"/>](docs/resources/vid/circularpath03_1.gif)
+[<img src="docs/resources/img/circlesim_wide.jpg" alt="Vid here" style="width: 900px;"/>](http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/circularpath03_1.gif)
 
 **HOVERING ROTOR:** `examples/singlerotor.jl`
-<img src="docs/resources/vid/fvs_singlerotor02.gif" alt="Vid here" style="width: 900px;"/>
+<img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/fvs_singlerotor02.gif" alt="Vid here" style="width: 900px;"/>
 
 **INTERACTING TANDEM HEAVING WING:** `examples/tandemheavingwing.jl`
 [![Vid here](docs/resources/img/play01_wide.png)](https://youtu.be/Pch94bKpjrQ)
@@ -85,7 +85,7 @@ For example simulations, check this notebook: [`docs/resources/examples.ipynb`](
 
 **Rotor Aeroacoustic Noise:** [`examples/rotornoise/singlerotor.ipynb`](https://nbviewer.jupyter.org/github/byuflowlab/FLOWUnsteady/blob/master/examples/rotornoise/singlerotor.ipynb)
 <img src="docs/resources/img/rotornoise01.png" alt="Pic here" style="width: 400px;"/>
-<img src="docs/resources/vid/cfdnoise_ningdji_multi_005D_03_15.gif" alt="Vid here" style="width: 400px;"/>
+<img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/cfdnoise_ningdji_multi_005D_03_15.gif" alt="Vid here" style="width: 400px;"/>
 
 # Framework Flowchart
 <img src="docs/resources/img/flowchart00.png" alt="Pic here" style="width: 900px;"/>

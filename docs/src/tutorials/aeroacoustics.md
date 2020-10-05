@@ -10,8 +10,8 @@ Further validation of rotor-on-rotor interactions is given in the following pape
 
 
 ```@raw html
-<img src="../../assets/vid/val_piv_multi16_005D_99_1_noise1_cropped00.gif" alt="Vid" width="400px"/>
+<img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/val_piv_multi16_005D_99_1_noise1_cropped00.gif" alt="Vid" width="400px"/>
 ```
 ```@raw html
-<img src="../../assets/vid/cfdnoise_ningdji_multi_005D_03_20.gif" alt="Vid" width="600px"/>
+<img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/cfdnoise_ningdji_multi_005D_03_20.gif" alt="Vid" width="600px"/>
 ```
