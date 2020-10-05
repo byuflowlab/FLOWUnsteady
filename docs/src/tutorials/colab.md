@@ -40,7 +40,7 @@ Here we show how to generate the aerodynamic solution, run PSU-WOPWOP to get ton
 This is the aeroacoustic output by FLOWUnsteady:
 
 ```@raw html
-<img src="https://media.githubusercontent.com/media/byuflowlab/FLOWUnsteady/master/examples/rotornoise/vid/dji9443_ccblade01_1.gif" alt="Vid here" width="700px">
+<img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/dji9443_ccblade01_1.gif" alt="Vid here" width="700px">
 ```
 
 To run this example, download the following files and upload them to `My Drive/FLOWUnsteady/`.
