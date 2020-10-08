@@ -6,7 +6,7 @@ PSU-WOPWOP is not included in the FLOWUnsteady suite, but the user can request a
 The example under [`examples/rotornoise/singlerotor.ipynb`](https://nbviewer.jupyter.org/github/byuflowlab/FLOWUnsteady/blob/master/examples/rotornoise/singlerotor.ipynb) shows validation of the aeroacoustics solver and instructions on how to run a rotor noise analysis.
 Further validation of rotor-on-rotor interactions is given in the following paper by the authors:
 
-* Alvarez, E. J., Schenk, A., Critchfield, T., and Ning, A., “Rotor-on-Rotor Aeroacoustic Interactions of Multirotor in Hover,” Journal of the American Helicopter Society, Jul. 2020, (in review). [[PDF](https://scholarsarchive.byu.edu/facpub/4053/)]
+* Alvarez, E. J., Schenk, A., Critchfield, T., and Ning, A., “Rotor-on-Rotor Aeroacoustic Interactions of Multirotor in Hover,” Journal of the American Helicopter Society, Jul. 2020, (in review). [\[SLIDES\]](http://edoalvar2.groups.et.byu.net/public/AlvarezSchenkCritchfield_2020-PresentationVFSForum-multirotor_noise_interactions_in_hoverSTATIC.pdf)[\[PDF\]](https://scholarsarchive.byu.edu/facpub/4053/)
 
 
 ```@raw html
