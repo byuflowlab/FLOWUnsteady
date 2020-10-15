@@ -1,12 +1,13 @@
 # Load simulation engine
 # import FLOWFVS
-reload("FLOWUnsteady")
+# reload("FLOWUnsteady")
+import FLOWUnsteady
 uns = FLOWUnsteady
 vlm = uns.vlm
-gt = vlm.vtk
+gt = vlm.gt
 
 # ------------ GENERIC MODULES -------------------------------------------------
-using Base.Test
+using Test
 using PyPlot
 using JLD
 
@@ -19,10 +20,10 @@ end
 # ------------ TESTS -----------------------------------------------------------
 
 # Test VLM solver: Isolated wing
-@test bertin_VLM(; wake_coupled=false, nsteps=0, verbose=true, disp_plot=true)
+# @test bertin_VLM(; wake_coupled=false, nsteps=0, verbose=true, disp_plot=true)
 
 # Test VLM regularization: Isolated wing
-@test bertin_VLM(; wake_coupled=false, vlm_fsgm=0.00125, nsteps=0, verbose=true, disp_plot=true)
+# @test bertin_VLM(; wake_coupled=false, vlm_fsgm=0.00125, nsteps=0, verbose=true, disp_plot=true)
 
 # Test VPM+VLM coupling: Isolated wing
 @test bertin_VLM(; wake_coupled=true, nsteps=150, verbose=true, disp_plot=true)

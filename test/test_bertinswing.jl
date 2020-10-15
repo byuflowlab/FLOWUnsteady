@@ -12,6 +12,9 @@
   * License   : MIT
 =###############################################################################
 
+using Printf
+import LinearAlgebra
+LA = LinearAlgebra
 
 """
     Test FLOWVLM solver with an isolated, planar, swept wing.
@@ -199,9 +202,9 @@ function bertin_VLM(;   # TEST OPTIONS
             plot(y2b, wing.sol["Gamma"], "-", label="FLOWVLM", alpha=0.5, color=clr)
             if wake_coupled && PFIELD.nt!=0
                 subplot(122)
-                plot(y2b, norm.(wing.sol["Vkin"]), "-", label="FLOWVLM", alpha=0.5, color=[clr[1], 1, clr[3]])
-                plot(y2b, norm.(wing.sol["Vvpm"]), "-", label="FLOWVLM", alpha=0.5, color=clr)
-                plot(y2b, [norm(Vinf(vlm.getControlPoint(wing, i), T)) for i in 1:vlm.get_m(wing)]/magVinf,
+                plot(y2b, LA.norm.(wing.sol["Vkin"]), "-", label="FLOWVLM", alpha=0.5, color=[clr[1], 1, clr[3]])
+                plot(y2b, LA.norm.(wing.sol["Vvpm"]), "-", label="FLOWVLM", alpha=0.5, color=clr)
+                plot(y2b, [LA.norm(Vinf(vlm.getControlPoint(wing, i), T)) for i in 1:vlm.get_m(wing)]/magVinf,
                                                             "-k", label="FLOWVLM", alpha=0.5)
             end
         end
@@ -460,14 +463,14 @@ function bertin_kinematic(;   # TEST OPTIONS
             l, d, s = uns.decompose(ftot, [0,0,1], [-1,0,0])
 
             # Lift of the wing
-            Lwing = norm(sum(L))
+            Lwing = LA.norm(sum(L))
             CLwing = Lwing/(qinf*b^2/ar)
-            ClCL = norm.(l) / (Lwing/b)
+            ClCL = LA.norm.(l) / (Lwing/b)
 
             # Drag of the wing
-            Dwing = norm(sum(D))
+            Dwing = LA.norm(sum(D))
             CDwing = Dwing/(qinf*b^2/ar)
-            CdCD = [sign(dot(this_d, [1,0,0])) for this_d in d].*norm.(d) / (Dwing/b) # Preserves the sign of drag
+            CdCD = [sign(dot(this_d, [1,0,0])) for this_d in d].*LA.norm.(d) / (Dwing/b) # Preserves the sign of drag
 
             vlm._addsolution(wing, "Cl/CL", ClCL)
             vlm._addsolution(wing, "Cd/CD", CdCD)
@@ -493,11 +496,11 @@ function bertin_kinematic(;   # TEST OPTIONS
             plot(y2b, wing.sol["Gamma"], "-", label="FLOWVLM", alpha=0.5, color=clr)
             if wake_coupled && PFIELD.nt!=0
                 subplot(122)
-                plot(y2b, norm.(wing.sol["Vkin"])/magVinf, "-", label="FLOWVLM", alpha=0.5, color=[clr[1], 1, clr[3]])
+                plot(y2b, LA.norm.(wing.sol["Vkin"])/magVinf, "-", label="FLOWVLM", alpha=0.5, color=[clr[1], 1, clr[3]])
                 if VehicleType==uns.VLMVehicle
-                    plot(y2b, norm.(wing.sol["Vvpm"]), "-", label="FLOWVLM", alpha=0.5, color=clr)
+                    plot(y2b, LA.norm.(wing.sol["Vvpm"]), "-", label="FLOWVLM", alpha=0.5, color=clr)
                 end
-                plot(y2b, [norm(Vinf(vlm.getControlPoint(wing, i), T)) for i in 1:vlm.get_m(wing)],
+                plot(y2b, [LA.norm(Vinf(vlm.getControlPoint(wing, i), T)) for i in 1:vlm.get_m(wing)],
                                                             "-k", label="FLOWVLM", alpha=0.5)
             end
         end
