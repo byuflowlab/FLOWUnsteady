@@ -35,7 +35,6 @@ function run_simulation(sim::Simulation, nsteps::Int;
                              vlm_sigma=-1,              # VLM regularization
                              vlm_rlx=-1,                # VLM relaxation
                              vlm_init=false,            # Initialize the first step with the VLM semi-infinite wake solution
-                            #  vlm_AR_to_360extrap=false,       # use the rotor AR to predict CDmax in the Viterna extrapolation
                              surf_sigma=-1,             # Vehicle surface regularization (for VLM-on-VPM, VLM-on-Rotor, and Rotor-on-VLM)
                              wake_coupled=true,         # Couple VPM wake on VLM solution
                              shed_unsteady=true,        # Whether to shed unsteady-loading wake
@@ -129,7 +128,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
 
         # Solve aerodynamics of the vehicle
         solve(sim, Vinf, PFIELD, wake_coupled, DT, vlm_rlx,
-                surf_sigma, rho, sound_spd; init_sol=vlm_init, AR_to_360extrap=true) # use the rotor AR to predict CDmax in the Viterna extrapolation
+                surf_sigma, rho, sound_spd; init_sol=vlm_init)
 
         # Shed unsteady-loading wake with new solution
         if shed_unsteady
