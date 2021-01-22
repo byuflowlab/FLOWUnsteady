@@ -103,7 +103,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
                     (:fmm, vpm_fmm),
                  ]
     Xdummy = zeros(3)
-    pfield = VPMType(max_particles; Uinf=t->Vinf(Xdummy, t), vpm_solver...)
+    pfield = VPMType(round(Int,max_particles); Uinf=t->Vinf(Xdummy, t), vpm_solver...)
 
 
     ############################################################################
