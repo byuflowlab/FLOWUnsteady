@@ -275,7 +275,7 @@ function Vvpm_on_Xs(pfield::vpm.AbstractParticleField, Xs::Array{T, 1}; static_p
 
         # Evaluate velocity field
         oldkernel = pfield.kernel
-        pfield.kernel = vpm.kernel_singular
+        pfield.kernel = vpm.kernel_turbine
         pfield.UJ(pfield)
         pfield.kernel = oldkernel
 
