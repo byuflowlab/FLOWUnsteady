@@ -274,7 +274,10 @@ function Vvpm_on_Xs(pfield::vpm.AbstractParticleField, Xs::Array{T, 1}; static_p
         end
 
         # Evaluate velocity field
+        oldkernel = pfield.kernel
+        pfield.kernel = vpm.kernel_singular
         pfield.UJ(pfield)
+        pfield.kernel = oldkernel
 
         # Retrieve velocity at probes
         Vvpm = [Array(P.U) for P in vpm.iterator(pfield; start_i=sta_np+1)]
