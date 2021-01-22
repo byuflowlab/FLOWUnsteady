@@ -80,6 +80,7 @@ function singlerotor(;  xfoil       = true,             # Whether to run XFOIL
                         prompt      = true,
                         verbose     = true,
                         v_lvl       = 0,
+                        rotor_file = "DJI-II.csv",           # Rotor geometry
                         optargs...)
 
     # TODO: Wake removal ?
@@ -87,7 +88,6 @@ function singlerotor(;  xfoil       = true,             # Whether to run XFOIL
     # ------------ PARAMETERS --------------------------------------------------
 
     # Rotor geometry
-    rotor_file = "DJI-II.csv"           # Rotor geometry
     data_path = uns.def_data_path       # Path to rotor database
     pitch = 0.0                         # (deg) collective pitch of blades
     # n = 50                              # Number of blade elements
