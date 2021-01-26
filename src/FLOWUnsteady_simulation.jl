@@ -273,15 +273,19 @@ function Vvpm_on_Xs(pfield::vpm.AbstractParticleField, Xs::Array{T, 1}; static_p
             add_probe(pfield, X)
         end
 
-        # Evaluate velocity field
-        scaling = 10.0
-        for P in vpm.iterator(pfield)
-            P.sigma ./= scaling
-        end
-        pfield.UJ(pfield)
-        for P in vpm.iterator(pfield)
-            P.sigma .*= scaling
-        end
+         # Evaluate velocity field
+         scaling = 100.0
+         for (i, P) in enumerate(vpm.iterator(pfield))
+             if i <= org_np
+                 P.sigma ./= scaling
+             end
+         end
+         pfield.UJ(pfield)
+         for (i, P) in enumerate(vpm.iterator(pfield))
+             if i <= org_np
+                 P.sigma .*= scaling
+             end
+         end
 
         # Retrieve velocity at probes
         Vvpm = [Array(P.U) for P in vpm.iterator(pfield; start_i=sta_np+1)]
