@@ -254,41 +254,35 @@ end
 """
 Returns the velocity induced by particle field on every position `Xs`
 """
-function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs::Array{T, 1};
-                static_particles_fun=(args...)->nothing, dt=0) where {T}
+function Vvpm_on_Xs(pfield::vpm.AbstractParticleField, Xs::Array{T, 1}; static_particles_fun=(args...)->nothing, dt=0) where {T}
 
-    if length(Xs)!=0 && vpm.get_np(pfield)!=0 # Case that there are particles in the field and probes are requested
-
+    if length(Xs)!=0 && vpm.get_np(pfield)!=0
         # Omit freestream
         Uinf = pfield.Uinf
+        pfield.Uinf = (t)->zeros(3)
 
-        pfield.Uinf = (t)->zeros(3)  # Sets the freestream to zero
+        org_np = vpm.get_np(pfield)             # Original particles
 
-        org_np = vpm.get_np(pfield)             # Original particles  (counts how many particles were originally in the field,
-                                                # this means that the wake particles are in the range 1:org_np)
         # Add static particles
-        static_particles_fun(pfield, pfield.t, dt)   # This add the embedded particles
+        static_particles_fun(pfield, pfield.t, dt)
 
-        sta_np = vpm.get_np(pfield)             # Original + static particles (counts how many particles are now in the field after adding the embedded ones)
+        sta_np = vpm.get_np(pfield)             # Original + static particles
 
         # Add probes
         for X in Xs
-            add_probe(pfield, X)      # Adds probes into the field as if they are particles
+            add_probe(pfield, X)
         end
 
+         # Evaluate velocity field
         scaling = 100.0
-        for (i, P) in enumerate(vpm.iterator(pfield))  # Iterates over every particle in the field, counting them from 1 through the end
-            if i <= org_np           # Scales the particle if the index of the particle is less or equal the original number of particles,
-                                     # meaning that the particle was in the wake.
+        for (i, P) in enumerate(vpm.iterator(pfield))
+            if i <= org_np
                 P.sigma ./= scaling
             end
         end
-
-        # Evaluate velocity field
-        pfield.UJ(pfield)                       # Evaluates the velocity at each particle in the field (including embedded particles and probes)
-
+        pfield.UJ(pfield)
         for (i, P) in enumerate(vpm.iterator(pfield))
-            if i <= org_np               # Resizes all particles in the wake back to their original size
+            if i <= org_np
                 P.sigma .*= scaling
             end
         end
@@ -303,7 +297,6 @@ function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs::Array{T, 1};
 
         # Restore freestream
         pfield.Uinf = Uinf
-
     else
         Vvpm = [zeros(3) for i in 1:length(Xs)]
     end
