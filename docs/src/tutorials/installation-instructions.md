@@ -30,6 +30,11 @@ which should reveal your Python version:
 v"3.8"
 ```
 
+## Setting up PyPlot
+Since PyCall now relies a custom install of Python3, make sure that:
+- matplotlib is installed for that python
+- for a best experience, verify that matplotlob uses Qt5Agg as a backend. Useful instructions can be found [here](https://github.com/JuliaPy/PyPlot.jl#os-x) and [here](https://stackoverflow.com/questions/58627696/warning-pyplot-is-using-tkagg-backend-which-is-known-to-cause-crashes-on-macos). 
+
 ## `Paraview`
 
 In order to visualize simulations, you need to install the open-source visualization engine `Paraview`, which may be downloaded [here](https://www.paraview.org/download/) for free. Any version will work well.
@@ -76,7 +81,9 @@ The following dependencies are unregistered Julia packages that need to be added
 * FLOWVLM: [https://github.com/byuflowlab/FLOWVLM](https://github.com/byuflowlab/FLOWVLM)
 * BPM: [https://github.com/byuflowlab/BPM.jl](https://github.com/byuflowlab/BPM.jl)
 * FLOWNoise: [https://github.com/byuflowlab/FLOWNoise](https://github.com/byuflowlab/FLOWNoise)
-* FLOWVPM: Contact Ed Alvarez ([edoalvarez.com](https://edoalvarez.com)) or the FLOW Lab ([flow.byu.edu](http://flow.byu.edu/)), and follow this instructions: [LINK](https://nbviewer.jupyter.org/url/edoalvar2.groups.et.byu.net/LabNotebook/202008/FLOWVPMSetupFinal.ipynb).
+* FLOWVPM: Contact Ed Alvarez ([edoalvarez.com](https://edoalvarez.com)) or the FLOW Lab ([flow.byu.edu](http://flow.byu.edu/)). Guidelines for compilation/installation can be found at:
+  *  for Linux: [LINK](https://nbviewer.jupyter.org/url/edoalvar2.groups.et.byu.net/LabNotebook/202008/FLOWVPMSetupFinal.ipynb).
+  *  for MacOS: [see Issue #26](https://github.com/byuflowlab/FLOWUnsteady/issues/26).
 * (Optional) MyPanel: [https://github.com/EdoAlvarezR/MyPanel.jl](https://github.com/EdoAlvarezR/MyPanel.jl)
 
 ## Install FLOWUnsteady
