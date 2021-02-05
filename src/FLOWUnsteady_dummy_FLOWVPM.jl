@@ -1,3 +1,14 @@
+#=##############################################################################
+# DESCRIPTION
+    Dummy FLOWVPM module in case that the real module is not available.
+
+# AUTHORSHIP
+  * Author    : Eduardo J. Alvarez
+  * Email     : Edo.AlvarezR@gmail.com
+  * Created   : Sep 2020
+  * License   : MIT
+=###############################################################################
+
 module FLOWVPM
 
 import Dates
@@ -75,6 +86,31 @@ viscousdiffusion(pfield, scheme::Inviscid, dt; optargs...) = nothing
 ##### END OF INVISCID SCHEME ###################################################
 
 
+
+################################################################################
+# ABSTRACT VPM FORMULATION TYPE
+################################################################################
+abstract type Formulation{R} end
+##### END OF ABSTRACT VPM FORMULATION ##########################################
+
+################################################################################
+# CLASSIC VPM
+################################################################################
+struct ClassicVPM{R} <: Formulation{R} end
+##### END OF CLASSIC VPM #######################################################
+
+################################################################################
+# REFORMULATED VPM
+################################################################################
+struct ReformulatedVPM{R} <: Formulation{R}
+    f::R                     # Re-orientation parameter
+    g::R                     # Stretching-compensation parameter
+    h::R                     # Stretching parameter
+
+    ReformulatedVPM{R}(f=R(0), g=R(1/5); h=(1-3*g)/(1+3*f)) where {R} = new(f, g, h)
+end
+
+
 ################################################################################
 # CORE SPEADING SCHEME TYPE
 ################################################################################
@@ -137,19 +173,19 @@ Returns true if viscous scheme is core spreading.
 """
 iscorespreading(scheme::ViscousScheme
                             ) = typeof(scheme).name == CoreSpreading.body.name
-
-
-mutable struct ParticleField{T, V<:ViscousScheme}
+asd
+mutable struct ParticleField{R<:Real, F<:Formulation, V<:ViscousScheme}
     # User inputs
     maxparticles::Int                           # Maximum number of particles
     particles                                   # Array of particles
     bodies                                      # ExaFMM array of bodies
+    formulation::F                              # VPM formulation
     viscous::V                                  # Viscous scheme
 
     # Internal properties
     np::Int                                     # Number of particles in the field
     nt::Int                                     # Current time step number
-    t::Float64                                  # Current time
+    t::R                                        # Current time
 
     # Solver setting
     kernel                                      # Vortex particle kernel
@@ -157,41 +193,54 @@ mutable struct ParticleField{T, V<:ViscousScheme}
 
     # Optional inputs
     Uinf::Function                              # Uniform freestream function Uinf(t)
-    transposed::Bool                            # Transposed vortex stretch scheme
-    relax::Bool                                 # Activates relaxation scheme
-    rlxf::Float64                               # Relaxation factor (fraction of dt)
+    sgsmodel::Function                          # Subgrid-scale contributions model
     integration::Function                       # Time integration scheme
+    transposed::Bool                            # Transposed vortex stretch scheme
+    relaxation::Function                        # Relaxation scheme
+    relax::Bool                                 # Enables relaxation scheme
+    rlxf::R                                     # Relaxation factor (fraction of dt)
     fmm::FMM                                    # Fast-multipole settings
 
+    # Internal memory for computation
+    M::Array{R, 1}
 
-    ParticleField{T, V}(
-                        maxparticles,
-                        particles, bodies, viscous;
-                        np=0, nt=0, t=0.0,
-                        kernel=gaussianerf,
-                        UJ=UJ_fmm,
-                        Uinf=t->zeros(3),
-                        transposed=true,
-                        relax=true, rlxf=0.3,
-                        integration=rungekutta3,
-                        fmm=FMM(),
-                 ) where {T, V} = new(
-                        maxparticles,
-                        particles, bodies, viscous,
-                        np, nt, t,
-                        kernel,
-                        UJ,
-                        Uinf,
-                        transposed,
-                        relax, rlxf,
-                        integration,
-                        fmm,
-                  )
+    ParticleField{R, F, V}(
+                                maxparticles,
+                                particles, bodies, formulation, viscous;
+                                np=0, nt=0, t=R(0.0),
+                                kernel=(args...)->nothing,
+                                UJ=UJ_fmm,
+                                Uinf=(args...)->nothing,
+                                sgsmodel=(args...)->nothing,
+                                integration=(args...)->nothing,
+                                transposed=true,
+                                relaxation=(args...)->nothing,
+                                relax=true, rlxf=R(0.3),
+                                fmm=FMM(),
+                                M=zeros(R, 4)
+                         ) where {R, F, V} = new(
+                                maxparticles,
+                                particles, bodies, formulation, viscous,
+                                np, nt, t,
+                                kernel,
+                                UJ,
+                                Uinf,
+                                sgsmodel,
+                                integration,
+                                transposed,
+                                relaxation,
+                                relax, rlxf,
+                                fmm,
+                                M
+                          )
 end
 
-function ParticleField(maxparticles; viscous::V=Inviscid(),
-                                            optargs...) where {V<:ViscousScheme}
-    return ParticleField{RealFMM, Inviscid{RealFMM}}(maxparticles, nothing, nothing, viscous; optargs...)
+function ParticleField(maxparticles;
+                                    formulation::F=formulation_default,
+                                    viscous::V=Inviscid(),
+                                    optargs...) where {F, V<:ViscousScheme}
+    return ParticleField{RealFMM, F, V}(maxparticles, nothing, nothing,
+                                         formulation, viscous;  optargs...)
 end
 
 function get_np(self::ParticleField)

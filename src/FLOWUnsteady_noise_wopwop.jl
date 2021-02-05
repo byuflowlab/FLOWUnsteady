@@ -71,13 +71,13 @@ function run_noise_wopwop(read_path::String,                        # Path from 
 
     _axisrot = nothing
     if const_geometry
-        if axisrot=="automatic"
-            @warn("axisrot set to \"automatic\"; defaulting to [1, 0, 0].")
-        end
 
-        println("CW!")
-        # _axisrot = (-1)^(!CW) * Float64.( axisrot=="automatic" ? [1, 0, 0] : axisrot )
-        _axisrot = (-1)^(CW) * Float64.( axisrot=="automatic" ? [1, 0, 0] : axisrot )
+        _axisrot = (-1)^(!CW) * Float64.( axisrot=="automatic" ? [1, 0, 0] : axisrot )
+        # _axisrot = (-1)^(CW) * Float64.( axisrot=="automatic" ? [1, 0, 0] : axisrot )
+
+        if axisrot=="automatic"
+            @warn("axisrot set to \"automatic\"; defaulting to $(_axisrot).")
+        end
     elseif periodic
         @warn("Running periodic solution. Make sure that loading is indeed periodic")
     end
@@ -446,6 +446,7 @@ catch e
 end
 
     cd(org_pwd)
+    if verbose; println("\t"^(v_lvl)*"PSU-WOPWOP is done!"); end;
 
     return microphoneX == nothing ? grid : nothing
 end

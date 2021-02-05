@@ -68,7 +68,6 @@ function singlerotor(;  xfoil       = true,             # Whether to run XFOIL
                         J           = 0.0,              # Advance ratio
                         DVinf       = [1.0, 0, 0],      # Freestream direction
                         nrevs       = 6,                # Number of revolutions
-                        VPMType     = vpm.ParticleField,# Type of VPM formulation
                         nsteps_per_rev = 72,            # Time steps per revolution
                         shed_unsteady = true,
                         lambda      = 2.125,
@@ -189,7 +188,6 @@ function singlerotor(;  xfoil       = true,             # Whether to run XFOIL
                                       # SIMULATION OPTIONS
                                       Vinf=Vinf,
                                       # SOLVERS OPTIONS
-                                      VPMType=VPMType,
                                       p_per_step=p_per_step,
                                       overwrite_sigma=overwrite_sigma,
                                       vlm_sigma=vlm_sigma,
@@ -228,7 +226,7 @@ function generate_monitor(J, rho, RPM, nsteps; save_path=nothing,
 
     # Function for run_vpm! to call on each iteration
     function extra_runtime_function(sim::uns.Simulation{V, M, R},
-                                    PFIELD::uns.vpm.AbstractParticleField,
+                                    PFIELD::uns.vpm.ParticleField,
                                     T::Real, DT::Real
                                    ) where{V<:uns.AbstractVLMVehicle, M, R}
 

@@ -212,6 +212,7 @@ function run_noise_bpm(rotors::Array{vlm.Rotor, 1},
     close(f3)
     close(f4)
     close(f5)
+    if verbose; println("\t"^v_lvl*"BPM calculation is done!"); end;
 
     return observer
 end

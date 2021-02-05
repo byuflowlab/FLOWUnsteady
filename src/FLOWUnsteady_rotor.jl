@@ -48,7 +48,7 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
                         rfl_n_lower=15, rfl_n_upper=15,
                         rediscretize_airfoils=true,
                         # OUTPUT OPTIONS
-                        verbose=false, v_lvl=1,
+                        verbose=false, verbose_xfoil=false, v_lvl=1,
                         plot_disc=true, figsize_factor=2/3)
     if verbose; println("\t"^v_lvl*"Generating geometry..."); end;
     n_bem = n
@@ -93,11 +93,11 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
     LE_z = [spl_LE_z(ri) for ri in r]
 
 
-    if verbose; println("\t"^v_lvl*"Generating airfoils..."); end;
+    if verbose; println("\t"^v_lvl*"Generating airfoil data..."); end;
 
     airfoils = []
     Mas = xfoil ? [] : nothing
-    for (pos, contour, file_name) in airfoil_contours
+    for (rfli, (pos, contour, file_name)) in enumerate(airfoil_contours)
         x, y = contour[:,1], contour[:,2]
         # Calls XFOIL to calculate polars of each airfoil
         if xfoil
@@ -122,10 +122,13 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
 
             push!(Mas, this_Ma)
 
+            if verbose; print("\t"^(v_lvl+1)*"Running XFOIL on airfoil"*
+                        " $(rfli) out of $(length(airfoil_contours))..."); end;
             polar = vlm.ap.runXFOIL(x, y, this_Re;
                                     alphas=[i for i in -20:1.0:20],
-                                    verbose=verbose, Mach=this_Ma,
+                                    verbose=verbose_xfoil, Mach=this_Ma,
                                     iter=100, ncrit=ncrit)
+            if verbose; println(" done."); end;
 
         else # Reads polars from files
             if verbose; println("\t"^(v_lvl+1)*"$file_name"); end;

@@ -19,7 +19,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
                              rho=1.225,                 # (kg/m^3) air density
                              mu=1.81e-5,                # Air dynamic viscosity
                              # SOLVERS OPTIONS
-                             VPMType=vpm.ParticleField, # VPM solver type
+                             vpm_formulation=vpm.formulation_sphere,
                              vpm_kernel=vpm.gaussianerf,# VPM kernel
                              vpm_UJ=vpm.UJ_fmm,         # VPM particle-to-particle interaction calculation
                              vpm_integration=vpm.rungekutta3, # VPM time integration scheme
@@ -51,7 +51,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
                              nsteps_restart=-1,         # Save jlds every this many steps
                              save_code="",              # Saves the source code in this path
                              save_horseshoes=false,     # Save VLM horseshoes
-                             save_static_particles=false,# Whether to save particles to represent the VLM
+                             save_static_particles=true,# Whether to save particles to represent the VLM
                              save_wopwopin=true,        # Generate inputs for PSU-WOPWOP
                              )
 
@@ -93,6 +93,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
 
     # Initiate particle field
     vpm_solver = [
+                    (:formulation, vpm_formulation),
                     (:viscous, vpm_viscous),
                     (:kernel, vpm_kernel),
                     (:UJ, vpm_UJ),
@@ -103,7 +104,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
                     (:fmm, vpm_fmm),
                  ]
     Xdummy = zeros(3)
-    pfield = VPMType(max_particles; Uinf=t->Vinf(Xdummy, t), vpm_solver...)
+    pfield = vpm.ParticleField(max_particles; Uinf=t->Vinf(Xdummy, t), vpm_solver...)
 
 
     ############################################################################
@@ -113,7 +114,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
     """
         This function gets called by `vpm.run_vpm!` at every time step.
     """
-    function runtime_function(PFIELD, T, DT)
+    function runtime_function(PFIELD, T, DT; vprintln=(args...)->nothing)
 
         # Move tilting systems, and translate and rotate vehicle
         nextstep_kinematic(sim, dt)
@@ -153,21 +154,13 @@ function run_simulation(sim::Simulation, nsteps::Int;
     end
 
     if vpm_surface
-        # if typeof(pfield).name==vpm.ParticleField
-        #     nothing
-        # elseif typeof(pfield).name==vpm.ParticleFieldStretch
-        #     if pfield.splitparticles<100
-        #         error("Particle splitting is not compatible with vpm_surface=true (static particles).")
-        #     end
-        # else
-        #     error("Logic error: Unkown VPMType $(typeof(pfield).name)")
-        # end
-        static_particles_function = generate_static_particle_fun(pfield, sim.vehicle, surf_sigma)
+        static_particles_function = generate_static_particle_fun(pfield,
+                                    sim.vehicle, surf_sigma;
+                                    save_path=save_static_particles ? save_path : nothing,
+                                    run_name=run_name)
     else
         static_particles_function = (pfield, t, dt)->nothing
     end
-
-    println("VPMType:\t$(typeof(pfield))")
 
     ############################################################################
     # RUN SIMULATION
@@ -183,7 +176,6 @@ function run_simulation(sim::Simulation, nsteps::Int;
                       prompt=prompt,
                       nsteps_relax=vpm_nsteps_relax,
                       static_particles_function=static_particles_function,
-                      save_static_particles=save_static_particles,
                       save_time=false
                       )
 
@@ -218,43 +210,15 @@ function add_particle(pfield::vpm.ParticleField, X::Array{Float64, 1},
     # Adds p_per_step particles along line l
     dX = l/pps
     for i in 1:pps
-        vpm.add_particle(pfield, X + i*dX - dX/2, Gamma/pps, sigmap; vol=vol/pps)
+        vpm.add_particle(pfield, X + i*dX - dX/2, Gamma/pps, sigmap;
+                                                vol=vol/pps, circulation=abs(gamma))
     end
 end
-
-function add_particle(pfield::vpm.ParticleFieldStretch, X::Array{Float64, 1},
-                        gamma::Float64, dt::Float64,
-                        V::Float64, infD::Array{Float64, 1},
-                        sigma::Float64, vol::Float64,
-                        line::Array{T1, 1}, p_per_step::Int64;
-                        overwrite_sigma=nothing) where {T1<:Real}
-
-    l = (V*dt)*infD      # Vortex tube length
-
-    # Decreases p_per_step for slowly moving parts of blade
-    # aux = min((sigma/p_per_step)/overwrite_sigma, 1)
-    # pps = max(1, min(p_per_step, floor(Int, 1/(1-(aux-1e-14))) ))
-    pps = p_per_step
-
-    if overwrite_sigma==nothing
-        sigmap = sigma/pps
-    else
-        sigmap = overwrite_sigma
-    end
-
-
-    # Adds p_per_step particles along line
-    dX = line/pps
-    for i in 1:pps
-        vpm.add_particle(pfield, X + i*dX - dX/2, gamma, l/pps, sigmap)
-    end
-end
-
 
 """
 Returns the velocity induced by particle field on every position `Xs`
 """
-function Vvpm_on_Xs(pfield::vpm.AbstractParticleField, Xs::Array{T, 1}; static_particles_fun=(args...)->nothing, dt=0) where {T}
+function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs::Array{T, 1}; static_particles_fun=(args...)->nothing, dt=0) where {T}
 
     if length(Xs)!=0 && vpm.get_np(pfield)!=0
         # Omit freestream
@@ -294,4 +258,3 @@ function Vvpm_on_Xs(pfield::vpm.AbstractParticleField, Xs::Array{T, 1}; static_p
 end
 
 add_probe(pfield::vpm.ParticleField, X) = vpm.add_particle(pfield, X, zeros(3), 1e-6; vol=0)
-add_probe(pfield::vpm.ParticleFieldStretch, X) = vpm.add_particle(pfield, X, 0, zeros(3), 1e-6)

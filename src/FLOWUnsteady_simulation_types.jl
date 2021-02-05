@@ -114,7 +114,7 @@ end
 Precalculations before calling the solver.
 """
 function precalculations(self::Simulation, Vinf::Function,
-                                pfield::vpm.AbstractParticleField, t::Real, dt::Real)
+                                pfield::vpm.ParticleField, t::Real, dt::Real)
     # Rotate rotors
     rotate_rotors(self, dt)
 

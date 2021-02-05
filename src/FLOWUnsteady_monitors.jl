@@ -47,7 +47,7 @@ function generate_monitor_rotors( rotors::Array{vlm.Rotor, 1},
 
     # Function for run_vpm! to call on each iteration
     function extra_runtime_function(sim::Simulation{V, M, R},
-                                    PFIELD::vpm.AbstractParticleField,
+                                    PFIELD::vpm.ParticleField,
                                     T::Real, DT::Real
                                    ) where{V<:AbstractVLMVehicle, M, R}
 
@@ -422,6 +422,29 @@ function generate_monitor_statevariables(; figname="monitor_statevariables")
                 legend(loc="best", frameon=false)
             end
         end
+
+        return false
+    end
+
+    return extra_runtime_function
+end
+
+
+function generate_monitor_enstrophy(; save_path=nothing,
+                                     figname="monitor_enstrophy", run_name="")
+
+    figure(figname, figsize=[7*1, 5*1])
+    xlabel("Simulation time")
+    ylabel(L"Enstrophy ($\mathrm{m}^6/\mathrm{s}^2$)")
+
+    enstrophy = []
+
+    function extra_runtime_function(sim, PFIELD, T, DT)
+        vpm.monitor_enstrophy(PFIELD, T, DT; save_path=save_path,
+                                               run_name=run_name, out=enstrophy)
+
+        figure(figname)
+        plot(T, enstrophy[end], ".k")
 
         return false
     end
