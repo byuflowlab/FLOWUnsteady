@@ -9,24 +9,24 @@
   * License   : MIT
 =###############################################################################
 
-"""
-Generates the Rotor object. `pitch` is the pitch of the blades in degrees,
-`n` is the number of lattices in the VLM.
-
-`ReD` is the diameter Reynolds number based on rotational speed calculated
-as ReD = (omega*R)*(2*R)/nu, and `Matip` is the rotational+freestream Mach
-number at the tip. This values are used for calculate airfoil properties
-through XFOIL (chord Reynolds), so ignore them if airfoil properties are
-prescribed.
-
-Give it `altReD = [RPM, J, nu]`, and it'll calculate the chord-based Reynolds
-accounting for the effective velocity at every station ignoring ReD (this is
-more accurate, but not needed).
-
-NOTE: If Matip is different than zero while running XFOIL, remember to deactive
-compressibility corrections when running `vlm.solvefromCCBlade()` by giving it
-`sound_spd=nothing`
-"""
+# """
+# Generates the Rotor object. `pitch` is the pitch of the blades in degrees,
+# `n` is the number of lattices in the VLM.
+#
+# `ReD` is the diameter Reynolds number based on rotational speed calculated
+# as ReD = (omega*R)*(2*R)/nu, and `Matip` is the rotational+freestream Mach
+# number at the tip. This values are used for calculate airfoil properties
+# through XFOIL (chord Reynolds), so ignore them if airfoil properties are
+# prescribed.
+#
+# Give it `altReD = [RPM, J, nu]`, and it'll calculate the chord-based Reynolds
+# accounting for the effective velocity at every station ignoring ReD (this is
+# more accurate, but not needed).
+#
+# NOTE: If Matip is different than zero while running XFOIL, remember to deactive
+# compressibility corrections when running `vlm.solvefromCCBlade()` by giving it
+# `sound_spd=nothing`
+# """
 function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
                         chorddist::Array{Float64,2},
                         pitchdist::Array{Float64,2},
@@ -149,32 +149,36 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
 
     if plot_disc
         fig = figure("discretization_verif", figsize=[7*2,5*1]*figsize_factor)
-        suptitle("Discretization Verification")
+        fig.suptitle("Discretization Verification")
+        axs = fig.subplots(1, 2)
 
-        subplot(121)
-        plot(chorddist[:, 1], chorddist[:, 2], "ok", label="Chord data", alpha=0.75)
-        plot(r/Rtip, chord/Rtip, "--or", label="Chord Spline", alpha=0.75)
-        plot(sweepdist[:, 1], sweepdist[:, 2], "^k", label="LE-x data", alpha=0.75)
-        plot(r/Rtip, LE_x/Rtip, "--^g", label="LE-x Spline", alpha=0.75)
-        plot(heightdist[:, 1], heightdist[:, 2], "*k", label="LE-z data", alpha=0.75)
-        plot(r/Rtip, LE_z/Rtip, "--*b", label="LE-z Spline", alpha=0.75)
-        xlabel(L"$r/R$")
-        ylabel(L"$c/R$, $x/R$, $z/R$")
-        legend(loc="best", frameon=true)
-        grid(true, color="0.8", linestyle="--")
+        ax = axs[1]
+        ax.plot(chorddist[:, 1], chorddist[:, 2], "ok", label="Chord data", alpha=0.75)
+        ax.plot(r/Rtip, chord/Rtip, "--or", label="Chord Spline", alpha=0.75)
+        ax.plot(sweepdist[:, 1], sweepdist[:, 2], "^k", label="LE-x data", alpha=0.75)
+        ax.plot(r/Rtip, LE_x/Rtip, "--^g", label="LE-x Spline", alpha=0.75)
+        ax.plot(heightdist[:, 1], heightdist[:, 2], "*k", label="LE-z data", alpha=0.75)
+        ax.plot(r/Rtip, LE_z/Rtip, "--*b", label="LE-z Spline", alpha=0.75)
+        ax.set_xlabel(L"$r/R$")
+        ax.set_ylabel(L"$c/R$, $x/R$, $z/R$")
+        ax.legend(loc="best", frameon=true)
+        ax.grid(true, color="0.8", linestyle="--")
 
-        subplot(122)
-        plot(pitchdist[:, 1], pitchdist[:, 2], "ok", label="Twist data", alpha=0.75)
-        plot(r/Rtip, theta, "--^r", label="Twist Spline", alpha=0.75)
-        xlabel(L"$r/R$")
-        ylabel(L"Twist $\theta$ ($^\circ$)")
-        legend(loc="best", frameon=true)
-        grid(true, color="0.8", linestyle="--")
+        ax = axs[2]
+        ax.plot(pitchdist[:, 1], pitchdist[:, 2], "ok", label="Twist data", alpha=0.75)
+        ax.plot(r/Rtip, theta, "--^r", label="Twist Spline", alpha=0.75)
+        ax.set_xlabel(L"$r/R$")
+        ax.set_ylabel(L"Twist $\theta$ ($^\circ$)")
+        ax.legend(loc="best", frameon=true)
+        ax.grid(true, color="0.8", linestyle="--")
 
+        fig = vlm.ap.figure("polars", figsize=[7,5].*[length(airfoils), 1])
+        axs = fig.subplots(1, length(airfoils))
         for (i,(pos, polar)) in enumerate(airfoils)
             vlm.ap.plot(polar; geometry=true, label="pos=$pos, Re=$(vlm.ap.get_Re(polar))"*
                                         (Mas!=nothing ? ", Ma=$(round(Mas[i], digits=2))" : ""),
-                    cdpolar=false, fig_id="prelim_curves", title_str="Re sweep", rfl_figfactor=figsize_factor)
+                    cdpolar=false, fig_id="prelim_curves", title_str="Re sweep",
+                    rfl_figfactor=figsize_factor, fig=fig, axs=axs)
         end
     end
 
