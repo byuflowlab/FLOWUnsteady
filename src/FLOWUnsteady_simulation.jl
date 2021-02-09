@@ -100,7 +100,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
                     (:kernel, vpm_kernel),
                     (:UJ, vpm_UJ),
                     (:sgsmodel, vpm_sgsmodel),
-                    (:vpm_sgsscaling, vpm_sgsscaling),
+                    (:sgsscaling, vpm_sgsscaling),
                     (:integration, vpm_integration),
                     (:transposed, vpm_transposed),
                     (:relax, vpm_relaxfactor != 0),
