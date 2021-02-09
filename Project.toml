@@ -25,3 +25,11 @@ FLOWVLM = "2.0.0"
 FLOWNoise = "2.0.0"
 BPM = "2.0.0"
 # FLOWVPM = "0.1.0"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+FLOWVPM = "6e19019d-7c31-4940-9d16-c3f15dfe6020"
+
+[targets]
+test = ["Test", "Printf", "FLOWVPM"]

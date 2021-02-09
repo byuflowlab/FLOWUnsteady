@@ -29,6 +29,11 @@ const winckelmans = kernel_winckelmans
 const rungekutta3 = (args...)->nothing
 const euler = (args...)->nothing
 
+
+const formulation_sphere = ReformulatedVPM{RealFMM}(1/4, 1/4)
+const sgs_none(args...) = nothing
+const sgs_scaling_none(args...) = 1
+
 mutable struct FMM
   # Optional user inputs
   p::Int32                        # Multipole expansion order
@@ -173,7 +178,7 @@ Returns true if viscous scheme is core spreading.
 """
 iscorespreading(scheme::ViscousScheme
                             ) = typeof(scheme).name == CoreSpreading.body.name
-asd
+
 mutable struct ParticleField{R<:Real, F<:Formulation, V<:ViscousScheme}
     # User inputs
     maxparticles::Int                           # Maximum number of particles
@@ -194,6 +199,7 @@ mutable struct ParticleField{R<:Real, F<:Formulation, V<:ViscousScheme}
     # Optional inputs
     Uinf::Function                              # Uniform freestream function Uinf(t)
     sgsmodel::Function                          # Subgrid-scale contributions model
+    sgsscaling::Function                        # Scaling factor of SGS contributions
     integration::Function                       # Time integration scheme
     transposed::Bool                            # Transposed vortex stretch scheme
     relaxation::Function                        # Relaxation scheme
@@ -212,6 +218,7 @@ mutable struct ParticleField{R<:Real, F<:Formulation, V<:ViscousScheme}
                                 UJ=UJ_fmm,
                                 Uinf=(args...)->nothing,
                                 sgsmodel=(args...)->nothing,
+                                sgsscaling=(args...)->1,
                                 integration=(args...)->nothing,
                                 transposed=true,
                                 relaxation=(args...)->nothing,
@@ -226,6 +233,7 @@ mutable struct ParticleField{R<:Real, F<:Formulation, V<:ViscousScheme}
                                 UJ,
                                 Uinf,
                                 sgsmodel,
+                                sgsscaling,
                                 integration,
                                 transposed,
                                 relaxation,

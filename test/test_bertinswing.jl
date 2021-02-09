@@ -12,6 +12,7 @@
   * License   : MIT
 =###############################################################################
 
+norm(X) = sqrt(X[1]^2 + X[2]^2 + X[3]^2)
 
 """
     Test FLOWVLM solver with an isolated, planar, swept wing.
@@ -129,44 +130,50 @@ function bertin_VLM(;   # TEST OPTIONS
     web_CD = 0.005
     web_CdCD = web_Cd/web_CD
 
-    function monitor(sim, PFIELD, T, DT; figname="monitor_$(save_path)", nsteps_plot=1)
+    figname = "monitor_$(save_path)"
+
+    fig1 = figure(figname, figsize=[7*2, 5*2]*figsize_factor)
+    axs1 = fig1.subplots(2, 2)
+
+    fig2 = figure(figname*"_2", figsize=[7*2, 5*1]*figsize_factor)
+    axs2 = fig2.subplots(1, 2)
+
+    function monitor(sim, PFIELD, T, DT; nsteps_plot=1)
 
         aux = PFIELD.nt/nsteps
         clr = (1-aux, 0, aux)
 
         if PFIELD.nt==0 && disp_plot
-            figure(figname, figsize=[7*2, 5*2]*figsize_factor)
-            subplot(221)
-            xlim([0,1])
-            xlabel(L"$\frac{2y}{b}$")
-            ylabel(L"$\frac{Cl}{CL}$")
-            title("Spanwise lift distribution")
 
-            subplot(222)
-            xlim([0,1])
-            xlabel(L"$\frac{2y}{b}$")
-            ylabel(L"$\frac{Cd}{CD}$")
-            title("Spanwise drag distribution")
+            ax = axs1[1]
+            ax.set_xlim([0,1])
+            ax.set_xlabel(L"$\frac{2y}{b}$")
+            ax.set_ylabel(L"$\frac{Cl}{CL}$")
+            ax.title.set_text("Spanwise lift distribution")
 
-            subplot(223)
-            xlabel("Simulation time (s)")
-            ylabel(L"Lift Coefficient $C_L$")
+            ax = axs1[2]
+            ax.set_xlim([0,1])
+            ax.set_xlabel(L"$\frac{2y}{b}$")
+            ax.set_ylabel(L"$\frac{Cd}{CD}$")
+            ax.title.set_text("Spanwise drag distribution")
 
-            subplot(224)
-            xlabel("Simulation time (s)")
-            ylabel(L"Drag Coefficient $C_D$")
+            ax = axs1[3]
+            ax.set_xlabel("Simulation time (s)")
+            ax.set_ylabel(L"Lift Coefficient $C_L$")
 
-            figure(figname*"_2", figsize=[7*2, 5*1]*figsize_factor)
-            subplot(121)
-            xlabel(L"$\frac{2y}{b}$")
-            ylabel(L"Circulation $\Gamma$")
-            subplot(122)
-            xlabel(L"$\frac{2y}{b}$")
-            ylabel(L"Effective velocity $V_\infty$")
+            ax = axs1[4]
+            ax.set_xlabel("Simulation time (s)")
+            ax.set_ylabel(L"Drag Coefficient $C_D$")
+
+            ax = axs2[1]
+            ax.set_xlabel(L"$\frac{2y}{b}$")
+            ax.set_ylabel(L"Circulation $\Gamma$")
+            ax = axs2[2]
+            ax.set_xlabel(L"$\frac{2y}{b}$")
+            ax.set_ylabel(L"Effective velocity $V_\infty$")
         end
 
         if PFIELD.nt%nsteps_plot==0 && disp_plot
-            figure(figname)
 
             vlm.calculate_field(wing, "Ftot"; S=b^2/ar, qinf=qinf, rhoinf=rhoinf)
             vlm.calculate_field(wing, "CFtot"; S=b^2/ar, qinf=qinf, rhoinf=rhoinf)
@@ -178,30 +185,29 @@ function bertin_VLM(;   # TEST OPTIONS
             CL = info["CL"]
             CD = info["CD"]
 
-            subplot(221)
-            plot(web_2yb, web_ClCL, "ok", label="Weber's experimental data")
-            plot(y2b, ClCL1, "-", label="FLOWVLM", alpha=0.5, color=clr)
+            ax = axs1[1]
+            ax.plot(web_2yb, web_ClCL, "ok", label="Weber's experimental data")
+            ax.plot(y2b, ClCL1, "-", label="FLOWVLM", alpha=0.5, color=clr)
 
-            subplot(222)
-            plot(web_2yb, web_CdCD, "ok", label="Weber's experimental data")
-            plot(y2b, CdCD1, "-", label="FLOWVLM", alpha=0.5, color=clr)
+            ax = axs1[2]
+            ax.plot(web_2yb, web_CdCD, "ok", label="Weber's experimental data")
+            ax.plot(y2b, CdCD1, "-", label="FLOWVLM", alpha=0.5, color=clr)
 
-            subplot(223)
-            plot([0, T], web_CL*ones(2), ":k", label="Weber's experimental data")
-            plot([T], [CL], "o", label="FLOWVLM", alpha=0.5, color=clr)
+            ax = axs1[3]
+            ax.plot([0, T], web_CL*ones(2), ":k", label="Weber's experimental data")
+            ax.plot([T], [CL], "o", label="FLOWVLM", alpha=0.5, color=clr)
 
-            subplot(224)
-            plot([0, T], web_CD*ones(2), ":k", label="Weber's experimental data")
-            plot([T], [CD], "o", label="FLOWVLM", alpha=0.5, color=clr)
+            ax = axs1[4]
+            ax.plot([0, T], web_CD*ones(2), ":k", label="Weber's experimental data")
+            ax.plot([T], [CD], "o", label="FLOWVLM", alpha=0.5, color=clr)
 
-            figure(figname*"_2")
-            subplot(121)
-            plot(y2b, wing.sol["Gamma"], "-", label="FLOWVLM", alpha=0.5, color=clr)
+            ax = axs2[1]
+            ax.plot(y2b, wing.sol["Gamma"], "-", label="FLOWVLM", alpha=0.5, color=clr)
             if wake_coupled && PFIELD.nt!=0
-                subplot(122)
-                plot(y2b, norm.(wing.sol["Vkin"]), "-", label="FLOWVLM", alpha=0.5, color=[clr[1], 1, clr[3]])
-                plot(y2b, norm.(wing.sol["Vvpm"]), "-", label="FLOWVLM", alpha=0.5, color=clr)
-                plot(y2b, [norm(Vinf(vlm.getControlPoint(wing, i), T)) for i in 1:vlm.get_m(wing)]/magVinf,
+                ax = axs2[2]
+                ax.plot(y2b, norm.(wing.sol["Vkin"]), "-", label="FLOWVLM", alpha=0.5, color=[clr[1], 1, clr[3]])
+                ax.plot(y2b, norm.(wing.sol["Vvpm"]), "-", label="FLOWVLM", alpha=0.5, color=clr)
+                ax.plot(y2b, [norm(Vinf(vlm.getControlPoint(wing, i), T)) for i in 1:vlm.get_m(wing)]/magVinf,
                                                             "-k", label="FLOWVLM", alpha=0.5)
             end
         end
@@ -406,45 +412,49 @@ function bertin_kinematic(;   # TEST OPTIONS
 
     prev_wing = nothing
 
-    function monitor(sim, PFIELD, T, DT; figname="monitor_$(save_path)", nsteps_plot=1)
+    figname = "monitor_$(save_path)"
+
+    fig1 = figure(figname, figsize=[7*2, 5*2]*figsize_factor)
+    axs1 = fig1.subplots(2, 2)
+
+    figure(figname*"_2", figsize=[7*2, 5*1]*figsize_factor)
+    axs2 = fig2.subplots(1, 2)
+
+    function monitor(sim, PFIELD, T, DT; nsteps_plot=1)
 
         aux = PFIELD.nt/nsteps
         clr = (1-aux, 0, aux)
 
         if PFIELD.nt==0 && disp_plot
-            figure(figname, figsize=[7*2, 5*2]*figsize_factor)
-            subplot(221)
-            xlim([0,1])
-            xlabel(L"$\frac{2y}{b}$")
-            ylabel(L"$\frac{Cl}{CL}$")
-            title("Spanwise lift distribution")
+            ax = axs1[1]
+            ax.set_xlim([0,1])
+            ax.set_xlabel(L"$\frac{2y}{b}$")
+            ax.set_ylabel(L"$\frac{Cl}{CL}$")
+            ax.title.set_text("Spanwise lift distribution")
 
-            subplot(222)
-            xlim([0,1])
-            xlabel(L"$\frac{2y}{b}$")
-            ylabel(L"$\frac{Cd}{CD}$")
-            title("Spanwise drag distribution")
+            ax = axs1[2]
+            ax.set_xlim([0,1])
+            ax.set_xlabel(L"$\frac{2y}{b}$")
+            ax.set_ylabel(L"$\frac{Cd}{CD}$")
+            ax.title.set_text("Spanwise drag distribution")
 
-            subplot(223)
-            xlabel("Simulation time (s)")
-            ylabel(L"Lift Coefficient $C_L$")
+            ax = axs1[3]
+            ax.set_xlabel("Simulation time (s)")
+            ax.set_ylabel(L"Lift Coefficient $C_L$")
 
-            subplot(224)
-            xlabel("Simulation time (s)")
-            ylabel(L"Drag Coefficient $C_D$")
+            ax = axs1[4]
+            ax.set_xlabel("Simulation time (s)")
+            ax.set_ylabel(L"Drag Coefficient $C_D$")
 
-            figure(figname*"_2", figsize=[7*2, 5*1]*figsize_factor)
-            subplot(121)
-            xlabel(L"$\frac{2y}{b}$")
-            ylabel(L"Circulation $\Gamma$")
-            subplot(122)
-            xlabel(L"$\frac{2y}{b}$")
-            ylabel(L"Effective velocity $V_\infty$")
+            ax = ax2[1]
+            ax.set_xlabel(L"$\frac{2y}{b}$")
+            ax.set_ylabel(L"Circulation $\Gamma$")
+            ax = ax2[2]
+            ax.set_xlabel(L"$\frac{2y}{b}$")
+            ax.set_ylabel(L"Effective velocity $V_\infty$")
         end
 
         if PFIELD.nt!=0 && PFIELD.nt%nsteps_plot==0 && disp_plot
-            figure(figname)
-
 
             # Force at each VLM element
             Ftot = uns.calc_aerodynamicforce(wing, prev_wing, PFIELD, Vinf, DT,
@@ -472,32 +482,31 @@ function bertin_kinematic(;   # TEST OPTIONS
             vlm._addsolution(wing, "Cl/CL", ClCL)
             vlm._addsolution(wing, "Cd/CD", CdCD)
 
-            subplot(221)
-            plot(web_2yb, web_ClCL, "ok", label="Weber's experimental data")
-            plot(y2b, ClCL, "-", label="FLOWVLM", alpha=0.5, color=clr)
+            ax = ax1[1]
+            ax.plot(web_2yb, web_ClCL, "ok", label="Weber's experimental data")
+            ax.plot(y2b, ClCL, "-", label="FLOWVLM", alpha=0.5, color=clr)
 
-            subplot(222)
-            plot(web_2yb, web_CdCD, "ok", label="Weber's experimental data")
-            plot(y2b, CdCD, "-", label="FLOWVLM", alpha=0.5, color=clr)
+            ax = ax1[2]
+            ax.plot(web_2yb, web_CdCD, "ok", label="Weber's experimental data")
+            ax.plot(y2b, CdCD, "-", label="FLOWVLM", alpha=0.5, color=clr)
 
-            subplot(223)
-            plot([0, T], web_CL*ones(2), ":k", label="Weber's experimental data")
-            plot([T], [CLwing], "o", label="FLOWVLM", alpha=0.5, color=clr)
+            ax = ax1[3]
+            ax.plot([0, T], web_CL*ones(2), ":k", label="Weber's experimental data")
+            ax.plot([T], [CLwing], "o", label="FLOWVLM", alpha=0.5, color=clr)
 
-            subplot(224)
-            plot([0, T], web_CD*ones(2), ":k", label="Weber's experimental data")
-            plot([T], [CDwing], "o", label="FLOWVLM", alpha=0.5, color=clr)
+            ax = ax1[4]
+            ax.plot([0, T], web_CD*ones(2), ":k", label="Weber's experimental data")
+            ax.plot([T], [CDwing], "o", label="FLOWVLM", alpha=0.5, color=clr)
 
-            figure(figname*"_2")
-            subplot(121)
-            plot(y2b, wing.sol["Gamma"], "-", label="FLOWVLM", alpha=0.5, color=clr)
+            ax = ax2[1]
+            ax.plot(y2b, wing.sol["Gamma"], "-", label="FLOWVLM", alpha=0.5, color=clr)
             if wake_coupled && PFIELD.nt!=0
-                subplot(122)
-                plot(y2b, norm.(wing.sol["Vkin"])/magVinf, "-", label="FLOWVLM", alpha=0.5, color=[clr[1], 1, clr[3]])
+                ax = ax2[2]
+                ax.plot(y2b, norm.(wing.sol["Vkin"])/magVinf, "-", label="FLOWVLM", alpha=0.5, color=[clr[1], 1, clr[3]])
                 if VehicleType==uns.VLMVehicle
-                    plot(y2b, norm.(wing.sol["Vvpm"]), "-", label="FLOWVLM", alpha=0.5, color=clr)
+                    ax.plot(y2b, norm.(wing.sol["Vvpm"]), "-", label="FLOWVLM", alpha=0.5, color=clr)
                 end
-                plot(y2b, [norm(Vinf(vlm.getControlPoint(wing, i), T)) for i in 1:vlm.get_m(wing)],
+                ax.plot(y2b, [norm(Vinf(vlm.getControlPoint(wing, i), T)) for i in 1:vlm.get_m(wing)],
                                                             "-k", label="FLOWVLM", alpha=0.5)
             end
         end

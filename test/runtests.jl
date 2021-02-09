@@ -1,14 +1,16 @@
-# Load simulation engine
-# import FLOWFVS
-reload("FLOWUnsteady")
-uns = FLOWUnsteady
-vlm = uns.vlm
-gt = vlm.vtk
+using Test
 
 # ------------ GENERIC MODULES -------------------------------------------------
-using Base.Test
 using PyPlot
+using Printf
 using JLD
+
+# ------------ FLOW MODULES ----------------------------------------------------
+# Load simulation engine
+import FLOWUnsteady
+uns = FLOWUnsteady
+vlm = uns.vlm
+gt = uns.gt
 
 # ------------ HEADERS ---------------------------------------------------------
 # Load modules
