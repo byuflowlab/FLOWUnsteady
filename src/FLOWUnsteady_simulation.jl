@@ -28,6 +28,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
                              vpm_transposed=true,       # VPM transposed stretching scheme
                              vpm_viscous=vpm.Inviscid(),# VPM viscous diffusion scheme
                              vpm_fmm=vpm.FMM(; p=4, ncrit=50, theta=0.4, phi=0.5), # VPM's FMM options
+                             vpm_relaxation=vpm.pedrizzetti, # VPM relaxation scheme
                              vpm_relaxfactor=0.3,       # VPM relaxation factor
                              vpm_nsteps_relax=1,        # Steps in between VPM relaxation
                              vpm_surface=true,          # Whether to include surfaces in the VPM
@@ -63,7 +64,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
     end
 
     if shed_unsteady==false
-        @warn("Unsteady wake shedding is off!")
+        @warn("Unsteady wake shedding is disabled!")
     end
 
     if surf_sigma<=0
@@ -103,6 +104,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
                     (:sgsscaling, vpm_sgsscaling),
                     (:integration, vpm_integration),
                     (:transposed, vpm_transposed),
+                    (:relaxation, vpm_relaxation),
                     (:relax, vpm_relaxfactor != 0),
                     (:rlxf, vpm_relaxfactor),
                     (:fmm, vpm_fmm),

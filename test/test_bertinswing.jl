@@ -12,7 +12,8 @@
   * License   : MIT
 =###############################################################################
 
-norm(X) = sqrt(X[1]^2 + X[2]^2 + X[3]^2)
+dot(X1, X2) = X1[1]*X2[1] + X1[2]*X2[2] + X1[3]*X2[3]
+norm(X) = sqrt(dot(X, X))
 
 """
     Test FLOWVLM solver with an isolated, planar, swept wing.
@@ -20,6 +21,7 @@ norm(X) = sqrt(X[1]^2 + X[2]^2 + X[3]^2)
 function bertin_VLM(;   # TEST OPTIONS
                         tol=0.025,
                         wake_coupled=true,
+                        shed_unsteady=true,
                         nsteps=200,
                         vlm_fsgm=-1,
                         surf_fsgm=0.05,
@@ -28,7 +30,8 @@ function bertin_VLM(;   # TEST OPTIONS
                         run_name="bertins",
                         prompt=true,
                         verbose=true, verbose2=true, v_lvl=1,
-                        disp_plot=true, figsize_factor=5/6
+                        disp_plot=true, figsize_factor=5/6,
+                        sim_optargs...
                         )
 
     if verbose; println("\t"^(v_lvl)*"Running Bertin's wing test..."); end;
@@ -81,7 +84,7 @@ function bertin_VLM(;   # TEST OPTIONS
     vlm_sigma = vlm_fsgm*b
     surf_sigma = surf_fsgm*b    # Smoothing radius of lifting surface on VPM
     # wake_coupled = true       # Coupled VPM wake with VLM solution
-    shed_unsteady = true        # Whether to shed unsteady-loading wake
+    # shed_unsteady = true        # Whether to shed unsteady-loading wake
     # shed_unsteady = false
     vlm_init = true             # Initialize with the VLM semi-infinite wake solution
 
@@ -247,7 +250,8 @@ function bertin_VLM(;   # TEST OPTIONS
                                       run_name=run_name,
                                       prompt=prompt,
                                       verbose=verbose2, v_lvl=v_lvl+1,
-                                      save_horseshoes=!wake_coupled
+                                      save_horseshoes=!wake_coupled,
+                                      sim_optargs...
                                       )
 
 
@@ -293,12 +297,14 @@ function bertin_kinematic(;   # TEST OPTIONS
                         p_per_step = 1,
                         vlm_rlx = -1,
                         VehicleType=uns.VLMVehicle,
+                        shed_unsteady=true,
                         # OUTPUT OPTIONS
                         save_path=nothing,
                         run_name="bertins",
                         prompt=true,
                         verbose=true, verbose2=true, v_lvl=1,
-                        disp_plot=true, figsize_factor=5/6
+                        disp_plot=true, figsize_factor=5/6,
+                        sim_optargs...
                         )
 
     if verbose; println("\t"^(v_lvl)*"Running Bertin's wing test..."); end;
@@ -360,7 +366,7 @@ function bertin_kinematic(;   # TEST OPTIONS
     vlm_sigma = vlm_fsgm*b
     surf_sigma = surf_fsgm*b    # Smoothing radius of lifting surface on VPM
     # wake_coupled = true       # Coupled VPM wake with VLM solution
-    shed_unsteady = true        # Whether to shed unsteady-loading wake
+    # shed_unsteady = true        # Whether to shed unsteady-loading wake
     # shed_unsteady = false
     # vlm_rlx = -1                # VLM relaxation (deactivated with -1)
     vlm_init = true             # Initialize with the VLM semi-infinite wake solution
@@ -417,7 +423,7 @@ function bertin_kinematic(;   # TEST OPTIONS
     fig1 = figure(figname, figsize=[7*2, 5*2]*figsize_factor)
     axs1 = fig1.subplots(2, 2)
 
-    figure(figname*"_2", figsize=[7*2, 5*1]*figsize_factor)
+    fig2 = figure(figname*"_2", figsize=[7*2, 5*1]*figsize_factor)
     axs2 = fig2.subplots(1, 2)
 
     function monitor(sim, PFIELD, T, DT; nsteps_plot=1)
@@ -446,10 +452,10 @@ function bertin_kinematic(;   # TEST OPTIONS
             ax.set_xlabel("Simulation time (s)")
             ax.set_ylabel(L"Drag Coefficient $C_D$")
 
-            ax = ax2[1]
+            ax = axs2[1]
             ax.set_xlabel(L"$\frac{2y}{b}$")
             ax.set_ylabel(L"Circulation $\Gamma$")
-            ax = ax2[2]
+            ax = axs2[2]
             ax.set_xlabel(L"$\frac{2y}{b}$")
             ax.set_ylabel(L"Effective velocity $V_\infty$")
         end
@@ -482,26 +488,26 @@ function bertin_kinematic(;   # TEST OPTIONS
             vlm._addsolution(wing, "Cl/CL", ClCL)
             vlm._addsolution(wing, "Cd/CD", CdCD)
 
-            ax = ax1[1]
+            ax = axs1[1]
             ax.plot(web_2yb, web_ClCL, "ok", label="Weber's experimental data")
             ax.plot(y2b, ClCL, "-", label="FLOWVLM", alpha=0.5, color=clr)
 
-            ax = ax1[2]
+            ax = axs1[2]
             ax.plot(web_2yb, web_CdCD, "ok", label="Weber's experimental data")
             ax.plot(y2b, CdCD, "-", label="FLOWVLM", alpha=0.5, color=clr)
 
-            ax = ax1[3]
+            ax = axs1[3]
             ax.plot([0, T], web_CL*ones(2), ":k", label="Weber's experimental data")
             ax.plot([T], [CLwing], "o", label="FLOWVLM", alpha=0.5, color=clr)
 
-            ax = ax1[4]
+            ax = axs1[4]
             ax.plot([0, T], web_CD*ones(2), ":k", label="Weber's experimental data")
             ax.plot([T], [CDwing], "o", label="FLOWVLM", alpha=0.5, color=clr)
 
-            ax = ax2[1]
+            ax = axs2[1]
             ax.plot(y2b, wing.sol["Gamma"], "-", label="FLOWVLM", alpha=0.5, color=clr)
             if wake_coupled && PFIELD.nt!=0
-                ax = ax2[2]
+                ax = axs2[2]
                 ax.plot(y2b, norm.(wing.sol["Vkin"])/magVinf, "-", label="FLOWVLM", alpha=0.5, color=[clr[1], 1, clr[3]])
                 if VehicleType==uns.VLMVehicle
                     ax.plot(y2b, norm.(wing.sol["Vvpm"]), "-", label="FLOWVLM", alpha=0.5, color=clr)
@@ -549,7 +555,8 @@ function bertin_kinematic(;   # TEST OPTIONS
                                       run_name=run_name,
                                       prompt=prompt,
                                       verbose=verbose2, v_lvl=v_lvl+1,
-                                      save_horseshoes=!wake_coupled
+                                      save_horseshoes=!wake_coupled,
+                                      sim_optargs...
                                       )
 
 
