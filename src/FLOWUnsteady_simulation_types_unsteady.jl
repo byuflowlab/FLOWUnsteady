@@ -182,7 +182,7 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
 
         # Rotate rotors
         # NOTE: this means that the rotational velocity hadn't been included in
-        # the kinematic velocitie up to this point
+        # the kinematic velocities up to this point
         rotate_rotors(self, dt)
     end
 end

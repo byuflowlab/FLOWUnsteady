@@ -22,6 +22,8 @@ function run_simulation(sim::Simulation, nsteps::Int;
                              vpm_formulation=vpm.formulation_sphere,
                              vpm_kernel=vpm.gaussianerf,# VPM kernel
                              vpm_UJ=vpm.UJ_fmm,         # VPM particle-to-particle interaction calculation
+                             vpm_sgsmodel=vpm.sgs_none, # VPM LES subgrid scale model
+                             vpm_sgsscaling=vpm.sgs_scaling_none, # Scaling of LES subgrid scale model
                              vpm_integration=vpm.rungekutta3, # VPM time integration scheme
                              vpm_transposed=true,       # VPM transposed stretching scheme
                              vpm_viscous=vpm.Inviscid(),# VPM viscous diffusion scheme
@@ -97,6 +99,8 @@ function run_simulation(sim::Simulation, nsteps::Int;
                     (:viscous, vpm_viscous),
                     (:kernel, vpm_kernel),
                     (:UJ, vpm_UJ),
+                    (:sgsmodel, vpm_sgsmodel),
+                    (:vpm_sgsscaling, vpm_sgsscaling),
                     (:integration, vpm_integration),
                     (:transposed, vpm_transposed),
                     (:relax, vpm_relaxfactor != 0),
