@@ -1,0 +1,8 @@
+property,file,description
+chorddist,Vahana2_chorddist.csv, Chord distribution
+pitchdist,apc10x7_pitchdist.csv, Pitch distribution
+sweepdist,apc10x7_sweepdist.csv, LE sweep distribution
+heightdist,apc10x7_heightdist.csv, LE height distribution
+airfoil_files,apc10x7_airfoils.csv, Airfoil distribution
+spl_k,3,  Spline order
+spl_s,5.0e-6, Spline smoothing

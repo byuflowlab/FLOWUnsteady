@@ -1,7 +1,8 @@
 #=##############################################################################
 # DESCRIPTION
     Unsteady simulation of eVTOL transition maneuver on tilt-wing, tandem,
-    distributed propulsion aircraft.
+    distributed propulsion aircraft. Geometry of a modified Vahana aircraft with
+    tilt rotors.
 
     REFERENCES
     * Vahana geometry: Droandi, G., Syal, M., and Bower, G., “Tiltwing Multi-Rotor
@@ -11,18 +12,20 @@
 # AUTHORSHIP
   * Author    : Eduardo J. Alvarez
   * Email     : Edo.AlvarezR@gmail.com
-  * Created   : Oct 2019
+  * Created   : Feb 2021
   * License   : MIT
 =###############################################################################
 
 
 # ------------ MODULES ---------------------------------------------------------
+using Revise
+import LinearAlgebra: I
 import FLOWUnsteady
 
 uns = FLOWUnsteady
 vpm = uns.vpm
 vlm = uns.vlm
-gt = GeometricTools
+gt = uns.gt
 
 # ------------ GLOBAL VARIABLES ------------------------------------------------
 # Default path where to save data
@@ -33,7 +36,7 @@ data_path = uns.def_data_path
 
 # ------------ HEADERS ---------------------------------------------------------
 for header_name in ["geometry", "kinematics", "monitor"]
-    include("vahana_"*header_name*".jl")
+    include("vahana2_"*header_name*".jl")
 end
 
 
@@ -227,7 +230,7 @@ function visualize_maneuver_vahana(; save_path=extdrive_path*"vahana_maneuver00/
                                     )
 
     # Move landing pad to landing area
-    vlm.vtk.lintransform!(grounds[2], eye(3), Vcruise*telapsed*[-0.25, 0, -0.0025])
+    gt.lintransform!(grounds[2], eye(3), Vcruise*telapsed*[-0.25, 0, -0.0025])
 
     # Save ground
     for (i, ground) in enumerate(grounds)
@@ -248,8 +251,8 @@ end
     Generates geometry of Vahana aircraft, saves it as vtk files, and calls
     Paraview visualizing the VTK geometry.
 """
-function visualize_geometry_vahana(; save_path=extdrive_path*"vahana_geometry00/",
-                                     prompt=true, run_name="vahana", optargs...)
+function visualize_geometry_vahana(; save_path=extdrive_path*"vahana2_geometry00/",
+                                     prompt=true, run_name="vahana2", optargs...)
 
     (vehicle, grounds) = generate_geometry_vahana(; n_factor=1,
                                                      xfoil=false,
