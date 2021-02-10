@@ -274,7 +274,7 @@ function Vvpm_on_Xs(pfield::vpm.AbstractParticleField, Xs::Array{T, 1}; static_p
         end
 
          # Evaluate velocity field
-        scaling = 10.0
+        scaling = 2.0
         for (i, P) in enumerate(vpm.iterator(pfield))
             if i <= org_np
                 P.sigma ./= scaling
