@@ -19,7 +19,7 @@ as the field `vlm_system.sol["Ftot"]`
 """
 function calc_aerodynamicforce(vlm_system::Union{vlm.Wing, vlm.WingSystem},
                                 prev_vlm_system, pfield, Vinf, dt, rho; t=0.0,
-                                vpm_solver="ExaFMM", per_unit_span=false,
+                                per_unit_span=false,
                                 Vout=nothing, lenout=nothing,
                                 lencrit=-1)
 
@@ -38,7 +38,12 @@ function calc_aerodynamicforce(vlm_system::Union{vlm.Wing, vlm.WingSystem},
 
     # Evaluate VPM on each midpoint
     Xs = vcat(ApA, AB, BBp)
-    Vvpm = Vvpm_on_Xs(pfield, Xs; dt=dt)
+
+    ## NOTE: Instead of calling the VPM, we use what was calculated
+    ## by `solve()`, which includes Rotor-on-VLM velocities
+    # Vvpm = Vvpm_on_Xs(pfield, Xs; dt=dt)
+    Vvpm = vcat(vlm_system.sol["Vvpm_ApA"], vlm_system.sol["Vvpm_AB"], vlm_system.sol["Vvpm_BBp"])
+
 
     # Evaluate VLM on each midpoint
     Vvlm = vlm.Vind.(Ref(vlm_system), Xs; t=t, ign_col=true, ign_infvortex=true)

@@ -16,7 +16,7 @@ import DataFrames
 import JLD
 import Dates
 using PyPlot
-using LinearAlgebra: norm, dot, cross, I
+using LinearAlgebra: cross, I
 
 # ------------ FLOW CODES ------------------------------------------------------
 # FLOWVLM https://github.com/byuflowlab/FLOWVLM

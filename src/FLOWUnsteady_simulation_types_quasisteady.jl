@@ -13,7 +13,8 @@
 function solve(self::Simulation{V, M, R}, Vinf::Function,
                 pfield::vpm.ParticleField, wake_coupled::Bool,
                 dt::Real, rlx::Real, sigma::Real, rho::Real,
-                speedofsound::Real; init_sol::Bool=false
+                speedofsound::Real, staticpfield::vpm.ParticleField;
+                init_sol::Bool=false
                 ) where {V<:QVLMVehicle, M<:AbstractManeuver, R}
 
 
@@ -124,6 +125,13 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
         end
 
         vlm._addsolution(vhcl.vlm_system, "Vind", Vinds; t=t)
+
+        # Add dummy VPM velocity for `calc_aerodynamicforce()`
+        Vdummy = zeros(3)
+        Vdummies = [Vdummy for i in 1:vlm.get_m(vhcl.vlm_system)]
+        vlm._addsolution(vhcl.vlm_system, "Vvpm_ApA", Vdummies; t=t)
+        vlm._addsolution(vhcl.vlm_system, "Vvpm_AB", Vdummies; t=t)
+        vlm._addsolution(vhcl.vlm_system, "Vvpm_BBp", Vdummies; t=t)
 
         # Calculate induced velocities to use in rotor solver
         ## Points where to calculate induced velocities

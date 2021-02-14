@@ -238,6 +238,22 @@ function _update_prev_rotor_systems(self::AbstractVLMVehicle, rotor_systems)
     self.prev_data[3] = rotor_systems
 end
 
+
+"""
+Return the maximum number of static particles.
+"""
+function _get_m_static(self::AbstractVLMVehicle)
+    m = vlm.get_m(self.vlm_system)
+
+    for rotors in self.rotor_systems
+        for rotor in rotors
+            m += vlm.get_m(rotor)
+        end
+    end
+
+    return m
+end
+
 """
 Returns the local translational velocity of every control point in `vlm_system`.
 """

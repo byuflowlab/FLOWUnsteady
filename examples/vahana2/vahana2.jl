@@ -42,7 +42,7 @@ end
 
 # ------------ DRIVERS ---------------------------------------------------------
 
-function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim01",
+function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim03",
                                     prompt=true,
                                     run_name="vahana2",
                                     verbose=true, v_lvl=1)

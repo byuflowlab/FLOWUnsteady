@@ -110,7 +110,10 @@ function run_simulation(sim::Simulation, nsteps::Int;
                     (:fmm, vpm_fmm),
                  ]
     Xdummy = zeros(3)
-    pfield = vpm.ParticleField(max_particles; Uinf=t->Vinf(Xdummy, t), vpm_solver...)
+    pfield = vpm.ParticleField(max_particles; Uinf=t->Vinf(Xdummy, t),
+                                                                  vpm_solver...)
+    staticpfield = vpm.ParticleField(_get_m_static(sim.vehicle);
+                                         Uinf=t->Vinf(Xdummy, t), vpm_solver...)
 
 
     ############################################################################
@@ -136,7 +139,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
 
         # Solve aerodynamics of the vehicle
         solve(sim, Vinf, PFIELD, wake_coupled, DT, vlm_rlx,
-                surf_sigma, rho, sound_spd; init_sol=vlm_init)
+                surf_sigma, rho, sound_spd, staticpfield; init_sol=vlm_init)
 
         # Shed unsteady-loading wake with new solution
         if shed_unsteady

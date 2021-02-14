@@ -213,7 +213,7 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
                                 ref_lbl="Reference", ref_stl="ok",
                                 conv_suff="_convergence.csv",
                                 figsize_factor=5/6,
-                                nsteps_plot=1,
+                                nsteps_plot=10,
                                 nsteps_savefig=10)
 
     fcalls = 0                  # Number of function calls
@@ -425,7 +425,8 @@ end
 
 
 function generate_monitor_enstrophy(; save_path=nothing,
-                                     figname="monitor_enstrophy", run_name="")
+                                     figname="monitor_enstrophy", run_name="",
+                                     nsteps_plot=10)
 
     fig = figure(figname, figsize=[7*1, 5*1])
     ax = gca()
@@ -433,12 +434,18 @@ function generate_monitor_enstrophy(; save_path=nothing,
     ax.set_ylabel(L"Enstrophy ($\mathrm{m}^6/\mathrm{s}^2$)")
 
     enstrophy = []
+    ts = []
 
     function extra_runtime_function(sim, PFIELD, T, DT)
         vpm.monitor_enstrophy(PFIELD, T, DT; save_path=save_path,
                                                run_name=run_name, out=enstrophy)
 
-        ax.plot(T, enstrophy[end], ".k")
+        push!(ts, T)
+
+        if PFIELD.nt%nsteps_plot == 0
+            ax.plot(ts, enstrophy[end-length(ts)+1:end], ".k")
+            ts = []
+        end
 
         return false
     end

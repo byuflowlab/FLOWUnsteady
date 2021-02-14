@@ -23,6 +23,9 @@ clrs = [
             [252, 127, 178]/255
         ]
 
+dot(X, Y) = X[1]*Y[1] + X[2]*Y[2] + X[3]*Y[3]
+norm(X) = sqrt(dot(X,X))
+
 """
     `plot_maneuver(maneuver::KinematicManeuver; ti::Real=0, tf::Real=1,
 vis_nsteps=300, figname="maneuver", tstages=[])`
