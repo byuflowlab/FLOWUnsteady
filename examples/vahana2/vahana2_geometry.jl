@@ -5,7 +5,7 @@
 # AUTHORSHIP
   * Author    : Eduardo J. Alvarez
   * Email     : Edo.AlvarezR@gmail.com
-  * Created   : Oct 2019
+  * Created   : Feb 2021
   * License   : MIT
 =###############################################################################
 
@@ -451,6 +451,7 @@ function generate_geometry_vahana(;
 
     # System to solve through the VLM solver
     vlm_system_m = vlm.WingSystem()
+    vlm.addwing(vlm_system_m, "middle", wing_md)
     vlm.addwing(vlm_system_m, "R", wing_R)
     vlm.addwing(vlm_system_m, "letR", winglet_R)
     vlm.addwing(vlm_system_m, "L", wing_L)

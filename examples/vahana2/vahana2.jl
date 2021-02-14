@@ -35,16 +35,16 @@ extdrive_path = "/media/edoalvar/Samsung_T5/simulationdata202102/"
 data_path = uns.def_data_path
 
 # ------------ HEADERS ---------------------------------------------------------
-for header_name in ["geometry", "kinematics", "monitor"]
+for header_name in ["geometry", "kinematics", "monitor", "misc"]
     include("vahana2_"*header_name*".jl")
 end
 
 
 # ------------ DRIVERS ---------------------------------------------------------
 
-function run_simulation_vahana(;    save_path=extdrive_path*"vahana_sim09",
+function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim01",
                                     prompt=true,
-                                    run_name="vahana",
+                                    run_name="vahana2",
                                     verbose=true, v_lvl=1)
 
     # ----------------- PARAMETERS ---------------------------------------------
@@ -76,23 +76,35 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana_sim09",
     mu = 1.81e-5                            # Air dynamic viscosity
 
     # Solver options
-    R = 0.75                                # (m) blade radius as a reference
-    lambda = 4.0                            # Target minimum core overlap
+    R = 0.75                                # (m) Reference blade radius
+    lambda = 2.125                          # Target minimum core overlap
     p_per_step = 4                          # Particle sheds per time step
     overwrite_sigma = lambda * (2*pi*RPMh_w/60*R + Vcruise)*dt / p_per_step
+    surf_sigma = R/10                       # Surface regularization
     # vlm_sigma = R/25                      # VLM regularization
     # vlm_sigma = R
-    vlm_sigma = -1
+    # vlm_sigma = -1
+    vlm_sigma = surf_sigma # MAKE THIS -1 if unstable
     vlm_rlx = 0.75                          # VLM relaxation (deactivated with -1)
-    surf_sigma = R/10                       # Surface regularization
-    shed_unsteady = false                   # Shed unsteady-loading particles
-    VehicleType = uns.QVLMVehicle           # Type of vehicle to generate
+    # shed_unsteady = false                   # Shed unsteady-loading particles
+    shed_unsteady = true
+    # VehicleType = uns.QVLMVehicle           # Type of vehicle to generate
+    VehicleType = uns.UVLMVehicle           # Type of vehicle to generate
+
+
+    vpm_formulation = vpm.formulation_sphere # VPM formulation
+    # vpm_formulation = vpm.formulation_classic
+    # vpm_sgsmodel    = vpm.sgs_stretching1_fmm
+    vpm_sgsmodel    = vpm.generate_sgs_directionfiltered(vpm.generate_sgs_lowfiltered(vpm.sgs_stretching1_fmm))
+    # vpm_relaxation  = vpm.norelaxation
+    # vpm_relaxation  = vpm.pedrizzetti
+    vpm_relaxation  = vpm.correctedpedrizzetti
 
 
 
     # ----------------- MANEUVER DEFINITION ------------------------------------
     # Generate maneuver
-    maneuver = generate_maneuver_vahana1(; add_rotors=add_rotors)
+    maneuver = generate_maneuver_vahana(; add_rotors=add_rotors)
 
     # Plot maneuver path and controls
     uns.plot_maneuver(maneuver; tstages=[0.2, 0.3, 0.5, 0.6])
@@ -108,7 +120,13 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana_sim09",
                                                     VehicleType=VehicleType)
 
     # Move landing pad to landing area
-    gt.lintransform!(grounds[2], eye(3), Vcruise*telapsed*[-0.25, 0, -0.0025])
+    gt.lintransform!(grounds[2], Array(1.0I, 3, 3), Vcruise*telapsed*[-0.25, 0, -0.0025])
+
+    # Save ground
+    gt.create_path(save_path, prompt)
+    for (i, ground) in enumerate(grounds)
+        gt.save(ground, run_name*"_Ground$i"; path=save_path)
+    end
 
     # ----------------- SIMULATION SETUP ---------------------------------------
     Vref = Vcruise
@@ -125,7 +143,14 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana_sim09",
                                                     Vinit=Vinit, Winit=Winit)
 
     # ----------------- SIMULATION MONITOR -------------------------------------
-    monitor = generate_monitor_vahana(vehicle, rho, RPMref, nsteps, save_path, Vinf)
+    monitor_vahana = generate_monitor_vahana(vehicle, rho, RPMref, nsteps, save_path, Vinf)
+    monitor_vpm = uns.generate_monitor_enstrophy(; save_path=save_path)
+
+    monitor(args...; optargs...) = monitor_vahana(args...; optargs...) || monitor_vpm(args...; optargs...)
+
+
+    # ----------------- WAKE TREATMENT FUNCTION --------------------------------
+    runtime_function(args...; optargs...) = remove_particles_lowstrength(args...; optargs...) || monitor(args...; optargs...)
 
     # ----------------- RUN SIMULATION -----------------------------------------
     pfield = uns.run_simulation(simulation, nsteps;
@@ -134,6 +159,9 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana_sim09",
                                       rho=rho,
                                       mu=mu,
                                       # SOLVERS OPTIONS
+                                      vpm_formulation=vpm_formulation,
+                                      vpm_sgsmodel=vpm_sgsmodel,
+                                      vpm_relaxation=vpm_relaxation,
                                       p_per_step=p_per_step,
                                       overwrite_sigma=overwrite_sigma,
                                       vlm_sigma=vlm_sigma,
@@ -141,27 +169,23 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana_sim09",
                                       surf_sigma=surf_sigma,
                                       max_particles=max_particles,
                                       shed_unsteady=shed_unsteady,
-                                      extra_runtime_function=monitor,
+                                      extra_runtime_function=runtime_function,
                                       # OUTPUT OPTIONS
                                       save_path=save_path,
+                                      create_savepath=false,
                                       run_name=run_name,
                                       prompt=prompt,
                                       verbose=verbose, v_lvl=v_lvl,
                                       save_code=splitdir(@__FILE__)[1]
                                       )
 
-    # Save ground
-    for (i, ground) in enumerate(grounds)
-        gt.save(ground, run_name*"_Ground$i"; path=save_path)
-    end
-
     return simulation, pfield
 end
 
 
-function visualize_maneuver_vahana(; save_path=extdrive_path*"vahana_maneuver00/",
+function visualize_maneuver_vahana(; save_path=extdrive_path*"vahana2_maneuver00/",
                                         prompt=true,
-                                        run_name="vahana",
+                                        run_name="vahana2",
                                         verbose=true, v_lvl=0,
                                         paraview=true,
                                         optargs...)
@@ -193,7 +217,7 @@ function visualize_maneuver_vahana(; save_path=extdrive_path*"vahana_maneuver00/
     dt = telapsed/nsteps
 
     # Generate maneuver
-    maneuver = generate_maneuver_vahana1(; optargs...)
+    maneuver = generate_maneuver_vahana(; optargs...)
 
     # Plot maneuver path and controls
     uns.plot_maneuver(maneuver; tstages=[0.2, 0.3, 0.5, 0.6])
@@ -230,7 +254,7 @@ function visualize_maneuver_vahana(; save_path=extdrive_path*"vahana_maneuver00/
                                     )
 
     # Move landing pad to landing area
-    gt.lintransform!(grounds[2], eye(3), Vcruise*telapsed*[-0.25, 0, -0.0025])
+    gt.lintransform!(grounds[2], Array(1.0I, 3, 3), Vcruise*telapsed*[-0.25, 0, -0.0025])
 
     # Save ground
     for (i, ground) in enumerate(grounds)

@@ -5,12 +5,12 @@
 # AUTHORSHIP
   * Author    : Eduardo J. Alvarez
   * Email     : Edo.AlvarezR@gmail.com
-  * Created   : Oct 2019
+  * Created   : Feb 2021
   * License   : MIT
 =###############################################################################
 
 
-function generate_maneuver_vahana1(; disp_plot=false, add_rotors=true, V0=0.0001)
+function generate_maneuver_vahana(; disp_plot=false, add_rotors=true, V0=0.0001)
 
     # NOTE: All of the following number are non-dimensional and scaled between
     # 0 and 1, with 0 and 1 beginning and end of simulation, or a scaling

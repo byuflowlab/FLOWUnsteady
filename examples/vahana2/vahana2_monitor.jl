@@ -1,11 +1,11 @@
 #=##############################################################################
 # DESCRIPTION
-    Vehicle and components performance montiro.
+    Vehicle and components performance monitor.
 
 # AUTHORSHIP
   * Author    : Eduardo J. Alvarez
   * Email     : Edo.AlvarezR@gmail.com
-  * Created   : Apr 2020
+  * Created   : Feb 2021
   * License   : MIT
 =###############################################################################
 
