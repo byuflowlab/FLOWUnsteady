@@ -216,6 +216,8 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
                                 nsteps_plot=1,
                                 nsteps_savefig=10)
 
+    fcalls = 0                  # Number of function calls
+
     # y2b = 2*wing._ym/b_ref          # Initial span position
     y2b = 2*[vlm.getControlPoint(wing, i)[y2b_i] for i in 1:vlm.get_m(wing)]/b_ref
     prev_wing = nothing
@@ -263,17 +265,19 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
         ax.set_ylabel(L"Effective velocity $V_\infty$")
     end
 
-    # Convergence file header
-    if save_path!=nothing
-        f = open(fname, "w")
-        print(f, "T,CL,CD\n")
-        close(f)
-    end
-
     function extra_runtime_function(sim, PFIELD, T, DT)
 
         aux = PFIELD.nt/nsteps_sim
         clr = (1-aux, 0, aux)
+
+        if fcalls==0
+            # Convergence file header
+            if save_path!=nothing
+                f = open(fname, "w")
+                print(f, "T,CL,CD\n")
+                close(f)
+            end
+        end
 
         if PFIELD.nt>2
 
@@ -374,6 +378,7 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
         end
 
         prev_wing = deepcopy(wing)
+        fcalls += 1
         return false
     end
 end
