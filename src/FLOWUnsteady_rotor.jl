@@ -172,8 +172,8 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
         ax.legend(loc="best", frameon=true)
         ax.grid(true, color="0.8", linestyle="--")
 
-        fig = vlm.ap.figure("polars", figsize=[7,5].*[length(airfoils), 1])
-        axs = fig.subplots(1, length(airfoils))
+        fig = vlm.ap.figure("polars", figsize=[7*3, 5*1]*2/3)
+        axs = fig.subplots(1, 3)
         for (i,(pos, polar)) in enumerate(airfoils)
             vlm.ap.plot(polar; geometry=true, label="pos=$pos, Re=$(vlm.ap.get_Re(polar))"*
                                         (Mas!=nothing ? ", Ma=$(round(Mas[i], digits=2))" : ""),

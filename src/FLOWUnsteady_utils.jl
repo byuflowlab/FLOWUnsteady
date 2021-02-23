@@ -34,7 +34,7 @@ Plots the kinematics and controls of a `KinematicManeuver`.
 """
 function plot_maneuver(maneuver::KinematicManeuver;
                         ti::Real=0, tf::Real=1, vis_nsteps=300,
-                        figname="maneuver", tstages=[], size_factor=1.0)
+                        figname="maneuver", tstages=[], size_factor=2/3)
 
     Vvhcl = maneuver.Vvehicle
     avhcl = maneuver.anglevehicle
@@ -124,9 +124,10 @@ function plot_maneuver(maneuver::KinematicManeuver;
 
     if length(angle_syss)!=0 || length(RPM_syss)!=0
         fig2 = figure(figname*"-controls",
-                        figsize=[7, 5].*gdims * size_factor * (nplots==1 ? 3/6 : 2/3);
+                        figsize=[7, 5].*gdims * size_factor * (nplots==1 ? 2/3 : 1);
                                                         constrained_layout=true)
         axs2 = fig2.subplots(gdims[1], gdims[2])
+        axs2 = gdims[1]==1 && gdims[2]==1 ? [axs2] : axs2
         fig2.suptitle("VEHICLE CONTROLS")
     end
 
@@ -167,7 +168,7 @@ function plot_maneuver(maneuver::KinematicManeuver;
         end
 
         ax.set_xlabel("Non-dimensional time")
-        ax.set_ylabel("Non-dimensional RPM (RPM/RPMh)")
+        ax.set_ylabel("Non-dimensional RPM\n(RPM/RPMh)")
         ax.legend(loc="best", frameon=false)
     end
 
