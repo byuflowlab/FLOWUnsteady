@@ -29,8 +29,8 @@ const winckelmans = kernel_winckelmans
 const rungekutta3 = (args...)->nothing
 const euler = (args...)->nothing
 
+const pedrizzetti = (args...)->nothing
 
-const formulation_sphere = ReformulatedVPM{RealFMM}(1/4, 1/4)
 const sgs_none(args...) = nothing
 const sgs_scaling_none(args...) = 1
 
@@ -115,6 +115,7 @@ struct ReformulatedVPM{R} <: Formulation{R}
     ReformulatedVPM{R}(f=R(0), g=R(1/5); h=(1-3*g)/(1+3*f)) where {R} = new(f, g, h)
 end
 
+const formulation_sphere = ReformulatedVPM{RealFMM}(1/4, 1/4)
 
 ################################################################################
 # CORE SPEADING SCHEME TYPE

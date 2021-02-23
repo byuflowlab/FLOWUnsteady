@@ -354,7 +354,7 @@ function tandemheavingwing(;   # TEST OPTIONS
                                       run_name=run_name,
                                       prompt=prompt,
                                       verbose=verbose2, v_lvl=v_lvl+1,
-                                      save_horseshoes=!wake_coupled
+                                      save_horseshoes=!wake_coupled || VehicleType==uns.QVLMVehicle
                                       )
 
     return simulation, pfield
