@@ -42,7 +42,7 @@ end
 
 # ------------ DRIVERS ---------------------------------------------------------
 
-function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim03",
+function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim10",
                                     prompt=true,
                                     run_name="vahana2",
                                     verbose=true, v_lvl=1)
@@ -53,21 +53,29 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim03",
     n_factor = 1                            # Refinement factor
     add_rotors = true                       # Whether to include rotors
 
+    # Maneuver to perform
+    ## 72 steps per rev settings
+    Vcruise = 0.25 * 125*0.44704            # Cruise speed
+    Vinf(x,t) = 1e-5*[1,0,-1]               # (m/s) freestream velocity, if 0 the simulation might crash
+    RPMh_w = 600.0                          # RPM of main wing rotors in hover
+    telapsed = 30.0                         # Total time to perform maneuver
+    nsteps = 21600                          # Time steps
+
     # # Maneuver to perform
     # Vcruise = 0.125 * 125*0.44704         # Cruise speed
     # RPMh_w = 600                          # RPM of main wing rotors in hover
     # telapsed = 60.0                       # Total time to perform maneuver
     # nsteps = 9000                         # Time steps
 
-    # Maneuver to perform
-    Vcruise = 0.25 * 125*0.44704            # Cruise speed
-    Vinf(x,t) = 1e-5*[1,0,-1]               # (m/s) freestream velocity, if 0 the simulation might crash
-    # RPMh_w = 200                          # RPM of main wing rotors in hover
-    # RPMh_w = 20
-    RPMh_w = 100
-    telapsed = 30.0                         # Total time to perform maneuver
-    nsteps = 1500                           # Time steps
-    # nsteps = 100
+    # # Maneuver to perform
+    # Vcruise = 0.25 * 125*0.44704            # Cruise speed
+    # Vinf(x,t) = 1e-5*[1,0,-1]               # (m/s) freestream velocity, if 0 the simulation might crash
+    # # RPMh_w = 200                          # RPM of main wing rotors in hover
+    # # RPMh_w = 20
+    # RPMh_w = 100
+    # telapsed = 30.0                         # Total time to perform maneuver
+    # nsteps = 1500                           # Time steps
+    # # nsteps = 100
 
     dt = telapsed/nsteps
 
@@ -150,7 +158,11 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim03",
 
 
     # ----------------- WAKE TREATMENT FUNCTION --------------------------------
-    runtime_function(args...; optargs...) = remove_particles_lowstrength(args...; optargs...) || monitor(args...; optargs...)
+    remove_particles(args...; optargs...) = (remove_particles_lowstrength(args...; optargs...)
+                                          || remove_particles_sphere(args...; optargs...))
+
+    # ----------------- RUNTIME FUNCTION ---------------------------------------
+    runtime_function(args...; optargs...) = remove_particles(args...; optargs...) || monitor(args...; optargs...)
 
     # ----------------- RUN SIMULATION -----------------------------------------
     pfield = uns.run_simulation(simulation, nsteps;
@@ -183,7 +195,7 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim03",
 end
 
 
-function visualize_maneuver_vahana(; save_path=extdrive_path*"vahana2_maneuver00/",
+function visualize_maneuver_vahana(; save_path=extdrive_path*"vahana2_maneuver02/",
                                         prompt=true,
                                         run_name="vahana2",
                                         verbose=true, v_lvl=0,
@@ -191,10 +203,17 @@ function visualize_maneuver_vahana(; save_path=extdrive_path*"vahana2_maneuver00
                                         optargs...)
 
     # Maneuver to perform
+    ## 72 steps per rev settings
     Vcruise = 0.25 * 125*0.44704            # Cruise speed
-    RPMh_w = 400.0                          # RPM of main wing rotors in hover
+    RPMh_w = 600.0                          # RPM of main wing rotors in hover
     telapsed = 30.0                         # Total time to perform maneuver
-    nsteps = 100                            # Time steps
+    nsteps = 21600                          # Time steps
+
+    # # Maneuver to perform
+    # Vcruise = 0.25 * 125*0.44704            # Cruise speed
+    # RPMh_w = 400.0                          # RPM of main wing rotors in hover
+    # telapsed = 30.0                         # Total time to perform maneuver
+    # nsteps = 100                            # Time steps
 
     # # Maneuver to perform
     # Vcruise = 0.25 * 125*0.44704            # Cruise speed
@@ -301,11 +320,11 @@ function visualize_geometry_vahana(; save_path=extdrive_path*"vahana2_geometry01
     # Save vehicle
     strn = uns.save_vtk(vehicle, run_name; path=save_path, save_horseshoes=false)
 
-    # # Save ground
-    # for (i, ground) in enumerate(grounds)
-    #     gt.save(ground, run_name*"_Ground$i"; path=save_path)
-    #     strn *= run_name*"_Ground$i.vtk;"
-    # end
+    # Save ground
+    for (i, ground) in enumerate(grounds)
+        gt.save(ground, run_name*"_Ground$i"; path=save_path)
+        strn *= run_name*"_Ground$i.vtk;"
+    end
 
     # Call Paraview
     run(`paraview --data="$save_path/$strn"`)

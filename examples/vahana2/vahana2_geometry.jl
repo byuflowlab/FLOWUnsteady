@@ -105,8 +105,8 @@ function generate_geometry_vahana(;
     tr_w = 1.0                    # Taper ratio
     twist_r_w = 7.5               # (deg) twist at root
     twist_t_w = twist_r_w         # (deg) twist at tip
-    lambda_w = 10.0               # (deg) sweep
-    gamma_w = 0.0                 # (deg) dihedral
+    lambda_w = main_outtilt       # (deg) sweep
+    gamma_w = 5.0                 # (deg) dihedral
     n_w = 12*n_factor             # Number of horseshoes per side of wing
     r_w = 2.0                     # Horseshoe expansion ratio
     md_w = 0.9                    # Ratio of length of middle section
@@ -232,11 +232,12 @@ function generate_geometry_vahana(;
                           symmetric=true, chordalign=0.0,
                           _ign1=true)
     # Left section
-    pos_l_w = [-(1-md_w), -0]
+    # pos_l_w = [-(1-md_w), -0]
+    pos_l_w = [0, -(1-md_w)]   # Here I'm defining this wing section from right to left
     clen_l_w = [1, clen_md_w[end]]
     twist_l_w = [twist_t_w, twist_md_w[end]]
     wing_L = vlm.complexWing(b_w, AR_w, ceil(Int, (1-md_w)*n_w/2), pos_l_w, clen_l_w,
-                            twist_l_w, lambda_w*ones(1), gamma_w*ones(1);
+                            twist_l_w, -lambda_w*ones(1), -gamma_w*ones(1);
                             symmetric=false, chordalign=0.0,
                             _ign1=true)
     # Right section
@@ -271,13 +272,14 @@ function generate_geometry_vahana(;
     if add_rotors
         if verbose; println("\t"^(v_lvl+2)*"Generating main wing propellers..."); end;
         O_prop_w = [
-                     (ypos - md_w*b_w/2)*[tan(lambda_w*pi/180), 0, tan(gamma_w*pi/180)] +
+                     (ypos - md_w*b_w/2)*[tan(lambda_w*pi/180), 0, -tan(gamma_w*pi/180)] +
                      ypos*[0, 1, 0] +
                      [-(i in stacked ? stckd_xoc_offset : xoc_offset_main)*AR_w/b_w, 0, 0] +
-                     [0, 0, (in in stacked ? stckd_zoc_offset : 0)*AR_w/b_w]
+                     [0, 0, (i in stacked ? stckd_zoc_offset*tan(gamma_w*pi/180) : 0)*AR_w/b_w]
                      for (i, ypos) in enumerate(y_pos_prop_w)]
         props_w = vlm.Rotor[]
-        props_w_stacked = vlm.Rotor[]
+        props_w_stacked_up = vlm.Rotor[]
+        props_w_stacked_low = vlm.Rotor[]
         for i in 1:2*np_w
             right = i<=np_w    # Indicates which side of the wing
 
@@ -304,7 +306,7 @@ function generate_geometry_vahana(;
                 push!(props_w, this_prop)
 
             else
-                push!(props_w_stacked, this_prop)
+                push!(props_w_stacked_up, this_prop)
 
                 copy_prop = deepcopy(stackedrotors[ 1+(i+1*!stckd_corotating)%2 ])
 
@@ -331,7 +333,7 @@ function generate_geometry_vahana(;
                 this_prop._polarroot = copy_prop._polarroot
                 this_prop._polartip = copy_prop._polartip
 
-                push!(props_w_stacked, this_prop)
+                push!(props_w_stacked_low, this_prop)
             end
         end
     end
@@ -340,8 +342,11 @@ function generate_geometry_vahana(;
     main_wing_fixed = vlm.WingSystem()
     vlm.addwing(main_wing_fixed, "WingM", wing_md)
     if add_rotors
-        for (i, prop) in enumerate(props_w_stacked)
-            vlm.addwing(main_wing_fixed, "StackedProp$i", prop)
+        for (i, prop) in enumerate(props_w_stacked_up)
+            vlm.addwing(main_wing_fixed, "StackedPropUp$i", prop)
+        end
+        for (i, prop) in enumerate(props_w_stacked_low)
+            vlm.addwing(main_wing_fixed, "StackedPropLow$i", prop)
         end
     end
 
@@ -542,7 +547,7 @@ function generate_geometry_vahana(;
     vlm.addwing(system, "TandemWing", tandem_wing)
 
     if add_rotors
-        rotors = vcat(props_w, props_w_stacked, props_tw)
+        rotors = vcat(props_w, props_w_stacked_up, props_w_stacked_low, props_tw)
     end
 
     # ------------ GROUND SURFACE ----------------------------------------
@@ -558,7 +563,7 @@ function generate_geometry_vahana(;
 
     # Rotors grouped by systems of the same RPM
     if add_rotors
-        rotor_systems = (props_w, props_w_stacked, props_tw)
+        rotor_systems = (props_w, props_w_stacked_up, props_w_stacked_low, props_tw)
     else
         rotor_systems = ()
     end

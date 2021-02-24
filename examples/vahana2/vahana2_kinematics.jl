@@ -35,9 +35,11 @@ function generate_maneuver_vahana(; disp_plot=false, add_rotors=true, V0=0.0001)
     RPM1 = 1.10
     RPM2 = 1.50
     RPM3 = 0.75
+    RPM3_stacked = 1e-7
     RPM4 = 1.00
     RPM5 = 0.90
 
+    r_RPMh_stup = 1.25               # Ratio between stacked and main rotors in hover
     r_RPMh_tw = 0.75               # Ratio between tandem and main wing RPM in hover
 
     # NOTE: -x is in the direction of flight and +z is climb with ground at z=0
@@ -304,6 +306,97 @@ function generate_maneuver_vahana(; disp_plot=false, add_rotors=true, V0=0.0001)
     end
 
     """
+        Receives a nondimensional time between 0 and 1, and returns the RPM of
+        stacked upper rotors in main wing non-dimensionalized by the hover RPM.
+    """
+    function RPM_stacked_up(t)
+
+        # ------------ TAKE OFF ------------------------------------------------
+        if t<t1
+            # Weibull acceleration to target climb
+            if t<t1/5
+                val = t / (t1/5)
+                RPM_w = RPM1*(1.05-exp(-(5*val)^2))
+            # Weibull decceleration to hover
+            else
+                val = 1 - (t-t1/5) / (1-t1/5)
+                RPM_w = 1.0 + (RPM1-1.0)*(1-exp(-(2*val)^5))
+            end
+
+            return r_RPMh_stup*RPM_w
+
+        # ------------ TRANSITION ----------------------------------------------
+        elseif t<t2
+            # Increases RPM to sustain forward flight and hover
+            if (t-t1)<(t2-t1)*0.65
+                val = (t-t1)/((t2-t1)*0.65)
+                RPM_tw = r_RPMh_tw*(1.0 + (RPM2-1.0)*(1-exp(-(2*val)^5)))
+            # Decreases RPM as it tilts the wing out of hover support
+            else
+                val = 1 - (t2-t)/(t2-((t2-t1)*0.65 + t1))
+                RPM_tw = r_RPMh_tw*(RPM2 + val*(RPM3_stacked-RPM2))
+            end
+
+            return RPM_tw
+
+        # ------------ CRUISE --------------------------------------------------
+        elseif t<t3
+            return RPM3_stacked
+
+        # ------------ TRANSITION ----------------------------------------------
+        elseif t<t4
+            # Weibull decceleration to hover
+            val = 1.5 * (1 - (t-t3) / (t4-t3))
+            RPM_w = RPM4 + (RPM3_stacked-RPM4)*(1-exp(-(val)^3))
+            return r_RPMh_stup*RPM_w
+
+        # ------------ LANDING -------------------------------------------------
+        else
+            # Weibull acceleration to target descend
+            if (t-t4)<(1-t4)*0.75
+                val = (t-t4) / ((1-t4)*0.75)
+                RPM_w = RPM4 + (RPM5-RPM4)*(1-exp(-(3*val)^5))
+            # Weibull decceleration to hover
+            else
+                val = ((t-t4) - (1-t4)*0.75) / ((1-t4)*(1-0.75))
+                val = val + 0.60
+                RPM_w = RPM5*(3.0*(val)^(3.0-1)*exp(-(val)^5.0))/1.0
+            end
+
+            return r_RPMh_stup*RPM_w
+        end
+    end
+
+
+    """
+        Receives a nondimensional time between 0 and 1, and returns the RPM of
+        stacked lower rotors in main wing non-dimensionalized by the hover RPM.
+    """
+    function RPM_stacked_low(t)
+
+        # ------------ TAKE OFF ------------------------------------------------
+        if t<t1
+            return RPM_stacked_up(t)
+
+        # ------------ TRANSITION ----------------------------------------------
+        elseif t<t2
+            return RPM_stacked_up(t)
+
+        # ------------ CRUISE --------------------------------------------------
+        elseif t<t3
+            return RPM_stacked_up(t)
+
+        # ------------ TRANSITION ----------------------------------------------
+        elseif t<t4
+            return RPM_stacked_up(t)
+
+        # ------------ LANDING -------------------------------------------------
+        else
+            return RPM_stacked_up(t)
+        end
+    end
+
+    """
         Receives a nondimensional time between 0 and 1, and returns the
         tandem wing RPM non-dimensionalized by the hover RPM.
     """
@@ -351,7 +444,7 @@ function generate_maneuver_vahana(; disp_plot=false, add_rotors=true, V0=0.0001)
     ############################################################################
     angle = (angle_main, angle_tandem)
     if add_rotors
-        RPM = (RPM_main, RPM_tandem)
+        RPM = (RPM_main, RPM_stacked_up, RPM_stacked_low, RPM_tandem)
     else
         RPM = ()
     end
