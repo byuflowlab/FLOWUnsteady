@@ -49,7 +49,8 @@ following format:
 """
 function generate_geometry_vahana(;
                                     # AIRCRAFT OPTIONS
-                                    rotor_file="Vahana2.csv", # Rotor
+                                    tiltrotor_file="VahanaTilt.csv", # Tilt-rotor
+                                    stackedrotor_file="VahanaStacked.csv", # Stacked-rotor
                                     data_path=uns.def_data_path,
                                     xfoil=true,                     # Run XFOIL
                                     n_factor::Int=1,                # Refinement factor
@@ -66,8 +67,9 @@ function generate_geometry_vahana(;
     if verbose; println("\t"^(v_lvl)*"Defining parameters..."); end;
 
     # ------------ GEOMETRIC PARAMETERS ------------------------------------
-    init_ori = 90.0                 # Initial orientation of wings
-    init_ori_prop = 0*90.0            # Initial orientation of rotors
+    init_ori = 90.0               # Initial orientation of wings
+    init_ori_prop = 0*90.0        # Initial orientation of rotors
+    init_ori_stackedprop = 30.0   # Initial orientation of stacked rotors
 
     # Rotors
     # NOTE: The radii defined here must match the radius in rotor_file
@@ -83,7 +85,19 @@ function generate_geometry_vahana(;
     ReD = ReD07/0.7               # Reynolds at tip
     pitch = 0.0                   # (deg) pitch of propellers
     soD = 0.1                     # Tip-to-tip distance of rotors over diameter
-    xoc_offset = 0.1              # Axial distance of rotors from LE over chord
+    xoc_offset_main = 0.175       # Axial distance of rotors from LE over chord
+    xoc_offset_tandem = 0.10      # Axial distance of rotors from LE over chord
+    main_outtilt = 10             # Mounted out-tilt of tandem-wing rotors
+    tandem_pitchtilt = 10         # Mounted pitch-tilt of tandem-wing rotors
+
+    # Stacked rotors
+    stacked = [np_w, np_w+1]      # Index of wing rotors that are stacked rotors
+    stckd_xoc_offset = -1.40      # Axial distance of rotors from LE over chord
+    stckd_zoc_offset = 0.10       # Distance of stacked rotors above wing over chord
+    stckd_zoR_offset = -0.05      # Stacking distance between stacked rotors over R
+    stckd_corotating = true       # Co-rotating stacked rotors
+    stckd_phase = -10             # Initial phase difference of stacked rotors
+    stckd_pitch = 7.5             # Pitch difference of stacked rotors
 
     # Wing
     b_w = 5.86                    # (m) span
@@ -91,7 +105,7 @@ function generate_geometry_vahana(;
     tr_w = 1.0                    # Taper ratio
     twist_r_w = 7.5               # (deg) twist at root
     twist_t_w = twist_r_w         # (deg) twist at tip
-    lambda_w = 0.0                # (deg) sweep
+    lambda_w = 10.0               # (deg) sweep
     gamma_w = 0.0                 # (deg) dihedral
     n_w = 12*n_factor             # Number of horseshoes per side of wing
     r_w = 2.0                     # Horseshoe expansion ratio
@@ -165,20 +179,35 @@ function generate_geometry_vahana(;
     # ------------ ROTORS ------------------------------------------------
     # Generates base propellers (one on each rotation orientation)
     if add_rotors
-        propellers = vlm.Rotor[]
-        if verbose; println("\t"^(v_lvl+1)*"Generating first propeller..."); end;
-        push!(propellers, uns.generate_rotor(rotor_file; pitch=pitch,
+        tiltrotors = vlm.Rotor[]
+        if verbose; println("\t"^(v_lvl+1)*"Generating first tilt-rotor..."); end;
+        push!(tiltrotors, uns.generate_rotor(tiltrotor_file; pitch=pitch,
                                                 n=n_ccb, blade_r=blade_r, CW=!CW_w, ReD=ReD,
-                                                verbose=verbose, xfoil=xfoil,
+                                                verbose=verbose, v_lvl=v_lvl+2, xfoil=xfoil,
                                                 data_path=data_path, plot_disc=false))
-        if verbose; println("\t"^(v_lvl+1)*"Generating second propeller..."); end;
-        # push!(propellers, generate_rotor(pitch; n=n_ccb, blade_r=blade_r, CW=CW_w, ReD=ReD,
-        #                         verbose=verbose, xfoil=xfoil, rotor_file=rotor_file))
-        push!(propellers, vlm.Rotor(!propellers[1].CW, propellers[1].r,
-                                  propellers[1].chord, propellers[1].theta,
-                                  propellers[1].LE_x, propellers[1].LE_z,
-                                  propellers[1].B, propellers[1].airfoils))
-        vlm.initialize(propellers[2], propellers[1].m)
+        if verbose; println("\t"^(v_lvl+1)*"Generating second tilt-rotor..."); end;
+        # push!(tiltrotors, generate_rotor(pitch; n=n_ccb, blade_r=blade_r, CW=CW_w, ReD=ReD,
+        #                         verbose=verbose, xfoil=xfoil, rotor_file=tiltrotor_file))
+        push!(tiltrotors, vlm.Rotor(!tiltrotors[1].CW, tiltrotors[1].r,
+                                  tiltrotors[1].chord, tiltrotors[1].theta,
+                                  tiltrotors[1].LE_x, tiltrotors[1].LE_z,
+                                  tiltrotors[1].B, tiltrotors[1].airfoils))
+        vlm.initialize(tiltrotors[2], tiltrotors[1].m)
+
+        stackedrotors = vlm.Rotor[]
+        if verbose; println("\t"^(v_lvl+1)*"Generating first stacked-rotor..."); end;
+        push!(stackedrotors, uns.generate_rotor(stackedrotor_file; pitch=pitch,
+                                                n=n_ccb, blade_r=blade_r, CW=!CW_w, ReD=ReD,
+                                                verbose=verbose, v_lvl=v_lvl+2, xfoil=xfoil,
+                                                data_path=data_path, plot_disc=false))
+        if verbose; println("\t"^(v_lvl+1)*"Generating second stacked-rotor..."); end;
+        # push!(stackedrotors, generate_rotor(pitch; n=n_ccb, blade_r=blade_r, CW=CW_w, ReD=ReD,
+        #                         verbose=verbose, xfoil=xfoil, rotor_file=stackedrotor_file))
+        push!(stackedrotors, vlm.Rotor(!stackedrotors[1].CW, stackedrotors[1].r,
+                                  stackedrotors[1].chord, stackedrotors[1].theta,
+                                  stackedrotors[1].LE_x, stackedrotors[1].LE_z,
+                                  stackedrotors[1].B, stackedrotors[1].airfoils))
+        vlm.initialize(stackedrotors[2], stackedrotors[1].m)
     end
 
 
@@ -195,23 +224,23 @@ function generate_geometry_vahana(;
     # newtip = root + md*(tip-root) = tip/tr + md*tip*(1 - 1/tr) = tip * ( md + (1/tr)*(1-md) )
     # newtr = newtip/root = 1 + md*(tip/root - 1) = 1 + md*(tr - 1)
     # newar = b/newtip = ar / ( md + (1/tr)*(1-md) )
-    pos_md_w = [-md_w, 0.0, md_w]
-    clen_md_w = [md_w + (1/tr_w)*(1-md_w), 1/tr_w, md_w + (1/tr_w)*(1-md_w)]
-    twist_md_w = [twist_r_w + md_w*(twist_t_w-twist_r_w), twist_r_w, twist_r_w + md_w*(twist_t_w-twist_r_w)]
+    pos_md_w = [0.0, md_w]
+    clen_md_w = [1/tr_w, md_w + (1/tr_w)*(1-md_w)]
+    twist_md_w = [twist_r_w, twist_r_w + md_w*(twist_t_w-twist_r_w)]
     wing_md = vlm.complexWing(b_w, AR_w, ceil(Int, md_w*n_w), pos_md_w, clen_md_w, twist_md_w,
-                          lambda_w*ones(2), gamma_w*ones(2);
-                          symmetric=false, chordalign=0.0,
+                          lambda_w*ones(1), gamma_w*ones(1);
+                          symmetric=true, chordalign=0.0,
                           _ign1=true)
     # Left section
-    pos_l_w = [-1, pos_md_w[1]]
-    clen_l_w = [1, clen_md_w[1]]
-    twist_l_w = [twist_t_w, twist_md_w[1]]
+    pos_l_w = [-(1-md_w), -0]
+    clen_l_w = [1, clen_md_w[end]]
+    twist_l_w = [twist_t_w, twist_md_w[end]]
     wing_L = vlm.complexWing(b_w, AR_w, ceil(Int, (1-md_w)*n_w/2), pos_l_w, clen_l_w,
                             twist_l_w, lambda_w*ones(1), gamma_w*ones(1);
                             symmetric=false, chordalign=0.0,
                             _ign1=true)
     # Right section
-    pos_r_w = [pos_md_w[end], 1]
+    pos_r_w = [0, (1-md_w)]
     clen_r_w = [clen_md_w[end], 1]
     twist_r_w = [twist_md_w[end], twist_t_w]
     wing_R = vlm.complexWing(b_w, AR_w, ceil(Int, (1-md_w)*n_w/2), pos_r_w, clen_r_w,
@@ -219,12 +248,19 @@ function generate_geometry_vahana(;
                             symmetric=false, chordalign=0.0,
                             _ign1=true)
 
+    O_w_R = (md_w*b_w/2)*[0, 1, 0]
+    O_w_L = [1 0 0; 0 -1 0; 0 0 1]*O_w_R
+    vlm.setcoordsystem(wing_R, O_w_R, Float64[1 0 0; 0 1 0; 0 0 1])
+    vlm.setcoordsystem(wing_L, O_w_L, Float64[1 0 0; 0 1 0; 0 0 1])
+
     # Generates winglets
     winglet_R = vlm.simpleWing(b_wl, AR_wl, tr_wl, twist_r_wl, lambda_wl, gamma_wl;
                                           twist_tip=twist_t_wl, n=n_wl, r=r_wl)
     winglet_L = vlm.simpleWing(b_wl, AR_wl, tr_wl, twist_r_wl, lambda_wl, gamma_wl;
                                           twist_tip=twist_t_wl, n=n_wl, r=r_wl)
-    O_wl_R = (b_w/2)*[tan(lambda_w*pi/180), 1, tan(gamma_w*pi/180)]
+
+    O_wl_R = (b_w/2)*[0, 1, 0]
+    O_wl_R += ((1-md_w)*b_w/2)*[tan(lambda_w*pi/180), 0, tan(gamma_w*pi/180)]
     O_wl_L = [1 0 0; 0 -1 0; 0 0 1]*O_wl_R
     Oaxis_wl_R = gt.rotation_matrix(0.0, 0.0, 90.0)
     Oaxis_wl_L = gt.rotation_matrix(0.0, 0.0, -90.0)
@@ -234,20 +270,29 @@ function generate_geometry_vahana(;
     ## Generates propellers on wing (from right to left)
     if add_rotors
         if verbose; println("\t"^(v_lvl+2)*"Generating main wing propellers..."); end;
-        O_prop_w = [ ypos*[tan(lambda_w*pi/180), 1, tan(gamma_w*pi/180)] + [-xoc_offset*AR_w/b_w, 0, 0]
-                                                  for ypos in y_pos_prop_w]
+        O_prop_w = [
+                     (ypos - md_w*b_w/2)*[tan(lambda_w*pi/180), 0, tan(gamma_w*pi/180)] +
+                     ypos*[0, 1, 0] +
+                     [-(i in stacked ? stckd_xoc_offset : xoc_offset_main)*AR_w/b_w, 0, 0] +
+                     [0, 0, (in in stacked ? stckd_zoc_offset : 0)*AR_w/b_w]
+                     for (i, ypos) in enumerate(y_pos_prop_w)]
         props_w = vlm.Rotor[]
+        props_w_stacked = vlm.Rotor[]
         for i in 1:2*np_w
             right = i<=np_w    # Indicates which side of the wing
-            copy_prop = propellers[1+i%2]
-            this_prop = deepcopy(copy_prop) # Alternates rotation orientation
-            this_O = O_prop_w[ right ? i : np_w-(i-np_w-1)] # Chooses position
-            this_O = [1 0 0; 0 (-1)^!right 0; 0 0 1]*this_O   # Places it in correct side
 
-            vlm.setcoordsystem(this_prop, this_O, Float64[1 0 0; 0 1 0; 0 0 1]; user=true)
+            copy_prop = i in stacked ? stackedrotors[1+i%2] : tiltrotors[1+i%2]
+            this_prop = deepcopy(copy_prop) # Alternates rotation orientation
+
+            this_O = O_prop_w[ right ? i : np_w-(i-np_w-1)]   # Chooses position
+            this_O = [1 0 0; 0 (-1)^!right 0; 0 0 1]*this_O   # Places it in correct side
+            this_Oaxis = i in stacked ? gt.rotation_matrix(0.0, 90, 0.0) :
+                                        gt.rotation_matrix((-1)^(i%2==0)*main_outtilt, 0.0, 0.0)
+
+            vlm.setcoordsystem(this_prop, this_O, this_Oaxis; user=true)
 
             # Rotates props to be tip to tip
-            vlm.rotate(this_prop, (-1)^(!CW_w) * init_ori_prop)
+            vlm.rotate(this_prop, (-1)^(!CW_w) * (i in stacked ? init_ori_stackedprop : init_ori_prop))
 
             # Adds the original polars that don't get copied in deepcopy
             this_prop.airfoils = copy_prop.airfoils
@@ -255,16 +300,63 @@ function generate_geometry_vahana(;
             this_prop._polarroot = copy_prop._polarroot
             this_prop._polartip = copy_prop._polartip
 
-            push!(props_w, this_prop)
+            if !(i in stacked)
+                push!(props_w, this_prop)
+
+            else
+                push!(props_w_stacked, this_prop)
+
+                copy_prop = deepcopy(stackedrotors[ 1+(i+1*!stckd_corotating)%2 ])
+
+                # Generate lower rotor of stack and add pitch
+                if stckd_pitch != 0
+                    this_prop = vlm.Rotor(copy_prop.CW, copy_prop.r,
+                                              copy_prop.chord, copy_prop.theta .+ stckd_pitch,
+                                              copy_prop.LE_x, copy_prop.LE_z,
+                                              copy_prop.B, copy_prop.airfoils)
+                    vlm.initialize(this_prop, copy_prop.m)
+                else
+                    this_prop = copy_prop
+                end
+
+                this_O += R_w*[0, 0, stckd_zoR_offset]
+                vlm.setcoordsystem(this_prop, this_O, this_Oaxis; user=true)
+
+                # Rotates props to be tip to tip
+                vlm.rotate(this_prop, (-1)^(!CW_w) * (init_ori_stackedprop+stckd_phase))
+
+                # Adds the original polars that don't get copied in deepcopy
+                this_prop.airfoils = copy_prop.airfoils
+                this_prop._polars = copy_prop._polars
+                this_prop._polarroot = copy_prop._polarroot
+                this_prop._polartip = copy_prop._polartip
+
+                push!(props_w_stacked, this_prop)
+            end
         end
     end
 
+    # Assembles fixed section of the wing
+    main_wing_fixed = vlm.WingSystem()
+    vlm.addwing(main_wing_fixed, "WingM", wing_md)
+    if add_rotors
+        for (i, prop) in enumerate(props_w_stacked)
+            vlm.addwing(main_wing_fixed, "StackedProp$i", prop)
+        end
+    end
+
+    main_wing_R = vlm.WingSystem()
+    vlm.addwing(main_wing_R, "Tip", wing_R)
+    vlm.addwing(main_wing_R, "Winglet", winglet_R)
+
+    main_wing_L = vlm.WingSystem()
+    vlm.addwing(main_wing_L, "Tip", wing_L)
+    vlm.addwing(main_wing_L, "Winglet", winglet_L)
+
     # Assembles moving sections of the wing
     main_wing_moving = vlm.WingSystem()
-    vlm.addwing(main_wing_moving, "WingR", wing_R)
-    vlm.addwing(main_wing_moving, "WingletR", winglet_R)
-    vlm.addwing(main_wing_moving, "WingL", wing_L)
-    vlm.addwing(main_wing_moving, "WingletL", winglet_L)
+    vlm.addwing(main_wing_moving, "WingR", main_wing_R)
+    vlm.addwing(main_wing_moving, "WingL", main_wing_L)
     if add_rotors
         for (i, prop) in enumerate(props_w)
             vlm.addwing(main_wing_moving, "Prop$i", prop)
@@ -288,13 +380,16 @@ function generate_geometry_vahana(;
         end
     end
 
+    # Places tilting sections at the main wing tip
+    O_mv = (md_w*b_w/2)*[tan(lambda_w*pi/180), 0, tan(gamma_w*pi/180)]
+
     # Initial rotation of moving sections
     Oaxis_wmv = gt.rotation_matrix(0.0, -init_ori, 0.0)
-    vlm.setcoordsystem(main_wing_moving, zeros(3), Oaxis_wmv)
+    vlm.setcoordsystem(main_wing_moving, O_mv, Oaxis_wmv)
 
     # Assembles main wing
     main_wing = vlm.WingSystem()
-    vlm.addwing(main_wing, "FixedWing", wing_md)
+    vlm.addwing(main_wing, "Fixed", main_wing_fixed)
     vlm.addwing(main_wing, "Moving", main_wing_moving)
 
     # Position of main wing
@@ -342,17 +437,19 @@ function generate_geometry_vahana(;
     ## Generates propellers on tandem wing (from right to left)
     if add_rotors
         if verbose; println("\t"^(v_lvl+2)*"Generating tandem wing propellers..."); end;
-        O_prop_tw = [ ypos*[tan(lambda_tw*pi/180), 1, tan(gamma_tw*pi/180)] + [-xoc_offset*AR_tw/b_tw, 0, 0]
+        O_prop_tw = [ ypos*[tan(lambda_tw*pi/180), 1, tan(gamma_tw*pi/180)] +
+                        [-xoc_offset_tandem*AR_tw/b_tw, 0, 0]
                                                   for ypos in y_pos_prop_tw]
         props_tw = vlm.Rotor[]
         for i in 1:2*np_tw
             right = i<=np_tw    # Indicates which side of the wing
-            copy_prop = propellers[1+(i+(CW_tw!=CW_w))%2]
+            copy_prop = tiltrotors[1+(i+(CW_tw!=CW_w))%2]
             this_prop = deepcopy(copy_prop)       # Alternates rotation orientation
             this_O = O_prop_tw[ right ? i : np_tw-(i-np_tw-1)] # Chooses position
             this_O = [1 0 0; 0 (-1)^!right 0; 0 0 1]*this_O   # Places it in correct side
+            this_Oaxis = gt.rotation_matrix(0, (-1)^(i%2==0)*(-1)^right*tandem_pitchtilt, 0)
 
-            vlm.setcoordsystem(this_prop, this_O, Float64[1 0 0; 0 1 0; 0 0 1]; user=true)
+            vlm.setcoordsystem(this_prop, this_O, this_Oaxis; user=true)
 
             # Rotates props to be tip to tip
             vlm.rotate(this_prop, (-1)^(!CW_tw) * init_ori_prop)
@@ -410,16 +507,33 @@ function generate_geometry_vahana(;
 
     # ------------ FUSELAGE ----------------------------------------------
     if verbose; println("\t"^(v_lvl+1)*"Generating fuselage..."); end;
-    # Generates fuselage
-    fuselage = vlm.Wing(x_pos_f1, c_pos_f1, 0.0, c_f1, 0.0)
-    vlm.addchord(fuselage, x_pos_f2, c_pos_f2, 0.0, c_f2, 0.0, 1)
-    vlm.addchord(fuselage, x_pos_f3, c_pos_f3, 0.0, c_f3, 0.0, 1)
-    vlm.addchord(fuselage, x_pos_f4, c_pos_f4, 0.0, c_f4, 0.0, 1)
-    Oaxis_f = gt.rotation_matrix(0.0, 0.0, -90.0)
-    vlm.setcoordsystem(fuselage, zeros(Float64,3), Oaxis_f)
-
     fuselage = generatefuselage_vahana(l_f)
 
+    body = gt.MultiGrid(3)
+    gt.addgrid(body, "Fuselage", fuselage)
+
+    if add_rotors
+        if verbose; println("\t"^(v_lvl+1)*"Generating pylons..."); end;
+
+        pylon_pos = 0.70
+        pylon_length = stckd_xoc_offset*AR_w/b_w * pylon_pos
+
+        for i in stacked
+            pylon = generatepylon(pylon_length)
+
+            right = i<=np_w
+            this_O = O_prop_w[ right ? i : np_w-(i-np_w-1)]   # Chooses position
+            this_O = [1 0 0; 0 (-1)^!right 0; 0 0 1]*this_O   # Places it in correct side
+            this_O += main_wing.O                             # Translates it with the wing
+                                                              # Offsets it according to length
+            this_O += [1/3*0.5*pylon_pos, 0, 3*R_w*stckd_zoR_offset]
+            rotation = gt.rotation_matrix2(0, 0, 0)
+
+            gt.lintransform!(pylon, rotation, this_O)
+
+            gt.addgrid(body, "Pylon$i", pylon)
+        end
+    end
 
     # ------------ SYSTEM ------------------------------------------------
     # Creates system assembly
@@ -428,7 +542,7 @@ function generate_geometry_vahana(;
     vlm.addwing(system, "TandemWing", tandem_wing)
 
     if add_rotors
-        rotors = vcat(props_w, props_tw)
+        rotors = vcat(props_w, props_w_stacked, props_tw)
     end
 
     # ------------ GROUND SURFACE ----------------------------------------
@@ -444,7 +558,7 @@ function generate_geometry_vahana(;
 
     # Rotors grouped by systems of the same RPM
     if add_rotors
-        rotor_systems = (props_w, props_tw)
+        rotor_systems = (props_w, props_w_stacked, props_tw)
     else
         rotor_systems = ()
     end
@@ -480,7 +594,7 @@ function generate_geometry_vahana(;
     end
 
     # Dummy grids that are rotated and translated along with the vehicle
-    grids = [fuselage]
+    grids = [body]
 
     # FVS's Vehicle object
     vehicle = VehicleType(   system;
@@ -823,6 +937,204 @@ function generatefuselage_vahana(fuselage_length; ncells=20)
     return triangrid_fuselage
 end
 
+
+"""
+    Returns a loft of the pylon.
+"""
+function generatepylon(pylon_length; ncells=20)
+    sections = [[] for i in 1:3]
+
+    # --------------- SECTION #1------------------------------------------------
+    Ps = [
+            [0.5, 0.1+0.2],
+            [0.0, 1.0],
+            [-0.5, 0.1+0.2],
+            [0, -0.20+0.2]
+         ]
+
+    CPs = [
+            [0.4, 1.0],
+            [-0.4, 1.0],
+            [-0.1, -0.3+0.2],
+            [0.1, -0.3+0.2],
+         ]
+
+    rhos = [
+            0.6,
+            0.6,
+            0.2,
+            0.2
+         ]
+
+    scaling = 1.0
+
+
+    ss = [
+            collect(range(0, 1, length=ncells)),
+            collect(range(0, 1, length=ncells)),
+            collect(range(0, 1, length=ncells)),
+            collect(range(0, 1, length=ncells))
+         ]
+
+    points = gt.conic_cross_section(Ps, CPs, rhos, ss)
+    points = scaling*points
+
+    sections[1] = points
+
+
+    # --------------- SECTION #2------------------------------------------------
+    Ps = [
+            [0.4, 0.4],
+            [0.0, 1.0],
+            [-0.4, 0.4],
+            [0, -0.05]
+         ]
+
+    CPs = [
+            [0.3, 1.0],
+            [-0.3, 1.0],
+            [-0.4, -0.08],
+            [0.4, -0.08],
+         ]
+
+    rhos = [
+            0.7,
+            0.7,
+            0.5,
+            0.5
+         ]
+
+    scaling = 2.0
+
+    ss = [
+            collect(range(0, 1, length=ncells)),
+            collect(range(0, 1, length=ncells)),
+            collect(range(0, 1, length=ncells)),
+            collect(range(0, 1, length=ncells))
+         ]
+
+    points = gt.conic_cross_section(Ps, CPs, rhos, ss)
+    points = scaling*points
+
+    sections[2] = points;
+
+
+    # --------------- SECTION #3------------------------------------------------
+    Ps = [
+            [0.4, 2.75-0.2],
+            [0.0, 3.25-0.2],
+            [-0.4, 2.75-0.2],
+            [0, 1.7]
+         ]
+
+    CPs = [
+            [0.3, 3.25-0.2],
+            [-0.3, 3.25-0.2],
+            [-0.4, 1.7],
+            [0.4, 1.7],
+         ]
+
+    rhos = [
+            0.4,
+            0.4,
+            0.5,
+            0.5
+         ]
+
+    scaling = 1.0
+
+    ss = [
+            collect(range(0, 1, length=ncells)),
+            collect(range(0, 1, length=ncells)),
+            collect(range(0, 1, length=ncells)),
+            collect(range(0, 1, length=ncells))
+         ]
+
+    points = gt.conic_cross_section(Ps, CPs, rhos, ss)
+    points = scaling*points
+
+    points = [p .- [0, 1.7] for p in points]
+    # points = [p .* [1, 0.75] for p in points]
+
+    sections[3] = points;
+
+    # --------------- SECTION #0------------------------------------------------
+    Ps = [
+            [0.5, 0.1+0.2],
+            [0.0, 1.0],
+            [-0.5, 0.1+0.2],
+            [0, -0.20+0.2]
+         ]
+
+    CPs = [
+            [0.4, 1.0],
+            [-0.4, 1.0],
+            [-0.1, -0.3+0.2],
+            [0.1, -0.3+0.2],
+         ]
+
+    rhos = [
+            0.6,
+            0.6,
+            0.2,
+            0.2
+         ]
+
+    scaling = 0.1
+
+    ss = [
+            collect(range(0, 1, length=ncells)),
+            collect(range(0, 1, length=ncells)),
+            collect(range(0, 1, length=ncells)),
+            collect(range(0, 1, length=ncells))
+         ]
+    points = gt.conic_cross_section(Ps, CPs, rhos, ss)
+    points = scaling*points
+
+    section0 = points
+
+
+    # --------------- LOFT -----------------------------------------------------
+
+    # --------------- LOFT -----------------------------------------------------
+    # fuselage_length = 5.86              # (m) fuselage length
+    bscale = pylon_length            # Scales the entire geometry by this factor
+
+    crosssections = [ # (l/bscale position , contour)
+                    (0.0  , [[2.00*0.8, 0.25][k]*(point[k]) + [0, 0.3][k] for point in section0, k in 1:2]*pylon_length/5.86),
+                    (0.02, [[0.6*0.8, 0.3][k]*(point[k]) + [0, 0.15][k] for point in sections[1], k in 1:2]*pylon_length/5.86),
+                    (1/3*0.25, [[1.0*0.8, 0.75*0.75][k]*point[k] for point in sections[1], k in 1:2]*pylon_length/5.86),
+                    (2/3, [[1.00*0.8, 0.35*0.75][k]*point[k] for point in sections[2], k in 1:2]*pylon_length/5.86),
+                    (3/3, [[1.00*0.8, 0.75*0.75][k]*(point[k] - [0, 0.1*2][k]) for point in sections[3], k in 1:2]*pylon_length/5.86),
+                    ]
+
+    # Dummy parameters
+    b_pos = [sec[1] for sec in crosssections]
+    chords = (1/bscale)*ones(size(b_pos))
+    twists = zeros(size(b_pos))
+    LE_x = zeros(size(b_pos))
+    LE_z = zeros(size(b_pos))
+
+    tilt_y = zeros(size(b_pos))
+    # tilt_y[2] = 45
+
+    grid_pylon = gt.generate_loft(crosssections, bscale,
+                                        b_pos, chords, twists, LE_x, LE_z;
+                                        # MORE GEOMETRIC OPTIONS
+                                        tilt_y=tilt_y,
+                                        symmetric=false,
+                                        loop_dim=0,
+                                    )
+
+    # Aligns the grid with the x-axis
+    rotation = gt.rotation_matrix2(0, 0, 90)
+    gt.lintransform!(grid_pylon, rotation, zeros(3))
+
+    dimsplit = 1
+    triangrid_pylon = gt.GridTriangleSurface(grid_pylon, dimsplit)
+
+    return triangrid_pylon
+end
 
 """
     Generates ground surface.

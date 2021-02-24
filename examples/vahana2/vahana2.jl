@@ -275,7 +275,7 @@ end
     Generates geometry of Vahana aircraft, saves it as vtk files, and calls
     Paraview visualizing the VTK geometry.
 """
-function visualize_geometry_vahana(; save_path=extdrive_path*"vahana2_geometry00/",
+function visualize_geometry_vahana(; save_path=extdrive_path*"vahana2_geometry01/",
                                      prompt=true, run_name="vahana2", optargs...)
 
     (vehicle, grounds) = generate_geometry_vahana(; n_factor=1,
@@ -301,11 +301,11 @@ function visualize_geometry_vahana(; save_path=extdrive_path*"vahana2_geometry00
     # Save vehicle
     strn = uns.save_vtk(vehicle, run_name; path=save_path, save_horseshoes=false)
 
-    # Save ground
-    for (i, ground) in enumerate(grounds)
-        gt.save(ground, run_name*"_Ground$i"; path=save_path)
-        strn *= run_name*"_Ground$i.vtk;"
-    end
+    # # Save ground
+    # for (i, ground) in enumerate(grounds)
+    #     gt.save(ground, run_name*"_Ground$i"; path=save_path)
+    #     strn *= run_name*"_Ground$i.vtk;"
+    # end
 
     # Call Paraview
     run(`paraview --data="$save_path/$strn"`)

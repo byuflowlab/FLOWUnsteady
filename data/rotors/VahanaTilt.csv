@@ -2,4 +2,4 @@ property,file,description
 Rtip,0.75, (m) Radius of blade tip
 Rhub,0.05, (m) Radius of hub
 B,5, Number of blades
-blade,Vahana2_blade.csv, Blade file
+blade,VahanaTilt_blade.csv, Blade file
