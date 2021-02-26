@@ -149,6 +149,10 @@ function plot_maneuver(maneuver::KinematicManeuver;
             amax = max([maximum(a_sys) for a_sys in a_syss]...)
             amin = min([minimum(a_sys) for a_sys in a_syss]...)
 
+            for tstage in tstages
+                ax.plot(tstage*ones(2), [amin, amax], ":k", alpha=0.5)
+            end
+
             for (j, a_sys) in enumerate(a_syss)
                 ax.plot(ts, a_sys, "-", label="Tilt-sys #$j", alpha=0.8,
                                                 color=clrs[(j-1)%length(clrs) + 1])
@@ -169,6 +173,10 @@ function plot_maneuver(maneuver::KinematicManeuver;
         RPMmax = max([maximum(RPM_sys) for RPM_sys in RPM_syss]...)
         RPMmin = min([minimum(RPM_sys) for RPM_sys in RPM_syss]...)
 
+        for tstage in tstages
+            ax.plot(tstage*ones(2), [RPMmin, RPMmax], ":k", alpha=0.5)
+        end
+
         for (j, RPM_sys) in enumerate(RPM_syss)
             ax.plot(ts, RPM_sys, "-", label="Rotor-sys #$j", alpha=0.8,
                                             color=clrs[(j-1)%length(clrs) + 1])
@@ -178,9 +186,6 @@ function plot_maneuver(maneuver::KinematicManeuver;
         ax.set_ylabel("Non-dimensional RPM\n(RPM/RPMh)")
         ax.legend(loc="best", frameon=false)
     end
-
-
-
 
     if length(angle_syss)!=0 || length(RPM_syss)!=0
         if save_path!=nothing

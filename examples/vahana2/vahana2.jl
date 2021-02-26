@@ -129,7 +129,7 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim13",
     maneuver = generate_maneuver_vahana(; add_rotors=add_rotors)
 
     # Plot maneuver path and controls
-    uns.plot_maneuver(maneuver; tstages=[0.2, 0.3, 0.5, 0.6])
+    uns.plot_maneuver(maneuver; tstages=[0.2, 0.3, 0.5, 0.6], save_path=save_path)
 
 
     # ----------------- GEOMETRY GENERATION ------------------------------------
