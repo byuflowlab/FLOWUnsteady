@@ -35,7 +35,7 @@ function generate_maneuver_vahana(; disp_plot=false, add_rotors=true, V0=0.0001)
     RPM1 = 1.10
     RPM2 = 1.50
     RPM3 = 0.75
-    RPM3_stacked = 1e-7
+    RPM3_stacked = 1e-3
     RPM4 = 1.00
     RPM5 = 0.90
 
@@ -179,9 +179,9 @@ function generate_maneuver_vahana(; disp_plot=false, add_rotors=true, V0=0.0001)
         # ------------ TRANSITION ----------------------------------------------
         elseif t<t2
             val = 1.5 * (t-t1) / (t2-t1)
-            val1 = val + 0.25
-            angle_main = 90 - 90*(1-exp(-(val1)^5))
-            return [0, angle_main, 0]
+            val2 = val - 0.00
+            angle = 90 - 90*(1-exp(-(val2)^6))
+            return [0, angle, 0]
 
         # ------------ CRUISE --------------------------------------------------
         elseif t<t3
@@ -191,8 +191,8 @@ function generate_maneuver_vahana(; disp_plot=false, add_rotors=true, V0=0.0001)
         elseif t<t4
             # Weibull decceleration to hover
             val = 1.5 * (1 - (t-t3) / (t4-t3))
-            angle_main = 90 - 90*(1-exp(-(val)^5))
-            return [0, angle_main, 0]
+            angle = 90 - 90*(1-exp(-(val)^5))
+            return [0, angle, 0]
 
         # ------------ LANDING -------------------------------------------------
         else
@@ -212,10 +212,10 @@ function generate_maneuver_vahana(; disp_plot=false, add_rotors=true, V0=0.0001)
 
         # ------------ TRANSITION ----------------------------------------------
         elseif t<t2
-            val = 1.5 * (t-t1) / (t2-t1)
-            val2 = val - 0.00
-            angle_tandem = 90 - 90*(1-exp(-(val2)^6))
-            return [0, angle_tandem, 0]
+            val = 2.0 * (t-t1) / (t2-t1)
+            val1 = val + 0.25
+            angle = 90 - 90*(1-exp(-(val1)^5))
+            return [0, angle, 0]
 
         # ------------ CRUISE --------------------------------------------------
         elseif t<t3
@@ -225,8 +225,8 @@ function generate_maneuver_vahana(; disp_plot=false, add_rotors=true, V0=0.0001)
         elseif t<t4
             # Weibull decceleration to hover
             val = 1.5 * (1 - (t-t3) / (t4-t3))
-            angle_tandem = 90 - 90*(1-exp(-(val)^5))
-            return [0, angle_tandem, 0]
+            angle = 90 - 90*(1-exp(-(val)^5))
+            return [0, angle, 0]
 
         # ------------ LANDING -------------------------------------------------
         else

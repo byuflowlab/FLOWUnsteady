@@ -107,7 +107,7 @@ function generate_geometry_vahana(;
     twist_t_w = twist_r_w         # (deg) twist at tip
     lambda_w = main_outtilt       # (deg) sweep
     gamma_w = 5.0                 # (deg) dihedral
-    n_w = 12*n_factor             # Number of horseshoes per side of wing
+    n_w = 2*12*n_factor           # Number of horseshoes per side of wing
     r_w = 2.0                     # Horseshoe expansion ratio
     md_w = 0.9                    # Ratio of length of middle section
     pivot_w = 1/4                 # Pivot point along chord of tilt-wing
@@ -120,7 +120,7 @@ function generate_geometry_vahana(;
     twist_t_wl = 0.0              # (deg) twist at tip
     lambda_wl = 40.0              # (deg) sweep
     gamma_wl = 15.0               # (deg) dihedral
-    n_wl = 4*n_factor             # Number of horseshoes per side of wing
+    n_wl = 2*4*n_factor           # Number of horseshoes per side of wing
     r_wl = 2.0                    # Horseshoe expansion ratio
 
     # Tandem wing
@@ -131,7 +131,7 @@ function generate_geometry_vahana(;
     twist_t_tw = twist_r_tw       # (deg) twist at tip
     lambda_tw = 0.0               # (deg) sweep
     gamma_tw = 0.0                # (deg) dihedral
-    n_tw = n_w                    # Number of horseshoes per side of wing
+    n_tw = 2*n_w                  # Number of horseshoes per side of wing
     r_tw = r_w                    # Horseshoe expansion ratio
     md_tw = 0.2                   # Ratio of length of middle section
     pivot_tw = pivot_w            # Pivot point along chord of tilt-wing
@@ -512,7 +512,7 @@ function generate_geometry_vahana(;
 
     # ------------ FUSELAGE ----------------------------------------------
     if verbose; println("\t"^(v_lvl+1)*"Generating fuselage..."); end;
-    fuselage = generatefuselage_vahana(l_f)
+    fuselage = generatefuselage_vahana(l_f; ncells=20)
 
     body = gt.MultiGrid(3)
     gt.addgrid(body, "Fuselage", fuselage)
@@ -524,7 +524,7 @@ function generate_geometry_vahana(;
         pylon_length = stckd_xoc_offset*AR_w/b_w * pylon_pos
 
         for i in stacked
-            pylon = generatepylon(pylon_length)
+            pylon = generatepylon(pylon_length; ncells=5)
 
             right = i<=np_w
             this_O = O_prop_w[ right ? i : np_w-(i-np_w-1)]   # Chooses position

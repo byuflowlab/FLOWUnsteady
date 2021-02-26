@@ -42,7 +42,7 @@ end
 
 # ------------ DRIVERS ---------------------------------------------------------
 
-function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim10",
+function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim13",
                                     prompt=true,
                                     run_name="vahana2",
                                     verbose=true, v_lvl=1)
@@ -53,13 +53,26 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim10",
     n_factor = 1                            # Refinement factor
     add_rotors = true                       # Whether to include rotors
 
-    # Maneuver to perform
     ## 72 steps per rev settings
     Vcruise = 0.25 * 125*0.44704            # Cruise speed
     Vinf(x,t) = 1e-5*[1,0,-1]               # (m/s) freestream velocity, if 0 the simulation might crash
     RPMh_w = 600.0                          # RPM of main wing rotors in hover
     telapsed = 30.0                         # Total time to perform maneuver
-    nsteps = 21600                          # Time steps
+    nsteps = 4*5400                         # Time steps for complete maneuver
+    lambda = 2.125                          # Target minimum core overlap
+    p_per_step = 2                          # Particle sheds per time step
+    vlm_rlx = 0.2                           # VLM relaxation (deactivated with -1)
+
+    # # Maneuver to perform
+    # ## 18 steps per rev settings
+    # Vcruise = 0.25 * 125*0.44704            # Cruise speed
+    # Vinf(x,t) = 1e-5*[1,0,-1]               # (m/s) freestream velocity, if 0 the simulation might crash
+    # RPMh_w = 600.0                          # RPM of main wing rotors in hover
+    # telapsed = 30.0                         # Total time to perform maneuver
+    # nsteps = 5400                           # Time steps
+    # lambda = 2.125                          # Target minimum core overlap
+    # p_per_step = 4                          # Particle sheds per time step
+    # vlm_rlx = 0.75                          # VLM relaxation (deactivated with -1)
 
     # # Maneuver to perform
     # Vcruise = 0.125 * 125*0.44704         # Cruise speed
@@ -85,15 +98,15 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim10",
 
     # Solver options
     R = 0.75                                # (m) Reference blade radius
-    lambda = 2.125                          # Target minimum core overlap
-    p_per_step = 4                          # Particle sheds per time step
+    # lambda = 2.125                          # Target minimum core overlap
+    # p_per_step = 4                          # Particle sheds per time step
     overwrite_sigma = lambda * (2*pi*RPMh_w/60*R + Vcruise)*dt / p_per_step
     surf_sigma = R/10                       # Surface regularization
     # vlm_sigma = R/25                      # VLM regularization
     # vlm_sigma = R
-    # vlm_sigma = -1
-    vlm_sigma = surf_sigma # MAKE THIS -1 if unstable
-    vlm_rlx = 0.75                          # VLM relaxation (deactivated with -1)
+    vlm_sigma = -1
+    # vlm_sigma = surf_sigma # MAKE THIS -1 if unstable
+    # vlm_rlx = 0.75                          # VLM relaxation (deactivated with -1)
     # shed_unsteady = false                   # Shed unsteady-loading particles
     shed_unsteady = true
     # VehicleType = uns.QVLMVehicle           # Type of vehicle to generate
@@ -104,6 +117,7 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim10",
     # vpm_formulation = vpm.formulation_classic
     # vpm_sgsmodel    = vpm.sgs_stretching1_fmm
     vpm_sgsmodel    = vpm.generate_sgs_directionfiltered(vpm.generate_sgs_lowfiltered(vpm.sgs_stretching1_fmm))
+    vpm_sgsscaling(args...) = 0.1
     # vpm_relaxation  = vpm.norelaxation
     # vpm_relaxation  = vpm.pedrizzetti
     vpm_relaxation  = vpm.correctedpedrizzetti
@@ -140,7 +154,8 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim10",
     Vref = Vcruise
     RPMref = RPMh_w
     ttot = telapsed
-    max_particles = ceil(Int, (nsteps+2)*(2*vlm.get_m(vehicle.vlm_system)+1)*p_per_step)
+    # max_particles = ceil(Int, (nsteps+2)*(2*vlm.get_m(vehicle.vlm_system)+1)*p_per_step)
+    max_particles = 200000
 
     Vinit = Vref*maneuver.Vvehicle(0)       # (m/s) initial vehicle velocity
                                             # (rad/s) initial vehicle angular velocity
@@ -173,6 +188,7 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim10",
                                       # SOLVERS OPTIONS
                                       vpm_formulation=vpm_formulation,
                                       vpm_sgsmodel=vpm_sgsmodel,
+                                      vpm_sgsscaling=vpm_sgsscaling,
                                       vpm_relaxation=vpm_relaxation,
                                       p_per_step=p_per_step,
                                       overwrite_sigma=overwrite_sigma,
@@ -195,7 +211,7 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim10",
 end
 
 
-function visualize_maneuver_vahana(; save_path=extdrive_path*"vahana2_maneuver02/",
+function visualize_maneuver_vahana(; save_path=extdrive_path*"vahana2_maneuver04/",
                                         prompt=true,
                                         run_name="vahana2",
                                         verbose=true, v_lvl=0,
@@ -203,11 +219,17 @@ function visualize_maneuver_vahana(; save_path=extdrive_path*"vahana2_maneuver02
                                         optargs...)
 
     # Maneuver to perform
-    ## 72 steps per rev settings
+    # ## 72 steps per rev settings
+    # Vcruise = 0.25 * 125*0.44704            # Cruise speed
+    # RPMh_w = 600.0                          # RPM of main wing rotors in hover
+    # telapsed = 30.0                         # Total time to perform maneuver
+    # nsteps = 21600                          # Time steps
+
+    ## 4 steps per rev settings
     Vcruise = 0.25 * 125*0.44704            # Cruise speed
     RPMh_w = 600.0                          # RPM of main wing rotors in hover
     telapsed = 30.0                         # Total time to perform maneuver
-    nsteps = 21600                          # Time steps
+    nsteps = Int(21600/18)                  # Time steps
 
     # # Maneuver to perform
     # Vcruise = 0.25 * 125*0.44704            # Cruise speed
