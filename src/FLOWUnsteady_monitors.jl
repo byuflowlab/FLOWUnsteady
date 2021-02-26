@@ -163,7 +163,7 @@ function generate_monitor_rotors( rotors::Array{vlm.Rotor, 1},
             # Save figure
             if fcalls%nsteps_savefig==0 && fcalls!=0 && save_path!=nothing
                 savefig(joinpath(save_path, run_name*"_convergence.png"),
-                                                            transparent=false)
+                                                    transparent=false, dpi=300)
             end
         end
 
@@ -361,10 +361,10 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
                     # Save figures
                     if PFIELD.nt%nsteps_savefig==0
                         fig1.savefig(joinpath(save_path, run_name*"_convergence.png"),
-                                                                transparent=false)
+                                                    transparent=false, dpi=300)
 
                         fig2.savefig(joinpath(save_path, run_name*"_convergence2.png"),
-                                                                transparent=false)
+                                                    transparent=false, dpi=300)
                     end
                 end
             end
@@ -384,7 +384,10 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
 end
 
 
-function generate_monitor_statevariables(; figname="monitor_statevariables")
+function generate_monitor_statevariables(; figname="monitor_statevariables",
+                                           save_path=nothing,
+                                           run_name="",
+                                           nsteps_savefig=10)
 
     fig = figure(figname, figsize=[7*2, 5*1])
     axs = fig.subplots(1, 3)
@@ -417,6 +420,14 @@ function generate_monitor_statevariables(; figname="monitor_statevariables")
             end
         end
 
+        if save_path!=nothing
+            # Save figures
+            if PFIELD.nt%nsteps_savefig==0
+                fig1.savefig(joinpath(save_path, run_name*"statevariables.png"),
+                                                    transparent=false, dpi=300)
+            end
+        end
+
         return false
     end
 
@@ -426,10 +437,11 @@ end
 
 function generate_monitor_enstrophy(; save_path=nothing,
                                      figname="monitor_enstrophy", run_name="",
+                                     nsteps_savefig=10,
                                      nsteps_plot=10)
 
     fig = figure(figname, figsize=[7*1, 5*1])
-    ax = gca()
+    ax = fig.gca()
     ax.set_xlabel("Simulation time")
     ax.set_ylabel(L"Enstrophy ($\mathrm{m}^6/\mathrm{s}^2$)")
 
@@ -445,6 +457,13 @@ function generate_monitor_enstrophy(; save_path=nothing,
         if PFIELD.nt%nsteps_plot == 0
             ax.plot(ts, enstrophy[end-length(ts)+1:end], ".k")
             ts = []
+        end
+
+        if save_path!=nothing
+            if PFIELD.nt%nsteps_savefig==0
+                fig1.savefig(joinpath(save_path, run_name*"enstrophy.png"),
+                                                    transparent=false, dpi=300)
+            end
         end
 
         return false
