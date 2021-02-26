@@ -401,7 +401,7 @@ function generate_monitor_statevariables(; figname="monitor_statevariables",
     Wlbls = [L"\Omega_x", L"\Omega_y", L"\Omega_z"]
     ax = axs[3]
     ax.set_xlabel("Simulation time")
-    ax.set_ylabel(L"$\mathop{O}$ position")
+    ax.set_ylabel(L"$O$ position")
     Olbls = [L"O_x", L"O_y", L"O_z"]
 
 
@@ -423,7 +423,7 @@ function generate_monitor_statevariables(; figname="monitor_statevariables",
         if save_path!=nothing
             # Save figures
             if PFIELD.nt%nsteps_savefig==0
-                fig1.savefig(joinpath(save_path, run_name*"statevariables.png"),
+                fig.savefig(joinpath(save_path, run_name*"statevariables.png"),
                                                     transparent=false, dpi=300)
             end
         end
@@ -461,7 +461,7 @@ function generate_monitor_enstrophy(; save_path=nothing,
 
         if save_path!=nothing
             if PFIELD.nt%nsteps_savefig==0
-                fig1.savefig(joinpath(save_path, run_name*"enstrophy.png"),
+                fig.savefig(joinpath(save_path, run_name*"enstrophy.png"),
                                                     transparent=false, dpi=300)
             end
         end

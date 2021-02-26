@@ -34,6 +34,7 @@ Plots the kinematics and controls of a `KinematicManeuver`.
 """
 function plot_maneuver(maneuver::KinematicManeuver;
                         ti::Real=0, tf::Real=1, vis_nsteps=300,
+                        save_path=nothing,
                         figname="maneuver", tstages=[], size_factor=2/3)
 
     Vvhcl = maneuver.Vvehicle
@@ -111,6 +112,12 @@ function plot_maneuver(maneuver::KinematicManeuver;
     ax.set_ylabel(L"Angle ($^\circ$)")
     ax.legend(loc="best", frameon=false)
 
+    if save_path!=nothing
+        # Save figure
+        fig1.savefig(joinpath(save_path, figname*"-kinematics.png"),
+                                                transparent=false, dpi=300)
+    end
+
 
     # -------------------- Tilting system history ------------------------------
     angle_syss = [a.(ts) for a in maneuver.angle]    # Angles of every tilt sys
@@ -170,6 +177,17 @@ function plot_maneuver(maneuver::KinematicManeuver;
         ax.set_xlabel("Non-dimensional time")
         ax.set_ylabel("Non-dimensional RPM\n(RPM/RPMh)")
         ax.legend(loc="best", frameon=false)
+    end
+
+
+
+
+    if length(angle_syss)!=0 || length(RPM_syss)!=0
+        if save_path!=nothing
+            # Save figure
+            fig2.savefig(joinpath(save_path, figname*"-controls.png"),
+                                                    transparent=false, dpi=300)
+        end
     end
 
 end

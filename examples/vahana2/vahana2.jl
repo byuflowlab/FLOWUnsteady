@@ -117,7 +117,7 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim13",
     # vpm_formulation = vpm.formulation_classic
     # vpm_sgsmodel    = vpm.sgs_stretching1_fmm
     vpm_sgsmodel    = vpm.generate_sgs_directionfiltered(vpm.generate_sgs_lowfiltered(vpm.sgs_stretching1_fmm))
-    vpm_sgsscaling(args...) = 0.1
+    vpm_sgsscaling(args...) = 0.2
     # vpm_relaxation  = vpm.norelaxation
     # vpm_relaxation  = vpm.pedrizzetti
     vpm_relaxation  = vpm.correctedpedrizzetti
@@ -155,7 +155,7 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim13",
     RPMref = RPMh_w
     ttot = telapsed
     # max_particles = ceil(Int, (nsteps+2)*(2*vlm.get_m(vehicle.vlm_system)+1)*p_per_step)
-    max_particles = 200000
+    max_particles = 400000
 
     Vinit = Vref*maneuver.Vvehicle(0)       # (m/s) initial vehicle velocity
                                             # (rad/s) initial vehicle angular velocity
