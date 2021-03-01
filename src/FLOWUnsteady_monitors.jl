@@ -162,7 +162,7 @@ function generate_monitor_rotors( rotors::Array{vlm.Rotor, 1},
         if disp_conv
             # Save figure
             if fcalls%nsteps_savefig==0 && fcalls!=0 && save_path!=nothing
-                savefig(joinpath(save_path, run_name*"_convergence.png"),
+                fig.savefig(joinpath(save_path, run_name*"_convergence.png"),
                                                     transparent=false, dpi=300)
             end
         end
