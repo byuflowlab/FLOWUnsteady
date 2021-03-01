@@ -43,7 +43,7 @@ end
 
 # ------------ DRIVERS ---------------------------------------------------------
 
-function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim14",
+function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim15",
                                     prompt=true,
                                     run_name="vahana2",
                                     verbose=true, v_lvl=1)
@@ -118,8 +118,8 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim14",
     # vpm_formulation = vpm.formulation_classic
     # vpm_sgsmodel    = vpm.sgs_stretching1_fmm
     vpm_sgsmodel    = vpm.generate_sgs_directionfiltered(vpm.generate_sgs_lowfiltered(vpm.sgs_stretching1_fmm))
-    # vpm_sgsscaling(args...) = 0.2
-    vpm_sgsscaling = vpm.sgs_scaling_none
+    vpm_sgsscaling(args...) = 0.5
+    # vpm_sgsscaling = vpm.sgs_scaling_none
     # vpm_relaxation  = vpm.norelaxation
     # vpm_relaxation  = vpm.pedrizzetti
     vpm_relaxation  = vpm.correctedpedrizzetti
