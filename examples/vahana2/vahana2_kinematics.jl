@@ -39,7 +39,7 @@ function generate_maneuver_vahana(; disp_plot=false, add_rotors=true, V0=0.0001)
     RPM4 = 1.00
     RPM5 = 0.90
 
-    r_RPMh_stup = 1.25               # Ratio between stacked and main rotors in hover
+    r_RPMh_stup = 2.00             # Ratio between stacked and main rotors in hover
     r_RPMh_tw = 0.75               # Ratio between tandem and main wing RPM in hover
 
     # NOTE: -x is in the direction of flight and +z is climb with ground at z=0
