@@ -30,7 +30,7 @@ gt = uns.gt
 # ------------ GLOBAL VARIABLES ------------------------------------------------
 # Default path where to save data
 # extdrive_path = "/media/edoalvar/Samsung_T5/simulationdata202102/"
-extdrive_path = "/home/flowlab/ealvarez/simulations/"
+extdrive_path = "/media/flowlab/Storage/ealvarez/simulations/"
 
 # Default data path where to find rotor and airfoil data
 data_path = uns.def_data_path
@@ -131,6 +131,7 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim14",
     maneuver = generate_maneuver_vahana(; add_rotors=add_rotors)
 
     # Plot maneuver path and controls
+    gt.create_path(save_path, prompt)
     uns.plot_maneuver(maneuver; tstages=[0.2, 0.3, 0.5, 0.6], save_path=save_path)
 
 
@@ -147,7 +148,6 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim14",
     gt.lintransform!(grounds[2], Array(1.0I, 3, 3), Vcruise*telapsed*[-0.25, 0, -0.0025])
 
     # Save ground
-    gt.create_path(save_path, prompt)
     for (i, ground) in enumerate(grounds)
         gt.save(ground, run_name*"_Ground$i"; path=save_path)
     end
