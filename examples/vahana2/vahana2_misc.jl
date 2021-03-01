@@ -24,7 +24,7 @@ function remove_particles_lowstrength(sim, PFIELD, T, DT; crit=0.00001^2)
 end
 
 
-function remove_particles_sphere(sim, PFIELD, T, DT; Rsphere2=(2*5.86)^2)
+function remove_particles_sphere(sim, PFIELD, T, DT; Rsphere2=(1.5*5.86)^2)
 
     Xvehicle = sim.vehicle.system.O
 

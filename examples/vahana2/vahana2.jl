@@ -29,7 +29,8 @@ gt = uns.gt
 
 # ------------ GLOBAL VARIABLES ------------------------------------------------
 # Default path where to save data
-extdrive_path = "/media/edoalvar/Samsung_T5/simulationdata202102/"
+# extdrive_path = "/media/edoalvar/Samsung_T5/simulationdata202102/"
+extdrive_path = "/home/flowlab/ealvarez/simulations/"
 
 # Default data path where to find rotor and airfoil data
 data_path = uns.def_data_path
@@ -42,7 +43,7 @@ end
 
 # ------------ DRIVERS ---------------------------------------------------------
 
-function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim13",
+function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim14",
                                     prompt=true,
                                     run_name="vahana2",
                                     verbose=true, v_lvl=1)
@@ -117,7 +118,8 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim13",
     # vpm_formulation = vpm.formulation_classic
     # vpm_sgsmodel    = vpm.sgs_stretching1_fmm
     vpm_sgsmodel    = vpm.generate_sgs_directionfiltered(vpm.generate_sgs_lowfiltered(vpm.sgs_stretching1_fmm))
-    vpm_sgsscaling(args...) = 0.2
+    # vpm_sgsscaling(args...) = 0.2
+    vpm_sgsscaling = vpm.sgs_scaling_none
     # vpm_relaxation  = vpm.norelaxation
     # vpm_relaxation  = vpm.pedrizzetti
     vpm_relaxation  = vpm.correctedpedrizzetti
