@@ -315,8 +315,9 @@ end
 
 "Returns the i-th bound-vortex midpoint of the j-th blade in `rotor`"
 function _get_midX(rotor::vlm.Rotor, j::Int, i::Int)
-    return (vlm.getHorseshoe(vlm.get_blade(rotor, j), i)[2] +
-            vlm.getHorseshoe(vlm.get_blade(rotor, j), i)[3]) / 2
+    # return (vlm.getHorseshoe(vlm.get_blade(rotor, j), i)[2] +
+    #         vlm.getHorseshoe(vlm.get_blade(rotor, j), i)[3]) / 2
+    return vlm.getHorseshoe(vlm.get_blade(rotor, j), i)[5]
 end
 
 "Returns all bound-vortex midpoints of the j-th blade in `rotor`"
