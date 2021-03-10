@@ -43,6 +43,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
                              wake_coupled=true,         # Couple VPM wake on VLM solution
                              shed_unsteady=true,        # Whether to shed unsteady-loading wake
                              unsteady_shedcrit=0.01,    # Criterion for unsteady-loading shedding
+                             omit_shedding=[],          # Indices of elements in `sim.vehicle.wake_system` on which omit shedding VPM particles
                              extra_runtime_function=(sim, PFIELD,T,DT)->false,
                              # OUTPUT OPTIONS
                              save_path="temps/vahanasimulation00",
@@ -135,7 +136,8 @@ function run_simulation(sim::Simulation, nsteps::Int;
         shed_wake(sim.vehicle, Vinf, PFIELD, DT, sim.nt; t=T,
                             unsteady_shedcrit=-1,
                             p_per_step=p_per_step, sigmafactor=sigmafactor,
-                            overwrite_sigma=overwrite_sigma)
+                            overwrite_sigma=overwrite_sigma,
+                            omit_shedding=omit_shedding)
 
         # Solve aerodynamics of the vehicle
         solve(sim, Vinf, PFIELD, wake_coupled, DT, vlm_rlx,
@@ -146,7 +148,8 @@ function run_simulation(sim::Simulation, nsteps::Int;
             shed_wake(sim.vehicle, Vinf, PFIELD, DT, sim.nt; t=T,
                         unsteady_shedcrit=unsteady_shedcrit,
                         p_per_step=p_per_step, sigmafactor=sigmafactor,
-                        overwrite_sigma=overwrite_sigma)
+                        overwrite_sigma=overwrite_sigma,
+                        omit_shedding=omit_shedding)
         end
 
         # Simulation-specific postprocessing
