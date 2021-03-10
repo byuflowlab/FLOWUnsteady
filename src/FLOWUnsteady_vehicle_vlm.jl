@@ -482,7 +482,7 @@ function VLM2VPM(system::Union{vlm.Wing, vlm.WingSystem, vlm.Rotor}, pfield, dt,
       l = -infD*V*dt                             # Distance the TE travels
 
       if unsteady_shedcrit<=0
-          if !(i in omit_shedding)
+          if !(i-1 in omit_shedding)
               add_particle(pfield, X, gamma, dt, V, infD, sigma, vol,
                               l, p_per_step; overwrite_sigma=overwrite_sigma)
           end
