@@ -35,7 +35,7 @@ function generate_maneuver_vahana(; disp_plot=false, add_rotors=true, V0=0.0001)
     RPM1 = 1.10
     RPM2 = 1.50
     RPM3 = 0.75
-    RPM3_stacked = 1e-3
+    RPM3_stacked = 2/600
     RPM4 = 1.00
     RPM5 = 0.90
 

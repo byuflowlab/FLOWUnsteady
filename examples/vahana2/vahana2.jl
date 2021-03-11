@@ -43,7 +43,7 @@ end
 
 # ------------ DRIVERS ---------------------------------------------------------
 
-function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim17",
+function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim18",
                                     prompt=true,
                                     run_name="vahana2",
                                     verbose=true, v_lvl=1)
@@ -60,11 +60,11 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim17",
     RPMh_w = 600.0                          # RPM of main wing rotors in hover
     telapsed = 30.0                         # Total time to perform maneuver
     nsteps = 4*5400                         # Time steps for complete maneuver
-    # lambda = 2.125                          # Target minimum core overlap
-    p_per_step = 2                          # Particle sheds per time step
+    lambda = 2.125                          # Target minimum core overlap
+    # p_per_step = 2                          # Particle sheds per time step
     vlm_rlx = 0.2                           # VLM relaxation (deactivated with -1)
 
-    lambda = 2.125/4                          # Target minimum core overlap
+    p_per_step = 4*2                          # Particle sheds per time step
 
     # # Maneuver to perform
     # ## 18 steps per rev settings
@@ -120,7 +120,8 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim17",
     # vpm_formulation = vpm.formulation_classic
     # vpm_sgsmodel    = vpm.sgs_stretching1_fmm
     vpm_sgsmodel    = vpm.generate_sgs_directionfiltered(vpm.generate_sgs_lowfiltered(vpm.sgs_stretching1_fmm))
-    vpm_sgsscaling(args...) = 0.75
+    # vpm_sgsscaling(args...) = 0.75
+    vpm_sgsscaling(args...) = 1.0
     # vpm_sgsscaling = vpm.sgs_scaling_none
     # vpm_relaxation  = vpm.norelaxation
     # vpm_relaxation  = vpm.pedrizzetti
@@ -159,7 +160,7 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim17",
     RPMref = RPMh_w
     ttot = telapsed
     # max_particles = ceil(Int, (nsteps+2)*(2*vlm.get_m(vehicle.vlm_system)+1)*p_per_step)
-    max_particles = 400000
+    max_particles = 4*400000
 
     Vinit = Vref*maneuver.Vvehicle(0)       # (m/s) initial vehicle velocity
                                             # (rad/s) initial vehicle angular velocity
