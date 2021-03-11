@@ -43,7 +43,7 @@ end
 
 # ------------ DRIVERS ---------------------------------------------------------
 
-function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim18",
+function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim19",
                                     prompt=true,
                                     run_name="vahana2",
                                     verbose=true, v_lvl=1)
@@ -64,7 +64,7 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim18",
     # p_per_step = 2                          # Particle sheds per time step
     vlm_rlx = 0.2                           # VLM relaxation (deactivated with -1)
 
-    p_per_step = 4*2                          # Particle sheds per time step
+    p_per_step = 2*2                          # Particle sheds per time step
 
     # # Maneuver to perform
     # ## 18 steps per rev settings
@@ -160,7 +160,7 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim18",
     RPMref = RPMh_w
     ttot = telapsed
     # max_particles = ceil(Int, (nsteps+2)*(2*vlm.get_m(vehicle.vlm_system)+1)*p_per_step)
-    max_particles = 4*400000
+    max_particles = 2*400000
 
     Vinit = Vref*maneuver.Vvehicle(0)       # (m/s) initial vehicle velocity
                                             # (rad/s) initial vehicle angular velocity
