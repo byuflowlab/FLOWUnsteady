@@ -360,12 +360,12 @@ function visualize_geometry_vahana(; save_path=extdrive_path*"vahana2_geometry01
     run(`paraview --data="$save_path/$strn"`)
 end
 
-function vahana2_postprocess()
+function vahana2_postprocess(; ite=1)
 
-    range = collect(0:4:6480)                   # Time steps to read
+    range = collect(4:4:6480)                   # Time steps to read
     nchunks = 4                                 # Number of chunks
     chunk = ceil(Int, length(range)/nchunks)    # Chunk length
-    ite = 1                                     # This chunk to iterate over
+    # ite = 1                                     # This chunk to iterate over
 
     nums = range[chunk*(ite-1) + 1 : (chunk*ite > length(range) ? length(range) : chunk*ite)]
 
