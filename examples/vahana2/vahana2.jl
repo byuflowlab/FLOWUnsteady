@@ -19,11 +19,13 @@
 
 # ------------ MODULES ---------------------------------------------------------
 using Revise
+import QuadGK
 import LinearAlgebra: I
+import FLOWVPM
 import FLOWUnsteady
 
 uns = FLOWUnsteady
-vpm = uns.vpm
+vpm = FLOWVPM
 vlm = uns.vlm
 gt = uns.gt
 
@@ -36,7 +38,8 @@ extdrive_path = "/media/flowlab/Storage/ealvarez/simulations/"
 data_path = uns.def_data_path
 
 # ------------ HEADERS ---------------------------------------------------------
-for header_name in ["geometry", "kinematics", "monitor", "misc"]
+for header_name in ["geometry", "kinematics", "monitor",
+                                                   "misc", "postprocessing"]
     include("vahana2_"*header_name*".jl")
 end
 
@@ -355,4 +358,26 @@ function visualize_geometry_vahana(; save_path=extdrive_path*"vahana2_geometry01
 
     # Call Paraview
     run(`paraview --data="$save_path/$strn"`)
+end
+
+function vahana2_postprocess()
+
+    range = collect(0:4:6480)                   # Time steps to read
+    nchunks = 4                                 # Number of chunks
+    chunk = ceil(Int, length(range)/nchunks)    # Chunk length
+    ite = 1                                     # This chunk to iterate over
+
+    nums = range[chunk*(ite-1) + 1 : (chunk*ite > length(range) ? length(range) : chunk*ite)]
+
+    read_path = extdrive_path*"vahana2_sim16/"
+    save_path = extdrive_path*"vahana2_sim16-fdom00-$(ite)/"
+
+
+    postprocessing_fluiddomain(read_path, save_path, nums;
+                                        # PROCESSING OPTIONS
+                                        fdx=1/80,                # Scaling of cell length
+                                        static_particles=false,  # Add static particles
+                                        # OUTPUT OPTIONS
+                                        run_name="vahana2",
+                                        prompt=true, paraview=false)
 end
