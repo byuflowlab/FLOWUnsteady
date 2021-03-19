@@ -60,6 +60,9 @@ For example simulations, check this notebook: [`docs/resources/examples.ipynb`](
   * [Unsteady eVTOL transition](https://github.com/byuflowlab/alvarezanderson2020-unsteady-evtol-transition)
   * [Wind-harvesting aircraft design](https://github.com/byuflowlab/mehr2020-airborne-wind-aero)
 
+# Sponsors
+<img src="docs/resources/img/sponsors00.png" alt="Pic here" style="width: 900px;"/>
+
 # Examples
 **HEAVING WING:** `examples/heavingwing.jl`
 <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/bertinsheaving00.gif" alt="Vid here" style="width: 900px;"/>
