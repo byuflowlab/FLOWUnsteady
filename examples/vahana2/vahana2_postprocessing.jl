@@ -18,6 +18,8 @@ function postprocessing_fluiddomain(read_path, save_path, nums;
                                     # PROCESSING OPTIONS
                                     fdx=1/80,                # Scaling of cell length
                                     static_particles=false,  # Add static particles
+                                    fsgm=0.35,               # Scaling of smoothing radii
+                                    maxvpmparticles=200000,
                                     # OUTPUT OPTIONS
                                     run_name="vahana2",
                                     prompt=true, paraview=false, debug=false,
@@ -72,7 +74,7 @@ function postprocessing_fluiddomain(read_path, save_path, nums;
 
     # ----------------- CALCULATE FLUID DOMAIN -----------------------------------------
     settings_fname = run_name*"_pfield_settings.jld"   # Partiel field settings file
-    maxparticles   = grid_fdom.nnodes + 200000       # Maximum number of particle in field
+    maxparticles   = grid_fdom.nnodes + maxvpmparticles# Maximum number of particle in field
 
     UJ             = vpm.UJ_fmm                      # Method for UJ evaluation
 
@@ -184,4 +186,90 @@ function postprocessing_fluiddomain(read_path, save_path, nums;
     end
 
     return str
+end
+
+"""
+Generate inputs for PSU-WOPWOP and run it.
+"""
+function postprocessing_aeracoustics()
+
+    # Path from where to read aerodynamic solution
+    # read_path       = "temps/vahana2_sim16/"
+    read_path       = "/home/flowlab/ealvarez/simulations/vahana2_sim16/"
+    # Path where to save PSU-WOPWOP's outputs
+    save_path       = "/home/flowlab/ealvarez/simulations/vahana2_sim16-psw00/"
+    # Path to PSU-WOPWOP binary (not included in FLOWUnsteady)
+    wopwopbin       = "/home/flowlab/ealvarez/code/wopwop3_serial"
+    # Run name (prefix of rotor files to read)
+    run_name        = "vahana2"
+
+    # ------------ PARAMETERS --------------------------------------------------
+    # NOTE: Make sure that these parameters match what was used in the
+    #       aerodynamic solution.
+
+    # rotorsystems[si][ri] is the number of blades of the ri-th rotor in the si-th system
+    rotorsystems    = [[5, 5], [2, 2], [2, 2], [5, 5, 5, 5]]
+    nsteps          = 6480-4               # when the aero solution ended
+    tend            = nsteps/21600 * 30.0  # (s) when the aero solution ended
+
+
+
+    # Simulation parameters
+    RPM             = 60                   # RPM is just a reference value to go from nrevs to simulation time
+    rho             = 1.225                # (kg/m^3) air density
+    speedofsound    = 342.35               # (m/s) speed of sound
+
+    # Solver parameters
+    ww_nrevs        = tend*(RPM/60)        # Number of revolutions in PSU-WOPWOP
+    ww_nsteps_per_rev = nsteps/ww_nrevs    # Number of steps per revolution in PSU-WOPWOP
+    num_min         = 0                    # Start reading aero files from this number
+    periodic        = false                # Periodic aerodynamic solution
+    const_geometry  = false                # Whether to run PSW on constant geometry from num_min
+    CW              = nothing              # Clock-wise rotation of constant geometry
+    highpass        = 0*0.0001             # High pass filter. Set to >0 to get rid of 0th freq in OASPL
+
+    # Observer definition: Circular array of microphones
+    sph_R           = 1.905                # (m) radial distance from rotor hub
+    sph_nR          = 0
+    sph_nphi        = 0
+    sph_ntht        = 72                   # Number of microphones
+    sph_thtmin      = 0                    # (deg) first microphone's angle
+    sph_thtmax      = 360                  # (deg) last microphone's angle
+    sph_phimax      = 180
+    sph_rotation    = [90, 0, 0]           # Rotation of grid of microphones
+    obs_name = "circle_mic_array"          # Observer file name
+
+    # Observer definition: Single microphone
+    Rmic = 0*1.905                         # (m) radial distance from rotor hub
+    anglemic = 90*pi/180                   # (rad) microphone angle from plane of rotation (- below, + above)
+                                           # 0deg is at the plane of rotation, 90deg is upstream
+    # microphoneX = nothing                  # Comment and uncomment this to switch from array to single microphone
+    microphoneX = Rmic*[-sin(anglemic), cos(anglemic), 0]
+
+
+    # ------------ RUN PSU-WOPWOP ----------------------------------------------
+    uns.run_noise_wopwop(read_path, run_name, RPM, rho, speedofsound, rotorsystems,
+                            ww_nrevs, ww_nsteps_per_rev, save_path, wopwopbin;
+                            # ---------- OBSERVERS -------------------------
+                            sph_R=sph_R,
+                            sph_nR=sph_nR, sph_ntht=sph_ntht,
+                            sph_nphi=sph_nphi, sph_phimax=sph_phimax,
+                            sph_rotation=sph_rotation,
+                            sph_thtmin=sph_thtmin, sph_thtmax=sph_thtmax,
+                            microphoneX=microphoneX,
+                            # ---------- SIMULATION OPTIONS ----------------
+                            periodic=periodic,
+                            # ---------- INPUT OPTIONS ---------------------
+                            num_min=num_min,
+                            const_geometry=const_geometry,
+                            axisrot="automatic",
+                            CW=CW,
+                            highpass=highpass,
+                            # ---------- OUTPUT OPTIONS --------------------
+                            verbose=true, v_lvl=0,
+                            prompt=false, debug_paraview=false,
+                            debuglvl=0,                     # WW debug level
+                            observerf_name="observergrid",  # .xyz file with observer grid
+                            case_name="runcase",            # Name of case to create and run
+                            );
 end
