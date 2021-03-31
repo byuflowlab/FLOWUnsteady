@@ -459,6 +459,11 @@ function VLM2VPM(system::Union{vlm.Wing, vlm.WingSystem, vlm.Rotor}, pfield, dt,
       vol = pi*(norm(Bp-Ap)/2)^2*V*dt           # Volume of particle
       l = -infD*V*dt                             # Distance the TE travels
 
+      # Check if the system loops around
+      if norm(Ap - vlm.getHorseshoe(system, m)[4]) / norm(Bp - Ap) > tol
+          gamma -= vlm.getHorseshoe(system, m)[8]
+      end
+
       if unsteady_shedcrit<=0
           if !(i in omit_shedding)
               add_particle(pfield, X, gamma, dt, V, infD, sigma, vol,
@@ -540,8 +545,8 @@ function VLM2VPM(system::Union{vlm.Wing, vlm.WingSystem, vlm.Rotor}, pfield, dt,
       end
 
 
-      # ----------- Case of right wing tip --------------------------
-      if i==m
+      # ----------- Case of discontinuous right wing tip -----------------------
+      if i==m && norm(Bp - vlm.getHorseshoe(system, 1)[1]) / norm(Bp - Ap) > tol
         # Adds particle at Bp
         X = Bp                                    # Particle position
         gamma = -Gamma                            # Infinite vortex circulation

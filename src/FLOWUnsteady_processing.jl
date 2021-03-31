@@ -144,3 +144,31 @@ function decompose(Fs, ihat, jhat)
 
     return Fis, Fjs, Fks
 end
+
+
+"""
+    `remove_particles_lowstrength(crit_Gamma2, every_nsteps)`
+
+Returns a extra_runtime_function that every `step` steps removes all
+particles that have a squared-magnitude Gamma smaller than `crit_Gamma2`.
+"""
+function remove_particles_lowstrength(crit_Gamma2::Real, step::Int)
+
+    function wake_treatment(sim, PFIELD, T, DT, args...; optargs...)
+        if sim.nt%step==0
+
+            for i in vpm.get_np(PFIELD):-1:1
+                P = vpm.get_particle(PFIELD, i)
+
+                if P.Gamma[1]*P.Gamma[1] + P.Gamma[2]*P.Gamma[2] + P.Gamma[3]*P.Gamma[3] < crit_Gamma2
+                    vpm.remove_particle(PFIELD, i)
+                end
+            end
+
+        end
+
+        return false
+    end
+
+    return wake_treatment
+end
