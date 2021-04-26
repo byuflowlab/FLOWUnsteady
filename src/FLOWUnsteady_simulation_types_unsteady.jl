@@ -14,7 +14,7 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
                 pfield::vpm.ParticleField, wake_coupled::Bool,
                 dt::Real, rlx::Real, sigma::Real, rho::Real,
                 speedofsound::Real, staticpfield::vpm.ParticleField;
-                init_sol::Bool=false
+                init_sol::Bool=false, vlm_fsgm=1
                 ) where {V<:UVLMVehicle, M<:AbstractManeuver, R}
 
 
@@ -66,7 +66,7 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
         static_particles_fun(pfield, args...) = _static_particles(pfield, vhcl.vlm_system, sigma)
 
         ## Evaluate VPM-on-Rotor induced velocity + static particles
-        Vinds = Vvpm_on_Xs(pfield, Xs; static_particles_fun=static_particles_fun, dt=dt)
+        Vinds = Vvpm_on_Xs(pfield, Xs; static_particles_fun=static_particles_fun, dt=dt, fsgm=vlm_fsgm)
 
         # Solve Rotors
         for (si, rotors) in enumerate(vhcl.rotor_systems)
@@ -82,8 +82,9 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
                 VindVkin = _format_blades(this_Vinds, vhcl.rotor_systems, si, ri)
 
                 if wake_coupled
-                    vlm.solvefromV(rotor, VindVkin, Vinf, RPM,
-                                  rho; t=t, sound_spd=speedofsound)
+                    vlm.solvefromV(rotor, VindVkin, Vinf, RPM, rho; t=t,
+                                    sound_spd=speedofsound,
+                                    tiploss_correction=vlm_fsgm==1)
                 else
                     vlm.solvefromCCBlade(rotor, Vinf, RPM, rho;
                                               t=t, sound_spd=speedofsound)
@@ -115,7 +116,7 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
         Xs_rotors = _get_midXs(vhcl.rotor_systems)
 
         # Calculate VPM velocity on all points (VLM and rotors)
-        Vvpm = Vvpm_on_Xs(pfield, vcat(Xs_cp_vlm, Xs_ApA_AB_BBp_vlm, Xs_rotors); dt=dt)
+        Vvpm = Vvpm_on_Xs(pfield, vcat(Xs_cp_vlm, Xs_ApA_AB_BBp_vlm, Xs_rotors); dt=dt, fsgm=vlm_fsgm)
 
         Vvpm_cp_vlm = Vvpm[1:m]
         Vvpm_ApA_AB_BBp_vlm = Vvpm[m+1:4*m]
@@ -140,7 +141,7 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
 
         # Evaluate Rotor-on-VLM induced velocity
         Vrotor_on_wing = Vvpm_on_Xs(staticpfield, vcat(Xs_cp_vlm, Xs_ApA_AB_BBp_vlm);
-                                    static_particles_fun=static_particles_fun2, dt=dt)
+                                    static_particles_fun=static_particles_fun2, dt=dt, fsgm=vlm_fsgm)
 
         # Add and save VPM-on-VLM and Rotor-on-VLM induced velocity
         vlm._addsolution(vhcl.vlm_system, "Vvpm",
@@ -166,7 +167,7 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
 
         ## Evaluate VLM-on-Rotor and Rotor-on-Rotor induced velocity
         Vvlmrotor_on_rotor = Vvpm_on_Xs(staticpfield, Xs_rotors;
-                              static_particles_fun=static_particles_fun3, dt=dt)
+                              static_particles_fun=static_particles_fun3, dt=dt, fsgm=vlm_fsgm)
 
         # Add VPM-on-Rotor, VLM-on-Rotor, and Rotor-on-Rotor induced velocity
         Vinds = Vvpm_rotors + Vvlmrotor_on_rotor
@@ -209,8 +210,9 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
                 VindVkin = _format_blades(this_Vinds + Vkin, vhcl.rotor_systems,
                                                                         si, ri)
                 if wake_coupled
-                    vlm.solvefromV(rotor, VindVkin, Vinf, RPM,
-                                  rho; t=t, sound_spd=speedofsound)
+                    vlm.solvefromV(rotor, VindVkin, Vinf, RPM, rho; t=t,
+                                    sound_spd=speedofsound,
+                                    tiploss_correction=vlm_fsgm==1)
                 else
                     vlm.solvefromCCBlade(rotor, Vinf, RPM, rho;
                                                 t=t, sound_spd=speedofsound)

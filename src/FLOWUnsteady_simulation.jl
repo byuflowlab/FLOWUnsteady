@@ -37,6 +37,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
                              sigmafactor=1.0,           # Particle core overlap
                              overwrite_sigma=nothing,   # Overwrite cores to this value (ignoring sigmafactor)
                              vlm_sigma=-1,              # VLM regularization
+                             vlm_fsgm=1,                # If !=1, replaces the tip loss correction with a singularization of particles by this factor
                              vlm_rlx=-1,                # VLM relaxation
                              vlm_init=false,            # Initialize the first step with the VLM semi-infinite wake solution
                              surf_sigma=-1,             # Vehicle surface regularization (for VLM-on-VPM, VLM-on-Rotor, and Rotor-on-VLM)
@@ -141,7 +142,8 @@ function run_simulation(sim::Simulation, nsteps::Int;
 
         # Solve aerodynamics of the vehicle
         solve(sim, Vinf, PFIELD, wake_coupled, DT, vlm_rlx,
-                surf_sigma, rho, sound_spd, staticpfield; init_sol=vlm_init)
+                surf_sigma, rho, sound_spd, staticpfield;
+                        init_sol=vlm_init, vlm_fsgm=vlm_fsgm)
 
         # Shed unsteady-loading wake with new solution
         if shed_unsteady
@@ -230,7 +232,7 @@ end
 """
 Returns the velocity induced by particle field on every position `Xs`
 """
-function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs::Array{T, 1}; static_particles_fun=(args...)->nothing, dt=0) where {T}
+function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs::Array{T, 1}; static_particles_fun=(args...)->nothing, dt=0, fsgm=1) where {T}
 
     if length(Xs)!=0 && vpm.get_np(pfield)!=0
         # Omit freestream
@@ -241,6 +243,13 @@ function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs::Array{T, 1}; static_particles
 
         # Add static particles
         static_particles_fun(pfield, pfield.t, dt)
+
+        # Singularize particles to correct tip loss
+        if fsgm != 1
+            for P in vpm.iterator(pfield)
+                P.sigma .*= fsgm
+            end
+        end
 
         sta_np = vpm.get_np(pfield)             # Original + static particles
 
@@ -254,6 +263,13 @@ function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs::Array{T, 1}; static_particles
 
         # Retrieve velocity at probes
         Vvpm = [Array(P.U) for P in vpm.iterator(pfield; start_i=sta_np+1)]
+
+        # De-singularize particles
+        if fsgm != 1
+            for P in vpm.iterator(pfield)
+                P.sigma ./= fsgm
+            end
+        end
 
         # Remove static particles and probes
         for pi in vpm.get_np(pfield):-1:(org_np+1)
