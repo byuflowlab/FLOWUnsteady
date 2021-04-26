@@ -149,7 +149,7 @@ end
 """
     `remove_particles_lowstrength(crit_Gamma2, every_nsteps)`
 
-Returns a extra_runtime_function that every `step` steps removes all
+Returns an extra_runtime_function that every `step` steps removes all
 particles that have a squared-magnitude Gamma smaller than `crit_Gamma2`.
 """
 function remove_particles_lowstrength(crit_Gamma2::Real, step::Int)
@@ -161,6 +161,40 @@ function remove_particles_lowstrength(crit_Gamma2::Real, step::Int)
                 P = vpm.get_particle(PFIELD, i)
 
                 if P.Gamma[1]*P.Gamma[1] + P.Gamma[2]*P.Gamma[2] + P.Gamma[3]*P.Gamma[3] < crit_Gamma2
+                    vpm.remove_particle(PFIELD, i)
+                end
+            end
+
+        end
+
+        return false
+    end
+
+    return wake_treatment
+end
+
+
+"""
+    `remove_particles_lowstrength(crit_Gamma2, every_nsteps)`
+
+Returns an extra_runtime_function that every `step` steps removes all
+particles that are outside of a box of minimum and maximum vertices `Pmin`
+and `Pmax`.
+"""
+function remove_particles_box(Pmin, Pmax, step::Int)
+
+    function wake_treatment(sim, PFIELD, T, DT, args...; optargs...)
+        if sim.nt%step==0
+
+            for i in vpm.get_np(PFIELD):-1:1
+                P = vpm.get_particle(PFIELD, i)
+
+                if (  (P.X[1] < Pmin[1] || P.X[1] > Pmax[1])
+                        ||
+                      (P.X[2] < Pmin[2] || P.X[2] > Pmax[2])
+                        ||
+                      (P.X[3] < Pmin[3] || P.X[3] > Pmax[3])
+                   ) 
                     vpm.remove_particle(PFIELD, i)
                 end
             end

@@ -49,6 +49,7 @@ function generate_monitor_rotors( rotors::Array{vlm.Rotor, 1},
     if disp_conv
         fig = figure(figname, figsize=(7*3,5*2))
         axs = fig.subplots(2, 3)
+        axs = [axs[1], axs[3], axs[5], axs[2], axs[4], axs[6]]
     end
 
     # Function for run_vpm! to call on each iteration
@@ -235,6 +236,7 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
         fig1 = figure(figname, figsize=[7*2, 5*2]*figsize_factor)
         fig1.suptitle(title_lbl)
         axs1 = fig1.subplots(2, 2)
+        axs1 = axs1[axs1[1], axs1[3], axs1[2], axs1[4]]
         ax = axs1[1]
         # xlim([-1,1])
         ax.set_xlabel(L"$\frac{2y}{b}$")
