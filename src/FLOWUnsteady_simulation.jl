@@ -74,6 +74,10 @@ function run_simulation(sim::Simulation, nsteps::Int;
                 " (surf_sigma=$surf_sigma).")
     end
 
+    if vlm_fsgm <= 0 && vlm_fsgm != -1
+        error("Invalid `vlm_fsgm` value (`vlm_fsgm=$(vlm_fsgm)`).")
+    end
+
     ############################################################################
     # SOLVERS SETUP
     ############################################################################
@@ -245,7 +249,7 @@ function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs::Array{T, 1}; static_particles
         static_particles_fun(pfield, pfield.t, dt)
 
         # Singularize particles to correct tip loss
-        if fsgm != 1
+        if abs(fsgm) != 1
             for P in vpm.iterator(pfield)
                 P.sigma .*= fsgm
             end
@@ -265,7 +269,7 @@ function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs::Array{T, 1}; static_particles
         Vvpm = [Array(P.U) for P in vpm.iterator(pfield; start_i=sta_np+1)]
 
         # De-singularize particles
-        if fsgm != 1
+        if abs(fsgm) != 1
             for P in vpm.iterator(pfield)
                 P.sigma ./= fsgm
             end
