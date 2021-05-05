@@ -460,7 +460,7 @@ function VLM2VPM(system::Union{vlm.Wing, vlm.WingSystem, vlm.Rotor}, pfield, dt,
       l = -infD*V*dt                             # Distance the TE travels
 
       # Check if the system loops around
-      if norm(Ap - vlm.getHorseshoe(system, m)[4]) / norm(Bp - Ap) > tol
+      if norm(Ap - vlm.getHorseshoe(system, m)[4]) / norm(Bp - Ap) <= tol
           gamma -= vlm.getHorseshoe(system, m)[8]
       end
 
