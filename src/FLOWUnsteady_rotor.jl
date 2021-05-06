@@ -196,7 +196,7 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
 
     return generate_rotor(Rtip, Rhub, B,
                             chorddist, pitchdist, sweepdist, heightdist,
-                            airfoil_contours; data_path=def_data_path, optargs...)
+                            airfoil_contours; data_path=data_path, optargs...)
 end
 
 function generate_rotor(Rtip::Real, Rhub::Real, B::Int, blade_file::String;
