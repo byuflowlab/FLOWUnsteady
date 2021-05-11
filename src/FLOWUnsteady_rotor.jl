@@ -48,6 +48,7 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
                         rediscretize_airfoils=true,
                         # OUTPUT OPTIONS
                         verbose=false, verbose_xfoil=false, v_lvl=1,
+                        save_polars=nothing, save_polar_pref="airfoilpolar",
                         plot_disc=true, figsize_factor=2/3)
     if verbose; println("\t"^v_lvl*"Generating geometry..."); end;
     n_bem = n
@@ -115,6 +116,11 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
                                     verbose=verbose_xfoil, Mach=this_Ma,
                                     iter=100, ncrit=ncrit)
             if verbose; println(" done."); end;
+
+            if save_polars != nothing
+                if !(isdir(save_polars)); mkdir(save_polars); end;
+                vlm.ap.save_polar2(polar, save_polar_pref*"-sec$(rfli)-Re$(ceil(Int, this_Re))"; path=save_polars)
+            end
 
         else # Reads polars from files
             if verbose; println("\t"^(v_lvl+1)*"$file_name"); end;
