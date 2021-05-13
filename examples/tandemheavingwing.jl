@@ -226,6 +226,10 @@ function tandemheavingwing(;   # TEST OPTIONS
     prev_wing = nothing
     prev_system = nothing
 
+    fig1, fig2 = nothing, nothing
+    axs1, axs2 = nothing, nothing
+
+
     function monitor(sim, PFIELD, T, DT; figname="monitor_$(save_path)",
                                                                 nsteps_plot=1)
 
@@ -233,34 +237,40 @@ function tandemheavingwing(;   # TEST OPTIONS
         clr = (1-aux, 0, aux)
 
         if PFIELD.nt==0 && disp_plot
-            figure(figname, figsize=[7*2, 5*2]*figsize_factor)
-            subplot(221)
-            xlim([0,1])
-            xlabel(L"$\frac{2y}{b}$")
-            ylabel(L"$\frac{Cl}{CL}$")
-            title("Spanwise lift distribution")
+            fig1 = figure(figname, figsize=[7*2, 5*2]*figsize_factor)
+            axs1 = fig1.subplots(2, 2)
+            axs1 = [axs1[1], axs1[3], axs1[2], axs1[4]]
 
-            subplot(222)
-            xlim([0,1])
-            xlabel(L"$\frac{2y}{b}$")
-            ylabel(L"$\frac{Cd}{CD}$")
-            title("Spanwise drag distribution")
+            ax = axs1[1]
+            ax.set_xlim([0,1])
+            ax.set_xlabel(L"$\frac{2y}{b}$")
+            ax.set_ylabel(L"$\frac{Cl}{CL}$")
+            ax.set_title("Spanwise lift distribution")
 
-            subplot(223)
-            xlabel("Simulation time (s)")
-            ylabel(L"Lift Coefficient $C_L$")
+            ax = axs1[2]
+            ax.set_xlim([0,1])
+            ax.set_xlabel(L"$\frac{2y}{b}$")
+            ax.set_ylabel(L"$\frac{Cd}{CD}$")
+            ax.set_title("Spanwise drag distribution")
 
-            subplot(224)
-            xlabel("Simulation time (s)")
-            ylabel(L"Drag Coefficient $C_D$")
+            ax = axs1[3]
+            ax.set_xlabel("Simulation time (s)")
+            ax.set_ylabel(L"Lift Coefficient $C_L$")
 
-            figure(figname*"_2", figsize=[7*2, 5*1]*figsize_factor)
-            subplot(121)
-            xlabel(L"$\frac{2y}{b}$")
-            ylabel(L"Circulation $\Gamma$")
-            subplot(122)
-            xlabel(L"$\frac{2y}{b}$")
-            ylabel(L"Effective velocity $V_\infty$")
+            ax = axs1[4]
+            ax.set_xlabel("Simulation time (s)")
+            ax.set_ylabel(L"Drag Coefficient $C_D$")
+
+            fig2 = figure(figname*"_2", figsize=[7*2, 5*1]*figsize_factor)
+            axs2 = fig2.subplots(1, 2)
+
+            ax = axs2[1]
+            ax.set_xlabel(L"$\frac{2y}{b}$")
+            ax.set_ylabel(L"Circulation $\Gamma$")
+
+            ax = axs2[2]
+            ax.set_xlabel(L"$\frac{2y}{b}$")
+            ax.set_ylabel(L"Effective velocity $V_\infty$")
 
         end
 
@@ -296,30 +306,29 @@ function tandemheavingwing(;   # TEST OPTIONS
             vlm._addsolution(wing, "Cl/CL", ClCL)
             vlm._addsolution(wing, "Cd/CD", CdCD)
 
-            subplot(221)
-            plot(web_2yb, web_ClCL, "ok", label="Weber's experimental data")
-            plot(y2b, ClCL, "-", label="FLOWVLM", alpha=0.5, color=clr)
+            ax = axs1[1]
+            ax.plot(web_2yb, web_ClCL, "ok", label="Weber's experimental data")
+            ax.plot(y2b, ClCL, "-", label="FLOWVLM", alpha=0.5, color=clr)
 
-            subplot(222)
-            plot(web_2yb, web_CdCD, "ok", label="Weber's experimental data")
-            plot(y2b, CdCD, "-", label="FLOWVLM", alpha=0.5, color=clr)
+            ax = axs1[2]
+            ax.plot(web_2yb, web_CdCD, "ok", label="Weber's experimental data")
+            ax.plot(y2b, CdCD, "-", label="FLOWVLM", alpha=0.5, color=clr)
 
-            subplot(223)
-            plot([0, T], web_CL*ones(2), ":k", label="Weber's experimental data")
-            plot([T], [CLwing], "o", label="FLOWVLM", alpha=0.5, color=clr)
+            ax = axs1[3]
+            ax.plot([0, T], web_CL*ones(2), ":k", label="Weber's experimental data")
+            ax.plot([T], [CLwing], "o", label="FLOWVLM", alpha=0.5, color=clr)
 
-            subplot(224)
-            plot([0, T], web_CD*ones(2), ":k", label="Weber's experimental data")
-            plot([T], [CDwing], "o", label="FLOWVLM", alpha=0.5, color=clr)
+            ax = axs1[4]
+            ax.plot([0, T], web_CD*ones(2), ":k", label="Weber's experimental data")
+            ax.plot([T], [CDwing], "o", label="FLOWVLM", alpha=0.5, color=clr)
 
-            figure(figname*"_2")
-            subplot(121)
-            plot(y2b, wing.sol["Gamma"], "-", label="FLOWVLM", alpha=0.5, color=clr)
+            ax = axs2[1]
+            ax.plot(y2b, wing.sol["Gamma"], "-", label="FLOWVLM", alpha=0.5, color=clr)
             if wake_coupled && PFIELD.nt!=0
-                subplot(122)
-                plot(y2b, norm.(wing.sol["Vkin"])/magVinf, "-", label="FLOWVLM", alpha=0.5, color=[clr[1], 1, clr[3]])
-                if VehicleType!=uns.QVLMVehicle; plot(y2b, norm.(wing.sol["Vvpm"]), "-", label="FLOWVLM", alpha=0.5, color=clr); end;
-                plot(y2b, [norm(Vinf(vlm.getControlPoint(wing, i), T)) for i in 1:vlm.get_m(wing)],
+                ax = axs2[2]
+                ax.plot(y2b, norm.(wing.sol["Vkin"])/magVinf, "-", label="FLOWVLM", alpha=0.5, color=[clr[1], 1, clr[3]])
+                if VehicleType!=uns.QVLMVehicle; ax.plot(y2b, norm.(wing.sol["Vvpm"]), "-", label="FLOWVLM", alpha=0.5, color=clr); end;
+                ax.plot(y2b, [norm(Vinf(vlm.getControlPoint(wing, i), T)) for i in 1:vlm.get_m(wing)],
                                                             "-k", label="FLOWVLM", alpha=0.5)
             end
 

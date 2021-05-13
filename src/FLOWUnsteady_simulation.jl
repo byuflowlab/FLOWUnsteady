@@ -213,6 +213,12 @@ function add_particle(pfield::vpm.ParticleField, X::Array{Float64, 1},
 
     Gamma = gamma*(V*dt)*infD       # Vectorial circulation
 
+    # Avoid adding empty particles to the computational domain, or ExaFMM would
+    # blow up
+    if sqrt(Gamma[1]^2 + Gamma[2]^2 + Gamma[3]^2) <= 5*eps(vpm.RealFMM)
+        Gamma = 5*eps(vpm.RealFMM)*ones(3)
+    end
+
     # Decreases p_per_step for slowly moving parts of blade
     # aux = min((sigma/p_per_step)/overwrite_sigma, 1)
     # pps = max(1, min(p_per_step, floor(Int, 1/(1-(aux-1e-14))) ))
@@ -229,7 +235,7 @@ function add_particle(pfield::vpm.ParticleField, X::Array{Float64, 1},
     dX = l/pps
     for i in 1:pps
         vpm.add_particle(pfield, X + i*dX - dX/2, Gamma/pps, sigmap;
-                                                vol=vol/pps, circulation=abs(gamma))
+                                                vol=vol/pps, circulation=max(abs(gamma), 5*eps(vpm.RealFMM)))
     end
 end
 
