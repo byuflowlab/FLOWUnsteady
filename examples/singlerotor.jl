@@ -15,8 +15,7 @@ II rotor.
 
 # ------------ MODULES ---------------------------------------------------------
 # Load simulation engine
-# import FLOWUnsteady
-reload("FLOWUnsteady")
+import FLOWUnsteady
 uns = FLOWUnsteady
 vlm = uns.vlm
 
@@ -70,23 +69,28 @@ function singlerotor(;  xfoil       = true,             # Whether to run XFOIL
                         DVinf       = [1.0, 0, 0],      # Freestream direction
                         nrevs       = 6,                # Number of revolutions
                         nsteps_per_rev = 72,            # Time steps per revolution
+                        shed_unsteady = true,
+                        lambda      = 2.125,
+                        n           = 10,
+                        overwrite_overwrite_sigma = nothing,
                         # OUTPUT OPTIONS
                         save_path   = nothing,
                         run_name    = "singlerotor",
                         prompt      = true,
                         verbose     = true,
-                        v_lvl       = 0)
+                        v_lvl       = 0,
+                        rotor_file = "DJI-II.csv",           # Rotor geometry
+                        optargs...)
 
     # TODO: Wake removal ?
 
     # ------------ PARAMETERS --------------------------------------------------
 
     # Rotor geometry
-    rotor_file = "DJI-II.csv"           # Rotor geometry
     data_path = uns.def_data_path       # Path to rotor database
     pitch = 0.0                         # (deg) collective pitch of blades
     # n = 50                              # Number of blade elements
-    n = 10
+    # n = 10
     CW = false                          # Clock-wise rotation
     # xfoil = false                     # Whether to run XFOIL
 
@@ -109,11 +113,13 @@ function singlerotor(;  xfoil       = true,             # Whether to run XFOIL
     p_per_step = 2                      # Sheds per time step
     ttot = nrevs/(RPM/60)               # (s) total simulation time
     nsteps = nrevs*nsteps_per_rev       # Number of time steps
-    lambda = 2.125                      # Core overlap
-    overwrite_sigma = lambda * 2*pi*R/(nsteps_per_rev*p_per_step) # Smoothing core size
+    # lambda = 2.125                      # Core overlap
+    overwrite_sigma = overwrite_overwrite_sigma != nothing ? overwrite_overwrite_sigma :
+                                        lambda * 2*pi*R/(nsteps_per_rev*p_per_step) # Smoothing core size
+
     surf_sigma = R/10                   # Smoothing radius of lifting surface
     vlm_sigma = surf_sigma              # Smoothing radius of VLM
-    shed_unsteady = true                # Shed particles from unsteady loading
+    # shed_unsteady = true                # Shed particles from unsteady loading
 
     max_particles = ((2*n+1)*B)*nrevs*nsteps_per_rev*p_per_step # Max particles for memory pre-allocation
     plot_disc = true                    # Plot blade discretization for debugging
@@ -194,6 +200,7 @@ function singlerotor(;  xfoil       = true,             # Whether to run XFOIL
                                       run_name=run_name,
                                       prompt=prompt,
                                       verbose=verbose, v_lvl=v_lvl,
+                                      optargs...
                                       )
     return pfield, rotor
 end

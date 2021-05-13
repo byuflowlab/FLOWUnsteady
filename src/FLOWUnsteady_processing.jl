@@ -19,7 +19,7 @@ as the field `vlm_system.sol["Ftot"]`
 """
 function calc_aerodynamicforce(vlm_system::Union{vlm.Wing, vlm.WingSystem},
                                 prev_vlm_system, pfield, Vinf, dt, rho; t=0.0,
-                                vpm_solver="ExaFMM", per_unit_span=false,
+                                per_unit_span=false,
                                 Vout=nothing, lenout=nothing,
                                 lencrit=-1)
 
@@ -38,7 +38,12 @@ function calc_aerodynamicforce(vlm_system::Union{vlm.Wing, vlm.WingSystem},
 
     # Evaluate VPM on each midpoint
     Xs = vcat(ApA, AB, BBp)
-    Vvpm = Vvpm_on_Xs(pfield, Xs; dt=dt)
+
+    ## NOTE: Instead of calling the VPM, we use what was calculated
+    ## by `solve()`, which includes Rotor-on-VLM velocities
+    # Vvpm = Vvpm_on_Xs(pfield, Xs; dt=dt)
+    Vvpm = vcat(vlm_system.sol["Vvpm_ApA"], vlm_system.sol["Vvpm_AB"], vlm_system.sol["Vvpm_BBp"])
+
 
     # Evaluate VLM on each midpoint
     Vvlm = vlm.Vind.(Ref(vlm_system), Xs; t=t, ign_col=true, ign_infvortex=true)
@@ -138,4 +143,66 @@ function decompose(Fs, ihat, jhat)
     end
 
     return Fis, Fjs, Fks
+end
+
+
+"""
+    `remove_particles_lowstrength(crit_Gamma2, every_nsteps)`
+
+Returns an extra_runtime_function that every `step` steps removes all
+particles that have a squared-magnitude Gamma smaller than `crit_Gamma2`.
+"""
+function remove_particles_lowstrength(crit_Gamma2::Real, step::Int)
+
+    function wake_treatment(sim, PFIELD, T, DT, args...; optargs...)
+        if sim.nt%step==0
+
+            for i in vpm.get_np(PFIELD):-1:1
+                P = vpm.get_particle(PFIELD, i)
+
+                if P.Gamma[1]*P.Gamma[1] + P.Gamma[2]*P.Gamma[2] + P.Gamma[3]*P.Gamma[3] < crit_Gamma2
+                    vpm.remove_particle(PFIELD, i)
+                end
+            end
+
+        end
+
+        return false
+    end
+
+    return wake_treatment
+end
+
+
+"""
+    `remove_particles_lowstrength(crit_Gamma2, every_nsteps)`
+
+Returns an extra_runtime_function that every `step` steps removes all
+particles that are outside of a box of minimum and maximum vertices `Pmin`
+and `Pmax`.
+"""
+function remove_particles_box(Pmin, Pmax, step::Int)
+
+    function wake_treatment(sim, PFIELD, T, DT, args...; optargs...)
+        if sim.nt%step==0
+
+            for i in vpm.get_np(PFIELD):-1:1
+                P = vpm.get_particle(PFIELD, i)
+
+                if (  (P.X[1] < Pmin[1] || P.X[1] > Pmax[1])
+                        ||
+                      (P.X[2] < Pmin[2] || P.X[2] > Pmax[2])
+                        ||
+                      (P.X[3] < Pmin[3] || P.X[3] > Pmax[3])
+                   )
+                    vpm.remove_particle(PFIELD, i)
+                end
+            end
+
+        end
+
+        return false
+    end
+
+    return wake_treatment
 end

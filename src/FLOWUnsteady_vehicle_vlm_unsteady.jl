@@ -105,33 +105,63 @@ const VLMVehicle = UVLMVehicle
 function shed_wake(self::VLMVehicle, Vinf::Function,
                             pfield::vpm.ParticleField, dt::Real, nt::Int; t=0.0,
                             unsteady_shedcrit=-1.0, p_per_step=1,
-                            sigmafactor=1.0, overwrite_sigma=nothing)
+                            sigmafactor=1.0, overwrite_sigma=nothing,
+                            omit_shedding=[])
     if nt!=0
         VLM2VPM(self.wake_system, pfield, dt, Vinf; t=t,
                     prev_system=_get_prev_wake_system(self),
                     unsteady_shedcrit=unsteady_shedcrit,
                     p_per_step=p_per_step, sigmafactor=sigmafactor,
-                    overwrite_sigma=overwrite_sigma, check=false)
+                    overwrite_sigma=overwrite_sigma, check=false,
+                    omit_shedding=omit_shedding)
     end
 end
 
 
 function generate_static_particle_fun(pfield::vpm.ParticleField,
-                                                self::VLMVehicle, sigma::Real)
+                                                self::VLMVehicle, sigma::Real;
+                                                save_path=nothing, run_name="",
+                                                suff="_staticpfield")
 
     if sigma<=0
         error("Invalid smoothing radius $sigma.")
+    end
+
+    flag = save_path!=nothing
+
+    # Create auxiliary particle field used for saving vtks with static particles
+    if flag
+        maxparticles = vlm.get_m(self.vlm_system)
+        for rotors in self.rotor_systems
+            for rotor in rotors
+                maxparticles += vlm.get_m(rotor)
+            end
+        end
+        pfield_static = vpm.ParticleField(3*maxparticles; nt=0, t=0)
     end
 
     function static_particles_function(pfield, args...)
 
         # Particles from vlm system
         _static_particles(pfield, self.vlm_system, sigma)
+        if flag; _static_particles(pfield_static, self.vlm_system, sigma); end;
 
         # Particles from rotor systems
         for rotors in self.rotor_systems
             for rotor in rotors
                 _static_particles(pfield, rotor, sigma)
+                if flag; _static_particles(pfield_static, rotor, sigma); end;
+            end
+        end
+
+        # Save vtk with static particles
+        if flag
+            vpm.save(pfield_static, run_name*suff; path=save_path, add_num=true,
+                                        overwrite_time=nothing)
+            pfield_static.nt += 1
+            pfield_static.t += 1
+            for pi in vpm.get_np(pfield_static):-1:1
+                vpm.remove_particle(pfield_static, pi)
             end
         end
 
@@ -153,7 +183,8 @@ function _static_particles(pfield::vpm.ParticleField,
     for i in 1:vlm.get_m(system)
         (Ap, A, B, Bp, _, _, _, Gamma) = vlm.getHorseshoe(system, i)
         for (i,(x1, x2)) in enumerate(((Ap,A), (A,B), (B,Bp)))
-            vpm.add_particle(pfield, (x1+x2)/2, Gamma*(x2-x1), sigma; vol=0)
+            vpm.add_particle(pfield, (x1+x2)/2, Gamma*(x2-x1), sigma;
+                                                    vol=0, circulation=abs(Gamma))
         end
     end
 end

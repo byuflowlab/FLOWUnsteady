@@ -45,6 +45,13 @@ function generate_monitor_rotors( rotors::Array{vlm.Rotor, 1},
         fname = joinpath(save_path, run_name*conv_suff)
     end
 
+    # Call figure
+    if disp_conv
+        fig = figure(figname, figsize=(7*3,5*2))
+        axs = fig.subplots(2, 3)
+        axs = [axs[1], axs[3], axs[5], axs[2], axs[4], axs[6]]
+    end
+
     # Function for run_vpm! to call on each iteration
     function extra_runtime_function(sim::Simulation{V, M, R},
                                     PFIELD::vpm.ParticleField,
@@ -55,40 +62,36 @@ function generate_monitor_rotors( rotors::Array{vlm.Rotor, 1},
         angle = T*360*RPM_ref/60
         t_scaled = T*t_scale
 
-
-        # Call figure
-        if disp_conv; fig = figure(figname, figsize=(7*3,5*2)); end;
-
         if fcalls==0
             # Format subplots
             if disp_conv
-                subplot(231)
-                title("Circulation Distribution")
-                xlabel("Element index")
-                ylabel(L"Circulation $\Gamma$ (m$^2$/s)")
-                grid(true, color="0.8", linestyle="--")
-                subplot(232)
-                title("Plane-of-rotation Normal Force")
-                xlabel("Element index")
-                ylabel(L"Normal Force $N_p$ (N/m)")
-                grid(true, color="0.8", linestyle="--")
-                subplot(233)
-                title("Plane-of-rotation Tangential Force")
-                xlabel("Element index")
-                ylabel(L"Tangential Force $T_p$ (N/m)")
-                grid(true, color="0.8", linestyle="--")
-                subplot(234)
-                xlabel(t_lbl)
-                ylabel(L"Thrust $C_T$")
-                grid(true, color="0.8", linestyle="--")
-                subplot(235)
-                xlabel(t_lbl)
-                ylabel(L"Torque $C_Q$")
-                grid(true, color="0.8", linestyle="--")
-                subplot(236)
-                xlabel(t_lbl)
-                ylabel(L"Propulsive efficiency $\eta$")
-                grid(true, color="0.8", linestyle="--")
+                ax = axs[1]
+                ax.title.set_text("Circulation Distribution")
+                ax.set_xlabel("Element index")
+                ax.set_ylabel(L"Circulation $\Gamma$ (m$^2$/s)")
+                ax.grid(true, color="0.8", linestyle="--")
+                ax = axs[2]
+                ax.title.set_text("Plane-of-rotation Normal Force")
+                ax.set_xlabel("Element index")
+                ax.set_ylabel(L"Normal Force $N_p$ (N/m)")
+                ax.grid(true, color="0.8", linestyle="--")
+                ax = axs[3]
+                ax.title.set_text("Plane-of-rotation Tangential Force")
+                ax.set_xlabel("Element index")
+                ax.set_ylabel(L"Tangential Force $T_p$ (N/m)")
+                ax.grid(true, color="0.8", linestyle="--")
+                ax = axs[4]
+                ax.set_xlabel(t_lbl)
+                ax.set_ylabel(L"Thrust $C_T$")
+                ax.grid(true, color="0.8", linestyle="--")
+                ax = axs[5]
+                ax.set_xlabel(t_lbl)
+                ax.set_ylabel(L"Torque $C_Q$")
+                ax.grid(true, color="0.8", linestyle="--")
+                ax = axs[6]
+                ax.set_xlabel(t_lbl)
+                ax.set_ylabel(L"Propulsive efficiency $\eta$")
+                ax.grid(true, color="0.8", linestyle="--")
             end
 
             # Convergence file header
@@ -120,28 +123,25 @@ function generate_monitor_rotors( rotors::Array{vlm.Rotor, 1},
             alpha = fcalls==0 && false ? 1 : 0.5
 
             # Circulation distribution
-            subplot(231)
             this_sol = []
             for rotor in rotors
                 this_sol = vcat(this_sol, [vlm.get_blade(rotor, j).sol["Gamma"] for j in 1:rotor.B]...)
             end
-            plot(1:size(this_sol,1), this_sol, stl, alpha=alpha, color=clr)
+            axs[1].plot(1:size(this_sol,1), this_sol, stl, alpha=alpha, color=clr)
 
             # Np distribution
-            subplot(232)
             this_sol = []
             for rotor in rotors
                 this_sol = vcat(this_sol, rotor.sol["Np"]["field_data"]...)
             end
-            plot(1:size(this_sol,1), this_sol, stl, alpha=alpha, color=clr)
+            axs[2].plot(1:size(this_sol,1), this_sol, stl, alpha=alpha, color=clr)
 
             # Tp distribution
-            subplot(233)
             this_sol = []
             for rotor in rotors
                 this_sol = vcat(this_sol, rotor.sol["Tp"]["field_data"]...)
             end
-            plot(1:size(this_sol,1), this_sol, stl, alpha=alpha, color=clr)
+            axs[3].plot(1:size(this_sol,1), this_sol, stl, alpha=alpha, color=clr)
         end
 
         # Plot performance parameters
@@ -150,12 +150,9 @@ function generate_monitor_rotors( rotors::Array{vlm.Rotor, 1},
             eta = J_ref*CT/(2*pi*CQ)
 
             if disp_conv
-                subplot(234)
-                plot([t_scaled], [CT], "$(stls[i])", alpha=alpha, color=clr)
-                subplot(235)
-                plot([t_scaled], [CQ], "$(stls[i])", alpha=alpha, color=clr)
-                subplot(236)
-                plot([t_scaled], [eta], "$(stls[i])", alpha=alpha, color=clr)
+                axs[4].plot([t_scaled], [CT], "$(stls[i])", alpha=alpha, color=clr)
+                axs[5].plot([t_scaled], [CQ], "$(stls[i])", alpha=alpha, color=clr)
+                axs[6].plot([t_scaled], [eta], "$(stls[i])", alpha=alpha, color=clr)
             end
 
             if save_path!=nothing
@@ -166,8 +163,8 @@ function generate_monitor_rotors( rotors::Array{vlm.Rotor, 1},
         if disp_conv
             # Save figure
             if fcalls%nsteps_savefig==0 && fcalls!=0 && save_path!=nothing
-                savefig(joinpath(save_path, run_name*"_convergence.png"),
-                                                            transparent=false)
+                fig.savefig(joinpath(save_path, run_name*"_convergence.png"),
+                                                    transparent=false, dpi=300)
             end
         end
 
@@ -217,8 +214,10 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
                                 ref_lbl="Reference", ref_stl="ok",
                                 conv_suff="_convergence.csv",
                                 figsize_factor=5/6,
-                                nsteps_plot=1,
+                                nsteps_plot=10,
                                 nsteps_savefig=10)
+
+    fcalls = 0                  # Number of function calls
 
     # y2b = 2*wing._ym/b_ref          # Initial span position
     y2b = 2*[vlm.getControlPoint(wing, i)[y2b_i] for i in 1:vlm.get_m(wing)]/b_ref
@@ -233,45 +232,47 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
         fname = joinpath(save_path, run_name*conv_suff)
     end
 
+    if disp_plot
+        fig1 = figure(figname, figsize=[7*2, 5*2]*figsize_factor)
+        fig1.suptitle(title_lbl)
+        axs1 = fig1.subplots(2, 2)
+        axs1 = axs1[axs1[1], axs1[3], axs1[2], axs1[4]]
+        ax = axs1[1]
+        # xlim([-1,1])
+        ax.set_xlabel(L"$\frac{2y}{b}$")
+        ax.set_ylabel(L"$\frac{Cl}{CL}$")
+        ax.title.set_text("Spanwise lift distribution")
+
+        ax = axs1[2]
+        # xlim([-1,1])
+        ax.set_xlabel(L"$\frac{2y}{b}$")
+        ax.set_ylabel(L"$\frac{Cd}{CD}$")
+        ax.title.set_text("Spanwise drag distribution")
+
+        ax = axs1[3]
+        ax.set_xlabel("Simulation time (s)")
+        ax.set_ylabel(CL_lbl)
+
+        ax = axs1[4]
+        ax.set_xlabel("Simulation time (s)")
+        ax.set_ylabel(CD_lbl)
+
+        fig2 = figure(figname*"_2", figsize=[7*2, 5*1]*figsize_factor)
+        axs2 = fig2.subplots(1, 2)
+        ax = axs2[1]
+        ax.set_xlabel(L"$\frac{2y}{b}$")
+        ax.set_ylabel(L"Circulation $\Gamma$")
+        ax = axs2[2]
+        ax.set_xlabel(L"$\frac{2y}{b}$")
+        ax.set_ylabel(L"Effective velocity $V_\infty$")
+    end
+
     function extra_runtime_function(sim, PFIELD, T, DT)
 
         aux = PFIELD.nt/nsteps_sim
         clr = (1-aux, 0, aux)
 
-        if PFIELD.nt==0
-
-            if disp_plot
-                figure(figname, figsize=[7*2, 5*2]*figsize_factor)
-                suptitle(title_lbl)
-                subplot(221)
-                # xlim([-1,1])
-                xlabel(L"$\frac{2y}{b}$")
-                ylabel(L"$\frac{Cl}{CL}$")
-                title("Spanwise lift distribution")
-
-                subplot(222)
-                # xlim([-1,1])
-                xlabel(L"$\frac{2y}{b}$")
-                ylabel(L"$\frac{Cd}{CD}$")
-                title("Spanwise drag distribution")
-
-                subplot(223)
-                xlabel("Simulation time (s)")
-                ylabel(CL_lbl)
-
-                subplot(224)
-                xlabel("Simulation time (s)")
-                ylabel(CD_lbl)
-
-                figure(figname*"_2", figsize=[7*2, 5*1]*figsize_factor)
-                subplot(121)
-                xlabel(L"$\frac{2y}{b}$")
-                ylabel(L"Circulation $\Gamma$")
-                subplot(122)
-                xlabel(L"$\frac{2y}{b}$")
-                ylabel(L"Effective velocity $V_\infty$")
-            end
-
+        if fcalls==0
             # Convergence file header
             if save_path!=nothing
                 f = open(fname, "w")
@@ -319,56 +320,53 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
             if out_CDwing!=nothing; push!(out_CDwing, CDwing); end;
 
             if PFIELD.nt%nsteps_plot==0 && disp_plot
-                figure(figname)
 
-                subplot(221)
+                ax = axs1[1]
                 if y2b_ref!=nothing && ClCL_ref!=nothing
-                    plot(y2b_ref, ClCL_ref, ref_stl, label=ref_lbl)
+                    ax.plot(y2b_ref, ClCL_ref, ref_stl, label=ref_lbl)
                 end
-                plot(y2b, ClCL, "-", alpha=0.5, color=clr)
+                ax.plot(y2b, ClCL, "-", alpha=0.5, color=clr)
 
-                subplot(222)
+                ax = axs1[2]
                 if y2b_ref!=nothing && CdCD_ref!=nothing
-                    plot(y2b_ref, CdCD_ref, ref_stl, label=ref_lbl)
+                    ax.plot(y2b_ref, CdCD_ref, ref_stl, label=ref_lbl)
                 end
-                plot(y2b, CdCD, "-", alpha=0.5, color=clr)
+                ax.plot(y2b, CdCD, "-", alpha=0.5, color=clr)
 
-                subplot(223)
+                ax = axs1[3]
                 if CL_ref!=nothing
-                    plot([0, T], CL_ref*ones(2), ":k", label=ref_lbl)
+                    ax.plot([0, T], CL_ref*ones(2), ":k", label=ref_lbl)
                 end
-                plot([T], [CLwing], "o", alpha=0.5, color=clr)
+                ax.plot([T], [CLwing], "o", alpha=0.5, color=clr)
 
-                subplot(224)
+                ax = axs1[4]
                 if CD_ref!=nothing
-                    plot([0, T], CD_ref*ones(2), ":k", label=ref_lbl)
+                    ax.plot([0, T], CD_ref*ones(2), ":k", label=ref_lbl)
                 end
-                plot([T], [CDwing], "o", alpha=0.5, color=clr)
+                ax.plot([T], [CDwing], "o", alpha=0.5, color=clr)
 
-                figure(figname*"_2")
-                subplot(121)
-                plot(y2b, wing.sol["Gamma"], "-", alpha=0.5, color=clr)
-                subplot(122)
+                ax = axs2[1]
+                ax.plot(y2b, wing.sol["Gamma"], "-", alpha=0.5, color=clr)
+                ax = axs2[2]
                 if "Vkin" in keys(wing.sol)
-                    plot(y2b, norm.(wing.sol["Vkin"]), "-", alpha=0.5, color=[clr[1], 1, clr[3]])
+                    ax.plot(y2b, norm.(wing.sol["Vkin"]), "-", alpha=0.5, color=[clr[1], 1, clr[3]])
                 end
                 if "Vvpm" in keys(wing.sol)
-                    plot(y2b, norm.(wing.sol["Vvpm"]), "-", alpha=0.5, color=clr)
+                    ax.plot(y2b, norm.(wing.sol["Vvpm"]), "-", alpha=0.5, color=clr)
                 elseif "Vind" in keys(wing.sol)
-                    plot(y2b, norm.(wing.sol["Vind"]), "-", alpha=0.5, color=clr)
+                    ax.plot(y2b, norm.(wing.sol["Vind"]), "-", alpha=0.5, color=clr)
                 end
-                plot(y2b, [norm(Vinf(vlm.getControlPoint(wing, i), T)) for i in 1:vlm.get_m(wing)],
+                ax.plot(y2b, [norm(Vinf(vlm.getControlPoint(wing, i), T)) for i in 1:vlm.get_m(wing)],
                                                             "-k", alpha=0.5)
 
                 if save_path!=nothing
                     # Save figures
                     if PFIELD.nt%nsteps_savefig==0
-                        figure(figname)
-                        savefig(joinpath(save_path, run_name*"_convergence.png"),
-                                                                transparent=false)
-                        figure(figname*"_2")
-                        savefig(joinpath(save_path, run_name*"_convergence2.png"),
-                                                                transparent=false)
+                        fig1.savefig(joinpath(save_path, run_name*"_convergence.png"),
+                                                    transparent=false, dpi=300)
+
+                        fig2.savefig(joinpath(save_path, run_name*"_convergence2.png"),
+                                                    transparent=false, dpi=300)
                     end
                 end
             end
@@ -382,44 +380,91 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
         end
 
         prev_wing = deepcopy(wing)
+        fcalls += 1
         return false
     end
 end
 
 
-function generate_monitor_statevariables(; figname="monitor_statevariables")
+function generate_monitor_statevariables(; figname="monitor_statevariables",
+                                           save_path=nothing,
+                                           run_name="",
+                                           nsteps_savefig=10)
 
-    figure(figname, figsize=[7*2, 5*1])
-    subplot(131)
-    xlabel("Simulation time")
-    ylabel("Velocity")
+    fig = figure(figname, figsize=[7*2, 5*1])
+    axs = fig.subplots(1, 3)
+    ax = axs[1]
+    ax.set_xlabel("Simulation time")
+    ax.set_ylabel("Velocity")
     Vlbls = [L"V_x", L"V_y", L"V_z"]
-    subplot(132)
-    xlabel("Simulation time")
-    ylabel(L"Angular velocity ($^\circ/t$)")
+    ax = axs[2]
+    ax.set_xlabel("Simulation time")
+    ax.set_ylabel(L"Angular velocity ($^\circ/t$)")
     Wlbls = [L"\Omega_x", L"\Omega_y", L"\Omega_z"]
-    subplot(133)
-    xlabel("Simulation time")
-    ylabel(L"$\mathop{O}$ position")
+    ax = axs[3]
+    ax.set_xlabel("Simulation time")
+    ax.set_ylabel(L"$O$ position")
     Olbls = [L"O_x", L"O_y", L"O_z"]
 
 
     function extra_runtime_function(sim, PFIELD, T, DT)
         for j in 1:3
-            subplot(131)
-            plot(sim.t, sim.vehicle.V[j], ".", label=Vlbls[j], alpha=0.8,
+            axs[1].plot(sim.t, sim.vehicle.V[j], ".", label=Vlbls[j], alpha=0.8,
                                                             color=clrs[j])
-            subplot(132)
-            plot(sim.t, sim.vehicle.W[j], ".", label=Wlbls[j], alpha=0.8,
+            axs[2].plot(sim.t, sim.vehicle.W[j], ".", label=Wlbls[j], alpha=0.8,
                                                             color=clrs[j])
-            subplot(133)
-            plot(sim.t, sim.vehicle.system.O[j], ".", label=Olbls[j], alpha=0.8,
+            axs[3].plot(sim.t, sim.vehicle.system.O[j], ".", label=Olbls[j], alpha=0.8,
                                                             color=clrs[j])
         end
         if sim.nt==0
             for j in 1:2
-                subplot(130+j)
-                legend(loc="best", frameon=false)
+                axs[j].legend(loc="best", frameon=false)
+            end
+        end
+
+        if save_path!=nothing
+            # Save figures
+            if PFIELD.nt%nsteps_savefig==0
+                fig.savefig(joinpath(save_path, run_name*"statevariables.png"),
+                                                    transparent=false, dpi=300)
+            end
+        end
+
+        return false
+    end
+
+    return extra_runtime_function
+end
+
+
+function generate_monitor_enstrophy(; save_path=nothing,
+                                     figname="monitor_enstrophy", run_name="",
+                                     nsteps_savefig=10,
+                                     nsteps_plot=10)
+
+    fig = figure(figname, figsize=[7*1, 5*1])
+    ax = fig.gca()
+    ax.set_xlabel("Simulation time")
+    ax.set_ylabel(L"Enstrophy ($\mathrm{m}^6/\mathrm{s}^2$)")
+
+    enstrophy = []
+    ts = []
+
+    function extra_runtime_function(sim, PFIELD, T, DT)
+        vpm.monitor_enstrophy(PFIELD, T, DT; save_path=save_path,
+                                               run_name=run_name, out=enstrophy)
+
+        push!(ts, T)
+
+        if PFIELD.nt%nsteps_plot == 0
+            ax.plot(ts, enstrophy[end-length(ts)+1:end], ".k")
+            ts = []
+        end
+
+        if save_path!=nothing
+            if PFIELD.nt%nsteps_savefig==0
+                fig.savefig(joinpath(save_path, run_name*"enstrophy.png"),
+                                                    transparent=false, dpi=300)
             end
         end
 

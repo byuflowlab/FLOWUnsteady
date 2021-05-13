@@ -112,7 +112,8 @@ distribution, otherwise it will shed wake due to unsteady loading.
 function shed_wake(self::AbstractVehicle, Vinf::Function,
                             pfield::vpm.ParticleField, dt::Real; t=0.0,
                             unsteady_shedcrit=-1.0, p_per_step=1,
-                            sigmafactor=1.0, overwrite_sigma=nothing)
+                            sigmafactor=1.0, overwrite_sigma=nothing,
+                            omit_shedding=[])
     error("$(typeof(self)) has no implementation yet!")
 end
 

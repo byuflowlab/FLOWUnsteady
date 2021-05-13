@@ -33,7 +33,7 @@ v"3.8"
 ## Setting up PyPlot
 Since PyCall now relies a custom install of Python3, make sure that:
 - matplotlib is installed for that python
-- for a best experience, verify that matplotlob uses Qt5Agg as a backend. Useful instructions can be found [here](https://github.com/JuliaPy/PyPlot.jl#os-x) and [here](https://stackoverflow.com/questions/58627696/warning-pyplot-is-using-tkagg-backend-which-is-known-to-cause-crashes-on-macos). 
+- for a best experience, verify that matplotlob uses Qt5Agg as a backend. Useful instructions can be found [here](https://github.com/JuliaPy/PyPlot.jl#os-x) and [here](https://stackoverflow.com/questions/58627696/warning-pyplot-is-using-tkagg-backend-which-is-known-to-cause-crashes-on-macos).
 
 ## `Paraview`
 
