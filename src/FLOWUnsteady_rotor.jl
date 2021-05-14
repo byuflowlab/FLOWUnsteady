@@ -234,7 +234,7 @@ function read_rotor(rotor_file::String; data_path=def_data_path)
     # Path to rotor files
     rotor_path = joinpath(data_path, "rotors")
 
-    data = DataFrames.DataFrame!(CSV.File(joinpath(rotor_path, rotor_file)))
+    data = DataFrames.DataFrame(CSV.File(joinpath(rotor_path, rotor_file)))
     Rtip = Meta.parse(data[1, 2])
     Rhub = Meta.parse(data[2, 2])
     B = Meta.parse(data[3, 2])
@@ -249,12 +249,12 @@ function read_blade(blade_file::String; data_path=def_data_path)
     rotor_path = joinpath(data_path, "rotors")
 
     # Read blade
-    files = DataFrames.DataFrame!(CSV.File(joinpath(rotor_path, blade_file)))
-    chorddist = DataFrames.DataFrame!(CSV.File(joinpath(rotor_path, files[1, 2])))
-    pitchdist = DataFrames.DataFrame!(CSV.File(joinpath(rotor_path, files[2, 2])))
-    sweepdist = DataFrames.DataFrame!(CSV.File(joinpath(rotor_path, files[3, 2])))
-    heightdist = DataFrames.DataFrame!(CSV.File(joinpath(rotor_path, files[4, 2])))
-    airfoil_files = DataFrames.DataFrame!(CSV.File(joinpath(rotor_path, files[5, 2])))
+    files = DataFrames.DataFrame(CSV.File(joinpath(rotor_path, blade_file)))
+    chorddist = DataFrames.DataFrame(CSV.File(joinpath(rotor_path, files[1, 2])))
+    pitchdist = DataFrames.DataFrame(CSV.File(joinpath(rotor_path, files[2, 2])))
+    sweepdist = DataFrames.DataFrame(CSV.File(joinpath(rotor_path, files[3, 2])))
+    heightdist = DataFrames.DataFrame(CSV.File(joinpath(rotor_path, files[4, 2])))
+    airfoil_files = DataFrames.DataFrame(CSV.File(joinpath(rotor_path, files[5, 2])))
     spl_k = Meta.parse(files[6, 2])
     spl_s = Meta.parse(files[7, 2])
 

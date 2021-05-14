@@ -118,13 +118,14 @@ function shed_wake(self::VLMVehicle, Vinf::Function,
 end
 
 
-function generate_static_particle_fun(pfield::vpm.ParticleField,
-                                                self::VLMVehicle, sigma::Real;
-                                                save_path=nothing, run_name="",
-                                                suff="_staticpfield")
+function generate_static_particle_fun(pfield::vpm.ParticleField, self::VLMVehicle,
+                                        sigma_vlm::Real, sigma_rotor::Real;
+                                        save_path=nothing, run_name="", suff="_staticpfield")
 
-    if sigma<=0
-        error("Invalid smoothing radius $sigma.")
+    if sigma_vlm<=0
+        error("Invalid VLM smoothing radius $sigma_vlm.")
+    elseif sigma_rotor<=0
+        error("Invalid rotor smoothing radius $sigma_rotor.")
     end
 
     flag = save_path!=nothing
@@ -143,14 +144,14 @@ function generate_static_particle_fun(pfield::vpm.ParticleField,
     function static_particles_function(pfield, args...)
 
         # Particles from vlm system
-        _static_particles(pfield, self.vlm_system, sigma)
-        if flag; _static_particles(pfield_static, self.vlm_system, sigma); end;
+        _static_particles(pfield, self.vlm_system, sigma_vlm)
+        if flag; _static_particles(pfield_static, self.vlm_system, sigma_vlm); end;
 
         # Particles from rotor systems
         for rotors in self.rotor_systems
             for rotor in rotors
-                _static_particles(pfield, rotor, sigma)
-                if flag; _static_particles(pfield_static, rotor, sigma); end;
+                _static_particles(pfield, rotor, sigma_rotor)
+                if flag; _static_particles(pfield_static, rotor, sigma_rotor); end;
             end
         end
 

@@ -19,7 +19,9 @@ function run_simulation(sim::Simulation, nsteps::Int;
                              rho=1.225,                 # (kg/m^3) air density
                              mu=1.81e-5,                # Air dynamic viscosity
                              # SOLVERS OPTIONS
-                             vpm_formulation=vpm.formulation_sphere,
+                             max_particles=Int(1e5),    # Maximum number of particles
+                             p_per_step=1,              # Particle sheds per time step
+                             vpm_formulation=vpm.formulation_sphere, # VPM formulation
                              vpm_kernel=vpm.gaussianerf,# VPM kernel
                              vpm_UJ=vpm.UJ_fmm,         # VPM particle-to-particle interaction calculation
                              vpm_sgsmodel=vpm.sgs_none, # VPM LES subgrid scale model
@@ -32,23 +34,24 @@ function run_simulation(sim::Simulation, nsteps::Int;
                              vpm_relaxfactor=0.3,       # VPM relaxation factor
                              vpm_nsteps_relax=1,        # Steps in between VPM relaxation
                              vpm_surface=true,          # Whether to include surfaces in the VPM
-                             max_particles=Int(1e5),    # Maximum number of particles
-                             p_per_step=1,              # Particle sheds per time step
-                             sigmafactor=1.0,           # Particle core overlap
-                             overwrite_sigma=nothing,   # Overwrite cores to this value (ignoring sigmafactor)
-                             vlm_sigma=-1,              # VLM regularization
-                             vlm_fsgm=1,                # If !=1, replaces the tip loss correction with a singularization of particles by this factor
                              vlm_rlx=-1,                # VLM relaxation
                              vlm_init=false,            # Initialize the first step with the VLM semi-infinite wake solution
-                             surf_sigma=-1,             # Vehicle surface regularization (for VLM-on-VPM, VLM-on-Rotor, and Rotor-on-VLM)
                              wake_coupled=true,         # Couple VPM wake on VLM solution
                              shed_unsteady=true,        # Whether to shed unsteady-loading wake
                              unsteady_shedcrit=0.01,    # Criterion for unsteady-loading shedding
                              omit_shedding=[],          # Indices of elements in `sim.vehicle.wake_system` on which omit shedding VPM particles
                              extra_runtime_function=(sim, PFIELD,T,DT)->false,
+                             # REGULARIZATION OPTIONS
+                             sigma_vlm_solver=-1,       # Regularization of VLM solver (internal)
+                             sigma_vlm_surf=-1,         # Size of embedded particles representing VLM surfaces (for VLM-on-VPM and VLM-on-Rotor)
+                             sigma_rotor_surf=-1,       # Size of embedded particles representing rotor blade surfaces (for Rotor-on-VPM, Rotor-on-VLM, and Rotor-on-Rotor)
+                             surf_sigma=-1,             # Vehicle surface regularization (for VLM-on-VPM, VLM-on-Rotor, and Rotor-on-VLM)
+                             sigmafactor_vpm=1.0,       # Core overlap of wake particles
+                             sigmafactor_vpmonvlm=1,    # Shrinks the particles by this factor when calculated VPM-on-VLM/Rotor induced velocities (if !=1, omits the hub/tip loss correction)
+                             sigma_vpm_overwrite=nothing,   # Overwrite cores of wake to this value (ignoring sigmafactor_vpm)
                              # OUTPUT OPTIONS
-                             save_path="temps/vahanasimulation00",
-                             run_name="FLOWUsimulation",
+                             save_path="temps/flowunsteadysimulation00",
+                             run_name="FLOWUnsteady-sim",
                              create_savepath=true,      # Whether to create save_path
                              prompt=true,
                              verbose=true, v_lvl=1, verbose_nsteps=10,
@@ -69,13 +72,18 @@ function run_simulation(sim::Simulation, nsteps::Int;
         @warn("Unsteady wake shedding is disabled!")
     end
 
-    if surf_sigma<=0
+    if sigma_vlm_surf<=0
         error("Received invalid vehicle surface regularization"*
-                " (surf_sigma=$surf_sigma).")
+                " (sigma_vlm_surf=$sigma_vlm_surf).")
     end
 
-    if vlm_fsgm <= 0 && vlm_fsgm != -1
-        error("Invalid `vlm_fsgm` value (`vlm_fsgm=$(vlm_fsgm)`).")
+    if sigma_rotor_surf<=0
+        error("Received invalid rotor surface regularization"*
+                " (sigma_rotor_surf=$sigma_rotor_surf).")
+    end
+
+    if sigmafactor_vpmonvlm <= 0 && sigmafactor_vpmonvlm != -1
+        error("Invalid `sigmafactor_vpmonvlm` value (`sigmafactor_vpmonvlm=$(sigmafactor_vpmonvlm)`).")
     end
 
     ############################################################################
@@ -83,11 +91,11 @@ function run_simulation(sim::Simulation, nsteps::Int;
     ############################################################################
     dt = sim.ttot/nsteps            # (s) time step
 
-    if vlm_sigma<=0
+    if sigma_vlm_solver<=0
         vlm.VLMSolver._blobify(false)
     else
         vlm.VLMSolver._blobify(true)
-        vlm.VLMSolver._smoothing_rad(vlm_sigma)
+        vlm.VLMSolver._smoothing_rad(sigma_vlm_solver)
     end
 
 
@@ -95,8 +103,8 @@ function run_simulation(sim::Simulation, nsteps::Int;
     # Set up viscous scheme
     if vpm.isinviscid(vpm_viscous) == false
         vpm_viscous.nu = mu/rho
-        if vpm.iscorespreading(vpm_viscous) && overwrite_sigma!=nothing
-            vpm_viscous.sgm0 = overwrite_sigma
+        if vpm.iscorespreading(vpm_viscous) && sigma_vpm_overwrite!=nothing
+            vpm_viscous.sgm0 = sigma_vpm_overwrite
         end
     end
 
@@ -140,21 +148,21 @@ function run_simulation(sim::Simulation, nsteps::Int;
         # Shed semi-infinite wake
         shed_wake(sim.vehicle, Vinf, PFIELD, DT, sim.nt; t=T,
                             unsteady_shedcrit=-1,
-                            p_per_step=p_per_step, sigmafactor=sigmafactor,
-                            overwrite_sigma=overwrite_sigma,
+                            p_per_step=p_per_step, sigmafactor=sigmafactor_vpm,
+                            overwrite_sigma=sigma_vpm_overwrite,
                             omit_shedding=omit_shedding)
 
         # Solve aerodynamics of the vehicle
         solve(sim, Vinf, PFIELD, wake_coupled, DT, vlm_rlx,
-                surf_sigma, rho, sound_spd, staticpfield;
-                        init_sol=vlm_init, vlm_fsgm=vlm_fsgm)
+                sigma_vlm_surf, sigma_rotor_surf, rho, sound_spd, staticpfield;
+                        init_sol=vlm_init, sigmafactor_vpmonvlm=sigmafactor_vpmonvlm)
 
         # Shed unsteady-loading wake with new solution
         if shed_unsteady
             shed_wake(sim.vehicle, Vinf, PFIELD, DT, sim.nt; t=T,
                         unsteady_shedcrit=unsteady_shedcrit,
-                        p_per_step=p_per_step, sigmafactor=sigmafactor,
-                        overwrite_sigma=overwrite_sigma,
+                        p_per_step=p_per_step, sigmafactor=sigmafactor_vpm,
+                        overwrite_sigma=sigma_vpm_overwrite,
                         omit_shedding=omit_shedding)
         end
 
@@ -173,7 +181,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
 
     if vpm_surface
         static_particles_function = generate_static_particle_fun(pfield,
-                                    sim.vehicle, surf_sigma;
+                                    sim.vehicle, sigma_vlm_surf, sigma_rotor_surf;
                                     save_path=save_static_particles ? save_path : nothing,
                                     run_name=run_name)
     else
@@ -251,15 +259,15 @@ function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs::Array{T, 1}; static_particles
 
         org_np = vpm.get_np(pfield)             # Original particles
 
-        # Add static particles
-        static_particles_fun(pfield, pfield.t, dt)
-
         # Singularize particles to correct tip loss
         if abs(fsgm) != 1
             for P in vpm.iterator(pfield)
                 P.sigma .*= fsgm
             end
         end
+
+        # Add static particles
+        static_particles_fun(pfield, pfield.t, dt)
 
         sta_np = vpm.get_np(pfield)             # Original + static particles
 
@@ -274,16 +282,16 @@ function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs::Array{T, 1}; static_particles
         # Retrieve velocity at probes
         Vvpm = [Array(P.U) for P in vpm.iterator(pfield; start_i=sta_np+1)]
 
+        # Remove static particles and probes
+        for pi in vpm.get_np(pfield):-1:(org_np+1)
+            vpm.remove_particle(pfield, pi)
+        end
+
         # De-singularize particles
         if abs(fsgm) != 1
             for P in vpm.iterator(pfield)
                 P.sigma ./= fsgm
             end
-        end
-
-        # Remove static particles and probes
-        for pi in vpm.get_np(pfield):-1:(org_np+1)
-            vpm.remove_particle(pfield, pi)
         end
 
         # Restore freestream
