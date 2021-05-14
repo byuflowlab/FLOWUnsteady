@@ -13,7 +13,8 @@
 function solve(self::Simulation{V, M, R}, Vinf::Function,
                 pfield::vpm.ParticleField, wake_coupled::Bool,
                 dt::Real, rlx::Real, sigma_vlm::Real, sigma_rotor::Real,
-                rho::Real, speedofsound::Real, staticpfield::vpm.ParticleField;
+                rho::Real, speedofsound::Real, staticpfield::vpm.ParticleField,
+                hubtiploss_correction;
                 init_sol::Bool=false, sigmafactor_vpmonvlm=1
                 ) where {V<:UVLMVehicle, M<:AbstractManeuver, R}
 
@@ -84,7 +85,7 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
                 if wake_coupled
                     vlm.solvefromV(rotor, VindVkin, Vinf, RPM, rho; t=t,
                                     sound_spd=speedofsound,
-                                    tiploss_correction=sigmafactor_vpmonvlm!=-1)
+                                    hubtiploss_correction=hubtiploss_correction)
                 else
                     vlm.solvefromCCBlade(rotor, Vinf, RPM, rho;
                                               t=t, sound_spd=speedofsound)
@@ -212,7 +213,7 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
                 if wake_coupled
                     vlm.solvefromV(rotor, VindVkin, Vinf, RPM, rho; t=t,
                                     sound_spd=speedofsound,
-                                    tiploss_correction=sigmafactor_vpmonvlm!=-1)
+                                    hubtiploss_correction=hubtiploss_correction)
                 else
                     vlm.solvefromCCBlade(rotor, Vinf, RPM, rho;
                                                 t=t, sound_spd=speedofsound)

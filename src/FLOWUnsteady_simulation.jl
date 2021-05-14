@@ -36,6 +36,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
                              vpm_surface=true,          # Whether to include surfaces in the VPM
                              vlm_rlx=-1,                # VLM relaxation
                              vlm_init=false,            # Initialize the first step with the VLM semi-infinite wake solution
+                             hubtiploss_correction=vlm.hubtiploss_nocorrection, # Hub and tip loss correction of rotors (ignored by quasi-steady solver)
                              wake_coupled=true,         # Couple VPM wake on VLM solution
                              shed_unsteady=true,        # Whether to shed unsteady-loading wake
                              unsteady_shedcrit=0.01,    # Criterion for unsteady-loading shedding
@@ -46,7 +47,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
                              sigma_vlm_surf=-1,         # Size of embedded particles representing VLM surfaces (for VLM-on-VPM and VLM-on-Rotor)
                              sigma_rotor_surf=-1,       # Size of embedded particles representing rotor blade surfaces (for Rotor-on-VPM, Rotor-on-VLM, and Rotor-on-Rotor)
                              sigmafactor_vpm=1.0,       # Core overlap of wake particles
-                             sigmafactor_vpmonvlm=1,    # Shrinks the particles by this factor when calculated VPM-on-VLM/Rotor induced velocities (if ==-1, omits the hub/tip loss correction)
+                             sigmafactor_vpmonvlm=1,    # Shrinks the particles by this factor when calculated VPM-on-VLM/Rotor induced velocities
                              sigma_vpm_overwrite=nothing,   # Overwrite cores of wake to this value (ignoring sigmafactor_vpm)
                              # OUTPUT OPTIONS
                              save_path="temps/flowunsteadysimulation00",
@@ -81,7 +82,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
                 " (sigma_rotor_surf=$sigma_rotor_surf).")
     end
 
-    if sigmafactor_vpmonvlm <= 0 && sigmafactor_vpmonvlm != -1
+    if sigmafactor_vpmonvlm <= 0
         error("Invalid `sigmafactor_vpmonvlm` value (`sigmafactor_vpmonvlm=$(sigmafactor_vpmonvlm)`).")
     end
 
@@ -153,7 +154,8 @@ function run_simulation(sim::Simulation, nsteps::Int;
 
         # Solve aerodynamics of the vehicle
         solve(sim, Vinf, PFIELD, wake_coupled, DT, vlm_rlx,
-                sigma_vlm_surf, sigma_rotor_surf, rho, sound_spd, staticpfield;
+                sigma_vlm_surf, sigma_rotor_surf, rho, sound_spd,
+                staticpfield, hubtiploss_correction;
                         init_sol=vlm_init, sigmafactor_vpmonvlm=sigmafactor_vpmonvlm)
 
         # Shed unsteady-loading wake with new solution
