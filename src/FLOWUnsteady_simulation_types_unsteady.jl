@@ -84,7 +84,7 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
                 if wake_coupled
                     vlm.solvefromV(rotor, VindVkin, Vinf, RPM, rho; t=t,
                                     sound_spd=speedofsound,
-                                    tiploss_correction=sigmafactor_vpmonvlm==1)
+                                    tiploss_correction=sigmafactor_vpmonvlm!=-1)
                 else
                     vlm.solvefromCCBlade(rotor, Vinf, RPM, rho;
                                               t=t, sound_spd=speedofsound)
@@ -212,7 +212,7 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
                 if wake_coupled
                     vlm.solvefromV(rotor, VindVkin, Vinf, RPM, rho; t=t,
                                     sound_spd=speedofsound,
-                                    tiploss_correction=sigmafactor_vpmonvlm==1)
+                                    tiploss_correction=sigmafactor_vpmonvlm!=-1)
                 else
                     vlm.solvefromCCBlade(rotor, Vinf, RPM, rho;
                                                 t=t, sound_spd=speedofsound)

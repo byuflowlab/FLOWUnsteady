@@ -47,7 +47,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
                              sigma_rotor_surf=-1,       # Size of embedded particles representing rotor blade surfaces (for Rotor-on-VPM, Rotor-on-VLM, and Rotor-on-Rotor)
                              surf_sigma=-1,             # Vehicle surface regularization (for VLM-on-VPM, VLM-on-Rotor, and Rotor-on-VLM)
                              sigmafactor_vpm=1.0,       # Core overlap of wake particles
-                             sigmafactor_vpmonvlm=1,    # Shrinks the particles by this factor when calculated VPM-on-VLM/Rotor induced velocities (if !=1, omits the hub/tip loss correction)
+                             sigmafactor_vpmonvlm=1,    # Shrinks the particles by this factor when calculated VPM-on-VLM/Rotor induced velocities (if ==-1, omits the hub/tip loss correction)
                              sigma_vpm_overwrite=nothing,   # Overwrite cores of wake to this value (ignoring sigmafactor_vpm)
                              # OUTPUT OPTIONS
                              save_path="temps/flowunsteadysimulation00",
