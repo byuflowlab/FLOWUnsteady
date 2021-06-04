@@ -196,6 +196,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
     vpm.run_vpm!(pfield, dt, nsteps;
                       save_path=save_path, run_name=run_name*"_pfield",
                       verbose=verbose, verbose_nsteps=verbose_nsteps,
+                      v_lvl=v_lvl,
                       create_savepath=create_savepath,
                       runtime_function=runtime_function,
                       nsteps_save=nsteps_save,

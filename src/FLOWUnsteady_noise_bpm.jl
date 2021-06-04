@@ -43,6 +43,8 @@ function run_noise_bpm(rotors::Array{vlm.Rotor, 1},
     # Create save path
     gt.create_path(save_path, prompt)
 
+    grid = nothing
+
     # Create observer
     if microphoneX == nothing
 
