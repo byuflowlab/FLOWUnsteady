@@ -65,12 +65,16 @@ For example simulations, check this notebook: [`docs/resources/examples.ipynb`](
 
 # Examples
 **HEAVING WING:** `examples/heavingwing.jl`
+
 <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/light/bertinsheaving00.gif" alt="Vid here" style="width: 400px;"/>
+
 
 **CROSS-WIND CIRCULAR PATH:** `examples/circularpath.jl`
 [<img src="docs/resources/img/circlesim_wide.jpg" alt="Vid here" style="width: 900px;"/>](http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/circularpath03_1.gif)
 
+
 **HOVERING ROTOR:** `examples/singlerotor.jl`
+
 <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/light/fvs_singlerotor02.gif" alt="Vid here" style="width: 400px;"/>
 
 **INTERACTING TANDEM HEAVING WING:** `examples/tandemheavingwing.jl`
@@ -82,12 +86,15 @@ For example simulations, check this notebook: [`docs/resources/examples.ipynb`](
 **Wind-harvesting Aircraft:** `examples/windcraft/windcraft.jl` (in progress)
 [![Vid here](docs/resources/img/windcraftwake.jpg)](https://youtu.be/iFM3B4_N2Ls)
 
-**eVTOL TRANSITION:** `examples/vahana2/vahana.jl`
-[<img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/light/vorticitytake01-smallreducedslower02-2.gif" alt="Vid here" style="width: 400px;"/>](https://youtu.be/d__wNtRIBY8)
-[<img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/light/acousticstake01-smallreducedslower03.gif" alt="Vid here" style="width: 400px;"/>](https://youtu.be/d__wNtRIBY8)
+**eVTOL TRANSITION:** `examples/vahana2/vahana.jl`, [VIDEO](https://youtu.be/d__wNtRIBY8)
+
+<img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/light/vorticitytake01-smallreducedslower02-2.gif" alt="Vid here" style="width: 400px;"/>
+<img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/light/acousticstake01-smallreducedslower03.gif" alt="Vid here" style="width: 400px;"/>
 
 **Rotor Aeroacoustic Noise:** [`examples/rotornoise/singlerotor.ipynb`](https://nbviewer.jupyter.org/github/byuflowlab/FLOWUnsteady/blob/master/examples/rotornoise/singlerotor.ipynb)
+
 <img src="docs/resources/img/rotornoise01.png" alt="Pic here" style="width: 400px;"/>
+
 <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/light/cfdnoise_ningdji_multi_005D_03_15.gif" alt="Vid here" style="width: 400px;"/>
 
 # Framework Flowchart
