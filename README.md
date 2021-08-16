@@ -14,7 +14,7 @@ strip theory solver), [`CCBlade`](https://github.com/byuflowlab/CCBlade.jl)
 solver), and `FLOWVPM` (viscous vortex particle method). The aeroacoustic
 solver integrates PSU-WOPWOP (FW-H solver), [FLOW's BPM](https://github.com/byuflowlab/BPM.jl), and [`FLOWNoise`](https://github.com/byuflowlab/FLOWNoise), obtaining both tonal and broadband acoustic noise.
 
-This package is written for Julia 1.4.2.
+This package is written for Julia 1.4.2 or higher.
 
 Official documentation: [https://flow.byu.edu/FLOWUnsteady/](https://flow.byu.edu/FLOWUnsteady/)
 
@@ -65,17 +65,16 @@ For example simulations, check this notebook: [`docs/resources/examples.ipynb`](
 
 # Examples
 **HEAVING WING:** `examples/heavingwing.jl`
-<img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/bertinsheaving00.gif" alt="Vid here" style="width: 900px;"/>
+<img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/light/bertinsheaving00.gif" alt="Vid here" style="width: 400px;"/>
 
 **CROSS-WIND CIRCULAR PATH:** `examples/circularpath.jl`
 [<img src="docs/resources/img/circlesim_wide.jpg" alt="Vid here" style="width: 900px;"/>](http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/circularpath03_1.gif)
 
 **HOVERING ROTOR:** `examples/singlerotor.jl`
-<img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/fvs_singlerotor02.gif" alt="Vid here" style="width: 900px;"/>
+<img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/light/fvs_singlerotor02.gif" alt="Vid here" style="width: 400px;"/>
 
 **INTERACTING TANDEM HEAVING WING:** `examples/tandemheavingwing.jl`
 [![Vid here](docs/resources/img/play01_wide.png)](https://youtu.be/Pch94bKpjrQ)
-
 
 **BLOWN WING:** `examples/blownwing/blownwing.jl`
 [![Vid here](docs/resources/img/blownwingplay03.png)](https://youtu.be/3REcIdIXrZA)
@@ -83,12 +82,13 @@ For example simulations, check this notebook: [`docs/resources/examples.ipynb`](
 **Wind-harvesting Aircraft:** `examples/windcraft/windcraft.jl` (in progress)
 [![Vid here](docs/resources/img/windcraftwake.jpg)](https://youtu.be/iFM3B4_N2Ls)
 
-**eVTOL TRANSITION:** `examples/vahana/vahana.jl` (in progress)
-[![Vid here](docs/resources/img/play00_wide.png)](https://youtu.be/f_AkQW37zqs)
+**eVTOL TRANSITION:** `examples/vahana2/vahana.jl`
+[<img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/light/vorticitytake01-smallreducedslower02-2.gif" alt="Vid here" style="width: 400px;"/>](https://youtu.be/d__wNtRIBY8)
+[<img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/light/acousticstake01-smallreducedslower03.gif" alt="Vid here" style="width: 400px;"/>](https://youtu.be/d__wNtRIBY8)
 
 **Rotor Aeroacoustic Noise:** [`examples/rotornoise/singlerotor.ipynb`](https://nbviewer.jupyter.org/github/byuflowlab/FLOWUnsteady/blob/master/examples/rotornoise/singlerotor.ipynb)
 <img src="docs/resources/img/rotornoise01.png" alt="Pic here" style="width: 400px;"/>
-<img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/cfdnoise_ningdji_multi_005D_03_15.gif" alt="Vid here" style="width: 400px;"/>
+<img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/light/cfdnoise_ningdji_multi_005D_03_15.gif" alt="Vid here" style="width: 400px;"/>
 
 # Framework Flowchart
 <img src="docs/resources/img/flowchart00.png" alt="Pic here" style="width: 900px;"/>
