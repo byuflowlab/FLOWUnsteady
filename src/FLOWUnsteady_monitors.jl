@@ -55,7 +55,7 @@ function generate_monitor_rotors( rotors::Array{vlm.Rotor, 1},
     # Function for run_vpm! to call on each iteration
     function extra_runtime_function(sim::Simulation{V, M, R},
                                     PFIELD::vpm.ParticleField,
-                                    T::Real, DT::Real
+                                    T::Real, DT::Real; optargs...
                                    ) where{V<:AbstractVLMVehicle, M, R}
 
         # rotors = vcat(sim.vehicle.rotor_systems...)
@@ -92,6 +92,7 @@ function generate_monitor_rotors( rotors::Array{vlm.Rotor, 1},
                 ax.set_xlabel(t_lbl)
                 ax.set_ylabel(L"Propulsive efficiency $\eta$")
                 ax.grid(true, color="0.8", linestyle="--")
+                fig.tight_layout()
             end
 
             # Convergence file header
@@ -257,6 +258,8 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
         ax.set_xlabel("Simulation time (s)")
         ax.set_ylabel(CD_lbl)
 
+        fig1.tight_layout()
+
         fig2 = figure(figname*"_2", figsize=[7*2, 5*1]*figsize_factor)
         axs2 = fig2.subplots(1, 2)
         ax = axs2[1]
@@ -265,9 +268,11 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
         ax = axs2[2]
         ax.set_xlabel(L"$\frac{2y}{b}$")
         ax.set_ylabel(L"Effective velocity $V_\infty$")
+
+        fig2.tight_layout()
     end
 
-    function extra_runtime_function(sim, PFIELD, T, DT)
+    function extra_runtime_function(sim, PFIELD, T, DT; optargs...)
 
         aux = PFIELD.nt/nsteps_sim
         clr = (1-aux, 0, aux)
@@ -406,8 +411,10 @@ function generate_monitor_statevariables(; figname="monitor_statevariables",
     ax.set_ylabel(L"$O$ position")
     Olbls = [L"O_x", L"O_y", L"O_z"]
 
+    fig.tight_layout()
 
-    function extra_runtime_function(sim, PFIELD, T, DT)
+
+    function extra_runtime_function(sim, PFIELD, T, DT; optargs...)
         for j in 1:3
             axs[1].plot(sim.t, sim.vehicle.V[j], ".", label=Vlbls[j], alpha=0.8,
                                                             color=clrs[j])
@@ -437,35 +444,117 @@ function generate_monitor_statevariables(; figname="monitor_statevariables",
 end
 
 
-function generate_monitor_enstrophy(; save_path=nothing,
-                                     figname="monitor_enstrophy", run_name="",
+function generate_monitor_enstrophy(; save_path=nothing, run_name="",
+                                     disp_plot=true,
+                                     figname="monitor_enstrophy",
                                      nsteps_savefig=10,
                                      nsteps_plot=10)
 
-    fig = figure(figname, figsize=[7*1, 5*1])
-    ax = fig.gca()
-    ax.set_xlabel("Simulation time")
-    ax.set_ylabel(L"Enstrophy ($\mathrm{m}^6/\mathrm{s}^2$)")
+    if disp_plot
+        fig = figure(figname, figsize=[7*1, 5*1])
+        ax = fig.gca()
+        ax.set_xlabel("Simulation time (s)")
+        ax.set_ylabel(L"Enstrophy ($\mathrm{m}^3/\mathrm{s}^2$)")
+    end
 
     enstrophy = []
     ts = []
 
-    function extra_runtime_function(sim, PFIELD, T, DT)
-        vpm.monitor_enstrophy(PFIELD, T, DT; save_path=save_path,
-                                               run_name=run_name, out=enstrophy)
+    function extra_runtime_function(sim, PFIELD, T, DT;
+                                                    vprintln=(args...)->nothing)
 
-        push!(ts, T)
+        vpm.monitor_enstrophy(PFIELD, T, DT;
+                                save_path=save_path, run_name=run_name,
+                                vprintln=vprintln, out=enstrophy)
 
-        if PFIELD.nt%nsteps_plot == 0
-            ax.plot(ts, enstrophy[end-length(ts)+1:end], ".k")
-            ts = []
+        if PFIELD.nt != 0
+            push!(ts, T)
+
+            if disp_plot
+                if PFIELD.nt%nsteps_plot == 0
+                    ax.plot(ts, enstrophy[end-length(ts)+1:end], ".k")
+                    ts = []
+                end
+
+                if save_path!=nothing && PFIELD.nt%nsteps_savefig==0
+                    fig.savefig(joinpath(save_path, run_name*"enstrophy.png"),
+                                                    transparent=false, dpi=300)
+                end
+            end
         end
 
-        if save_path!=nothing
-            if PFIELD.nt%nsteps_savefig==0
-                fig.savefig(joinpath(save_path, run_name*"enstrophy.png"),
+        return false
+    end
+
+    return extra_runtime_function
+end
+
+
+function generate_monitor_Cd(; save_path=nothing, run_name="",
+                                     disp_plot=true,
+                                     figname="monitor_Cd",
+                                     nsteps_savefig=10,
+                                     nsteps_plot=10,
+                                     ylims=[1e-5, 1e0])
+
+    if disp_plot
+        fig = figure(figname, figsize=[7*2, 5*1])
+        axs = fig.subplots(1, 2)
+
+        ax = axs[1]
+        ax.set_ylim(ylims)
+        ax.set_yscale("log")
+        ax.set_xlabel("Simulation time (s)")
+        ax.set_ylabel(L"Mean $\Vert C_d \Vert$")
+        ax = axs[2]
+        ax.set_xlabel("Simulation time")
+        ax.set_ylabel(L"Ratio of $C_d$-zeroes"*
+                      L" $\frac{n_\mathrm{zeroes}}{n_\mathrm{particles}}$")
+    end
+
+    meanCds, stdCds, zeroCds, ts, out  = [], [], [], [], []
+
+    function extra_runtime_function(sim, PFIELD, T, DT;
+                                                    vprintln=(args...)->nothing)
+
+        vpm.monitor_Cd(PFIELD, T, DT;
+                                save_path=save_path, run_name=run_name,
+                                vprintln=vprintln, out=out)
+
+        if PFIELD.nt != 0
+
+            t, rationzero, mean, stddev, skew, kurt, minC, maxC = out
+            push!(ts, T)
+            push!(meanCds, mean)
+            push!(stdCds, stddev)
+            push!(zeroCds, rationzero)
+
+            if disp_plot
+                if PFIELD.nt%nsteps_plot == 0
+
+                    this_meanCds = view(meanCds, length(meanCds)-length(ts)+1, length(meanCds))
+                    this_stdCds = view(stdCds, length(stdCds)-length(ts)+1,length(stdCds))
+
+                    ax = axs[1]
+                    ax.plot(ts, this_meanCds, ".k")
+                    if nsteps_plot > 1
+                        ax.fill_between(ts, this_meanCds .+ this_stdCds,
+                                            this_meanCds .- this_stdCds;
+                                            alpha=0.1, color="tab:blue")
+                    end
+
+                    ax = axs[2]
+                    ax.plot(ts, zeroCds[end-length(ts)+1:end], ".k")
+
+                    ts = []
+                end
+
+                if save_path!=nothing && PFIELD.nt%nsteps_savefig==0
+                    fig.savefig(joinpath(save_path, run_name*"Chistory.png"),
                                                     transparent=false, dpi=300)
+                end
             end
+
         end
 
         return false

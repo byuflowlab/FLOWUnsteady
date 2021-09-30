@@ -185,7 +185,7 @@ function _static_particles(pfield::vpm.ParticleField,
         (Ap, A, B, Bp, _, _, _, Gamma) = vlm.getHorseshoe(system, i)
         for (i,(x1, x2)) in enumerate(((Ap,A), (A,B), (B,Bp)))
             vpm.add_particle(pfield, (x1+x2)/2, Gamma*(x2-x1), sigma;
-                                                    vol=0, circulation=abs(Gamma))
+                                    vol=0, circulation=abs(Gamma), static=true)
         end
     end
 end

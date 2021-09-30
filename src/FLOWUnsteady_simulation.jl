@@ -21,11 +21,10 @@ function run_simulation(sim::Simulation, nsteps::Int;
                              # SOLVERS OPTIONS
                              max_particles=Int(1e5),    # Maximum number of particles
                              p_per_step=1,              # Particle sheds per time step
-                             vpm_formulation=vpm.formulation_sphere, # VPM formulation
+                             vpm_formulation=vpm.formulation_rVPM, # VPM formulation
                              vpm_kernel=vpm.gaussianerf,# VPM kernel
                              vpm_UJ=vpm.UJ_fmm,         # VPM particle-to-particle interaction calculation
-                             vpm_sgsmodel=vpm.sgs_none, # VPM LES subgrid scale model
-                             vpm_sgsscaling=vpm.sgs_scaling_none, # Scaling of LES subgrid scale model
+                             vpm_SFS=vpm.SFS_none,      # VPM LES subfilter-scale model
                              vpm_integration=vpm.rungekutta3, # VPM time integration scheme
                              vpm_transposed=true,       # VPM transposed stretching scheme
                              vpm_viscous=vpm.Inviscid(),# VPM viscous diffusion scheme
@@ -47,12 +46,14 @@ function run_simulation(sim::Simulation, nsteps::Int;
                              sigmafactor_vpm=1.0,       # Core overlap of wake particles
                              sigmafactor_vpmonvlm=1,    # Shrinks the particles by this factor when calculated VPM-on-VLM/Rotor induced velocities
                              sigma_vpm_overwrite=nothing,   # Overwrite cores of wake to this value (ignoring sigmafactor_vpm)
+                             # RESTART OPTIONS
+                             restart_vpmfile=nothing,   # VPM particle field restart file
                              # OUTPUT OPTIONS
                              save_path="temps/flowunsteadysimulation00",
                              run_name="FLOWUnsteady-sim",
                              create_savepath=true,      # Whether to create save_path
                              prompt=true,
-                             verbose=true, v_lvl=1, verbose_nsteps=10,
+                             verbose=true, v_lvl=0, verbose_nsteps=10,
                              nsteps_save=1,             # Save vtks every this many steps
                              nsteps_restart=-1,         # Save jlds every this many steps
                              save_code="",              # Saves the source code in this path
@@ -112,8 +113,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
                     (:viscous, vpm_viscous),
                     (:kernel, vpm_kernel),
                     (:UJ, vpm_UJ),
-                    (:sgsmodel, vpm_sgsmodel),
-                    (:sgsscaling, vpm_sgsscaling),
+                    (:SFS, vpm_SFS),
                     (:integration, vpm_integration),
                     (:transposed, vpm_transposed),
                     (:relaxation, vpm_relaxation),
@@ -124,6 +124,10 @@ function run_simulation(sim::Simulation, nsteps::Int;
                                                                   vpm_solver...)
     staticpfield = vpm.ParticleField(_get_m_static(sim.vehicle);
                                          Uinf=t->Vinf(Xdummy, t), vpm_solver...)
+
+    if restart_vpmfile!=nothing
+        vpm.read!(pfield, restart_vpmfile; overwrite=true, load_time=false)
+    end
 
 
     ############################################################################
@@ -164,7 +168,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
         end
 
         # Simulation-specific postprocessing
-        breakflag = extra_runtime_function(sim, PFIELD, T, DT)
+        breakflag = extra_runtime_function(sim, PFIELD, T, DT; vprintln=vprintln)
 
         # Output vtks
         if save_path!=nothing && PFIELD.nt%nsteps_save==0
@@ -218,11 +222,13 @@ function add_particle(pfield::vpm.ParticleField, X::Array{Float64, 1},
 
     Gamma = gamma*(V*dt)*infD       # Vectorial circulation
 
-    # Avoid adding empty particles to the computational domain, or ExaFMM would
+    # Avoid adding empty particles to the computational domain, or ExaFMM will
     # blow up
     if sqrt(Gamma[1]^2 + Gamma[2]^2 + Gamma[3]^2) <= 5*eps(vpm.RealFMM)
         Gamma = 5*eps(vpm.RealFMM)*ones(3)
     end
+
+    circulation = max(abs(gamma), 5*eps(vpm.RealFMM))
 
     # Decreases p_per_step for slowly moving parts of blade
     # aux = min((sigma/p_per_step)/overwrite_sigma, 1)
@@ -235,12 +241,11 @@ function add_particle(pfield::vpm.ParticleField, X::Array{Float64, 1},
         sigmap = overwrite_sigma
     end
 
-
     # Adds p_per_step particles along line l
     dX = l/pps
     for i in 1:pps
         vpm.add_particle(pfield, X + i*dX - dX/2, Gamma/pps, sigmap;
-                                                vol=vol/pps, circulation=max(abs(gamma), 5*eps(vpm.RealFMM)))
+                            vol=vol/pps, circulation=circulation)
     end
 end
 
@@ -257,6 +262,8 @@ function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs::Array{T, 1}; static_particles
         org_np = vpm.get_np(pfield)             # Original particles
 
         # Singularize particles to correct tip loss
+        # NOTE: This doesn't include static particles, but there shouldn't be
+        #       any in the field at this point anyways
         if abs(fsgm) != 1
             for P in vpm.iterator(pfield)
                 P.sigma .*= fsgm

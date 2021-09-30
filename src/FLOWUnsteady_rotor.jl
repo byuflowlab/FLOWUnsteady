@@ -140,8 +140,8 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
                     rediscretize=rediscretize_airfoils)
 
     if plot_disc
-        fig = figure("discretization_verif", figsize=[7*2,5*1]*figsize_factor)
-        fig.suptitle("Discretization Verification")
+        fig = figure("flowunsteady-discr", figsize=[7*2,5*1]*figsize_factor)
+        fig.suptitle("FLOWUnsteady Discretization Verification")
         axs = fig.subplots(1, 2)
 
         ax = axs[1]
@@ -153,7 +153,7 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
         ax.plot(r/Rtip, LE_z/Rtip, "--*b", label="LE-z Spline", alpha=0.75)
         ax.set_xlabel(L"$r/R$")
         ax.set_ylabel(L"$c/R$, $x/R$, $z/R$")
-        ax.legend(loc="best", frameon=true)
+        ax.legend(loc="best", frameon=false, fontsize=6)
         ax.grid(true, color="0.8", linestyle="--")
 
         ax = axs[2]
@@ -161,17 +161,21 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
         ax.plot(r/Rtip, theta, "--^r", label="Twist Spline", alpha=0.75)
         ax.set_xlabel(L"$r/R$")
         ax.set_ylabel(L"Twist $\theta$ ($^\circ$)")
-        ax.legend(loc="best", frameon=true)
+        ax.legend(loc="best", frameon=false, fontsize=8)
         ax.grid(true, color="0.8", linestyle="--")
+
+        fig.tight_layout(rect=[0, 0.03, 1, 0.95])
 
         fig = vlm.ap.figure("polars", figsize=[7*3, 5*1]*2/3)
         axs = fig.subplots(1, 3)
         for (i,(pos, polar)) in enumerate(airfoils)
-            vlm.ap.plot(polar; geometry=true, label="pos=$pos, Re=$(vlm.ap.get_Re(polar))"*
+            vlm.ap.plot(polar; geometry=true, label="pos=$(round(pos, digits=3)), Re=$(ceil(Int, vlm.ap.get_Re(polar)))"*
                                         (Mas!=nothing ? ", Ma=$(round(Mas[i], digits=2))" : ""),
                     cdpolar=false, fig_id="prelim_curves", title_str="Re sweep",
                     rfl_figfactor=figsize_factor, fig=fig, axs=axs)
         end
+        axs[3].legend(loc="best", frameon=true, fontsize=7)
+        fig.tight_layout(rect=[0, 0.03, 1, 0.95])
     end
 
     return propeller
