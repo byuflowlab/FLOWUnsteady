@@ -120,7 +120,8 @@ end
 
 function generate_static_particle_fun(pfield::vpm.ParticleField, self::VLMVehicle,
                                         sigma_vlm::Real, sigma_rotor::Real;
-                                        save_path=nothing, run_name="", suff="_staticpfield")
+                                        save_path=nothing, run_name="", suff="_staticpfield",
+                                        nsteps_save=1)
 
     if sigma_vlm<=0
         error("Invalid VLM smoothing radius $sigma_vlm.")
@@ -157,8 +158,10 @@ function generate_static_particle_fun(pfield::vpm.ParticleField, self::VLMVehicl
 
         # Save vtk with static particles
         if flag
-            vpm.save(pfield_static, run_name*suff; path=save_path, add_num=true,
-                                        overwrite_time=nothing)
+            if pfield_static.nt%nsteps_save==0
+                vpm.save(pfield_static, run_name*suff; path=save_path,
+                                    add_num=true, overwrite_time=nothing)
+            end
             pfield_static.nt += 1
             pfield_static.t += 1
             for pi in vpm.get_np(pfield_static):-1:1

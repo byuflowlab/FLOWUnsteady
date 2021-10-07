@@ -184,7 +184,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
         static_particles_function = generate_static_particle_fun(pfield,
                                     sim.vehicle, sigma_vlm_surf, sigma_rotor_surf;
                                     save_path=save_static_particles ? save_path : nothing,
-                                    run_name=run_name)
+                                    run_name=run_name, nsteps_save=nsteps_save)
     else
         static_particles_function = (pfield, t, dt)->nothing
     end
