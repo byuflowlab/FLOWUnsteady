@@ -532,8 +532,8 @@ function generate_monitor_Cd(; save_path=nothing, run_name="",
             if disp_plot
                 if PFIELD.nt%nsteps_plot == 0
 
-                    this_meanCds = view(meanCds, length(meanCds)-length(ts)+1, length(meanCds))
-                    this_stdCds = view(stdCds, length(stdCds)-length(ts)+1,length(stdCds))
+                    this_meanCds = view(meanCds, (length(meanCds)-length(ts)+1):length(meanCds))
+                    this_stdCds = view(stdCds, (length(stdCds)-length(ts)+1):length(stdCds))
 
                     ax = axs[1]
                     ax.plot(ts, this_meanCds, ".k")
