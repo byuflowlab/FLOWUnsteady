@@ -523,7 +523,7 @@ function generate_monitor_Cd(; save_path=nothing, run_name="",
 
         if PFIELD.nt != 0
 
-            t, rationzero, mean, stddev, skew, kurt, minC, maxC = out
+            t, rationzero, mean, stddev, skew, kurt, minC, maxC = out[end]
             push!(ts, T)
             push!(meanCds, mean)
             push!(stdCds, stddev)
