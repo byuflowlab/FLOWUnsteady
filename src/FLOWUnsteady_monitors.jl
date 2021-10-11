@@ -237,7 +237,7 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
         fig1 = figure(figname, figsize=[7*2, 5*2]*figsize_factor)
         fig1.suptitle(title_lbl)
         axs1 = fig1.subplots(2, 2)
-        axs1 = axs1[axs1[1], axs1[3], axs1[2], axs1[4]]
+        axs1 = [axs1[1], axs1[3], axs1[2], axs1[4]]
         ax = axs1[1]
         # xlim([-1,1])
         ax.set_xlabel(L"$\frac{2y}{b}$")
