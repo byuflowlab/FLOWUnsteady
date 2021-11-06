@@ -216,7 +216,7 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
                                 conv_suff="_convergence.csv",
                                 figsize_factor=5/6,
                                 nsteps_plot=10,
-                                nsteps_savefig=10)
+                                nsteps_savefig=1)
 
     fcalls = 0                  # Number of function calls
 

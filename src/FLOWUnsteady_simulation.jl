@@ -37,6 +37,10 @@ function run_simulation(sim::Simulation, nsteps::Int;
                              wake_coupled=true,         # Couple VPM wake on VLM solution
                              shed_unsteady=true,        # Whether to shed unsteady-loading wake
                              unsteady_shedcrit=0.01,    # Criterion for unsteady-loading shedding
+                             shed_starting=false,       # Whether to shed starting vortex (only with shed_unsteady==true)
+                             shed_boundarylayer=false,  # Whether to shed vorticity from boundary layer of surfaces
+                             boundarylayer_prescribedCd=0.1, # Prescribed Cd for boundary layer shedding used for wings
+                             boundarylayer_d=0.0,       # Dipole width for boundary layer shedding
                              omit_shedding=[],          # Indices of elements in `sim.vehicle.wake_system` on which omit shedding VPM particles
                              extra_runtime_function=(sim, PFIELD,T,DT)->false,
                              # REGULARIZATION OPTIONS
@@ -156,15 +160,27 @@ function run_simulation(sim::Simulation, nsteps::Int;
         solve(sim, Vinf, PFIELD, wake_coupled, DT, vlm_rlx,
                 sigma_vlm_surf, sigma_rotor_surf, rho, sound_spd,
                 staticpfield, hubtiploss_correction;
-                        init_sol=vlm_init, sigmafactor_vpmonvlm=sigmafactor_vpmonvlm)
+                init_sol=vlm_init, sigmafactor_vpmonvlm=sigmafactor_vpmonvlm)
 
         # Shed unsteady-loading wake with new solution
         if shed_unsteady
             shed_wake(sim.vehicle, Vinf, PFIELD, DT, sim.nt; t=T,
                         unsteady_shedcrit=unsteady_shedcrit,
+                        shed_starting=shed_starting,
                         p_per_step=p_per_step, sigmafactor=sigmafactor_vpm,
                         overwrite_sigma=sigma_vpm_overwrite,
                         omit_shedding=omit_shedding)
+        end
+
+        if shed_boundarylayer
+            shed_wake(sim.vehicle, Vinf, PFIELD, DT, sim.nt; t=T,
+                        unsteady_shedcrit=-1,
+                        p_per_step=p_per_step, sigmafactor=sigmafactor_vpm,
+                        overwrite_sigma=sigma_vpm_overwrite,
+                        omit_shedding=omit_shedding,
+                        shed_boundarylayer=true,
+                        prescribed_Cd=boundarylayer_prescribedCd,
+                        dipole_d=boundarylayer_d)
         end
 
         # Simulation-specific postprocessing

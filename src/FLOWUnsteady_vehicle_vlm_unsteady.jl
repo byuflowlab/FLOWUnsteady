@@ -104,16 +104,41 @@ const VLMVehicle = UVLMVehicle
 ##### FUNCTIONS  ###############################################################
 function shed_wake(self::VLMVehicle, Vinf::Function,
                             pfield::vpm.ParticleField, dt::Real, nt::Int; t=0.0,
-                            unsteady_shedcrit=-1.0, p_per_step=1,
+                            unsteady_shedcrit=-1.0,
+                            shed_starting=false,
+                            p_per_step=1,
                             sigmafactor=1.0, overwrite_sigma=nothing,
-                            omit_shedding=[])
+                            omit_shedding=[],
+                            shed_boundarylayer=false,
+                            prescribed_Cd=nothing, dipole_d=0.0,
+                            )
     if nt!=0
-        VLM2VPM(self.wake_system, pfield, dt, Vinf; t=t,
-                    prev_system=_get_prev_wake_system(self),
-                    unsteady_shedcrit=unsteady_shedcrit,
-                    p_per_step=p_per_step, sigmafactor=sigmafactor,
-                    overwrite_sigma=overwrite_sigma, check=false,
-                    omit_shedding=omit_shedding)
+
+        if shed_boundarylayer
+            if dipole_d == 0
+                error("Boundary layer shedding requested but no `d` was provided!")
+            end
+
+            # Shed only boundary layer (dragging line) particles
+            VLM2VPM_draggingline(self.wake_system, _get_prev_wake_system(self),
+                                    pfield, dt, Vinf,
+                                    dipole_d;
+                                    t=t,
+                                    prescribed_Cd=prescribed_Cd,
+                                    p_per_step=p_per_step,
+                                    sigmafactor=sigmafactor,
+                                    overwrite_sigma=overwrite_sigma,
+                                )
+        else
+            # Shed trailing-circulation particles
+            VLM2VPM(self.wake_system, pfield, dt, Vinf; t=t,
+                        prev_system=_get_prev_wake_system(self),
+                        unsteady_shedcrit=unsteady_shedcrit,
+                        shed_starting=shed_starting && nt==1,
+                        p_per_step=p_per_step, sigmafactor=sigmafactor,
+                        overwrite_sigma=overwrite_sigma, check=false,
+                        omit_shedding=omit_shedding)
+        end
     end
 end
 
