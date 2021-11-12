@@ -12,6 +12,11 @@
   * License   : MIT
 =###############################################################################
 
+# Declare the VLM solution fields that we which FLOWVLM will output
+vlm.FIELDS["l"] = [[], "vector"]
+vlm.FIELDS["d"] = [[], "vector"]
+vlm.FIELDS["s"] = [[], "vector"]
+
 
 """
     `generate_monitor_rotors( rotors::Array{vlm.Rotor, 1}, J_ref::Real,
