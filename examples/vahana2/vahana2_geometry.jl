@@ -186,13 +186,17 @@ function generate_geometry_vahana(;
                                                 verbose=verbose, v_lvl=v_lvl+2, xfoil=xfoil,
                                                 data_path=data_path, plot_disc=false))
         if verbose; println("\t"^(v_lvl+1)*"Generating second tilt-rotor..."); end;
-        # push!(tiltrotors, generate_rotor(pitch; n=n_ccb, blade_r=blade_r, CW=CW_w, ReD=ReD,
-        #                         verbose=verbose, xfoil=xfoil, rotor_file=tiltrotor_file))
-        push!(tiltrotors, vlm.Rotor(!tiltrotors[1].CW, tiltrotors[1].r,
-                                  tiltrotors[1].chord, tiltrotors[1].theta,
-                                  tiltrotors[1].LE_x, tiltrotors[1].LE_z,
-                                  tiltrotors[1].B, tiltrotors[1].airfoils))
-        vlm.initialize(tiltrotors[2], tiltrotors[1].m)
+        push!(tiltrotors, uns.generate_rotor(tiltrotor_file; pitch=pitch,
+                                                n=n_ccb, blade_r=blade_r, CW=CW_w, ReD=ReD,
+                                                verbose=verbose, v_lvl=v_lvl+2, xfoil=xfoil,
+                                                data_path=data_path, plot_disc=false))
+
+        # NOTE: This doesn't work unless we also use the same blade_r and spl_k
+        # push!(tiltrotors, vlm.Rotor(!tiltrotors[1].CW, tiltrotors[1].r,
+        #                           tiltrotors[1].chord, tiltrotors[1].theta,
+        #                           tiltrotors[1].LE_x, tiltrotors[1].LE_z,
+        #                           tiltrotors[1].B, tiltrotors[1].airfoils))
+        # vlm.initialize(tiltrotors[2], tiltrotors[1].m)
 
         stackedrotors = vlm.Rotor[]
         if verbose; println("\t"^(v_lvl+1)*"Generating first stacked-rotor..."); end;

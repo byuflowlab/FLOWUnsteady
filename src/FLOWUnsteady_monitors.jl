@@ -195,7 +195,7 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
                                 rho_ref::Real, qinf_ref::Real, nsteps_sim::Int;
                                 lencrit_f=0.5,      # Factor for critical length to ignore horseshoe forces
                                 L_dir=[0,0,1],      # Direction of lift component
-                                D_dir=[-1,0,0],     # Direction of drag component
+                                D_dir=[1,0,0],      # Direction of drag component
                                 # OUTPUT OPTIONS
                                 out_Lwing=nothing,
                                 out_Dwing=nothing,
@@ -307,14 +307,16 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
             vlm._addsolution(wing, "s", s)
 
             # Lift of the wing
-            Lwing = norm(sum(L))
+            Lwing = sum(L)
+            Lwing = sign(dot(Lwing, L_dir))*norm(Lwing)
             CLwing = Lwing/(qinf_ref*b_ref^2/ar_ref)
-            ClCL = norm.(l) / (Lwing/b_ref)
+            ClCL = [sign(dot(this_l, L_dir)) for this_l in l].*norm.(l) / abs(Lwing/b_ref)
 
             # Drag of the wing
-            Dwing = norm(sum(D))
+            Dwing = sum(D)
+            Dwing = sign(dot(Dwing, D_dir))*norm(Dwing)
             CDwing = Dwing/(qinf_ref*b_ref^2/ar_ref)
-            CdCD = [sign(dot(this_d, [1,0,0])) for this_d in d].*norm.(d) / (Dwing/b_ref) # Preserves the sign of drag
+            CdCD = [sign(dot(this_d, D_dir)) for this_d in d].*norm.(d) / abs(Dwing/b_ref) # Preserves the sign of drag
 
             vlm._addsolution(wing, "Cl/CL", ClCL)
             vlm._addsolution(wing, "Cd/CD", CdCD)
