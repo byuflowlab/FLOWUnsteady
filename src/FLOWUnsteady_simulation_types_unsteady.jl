@@ -15,7 +15,7 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
                 dt::Real, rlx::Real, sigma_vlm::Real, sigma_rotor::Real,
                 rho::Real, speedofsound::Real, staticpfield::vpm.ParticleField,
                 hubtiploss_correction;
-                init_sol::Bool=false, sigmafactor_vpmonvlm=1
+                init_sol::Bool=false, sigmafactor_vpmonvlm=1, debug=false
                 ) where {V<:UVLMVehicle, M<:AbstractManeuver, R}
 
 
@@ -85,10 +85,12 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
                 if wake_coupled
                     vlm.solvefromV(rotor, VindVkin, Vinf, RPM, rho; t=t,
                                     sound_spd=speedofsound,
-                                    hubtiploss_correction=hubtiploss_correction)
+                                    hubtiploss_correction=hubtiploss_correction,
+                                    debug=debug)
                 else
                     vlm.solvefromCCBlade(rotor, Vinf, RPM, rho;
-                                              t=t, sound_spd=speedofsound)
+                                              t=t, sound_spd=speedofsound,
+                                              debug=debug)
                 end
             end
         end
@@ -213,10 +215,11 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
                 if wake_coupled
                     vlm.solvefromV(rotor, VindVkin, Vinf, RPM, rho; t=t,
                                     sound_spd=speedofsound,
-                                    hubtiploss_correction=hubtiploss_correction)
+                                    hubtiploss_correction=hubtiploss_correction,
+                                    debug=debug)
                 else
-                    vlm.solvefromCCBlade(rotor, Vinf, RPM, rho;
-                                                t=t, sound_spd=speedofsound)
+                    vlm.solvefromCCBlade(rotor, Vinf, RPM, rho; t=t,
+                                            sound_spd=speedofsound, debug=debug)
                 end
             end
         end

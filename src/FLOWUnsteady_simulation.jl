@@ -58,6 +58,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
                              create_savepath=true,      # Whether to create save_path
                              prompt=true,
                              verbose=true, v_lvl=0, verbose_nsteps=10,
+                             debug=false,               # Output extra states for debugging
                              nsteps_save=1,             # Save vtks every this many steps
                              nsteps_restart=-1,         # Save jlds every this many steps
                              save_code="",              # Saves the source code in this path
@@ -160,7 +161,8 @@ function run_simulation(sim::Simulation, nsteps::Int;
         solve(sim, Vinf, PFIELD, wake_coupled, DT, vlm_rlx,
                 sigma_vlm_surf, sigma_rotor_surf, rho, sound_spd,
                 staticpfield, hubtiploss_correction;
-                init_sol=vlm_init, sigmafactor_vpmonvlm=sigmafactor_vpmonvlm)
+                init_sol=vlm_init, sigmafactor_vpmonvlm=sigmafactor_vpmonvlm,
+                debug=debug)
 
         # Shed unsteady-loading wake with new solution
         if shed_unsteady

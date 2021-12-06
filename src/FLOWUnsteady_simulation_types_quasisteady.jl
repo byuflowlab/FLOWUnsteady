@@ -15,7 +15,7 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
                 dt::Real, rlx::Real, sigma_vlm::Real, sigma_rotor::Real,
                 rho::Real, speedofsound::Real, staticpfield::vpm.ParticleField,
                 hubtiploss_correction;
-                init_sol::Bool=false, sigmafactor_vpmonvlm=1
+                init_sol::Bool=false, sigmafactor_vpmonvlm=1, debug=false
                 ) where {V<:QVLMVehicle, M<:AbstractManeuver, R}
 
 
@@ -86,7 +86,8 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
                 VindVkin = _format_blades(this_Vinds, vhcl.rotor_systems, si, ri)
 
                 vlm.solvefromCCBlade(rotor, Vinf, RPM, rho; _Vinds=VindVkin,
-                                              t=t, sound_spd=speedofsound)
+                                              t=t, sound_spd=speedofsound,
+                                              debug=debug)
             end
         end
 
@@ -192,7 +193,8 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
                                                                         si, ri)
 
                 vlm.solvefromCCBlade(rotor, Vinf, RPM, rho; _Vinds=VindVkin,
-                                            t=t, sound_spd=speedofsound)
+                                            t=t, sound_spd=speedofsound,
+                                            debug=debug)
             end
         end
 

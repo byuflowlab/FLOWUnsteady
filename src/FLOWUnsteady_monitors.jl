@@ -12,11 +12,6 @@
   * License   : MIT
 =###############################################################################
 
-# Declare the VLM solution fields that we which FLOWVLM will output
-vlm.FIELDS["l"] = [[], "vector"]
-vlm.FIELDS["d"] = [[], "vector"]
-vlm.FIELDS["s"] = [[], "vector"]
-
 
 """
     `generate_monitor_rotors( rotors::Array{vlm.Rotor, 1}, J_ref::Real,
@@ -307,9 +302,6 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
                                         rho_ref; t=PFIELD.t, per_unit_span=true,
                                         lencrit=lencrit)
             l, d, s = decompose(ftot, L_dir, D_dir)
-            vlm._addsolution(wing, "l", l)
-            vlm._addsolution(wing, "d", d)
-            vlm._addsolution(wing, "s", s)
 
             # Lift of the wing
             Lwing = sum(L)
