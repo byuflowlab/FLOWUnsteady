@@ -34,6 +34,7 @@ function generate_monitor_rotors( rotors::Array{vlm.Rotor, 1},
                                     figname="monitor_rotor",
                                     disp_conv=true,
                                     conv_suff="_convergence.csv",
+                                    save_init_plots=true,
                                     nsteps_savefig=10,
                                     colors="rgbcmy"^100,
                                     stls="o^*.px"^100, )
@@ -104,6 +105,15 @@ function generate_monitor_rotors( rotors::Array{vlm.Rotor, 1},
                 end
                 print(f, "\n")
                 close(f)
+            end
+
+            # Save initialization plots (including polars)
+            if save_init_plots && save_path!=nothing
+                for fi in PyPlot.get_fignums()
+                    this_fig = PyPlot.figure(fi)
+                    this_fig.savefig(joinpath(save_path, run_name*"_initplot$(fi).png"),
+                                                            transparent=false, dpi=300)
+                end
             end
         end
 
