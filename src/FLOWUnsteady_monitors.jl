@@ -206,6 +206,7 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
                                 lencrit_f=0.5,      # Factor for critical length to ignore horseshoe forces
                                 L_dir=[0,0,1],      # Direction of lift component
                                 D_dir=[1,0,0],      # Direction of drag component
+                                include_trailingboundvortex=false,
                                 # OUTPUT OPTIONS
                                 out_Lwing=nothing,
                                 out_Dwing=nothing,
@@ -301,7 +302,8 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
             # Force at each VLM element
             Ftot = calc_aerodynamicforce(wing, prev_wing, PFIELD, Vinf, DT,
                                                             rho_ref; t=PFIELD.t,
-                                                            lencrit=lencrit)
+                                                            lencrit=lencrit,
+                                                            include_trailingboundvortex=include_trailingboundvortex)
             L, D, S = decompose(Ftot, L_dir, D_dir)
             vlm._addsolution(wing, "L", L)
             vlm._addsolution(wing, "D", D)
@@ -310,7 +312,8 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
             # Force per unit span at each VLM element
             ftot = calc_aerodynamicforce(wing, prev_wing, PFIELD, Vinf, DT,
                                         rho_ref; t=PFIELD.t, per_unit_span=true,
-                                        lencrit=lencrit)
+                                        lencrit=lencrit,
+                                        include_trailingboundvortex=include_trailingboundvortex)
             l, d, s = decompose(ftot, L_dir, D_dir)
 
             # Lift of the wing

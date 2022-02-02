@@ -20,6 +20,7 @@ as the field `vlm_system.sol["Ftot"]`
 function calc_aerodynamicforce(vlm_system::Union{vlm.Wing, vlm.WingSystem},
                                 prev_vlm_system, pfield, Vinf, dt, rho; t=0.0,
                                 per_unit_span=false,
+                                include_trailingboundvortex=true,
                                 Vout=nothing, lenout=nothing,
                                 lencrit=-1)
 
@@ -56,9 +57,10 @@ function calc_aerodynamicforce(vlm_system::Union{vlm.Wing, vlm.WingSystem},
                                                 targetX=["Ap", "A", "B", "Bp"])
 
     Ftot = [zeros(3) for i in 1:m]
+    vortices = include_trailingboundvortex ? 1:3 : 2:2  # 1==ApA, 2==AB, 3==BBp
 
     for i in 1:m                 # Iterate over horseshoes
-        for j in 1:3             # Iterate over bound vortices (1==ApA, 2==AB, 3==BBp)
+        for j in vortices        # Iterate over bound vortices (1==ApA, 2==AB, 3==BBp)
 
             # Bound vortex' length vector
             if j==1
