@@ -57,7 +57,7 @@ function calc_aerodynamicforce(vlm_system::Union{vlm.Wing, vlm.WingSystem},
                                                 targetX=["Ap", "A", "B", "Bp"])
 
     Ftot = [zeros(3) for i in 1:m]
-    vortices = include_trailingboundvortex ? 1:3 : 2:2  # 1==ApA, 2==AB, 3==BBp
+    vortices = include_trailingboundvortex ? (1:3) : (2:2)  # 1==ApA, 2==AB, 3==BBp
 
     for i in 1:m                 # Iterate over horseshoes
         for j in vortices        # Iterate over bound vortices (1==ApA, 2==AB, 3==BBp)
