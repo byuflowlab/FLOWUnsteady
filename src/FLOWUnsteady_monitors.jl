@@ -207,6 +207,8 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
                                 L_dir=[0,0,1],      # Direction of lift component
                                 D_dir=[1,0,0],      # Direction of drag component
                                 include_trailingboundvortex=false,
+                                calc_aerodynamicforce_fun=calc_aerodynamicforce_kuttajoukowski,
+                                calc_aerodynamicforce_optargs=[],
                                 # OUTPUT OPTIONS
                                 out_Lwing=nothing,
                                 out_Dwing=nothing,
@@ -300,20 +302,24 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
         if PFIELD.nt>2
 
             # Force at each VLM element
-            Ftot = calc_aerodynamicforce(wing, prev_wing, PFIELD, Vinf, DT,
+            Ftot = calc_aerodynamicforce_fun(wing, prev_wing, PFIELD, Vinf, DT,
                                                             rho_ref; t=PFIELD.t,
+                                                            spandir=cross(L_dir, D_dir),
                                                             lencrit=lencrit,
-                                                            include_trailingboundvortex=include_trailingboundvortex)
+                                                            include_trailingboundvortex=include_trailingboundvortex,
+                                                            calc_aerodynamicforce_optargs...)
             L, D, S = decompose(Ftot, L_dir, D_dir)
             vlm._addsolution(wing, "L", L)
             vlm._addsolution(wing, "D", D)
             vlm._addsolution(wing, "S", S)
 
             # Force per unit span at each VLM element
-            ftot = calc_aerodynamicforce(wing, prev_wing, PFIELD, Vinf, DT,
+            ftot = calc_aerodynamicforce_fun(wing, prev_wing, PFIELD, Vinf, DT,
                                         rho_ref; t=PFIELD.t, per_unit_span=true,
+                                        spandir=cross(L_dir, D_dir),
                                         lencrit=lencrit,
-                                        include_trailingboundvortex=include_trailingboundvortex)
+                                        include_trailingboundvortex=include_trailingboundvortex,
+                                        calc_aerodynamicforce_optargs...)
             l, d, s = decompose(ftot, L_dir, D_dir)
 
             # Lift of the wing

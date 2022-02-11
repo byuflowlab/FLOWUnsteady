@@ -16,10 +16,13 @@
 current `Gamma` solution, the velocity induced by the particle field `pfield`,
 and the kinematic velocity calculated from `prev_vlm_system`. It saves the force
 as the field `vlm_system.sol["Ftot"]`
+
+Force is calculated using the Kutta-Joukowski's theorem including only the force
+of freestream, kinematic, and induced velocities on bound vortices.
 """
-function calc_aerodynamicforce(vlm_system::Union{vlm.Wing, vlm.WingSystem},
+function calc_aerodynamicforce_kuttajoukowski(vlm_system::Union{vlm.Wing, vlm.WingSystem},
                                 prev_vlm_system, pfield, Vinf, dt, rho; t=0.0,
-                                per_unit_span=false,
+                                per_unit_span=false, spandir=[0, 1, 0],
                                 include_trailingboundvortex=true,
                                 Vout=nothing, lenout=nothing,
                                 lencrit=-1)
@@ -88,13 +91,7 @@ function calc_aerodynamicforce(vlm_system::Union{vlm.Wing, vlm.WingSystem},
 
             # Normalization factor
             if per_unit_span
-                # len = norm(cross(V/norm(V),l))
-                unitV = V/sqrt(V[1]*V[1]+V[2]*V[2]+V[3]*V[3])
-                projl = zeros(3)
-                projl[1] = unitV[2]*l[3] - unitV[3]*l[2]
-                projl[2] = unitV[3]*l[1] - unitV[1]*l[3]
-                projl[3] = unitV[1]*l[2] - unitV[2]*l[1]
-                len = sqrt(projl[1]*projl[1]+projl[2]*projl[2]+projl[3]*projl[3])
+                len = abs(l[1]*spandir[1] + l[2]*spandir[2] + l[3]*spandir[3])
             else
                 len = 1
             end
@@ -177,7 +174,7 @@ end
 
 
 """
-    `remove_particles_lowstrength(crit_Gamma2, every_nsteps)`
+    `remove_particles_box(Pmin, Pmax, step::Int)`
 
 Returns an extra_runtime_function that every `step` steps removes all
 particles that are outside of a box of minimum and maximum vertices `Pmin`
