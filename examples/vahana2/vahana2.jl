@@ -31,22 +31,22 @@ gt = uns.gt
 
 # ------------ GLOBAL VARIABLES ------------------------------------------------
 # Default path where to save data
-# extdrive_path = "/media/edoalvar/Samsung_T5/simulationdata202102/"
-extdrive_path = "/media/flowlab/Storage/ealvarez/simulations/"
+# extdrive_path = "/media/edoalvar/Samsung_T51/simulationdata202202/"
+# extdrive_path = "/media/flowlab/Storage/ealvarez/simulations/"
+extdrive_path = "/fslhome/edoalvar/simulationdataFSLG1/"
 
 # Default data path where to find rotor and airfoil data
 data_path = uns.def_data_path
 
 # ------------ HEADERS ---------------------------------------------------------
-for header_name in ["geometry", "kinematics", "monitor",
-                                                   "misc", "postprocessing"]
+for header_name in ["geometry", "kinematics", "monitor", "postprocessing"]
     include("vahana2_"*header_name*".jl")
 end
 
 
 # ------------ DRIVERS ---------------------------------------------------------
 
-function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim19",
+function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim22",
                                     prompt=true,
                                     run_name="vahana2",
                                     verbose=true, v_lvl=1)
@@ -96,6 +96,25 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim19",
     # nsteps = 1500                           # Time steps
     # # nsteps = 100
 
+    ## Segment of the maneuver to perform
+    # # Beginning to end
+    # tstart = 0
+    # tquit = Inf
+
+    # # Hover segment
+    # tstart = 0.07*telapsed
+    # tquit = 0.14*telapsed
+
+    # Hover-cruise transition segment
+    tstart = 0.20*telapsed
+    tquit = 0.35*telapsed
+
+    start_kinmaneuver = false               # If true, it starts the maneuver with the
+                                            # velocity and angles of tstart.
+                                            # If false, starts with velocity=0
+                                            # and angles as initiated by the geometry
+
+
     dt = telapsed/nsteps
 
     # Simulation options
@@ -106,29 +125,42 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim19",
     R = 0.75                                # (m) Reference blade radius
     # lambda = 2.125                          # Target minimum core overlap
     # p_per_step = 4                          # Particle sheds per time step
-    overwrite_sigma = lambda * (2*pi*RPMh_w/60*R + Vcruise)*dt / p_per_step
-    surf_sigma = R/10                       # Surface regularization
-    # vlm_sigma = R/25                      # VLM regularization
-    # vlm_sigma = R
-    vlm_sigma = -1
-    # vlm_sigma = surf_sigma # MAKE THIS -1 if unstable
-    # vlm_rlx = 0.75                          # VLM relaxation (deactivated with -1)
+    sigma_vpm_overwrite = lambda * (2*pi*RPMh_w/60*R + Vcruise)*dt / p_per_step
+
+
+    sigma_vlm_surf  = R/50                 # Size of embedded particles representing VLM surfaces (for VLM-on-VPM and VLM-on-Rotor)
+    sigma_rotor_surf= R/80                 # Size of embedded particles representing rotor blade surfaces (for Rotor-on-VPM, Rotor-on-VLM, and Rotor-on-Rotor)
+    sigma_vlm_solver= -1                   # Regularization of VLM solver (internal)
+    sigmafactor_vpmonvlm   = 1.0           # Shrinks the particles by this factor when calculated VPM-on-VLM/Rotor induced velocities
+    # sigmafactor_vpmonvlm   = 1.0 * nsteps_per_rev/72
+    # vlm_rlx         = 0.5                # VLM relaxation
+    # vlm_rlx         = 0.3
+
+
     # shed_unsteady = false                   # Shed unsteady-loading particles
     shed_unsteady = true
+    # unsteady_shedcrit      = 0.0001      # Shed unsteady loading whenever circulation fluctuates more than this ratio
+    unsteady_shedcrit      = 0.001
+    shed_starting   = true                 # Shed starting vortex
+    # shed_starting   = false
+
     # VehicleType = uns.QVLMVehicle           # Type of vehicle to generate
     VehicleType = uns.UVLMVehicle           # Type of vehicle to generate
 
+    hubtiploss_correction = vlm.hubtiploss_correction_prandtl   # Hub and tip correction
 
-    vpm_formulation = vpm.formulation_sphere # VPM formulation
-    # vpm_formulation = vpm.formulation_classic
-    # vpm_sgsmodel    = vpm.sgs_stretching1_fmm
-    vpm_sgsmodel    = vpm.generate_sgs_directionfiltered(vpm.generate_sgs_lowfiltered(vpm.sgs_stretching1_fmm))
-    # vpm_sgsscaling(args...) = 0.75
-    vpm_sgsscaling(args...) = 1.0
-    # vpm_sgsscaling = vpm.sgs_scaling_none
+
+    vpm_formulation = vpm.formulation_rVPM # VPM formulation
+    # vpm_formulation = vpm.formulation_cVPM
+    # vpm_SFS = vpm.SFS_none
+    # vpm_SFS = vpm.SFS_Cs_nobackscatter
+    vpm_SFS = vpm.SFS_Cd_twolevel_nobackscatter
+    # vpm_SFS = vpm.DynamicSFS(vpm.Estr_fmm, vpm.pseudo3level_positive; alpha=0.999,
+    #                             clippings=[vpm.clipping_backscatter],
+    #                             controls=[vpm.control_directional, vpm.control_magnitude])
     # vpm_relaxation  = vpm.norelaxation
-    # vpm_relaxation  = vpm.pedrizzetti
-    vpm_relaxation  = vpm.correctedpedrizzetti
+    vpm_relaxation  = vpm.pedrizzetti
+    # vpm_relaxation  = vpm.correctedpedrizzetti
 
 
 
@@ -162,27 +194,47 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim19",
     Vref = Vcruise
     RPMref = RPMh_w
     ttot = telapsed
-    # max_particles = ceil(Int, (nsteps+2)*(2*vlm.get_m(vehicle.vlm_system)+1)*p_per_step)
-    max_particles = 2*400000
+    max_particles = ceil(Int, (nsteps+2)*(2*vlm.get_m(vehicle.vlm_system)+1)*p_per_step)
+    if tquit != Inf
+        max_particles = ceil(Int, max_particles*(tquit-tstart)/ttot)
+    end
 
-    Vinit = Vref*maneuver.Vvehicle(0)       # (m/s) initial vehicle velocity
+    max_particles = minimum(Int(10e6), max_particles)
+
+    t0 = tstart/ttot*start_kinmaneuver
+
+    Vinit = Vref*maneuver.Vvehicle(t0)       # (m/s) initial vehicle velocity
                                             # (rad/s) initial vehicle angular velocity
-    Winit = pi/180 * (maneuver.anglevehicle(0+1e-12)-
-                                          maneuver.anglevehicle(0))/(ttot*1e-12)
+    Winit = pi/180 * (maneuver.anglevehicle(t0+1e-12)- maneuver.anglevehicle(t0))/(ttot*1e-12)
 
     simulation = uns.Simulation(vehicle, maneuver, Vref, RPMref, ttot;
-                                                    Vinit=Vinit, Winit=Winit)
+                                                    Vinit=Vinit, Winit=Winit,
+                                                    t=tstart)
 
     # ----------------- SIMULATION MONITOR -------------------------------------
     monitor_vahana = generate_monitor_vahana(vehicle, rho, RPMref, nsteps, save_path, Vinf)
-    monitor_vpm = uns.generate_monitor_enstrophy(; save_path=save_path)
+
+    monitors_vpm = []
+    if VehicleType == uns.UVLMVehicle
+
+        monitor_enstrophy = uns.generate_monitor_enstrophy(; save_path=save_path)
+        push!(monitors_vpm, monitor_enstrophy)
+
+        if vpm.isSFSenabled(vpm_SFS)
+            monitor_Chistory = uns.generate_monitor_Cd(; save_path=save_path)
+            push!(monitors_vpm, monitor_Chistory)
+        end
+    end
+
+    monitor_vpm(args...; optargs...) = length(monitors_vpm)==0 ? false : !prod(!f(args...; optargs...) for f in monitors_vpm)
 
     monitor(args...; optargs...) = monitor_vahana(args...; optargs...) || monitor_vpm(args...; optargs...)
 
 
     # ----------------- WAKE TREATMENT FUNCTION --------------------------------
-    remove_particles(args...; optargs...) = (remove_particles_lowstrength(args...; optargs...)
-                                          || remove_particles_sphere(args...; optargs...))
+    wake_treatment_lowstrength = uns.remove_particles_lowstrength( (0.00001^2 * 2*2/p_per_step * dt/(30/(4*5400)) )^2, 1)
+    wake_treatment_sphere = uns.remove_particles_sphere((1.25*5.86)^2, 1; Xoff=[4.0, 0, 0])
+    remove_particles(args...; optargs...) = (wake_treatment_lowstrength(args...; optargs...) || wake_treatment_sphere(args...; optargs...))
 
     # ----------------- RUNTIME FUNCTION ---------------------------------------
     runtime_function(args...; optargs...) = remove_particles(args...; optargs...) || monitor(args...; optargs...)
@@ -193,18 +245,23 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim19",
                                       Vinf=Vinf,
                                       rho=rho,
                                       mu=mu,
+                                      tquit=tquit,
                                       # SOLVERS OPTIONS
-                                      vpm_formulation=vpm_formulation,
-                                      vpm_sgsmodel=vpm_sgsmodel,
-                                      vpm_sgsscaling=vpm_sgsscaling,
-                                      vpm_relaxation=vpm_relaxation,
-                                      p_per_step=p_per_step,
-                                      overwrite_sigma=overwrite_sigma,
-                                      vlm_sigma=vlm_sigma,
-                                      vlm_rlx=vlm_rlx,
-                                      surf_sigma=surf_sigma,
                                       max_particles=max_particles,
+                                      p_per_step=p_per_step,
+                                      vpm_formulation=vpm_formulation,
+                                      vpm_SFS=vpm_SFS,
+                                      vpm_relaxation=vpm_relaxation,
+                                      vlm_rlx=vlm_rlx,
+                                      sigma_vpm_overwrite=sigma_vpm_overwrite,
+                                      sigma_vlm_solver=sigma_vlm_solver,
+                                      sigma_vlm_surf=sigma_vlm_surf,
+                                      sigma_rotor_surf=sigma_rotor_surf,
+                                      sigmafactor_vpmonvlm=sigmafactor_vpmonvlm,
+                                      hubtiploss_correction=hubtiploss_correction,
                                       shed_unsteady=shed_unsteady,
+                                      unsteady_shedcrit=unsteady_shedcrit,
+                                      shed_starting=shed_starting,
                                       extra_runtime_function=runtime_function,
                                       # OUTPUT OPTIONS
                                       save_path=save_path,
@@ -212,6 +269,7 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim19",
                                       run_name=run_name,
                                       prompt=prompt,
                                       verbose=verbose, v_lvl=v_lvl,
+                                      save_horseshoes=VehicleType==uns.QVLMVehicle && false,
                                       save_code=splitdir(@__FILE__)[1]
                                       )
 
@@ -219,7 +277,7 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim19",
 end
 
 
-function visualize_maneuver_vahana(; save_path=extdrive_path*"vahana2_maneuver04/",
+function visualize_maneuver_vahana(; save_path=extdrive_path*"vahana2_maneuver00/",
                                         prompt=true,
                                         run_name="vahana2",
                                         verbose=true, v_lvl=0,
@@ -324,7 +382,7 @@ end
     Generates geometry of Vahana aircraft, saves it as vtk files, and calls
     Paraview visualizing the VTK geometry.
 """
-function visualize_geometry_vahana(; save_path=extdrive_path*"vahana2_geometry01/",
+function visualize_geometry_vahana(; save_path=extdrive_path*"vahana2_geometry00/",
                                      prompt=true, run_name="vahana2", optargs...)
 
     (vehicle, grounds) = generate_geometry_vahana(; n_factor=1,

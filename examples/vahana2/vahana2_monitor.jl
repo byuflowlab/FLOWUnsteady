@@ -70,15 +70,15 @@ function generate_monitor_vahana(vehicle, rho, RPMref, nsteps, save_path, Vinf)
     statevariable_monitor = uns.generate_monitor_statevariables(; save_path=save_path)
 
     # Stitch the simulation monitor together
-    function monitor(args...)
+    function monitor(args...; optargs...)
 
         for rotors_monitor in rotors_monitors
-            rotors_monitor(args...)
+            rotors_monitor(args...; optargs...)
         end
 
-        mainwing_monitor(args...)
-        tandemwing_monitor(args...)
-        statevariable_monitor(args...)
+        mainwing_monitor(args...; optargs...)
+        tandemwing_monitor(args...; optargs...)
+        statevariable_monitor(args...; optargs...)
 
         return false
     end

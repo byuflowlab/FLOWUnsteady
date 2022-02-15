@@ -205,13 +205,34 @@ function generate_geometry_vahana(;
                                                 verbose=verbose, v_lvl=v_lvl+2, xfoil=xfoil,
                                                 data_path=data_path, plot_disc=false))
         if verbose; println("\t"^(v_lvl+1)*"Generating second stacked-rotor..."); end;
-        # push!(stackedrotors, generate_rotor(pitch; n=n_ccb, blade_r=blade_r, CW=CW_w, ReD=ReD,
-        #                         verbose=verbose, xfoil=xfoil, rotor_file=stackedrotor_file))
-        push!(stackedrotors, vlm.Rotor(!stackedrotors[1].CW, stackedrotors[1].r,
-                                  stackedrotors[1].chord, stackedrotors[1].theta,
-                                  stackedrotors[1].LE_x, stackedrotors[1].LE_z,
-                                  stackedrotors[1].B, stackedrotors[1].airfoils))
-        vlm.initialize(stackedrotors[2], stackedrotors[1].m)
+        push!(stackedrotors, uns.generate_rotor(stackedrotor_file; pitch=pitch,
+                                                n=n_ccb, blade_r=blade_r, CW=CW_w, ReD=ReD,
+                                                verbose=verbose, v_lvl=v_lvl+2, xfoil=xfoil,
+                                                data_path=data_path, plot_disc=false))
+        # push!(stackedrotors, vlm.Rotor(!stackedrotors[1].CW, stackedrotors[1].r,
+        #                           stackedrotors[1].chord, stackedrotors[1].theta,
+        #                           stackedrotors[1].LE_x, stackedrotors[1].LE_z,
+        #                           stackedrotors[1].B, stackedrotors[1].airfoils))
+        # vlm.initialize(stackedrotors[2], stackedrotors[1].m)
+
+
+        stackedrotors_low = vlm.Rotor[]
+        if stckd_pitch != 0
+            if verbose; println("\t"^(v_lvl+1)*"Generating first lower-stacked-rotor..."); end;
+            push!(stackedrotors_low, uns.generate_rotor(stackedrotor_file; pitch=pitch+stckd_pitch,
+                                                    n=n_ccb, blade_r=blade_r, CW=!CW_w, ReD=ReD,
+                                                    verbose=verbose, v_lvl=v_lvl+2, xfoil=xfoil,
+                                                    data_path=data_path, plot_disc=false))
+            if verbose; println("\t"^(v_lvl+1)*"Generating second lower-stacked-rotor..."); end;
+            push!(stackedrotors_low, uns.generate_rotor(stackedrotor_file; pitch=pitch+stckd_pitch,
+                                                    n=n_ccb, blade_r=blade_r, CW=CW_w, ReD=ReD,
+                                                    verbose=verbose, v_lvl=v_lvl+2, xfoil=xfoil,
+                                                    data_path=data_path, plot_disc=false))
+        else
+            for rotor in stackedrotors
+                push!(stackedrotors_low, rotor)
+            end
+        end
     end
 
 
@@ -312,18 +333,8 @@ function generate_geometry_vahana(;
             else
                 push!(props_w_stacked_up, this_prop)
 
-                copy_prop = deepcopy(stackedrotors[ 1+(i+1*!stckd_corotating)%2 ])
-
-                # Generate lower rotor of stack and add pitch
-                if stckd_pitch != 0
-                    this_prop = vlm.Rotor(copy_prop.CW, copy_prop.r,
-                                              copy_prop.chord, copy_prop.theta .+ stckd_pitch,
-                                              copy_prop.LE_x, copy_prop.LE_z,
-                                              copy_prop.B, copy_prop.airfoils)
-                    vlm.initialize(this_prop, copy_prop.m)
-                else
-                    this_prop = copy_prop
-                end
+                copy_prop = stackedrotors_low[ 1+(i+1*!stckd_corotating)%2 ]
+                this_prop = deepcopy(copy_prop)
 
                 this_O += R_w*[0, 0, stckd_zoR_offset]
                 vlm.setcoordsystem(this_prop, this_O, this_Oaxis; user=true)
