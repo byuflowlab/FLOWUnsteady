@@ -18,6 +18,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
                              sound_spd=343,             # (m/s) speed of sound
                              rho=1.225,                 # (kg/m^3) air density
                              mu=1.81e-5,                # Air dynamic viscosity
+                             tquit=-1,                 # (s) time at which to quit the simulation
                              # SOLVERS OPTIONS
                              max_particles=Int(1e5),    # Maximum number of particles
                              p_per_step=1,              # Particle sheds per time step
@@ -195,7 +196,13 @@ function run_simulation(sim::Simulation, nsteps::Int;
                             save_wopwopin=save_wopwopin)
         end
 
-        return breakflag
+        breakflag2 = sim.t >= tquit
+
+        if breakflag2
+            vprintln("Quitting time $(tquit) (s) has been reached. Simulation will now end.")
+        end
+
+        return breakflag || breakflag2
     end
 
     if vpm_surface

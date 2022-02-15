@@ -205,3 +205,34 @@ function remove_particles_box(Pmin, Pmax, step::Int)
 
     return wake_treatment
 end
+
+
+"""
+    `remove_particles_sphere(Rsphere2, step::Int; Xoff=zeros(3))`
+
+Returns an extra_runtime_function that every `step` steps removes all
+particles that are outside of a sphere of radius `sqrt(Rsphere2)` centered
+around the vehicle or with and offset `Xoff` from the center of the vehicle.
+"""
+function remove_particles_sphere(Rsphere2, step::Int; Xoff=zeros(3))
+
+    function wake_treatment(sim, PFIELD, T, DT, args...; optargs...)
+
+        Xvehicle = sim.vehicle.system.O
+
+        for i in vpm.get_np(PFIELD):-1:1
+            P = vpm.get_particle(PFIELD, i)
+            X1 = P.X[1] - (Xvehicle[1] + Xoff[1])
+            X2 = P.X[2] - (Xvehicle[2] + Xoff[2])
+            X3 = P.X[3] - (Xvehicle[3] + Xoff[3])
+
+            if X1*X1 + X2*X2 + X3*X3 > Rsphere2
+                vpm.remove_particle(PFIELD, i)
+            end
+        end
+
+        return false
+    end
+
+    return wake_treatment
+end

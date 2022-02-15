@@ -187,7 +187,7 @@ function save_vtk_base(self::AbstractVLMVehicle, filename; path=nothing,
     strn = vlm.save(self.system, filename; path=path, num=num, optargs...)
 
     for (i, grid) in enumerate(self.grids)
-        strn *= gt.save(grid, filename*"_Grid$i"; path=path, num=num)
+        strn *= gt.save(grid, filename*"_Grid$i"; format="vtk", path=path, num=num)
     end
 
     # Generate inputs for PSU-WOPWOP
