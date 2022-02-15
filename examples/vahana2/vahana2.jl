@@ -199,7 +199,7 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim22",
         max_particles = ceil(Int, max_particles*(tquit-tstart)/ttot)
     end
 
-    max_particles = minimum(Int(10e6), max_particles)
+    max_particles = min(Int(10e6), max_particles)
 
     t0 = tstart/ttot*start_kinmaneuver
 
