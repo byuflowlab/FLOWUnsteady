@@ -91,7 +91,7 @@ function calc_aerodynamicforce_kuttajoukowski(vlm_system::Union{vlm.Wing, vlm.Wi
 
             # Normalization factor
             if per_unit_span
-                len = abs(l[1]*spandir[1] + l[2]*spandir[2] + l[3]*spandir[3])
+                len = abs((B[i][1]-A[i][1])*spandir[1] + (B[i][2]-A[i][2])*spandir[2] + (B[i][3]-A[i][3])*spandir[3])
             else
                 len = 1
             end
