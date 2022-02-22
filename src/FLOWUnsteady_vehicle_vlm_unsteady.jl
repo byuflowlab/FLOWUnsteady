@@ -143,15 +143,14 @@ function shed_wake(self::VLMVehicle, Vinf::Function,
 end
 
 
-function generate_static_particle_fun(pfield::vpm.ParticleField, self::VLMVehicle,
-                                        sigma_vlm::Real, sigma_rotor::Real;
-                                        save_path=nothing, run_name="", suff="_staticpfield",
-                                        nsteps_save=1)
+function generate_static_particle_fun(pfield::vpm.ParticleField,
+                                                self::VLMVehicle, sigma::Real;
+                                                save_path=nothing, run_name="",
+                                                suff="_staticpfield",
+                                                ground_effect=true)
 
-    if sigma_vlm<=0
-        error("Invalid VLM smoothing radius $sigma_vlm.")
-    elseif sigma_rotor<=0
-        error("Invalid rotor smoothing radius $sigma_rotor.")
+    if sigma<=0
+        error("Invalid smoothing radius $sigma.")
     end
 
     flag = save_path!=nothing
@@ -170,23 +169,52 @@ function generate_static_particle_fun(pfield::vpm.ParticleField, self::VLMVehicl
     function static_particles_function(pfield, args...)
 
         # Particles from vlm system
-        _static_particles(pfield, self.vlm_system, sigma_vlm)
-        if flag; _static_particles(pfield_static, self.vlm_system, sigma_vlm); end;
+        _static_particles(pfield, self.vlm_system, sigma)
+        if flag; _static_particles(pfield_static, self.vlm_system, sigma); end;
 
         # Particles from rotor systems
         for rotors in self.rotor_systems
             for rotor in rotors
-                _static_particles(pfield, rotor, sigma_rotor)
-                if flag; _static_particles(pfield_static, rotor, sigma_rotor); end;
+                _static_particles(pfield, rotor, sigma)
+                if flag; _static_particles(pfield_static, rotor, sigma); end;
             end
         end
 
+        altitude = self.altitude;
+
+        #----------------Ground Effect Particles----------------------------------
+        if ground_effect
+            np = pfield.np;
+            for i = 1:np
+                X_i = pfield.particle[i].X;
+                new_z = -2*(altitude + X_i[3]);        #Change z to flip over z_axis defined by altitude.
+
+                X_i = [X_i[1], X_i[2], new_z];
+
+                Γ_new = pfield.particle[i].Γ;
+                Γ_new = [-Γ_new[1], -Γ_new[2], Γ_new[3]];       #Change direction of Γ
+                
+                pfield.add_particle(X_i, Γ_new, sigma); 
+            end
+        end
+
+        ####
+        pfield.np # number of particles
+        pfield::vpm.ParticleField
+        pfield.particles # array of ::Particle structs
+        for i=1:pfield.np
+            p_X = ...
+            p_Gamma = ...
+            p_sigma = ...
+            vpm.add_particle(pfield, p_X, p_Gamma, p_sigma)
+        end
+        ####
+        #------------------------------------------------------------
+
         # Save vtk with static particles
         if flag
-            if pfield_static.nt%nsteps_save==0
-                vpm.save(pfield_static, run_name*suff; path=save_path,
-                                    add_num=true, overwrite_time=nothing)
-            end
+            vpm.save(pfield_static, run_name*suff; path=save_path, add_num=true,
+                                        overwrite_time=nothing)
             pfield_static.nt += 1
             pfield_static.t += 1
             for pi in vpm.get_np(pfield_static):-1:1
