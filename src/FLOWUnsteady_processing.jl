@@ -146,20 +146,59 @@ end
 
 
 """
+    `remove_particles_strength(minGamma2, maxGamma2; every_nsteps=1)`
+
+Returns an extra_runtime_function that removes all particles with a vortex
+strength magnitude that is larger than `sqrt(maxGamma2)` or smaller than
+`sqrt(minGamma2)`.
+"""
+function remove_particles_strength(minGamma2::Real, maxGamma2::Real; every_nsteps::Int=1)
+
+    function wake_treatment(sim, PFIELD, T, DT, args...; optargs...)
+        if sim.nt%every_nsteps==0
+
+            for i in vpm.get_np(PFIELD):-1:1
+                P = vpm.get_particle(PFIELD, i)
+
+                if !(minGamma2 <= P.Gamma[1]*P.Gamma[1] + P.Gamma[2]*P.Gamma[2] + P.Gamma[3]*P.Gamma[3] <= maxGamma2)
+                    vpm.remove_particle(PFIELD, i)
+                end
+            end
+
+        end
+
+        return false
+    end
+
+    return wake_treatment
+end
+
+
+"""
     `remove_particles_lowstrength(crit_Gamma2, every_nsteps)`
 
 Returns an extra_runtime_function that every `step` steps removes all
 particles that have a squared-magnitude Gamma smaller than `crit_Gamma2`.
 """
-function remove_particles_lowstrength(crit_Gamma2::Real, step::Int)
+remove_particles_lowstrength(crit_Gamma2, step) = remove_particles_strength(crit_Gamma2, Inf; every_nsteps=step)
+
+
+
+"""
+    `remove_particles_sigma(minsigma, maxsigma; every_nsteps=1)`
+
+Returns an extra_runtime_function that removes all particles with a smoothing
+radius that is larger than `maxsigma` or smaller than `minsigma`.
+"""
+function remove_particles_sigma(minsigma::Real, maxsigma::Real; every_nsteps::Int=1)
 
     function wake_treatment(sim, PFIELD, T, DT, args...; optargs...)
-        if sim.nt%step==0
+        if sim.nt%every_nsteps==0
 
             for i in vpm.get_np(PFIELD):-1:1
                 P = vpm.get_particle(PFIELD, i)
 
-                if P.Gamma[1]*P.Gamma[1] + P.Gamma[2]*P.Gamma[2] + P.Gamma[3]*P.Gamma[3] < crit_Gamma2
+                if !(minsigma <= P.sigma[1] <= maxsigma)
                     vpm.remove_particle(PFIELD, i)
                 end
             end
