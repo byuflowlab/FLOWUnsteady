@@ -194,20 +194,22 @@ function generate_static_particle_fun(pfield::vpm.ParticleField,
                 Γ_new = pfield.particle[i].Γ;
                 Γ_new = [-Γ_new[1], -Γ_new[2], Γ_new[3]];       #Change direction of Γ
                 
+                sigma = pfield[i].sigma;
                 pfield.add_particle(X_i, Γ_new, sigma); 
             end
         end
 
         ####
-        pfield.np # number of particles
-        pfield::vpm.ParticleField
-        pfield.particles # array of ::Particle structs
-        for i=1:pfield.np
-            p_X = ...
-            p_Gamma = ...
-            p_sigma = ...
-            vpm.add_particle(pfield, p_X, p_Gamma, p_sigma)
-        end
+        # pfield.np # number of particles
+        # pfield::vpm.ParticleField
+        # pfield.particles # array of ::Particle structs
+        # for i=1:pfield.np
+        #     p_X = pfield[i].X
+        #     p_x = []
+        #     p_Gamma = pfield[i].Gamma
+        #     p_sigma = pfield[i].sigma
+        #     vpm.add_particle(pfield, p_X, p_Gamma, p_sigma)
+        # end
         ####
         #------------------------------------------------------------
 
