@@ -25,7 +25,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
                              vpm_formulation=vpm.formulation_sphere_momentum, # VPM formulation
                              vpm_kernel=vpm.gaussianerf,# VPM kernel
                              vpm_UJ=vpm.UJ_fmm,         # VPM particle-to-particle interaction calculation
-                             vpm_SFS=vpm.SFS_none,      # VPM LES subfilter-scale model
+                             vpm_SFS=vpm.sgs_none,      # VPM LES subfilter-scale model
                              vpm_integration=vpm.rungekutta3, # VPM time integration scheme
                              vpm_transposed=true,       # VPM transposed stretching scheme
                              vpm_viscous=vpm.Inviscid(),# VPM viscous diffusion scheme
