@@ -34,7 +34,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
                              vpm_surface=true,          # Whether to include surfaces in the VPM
                              vlm_rlx=-1,                # VLM relaxation
                              vlm_init=false,            # Initialize the first step with the VLM semi-infinite wake solution
-                            #  hubtiploss_correction=vlm.hubtiploss_nocorrection, # Hub and tip loss correction of rotors (ignored by quasi-steady solver)
+                             tiploss_correction=false #vlm.hubtiploss_nocorrection, # Hub and tip loss correction of rotors (ignored by quasi-steady solver)
                              wake_coupled=true,         # Couple VPM wake on VLM solution
                              shed_unsteady=true,        # Whether to shed unsteady-loading wake
                              unsteady_shedcrit=0.01,    # Criterion for unsteady-loading shedding
@@ -161,7 +161,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
         # Solve aerodynamics of the vehicle
         solve(sim, Vinf, PFIELD, wake_coupled, DT, vlm_rlx,
                 sigma_vlm_surf, sigma_rotor_surf, rho, sound_spd,
-                staticpfield, hubtiploss_correction;
+                staticpfield, tiploss_correction;
                 init_sol=vlm_init, sigmafactor_vpmonvlm=sigmafactor_vpmonvlm,
                 debug=debug)
 
