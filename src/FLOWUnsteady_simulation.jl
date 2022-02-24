@@ -206,9 +206,14 @@ function run_simulation(sim::Simulation, nsteps::Int;
     end
 
     if vpm_surface
+        # function generate_static_particle_fun(pfield::vpm.ParticleField,
+        #     self::VLMVehicle, sigma::Real;
+        #     save_path=nothing, run_name="",
+        #     suff="_staticpfield",
+        #     ground_effect=true)
         static_particles_function = generate_static_particle_fun(pfield,
-                                    sim.vehicle, sigma_vlm_surf, sigma_rotor_surf;
-                                    save_path=save_static_particles ? save_path : nothing,
+                                    sim.vehicle, sigma_rotor_surf;
+                                    save_path=save_path,
                                     run_name=run_name)
     else
         static_particles_function = (pfield, t, dt)->nothing
