@@ -22,7 +22,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
                              # SOLVERS OPTIONS
                              max_particles=Int(1e5),    # Maximum number of particles
                              p_per_step=1,              # Particle sheds per time step
-                             vpm_formulation=vpm.formulation_rVPM, # VPM formulation
+                             vpm_formulation=vpm.formulation_sphere_momentum, # VPM formulation
                              vpm_kernel=vpm.gaussianerf,# VPM kernel
                              vpm_UJ=vpm.UJ_fmm,         # VPM particle-to-particle interaction calculation
                              vpm_SFS=vpm.SFS_none,      # VPM LES subfilter-scale model
