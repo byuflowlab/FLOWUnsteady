@@ -119,7 +119,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
                     (:viscous, vpm_viscous),
                     (:kernel, vpm_kernel),
                     (:UJ, vpm_UJ),
-                    (:SFS, vpm_SFS),
+                    (:sgsmodel, vpm_SFS),
                     (:integration, vpm_integration),
                     (:transposed, vpm_transposed),
                     (:relaxation, vpm_relaxation),
