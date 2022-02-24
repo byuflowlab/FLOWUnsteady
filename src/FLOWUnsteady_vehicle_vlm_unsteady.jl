@@ -195,7 +195,7 @@ function generate_static_particle_fun(pfield::vpm.ParticleField,
                 Γ_new = [-Γ_new[1], -Γ_new[2], Γ_new[3]];       #Change direction of Γ
                 
                 sigma = pfield[i].sigma;
-                pfield.add_particle(X_i, Γ_new, sigma); 
+                vpm.add_particle(pfield, X_i, Γ_new, sigma; static=true); 
             end
         end
 
