@@ -45,12 +45,12 @@ function run_simulation(sim::Simulation, nsteps::Int;
                              omit_shedding=[],          # Indices of elements in `sim.vehicle.wake_system` on which omit shedding VPM particles
                              extra_runtime_function=(sim, PFIELD,T,DT)->false,
                              # REGULARIZATION OPTIONS
-                             sigma_vlm_solver=-1,       # Regularization of VLM solver (internal)
-                             sigma_vlm_surf=-1,         # Size of embedded particles representing VLM surfaces (for VLM-on-VPM and VLM-on-Rotor)
-                             sigma_rotor_surf=-1,       # Size of embedded particles representing rotor blade surfaces (for Rotor-on-VPM, Rotor-on-VLM, and Rotor-on-Rotor)
-                             sigmafactor_vpm=1.0,       # Core overlap of wake particles
-                             sigmafactor_vpmonvlm=1,    # Shrinks the particles by this factor when calculating VPM-on-VLM/Rotor induced velocities
-                             sigma_vpm_overwrite=nothing,   # Overwrite cores of wake to this value (ignoring sigmafactor_vpm)
+                            #  sigma_vlm_solver=-1,       # Regularization of VLM solver (internal)
+                            #  sigma_vlm_surf=-1,         # Size of embedded particles representing VLM surfaces (for VLM-on-VPM and VLM-on-Rotor)
+                            #  sigma_rotor_surf=-1,       # Size of embedded particles representing rotor blade surfaces (for Rotor-on-VPM, Rotor-on-VLM, and Rotor-on-Rotor)
+                            #  sigmafactor_vpm=1.0,       # Core overlap of wake particles
+                            #  sigmafactor_vpmonvlm=1,    # Shrinks the particles by this factor when calculating VPM-on-VLM/Rotor induced velocities
+                            #  sigma_vpm_overwrite=nothing,   # Overwrite cores of wake to this value (ignoring sigmafactor_vpm)
                              # RESTART OPTIONS
                              restart_vpmfile=nothing,   # VPM particle field restart file
                              # OUTPUT OPTIONS
