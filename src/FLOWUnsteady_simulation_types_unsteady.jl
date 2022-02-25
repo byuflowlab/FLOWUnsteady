@@ -85,12 +85,10 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
                 if wake_coupled
                     vlm.solvefromV(rotor, VindVkin, Vinf, RPM, rho; t=t,
                                     sound_spd=speedofsound,
-                                    tiploss_correction=tiploss_correction,
-                                    debug=debug)
+                                    tiploss_correction=tiploss_correction)
                 else
                     vlm.solvefromCCBlade(rotor, Vinf, RPM, rho;
-                                              t=t, sound_spd=speedofsound,
-                                              debug=debug)
+                                              t=t, sound_spd=speedofsound)
                 end
             end
         end
