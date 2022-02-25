@@ -143,7 +143,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
     """
         This function gets called by `vpm.run_vpm!` at every time step.
     """
-    function runtime_function(PFIELD, T, DT; vprintln=(args...)->nothing)
+    function runtime_function(PFIELD, T, DT)
 
         # Move tilting systems, and translate and rotate vehicle
         nextstep_kinematic(sim, dt)
