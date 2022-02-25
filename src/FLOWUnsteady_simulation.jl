@@ -187,7 +187,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
         end
 
         # Simulation-specific postprocessing
-        breakflag = extra_runtime_function(sim, PFIELD, T, DT; vprintln=vprintln)
+        breakflag = extra_runtime_function(sim, PFIELD, T, DT)
 
         # Output vtks
         if save_path!=nothing && PFIELD.nt%nsteps_save==0
@@ -199,7 +199,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
         breakflag2 = sim.t >= tquit
 
         if breakflag2
-            vprintln("Quitting time $(tquit) (s) has been reached. Simulation will now end.")
+            # vprintln("Quitting time $(tquit) (s) has been reached. Simulation will now end.")
         end
 
         return breakflag || breakflag2
