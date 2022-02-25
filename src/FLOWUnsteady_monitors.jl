@@ -478,12 +478,11 @@ function generate_monitor_enstrophy(; save_path=nothing, run_name="",
     enstrophy = []
     ts = []
 
-    function extra_runtime_function(sim, PFIELD, T, DT;
-                                                    vprintln=(args...)->nothing)
+    function extra_runtime_function(sim, PFIELD, T, DT)
 
         vpm.monitor_enstrophy(PFIELD, T, DT;
                                 save_path=save_path, run_name=run_name,
-                                vprintln=vprintln, out=enstrophy)
+                                out=enstrophy)
 
         if PFIELD.nt != 0
             push!(ts, T)
@@ -532,12 +531,10 @@ function generate_monitor_Cd(; save_path=nothing, run_name="",
 
     meanCds, stdCds, zeroCds, ts, out  = [], [], [], [], []
 
-    function extra_runtime_function(sim, PFIELD, T, DT;
-                                                    vprintln=(args...)->nothing)
+    function extra_runtime_function(sim, PFIELD, T, DT)
 
         vpm.monitor_Cd(PFIELD, T, DT;
-                                save_path=save_path, run_name=run_name,
-                                vprintln=vprintln, out=out)
+                                save_path=save_path, run_name=run_name,out=out)
 
         if PFIELD.nt != 0
 
