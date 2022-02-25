@@ -40,7 +40,7 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
                         pitch=0.0,
                         n=10, CW=true, blade_r=1.0,
                         ReD=5*10^5, altReD=nothing, Matip=0.0,
-                        ncrit=9,
+                        ncrit=9, alphas=[i for i in -20:1.0:20],
                         xfoil=false,
                         spline_k=5, spline_s=0.001, splines_s=nothing, spline_bc="extrapolate",
                         turbine_flag=false,
@@ -82,6 +82,16 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
 
     if verbose; println("\t"^v_lvl*"Generating airfoil data..."); end;
 
+    if Matip != 0 && xfoil
+        @warn("*"^73*"\n"*
+              "Tip Mach number received (Matip=$(Matip)). This will be used to"*
+              " pre-correct the airfoil polars in XFOIL for compressibility"*
+              " effects. However, FLOWUnsteady also automatically corrects for"*
+              " compressibility. Make sure to run simulation as"*
+              " `run_simulation(...; sound_spd=nothing, ...)` to avoid double"*
+              "-accounting for compressibility.\n"*"*"^73)
+    end
+
     airfoils = []
     Mas = xfoil ? [] : nothing
     for (rfli, (pos, contour, file_name)) in enumerate(airfoil_contours)
@@ -97,7 +107,7 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
 
                 if Matip != 0
                     speedofsnd = (2*pi*RPM/60)*Rtip / Matip
-                    this_Ma = calc_Veff(2*R, RPM, J, roR*Rtip) / speedofsnd
+                    this_Ma = calc_Veff(2*Rtip, RPM, J, roR*Rtip) / speedofsnd
                 else
                     this_Ma = Matip*roR
                 end
@@ -112,7 +122,7 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
             if verbose; print("\t"^(v_lvl+1)*"Running XFOIL on airfoil"*
                         " $(rfli) out of $(length(airfoil_contours))..."); end;
             polar = vlm.ap.runXFOIL(x, y, this_Re;
-                                    alphas=[i for i in -20:1.0:20],
+                                    alphas=alphas,
                                     verbose=verbose_xfoil, Mach=this_Ma,
                                     iter=100, ncrit=ncrit)
             if verbose; println(" done."); end;
@@ -166,7 +176,7 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
 
         fig.tight_layout(rect=[0, 0.03, 1, 0.95])
 
-        fig = vlm.ap.figure("polars", figsize=[7*3, 5*1]*2/3)
+        fig = vlm.ap.figure("polars", figsize=[7*3, 5*1]*7/9)
         axs = fig.subplots(1, 3)
         for (i,(pos, polar)) in enumerate(airfoils)
             vlm.ap.plot(polar; geometry=true, label="pos=$(round(pos, digits=3)), Re=$(ceil(Int, vlm.ap.get_Re(polar)))"*
@@ -176,6 +186,9 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
         end
         axs[3].legend(loc="best", frameon=true, fontsize=7)
         fig.tight_layout(rect=[0, 0.03, 1, 0.95])
+
+        # fig = figure("prelim_curves_rfl")
+        # fig.tight_layout(rect=[0, 0.03, 1, 0.95])
     end
 
     return propeller
