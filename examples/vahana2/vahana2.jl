@@ -32,7 +32,7 @@ gt = uns.gt
 # ------------ GLOBAL VARIABLES ------------------------------------------------
 # Default path where to save data
 # extdrive_path = "/media/edoalvar/Samsung_T5/simulationdata202102/"
-extdrive_path = "/media/flowlab/Storage/ealvarez/simulations/"
+extdrive_path = "/Users/brigham/Desktop/Winter_2022/Research/Rotor_Simulation_Repo" 
 
 # Default data path where to find rotor and airfoil data
 data_path = uns.def_data_path

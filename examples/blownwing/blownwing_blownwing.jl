@@ -138,7 +138,8 @@ function blownwing(; xfoil=true,
                                             verbose=verbose, xfoil=xfoil,
                                             data_path=data_path,
                                             plot_disc=plot_disc,
-                                            verbose=verbose, v_lvl=v_lvl+1)
+                                            # verbose=verbose,
+                                             v_lvl=v_lvl+1)
     # Generate counter-clockwise rotor
     rotor_ccw = vlm.Rotor(!rotor_cw.CW, rotor_cw.r, rotor_cw.chord,
                                             rotor_cw.theta, rotor_cw.LE_x,

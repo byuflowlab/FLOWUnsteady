@@ -13,8 +13,8 @@ Aerodynamics for Engineers) with two APC 10x7 propellers (one on each side).
 
 # ------------ MODULES ---------------------------------------------------------
 # Load simulation engine
-# import FLOWUnsteady
-reload("FLOWUnsteady")
+import FLOWUnsteady
+# reload("FLOWUnsteady")
 uns = FLOWUnsteady
 vlm = uns.vlm
 
@@ -36,7 +36,8 @@ end
 
 # ------------ GLOBAL VARIABLES ------------------------------------------------
 # Default path where to save data
-extdrive_path = "/media/edoalvar/MyExtDrive/simulationdata7/"
+# extdrive_path = "/media/edoalvar/MyExtDrive/simulationdata7/"
+extdrive_path = "/Users/brigham/Desktop/Winter_2022/Research"
 # extdrive_path = "temps/"
 
 

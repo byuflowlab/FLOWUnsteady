@@ -26,7 +26,8 @@ using PyPlot
 
 # ------------ GLOBAL VARIABLES ------------------------------------------------
 # Default path where to save data
-extdrive_path = "/media/edoalvar/MyExtDrive/simulationdata7/"
+# extdrive_path = "/media/edoalvar/MyExtDrive/simulationdata7/"
+extdrive_path = "/Users/brigham/Desktop/Winter_2022/Research"
 # extdrive_path = "temps/"
 
 
@@ -92,6 +93,7 @@ function singlerotor(;  xfoil       = true,             # Whether to run XFOIL
     # n = 50                              # Number of blade elements
     # n = 10
     CW = false                          # Clock-wise rotation
+
     # xfoil = false                     # Whether to run XFOIL
 
     # Read radius of this rotor and number of blades
@@ -127,10 +129,14 @@ function singlerotor(;  xfoil       = true,             # Whether to run XFOIL
 
     # ------------ SIMULATION SETUP --------------------------------------------
     # Generate rotor
+    # blade_r = 1/20; 
+
     rotor = uns.generate_rotor(rotor_file; pitch=pitch,
-                                            n=n, CW=CW, ReD=ReD,
-                                            verbose=verbose, xfoil=xfoil,
-                                            data_path=data_path,
+                                            n=n, 
+                                            # blade_r = blade_r,
+                                            CW=CW, ReD=ReD,
+                                            verbose=verbose, v_lvl = v_lvl,
+                                            xfoil=xfoil, data_path=data_path,
                                             plot_disc=plot_disc)
     # ----- VEHICLE DEFINITION
     # System of all FLOWVLM objects

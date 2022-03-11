@@ -26,7 +26,8 @@ using LinearAlgebra: I, norm, dot
 # Default path where to save data
 # extdrive_path = "/media/edoalvar/MyExtDrive/simulationdata5/"
 # extdrive_path = "/media/edoalvar/Samsung_T5/simulationdata202006/"
-extdrive_path = "temps/"
+extdrive_path = "/Users/brigham/Desktop/Winter_2022/Research"
+# extdrive_path = "temps/"
 
 
 
