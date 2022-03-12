@@ -121,7 +121,8 @@ end
 function generate_static_particle_fun(pfield::vpm.ParticleField,
                                                 self::VLMVehicle, sigma::Real;
                                                 save_path=nothing, run_name="",
-                                                suff="_staticpfield")
+                                                suff="_staticpfield",
+                                                ground_effect = true)
 
     if sigma<=0
         error("Invalid smoothing radius $sigma.")
@@ -151,6 +152,25 @@ function generate_static_particle_fun(pfield::vpm.ParticleField,
             for rotor in rotors
                 _static_particles(pfield, rotor, sigma)
                 if flag; _static_particles(pfield_static, rotor, sigma); end;
+            end
+        end
+        
+        altitude = self.altitude;
+
+        #----------------Ground Effect Particles----------------------------------
+        if ground_effect
+            np = pfield.np;
+            for i = 1:np
+                X_i = pfield.particle[i].X;
+                new_z = -2*(altitude + X_i[3]);        #Change z to flip over z_axis defined by altitude.
+
+                X_i = [X_i[1], X_i[2], new_z];
+
+                Γ_new = pfield.particle[i].Γ;
+                Γ_new = [-Γ_new[1], -Γ_new[2], Γ_new[3]];       #Change direction of Γ
+                
+                sigma = pfield[i].sigma;
+                vpm.add_particle(pfield, X_i, Γ_new, sigma; static=true); 
             end
         end
 
