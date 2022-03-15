@@ -33,7 +33,7 @@ extdrive_path = "/Users/brigham/Desktop/Winter_2022/Research"
 
 
 # ------------ DRIVERS ---------------------------------------------------------
-function run_singlerotor_hover(; xfoil=true, prompt=true)
+function run_singlerotor_hover(; xfoil=false, prompt=true)
 
     J = 0.00                # Advance ratio Vinf/(nD)
     angle = 0.0             # (deg) angle of freestream (0 == climb, 90==forward flight)
