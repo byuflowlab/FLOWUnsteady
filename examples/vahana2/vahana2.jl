@@ -16,6 +16,15 @@
   * License   : MIT
 =###############################################################################
 
+#=
+    CHANGE LOG
+    * lambda = 2.125*1.2, nsteps = 2*4*5400, p_per_step=5
+    * Remove !(0.1<sigma<5), Remove Gamma<0.0001
+    * sigma_vlm_surf=sigma_rotor_surf=R/20, directional and magnitude SFS control.
+
+    TODO
+    * Re-run simulation with start_kinmaneuver=true
+=#
 
 # ------------ MODULES ---------------------------------------------------------
 using Revise
@@ -28,6 +37,11 @@ uns = FLOWUnsteady
 vpm = FLOWVPM
 vlm = uns.vlm
 gt = uns.gt
+
+vpm_path = joinpath(dirname(pathof(vpm)), "..")*"/"
+include(vpm_path*"examples/utilities/utilities.jl")
+
+
 
 # ------------ GLOBAL VARIABLES ------------------------------------------------
 # Default path where to save data
@@ -46,7 +60,7 @@ end
 
 # ------------ DRIVERS ---------------------------------------------------------
 
-function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim22",
+function run_simulation_vahana(;    save_path=extdrive_path*"vahana2-transition-005",
                                     prompt=true,
                                     run_name="vahana2",
                                     verbose=true, v_lvl=1)
@@ -54,7 +68,7 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim22",
     # ----------------- PARAMETERS ---------------------------------------------
 
     # Geometry options
-    n_factor = 1                            # Refinement factor
+    n_factor = 1*4                            # Refinement factor
     add_rotors = true                       # Whether to include rotors
 
     ## 72 steps per rev settings
@@ -62,12 +76,12 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim22",
     Vinf(x,t) = 1e-5*[1,0,-1]               # (m/s) freestream velocity, if 0 the simulation might crash
     RPMh_w = 600.0                          # RPM of main wing rotors in hover
     telapsed = 30.0                         # Total time to perform maneuver
-    nsteps = 4*5400                         # Time steps for complete maneuver
-    lambda = 2.125                          # Target minimum core overlap
+    nsteps = 2*4*5400                         # Time steps for complete maneuver
+    lambda = 1.5*2.125                          # Target minimum core overlap
     # p_per_step = 2                          # Particle sheds per time step
     vlm_rlx = 0.2                           # VLM relaxation (deactivated with -1)
 
-    p_per_step = 2*2                          # Particle sheds per time step
+    p_per_step = 5                          # Particle sheds per time step
 
     # # Maneuver to perform
     # ## 18 steps per rev settings
@@ -101,7 +115,7 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim22",
     # tstart = 0
     # tquit = Inf
 
-    # # Hover segment
+    ## Hover segment
     # tstart = 0.07*telapsed
     # tquit = 0.14*telapsed
 
@@ -128,8 +142,10 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim22",
     sigma_vpm_overwrite = lambda * (2*pi*RPMh_w/60*R + Vcruise)*dt / p_per_step
 
 
-    sigma_vlm_surf  = R/50                 # Size of embedded particles representing VLM surfaces (for VLM-on-VPM and VLM-on-Rotor)
-    sigma_rotor_surf= R/80                 # Size of embedded particles representing rotor blade surfaces (for Rotor-on-VPM, Rotor-on-VLM, and Rotor-on-Rotor)
+    # sigma_vlm_surf  = R/50                 # Size of embedded particles representing VLM surfaces (for VLM-on-VPM and VLM-on-Rotor)
+    sigma_vlm_surf  = R/20
+    # sigma_rotor_surf= R/80                 # Size of embedded particles representing rotor blade surfaces (for Rotor-on-VPM, Rotor-on-VLM, and Rotor-on-Rotor)
+    sigma_rotor_surf= R/20
     sigma_vlm_solver= -1                   # Regularization of VLM solver (internal)
     sigmafactor_vpmonvlm   = 1.0           # Shrinks the particles by this factor when calculated VPM-on-VLM/Rotor induced velocities
     # sigmafactor_vpmonvlm   = 1.0 * nsteps_per_rev/72
@@ -154,10 +170,10 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim22",
     # vpm_formulation = vpm.formulation_cVPM
     # vpm_SFS = vpm.SFS_none
     # vpm_SFS = vpm.SFS_Cs_nobackscatter
-    vpm_SFS = vpm.SFS_Cd_twolevel_nobackscatter
-    # vpm_SFS = vpm.DynamicSFS(vpm.Estr_fmm, vpm.pseudo3level_positive; alpha=0.999,
-    #                             clippings=[vpm.clipping_backscatter],
-    #                             controls=[vpm.control_directional, vpm.control_magnitude])
+    # vpm_SFS = vpm.SFS_Cd_twolevel_nobackscatter
+    vpm_SFS = vpm.DynamicSFS(vpm.Estr_fmm, vpm.pseudo3level_positive; alpha=0.999,
+                                clippings=[vpm.clipping_backscatter],
+                                controls=[vpm.control_directional, vpm.control_magnitude])
     # vpm_relaxation  = vpm.norelaxation
     vpm_relaxation  = vpm.pedrizzetti
     # vpm_relaxation  = vpm.correctedpedrizzetti
@@ -232,9 +248,17 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana2_sim22",
 
 
     # ----------------- WAKE TREATMENT FUNCTION --------------------------------
-    wake_treatment_lowstrength = uns.remove_particles_lowstrength( (0.00001^2 * 2*2/p_per_step * dt/(30/(4*5400)) )^2, 1)
+    rmv_strngth = 2*2/p_per_step * dt/(30/(4*5400))
+    minmaxGamma = rmv_strngth*[0.0001, Inf]
+    minmaxsigma = sigma_vpm_overwrite*[0.1, 5]
+    @show minmaxGamma
+    @show minmaxsigma
+    wake_treatment_strength = uns.remove_particles_strength( minmaxGamma[1]^2, minmaxGamma[2]^2; every_nsteps=1)
+    wake_treatment_sigma = uns.remove_particles_sigma( minmaxsigma[1], minmaxsigma[2]; every_nsteps=1)
     wake_treatment_sphere = uns.remove_particles_sphere((1.25*5.86)^2, 1; Xoff=[4.0, 0, 0])
-    remove_particles(args...; optargs...) = (wake_treatment_lowstrength(args...; optargs...) || wake_treatment_sphere(args...; optargs...))
+    remove_particles(args...; optargs...) = (wake_treatment_strength(args...; optargs...) ||
+                                             wake_treatment_sigma(args...; optargs...) ||
+                                             wake_treatment_sphere(args...; optargs...))
 
     # ----------------- RUNTIME FUNCTION ---------------------------------------
     runtime_function(args...; optargs...) = remove_particles(args...; optargs...) || monitor(args...; optargs...)
@@ -420,21 +444,37 @@ end
 
 function vahana2_postprocess(; ite=1)
 
-    range = collect(4:4:6480)                   # Time steps to read
-    nchunks = 4                                 # Number of chunks
+    # range = collect(4:4:6480)                 # Time steps to read
+    # nchunks = 4                               # Number of chunks
+
+    # range = [36, 72, 1345, 1000][end-1:end]
+    range = [1658, 1345]
+    nchunks = 1
+
     chunk = ceil(Int, length(range)/nchunks)    # Chunk length
-    # ite = 1                                     # This chunk to iterate over
+
+    # ite = 1                                   # This chunk to iterate over
 
     nums = range[chunk*(ite-1) + 1 : (chunk*ite > length(range) ? length(range) : chunk*ite)]
 
-    read_path = extdrive_path*"vahana2_sim16/"
-    save_path = extdrive_path*"vahana2_sim16-fdom00-$(ite)/"
+    read_path = extdrive_path*"vahana2-transition-006/"
+    save_path = extdrive_path*"vahana2-transition-006-fdom03-$(ite)/"
 
 
     postprocessing_fluiddomain(read_path, save_path, nums;
                                         # PROCESSING OPTIONS
-                                        fdx=1/80,                # Scaling of cell length
-                                        static_particles=false,  # Add static particles
+                                        fdx=1/160,                # Scaling of cell length
+                                        maxparticles=Int(35e6),
+                                        # fdx=1/40,
+                                        # maxparticles=Int(8e5),
+                                        static_particles=true,
+                                        # SIMULATION INFORMATION
+                                        ttot=30.0,
+                                        nsteps=2*4*5400,
+                                        tstart=0.20 * 30.0,
+                                        # tstart=0,
+                                        start_kinmaneuver=false,
+                                        Vref=0.25 * 125*0.44704,
                                         # OUTPUT OPTIONS
                                         run_name="vahana2",
                                         prompt=true, paraview=false)
