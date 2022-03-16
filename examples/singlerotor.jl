@@ -124,6 +124,9 @@ function singlerotor(;  xfoil       = true,             # Whether to run XFOIL
     # shed_unsteady = true                # Shed particles from unsteady loading
 
     max_particles = ((2*n+1)*B)*nrevs*nsteps_per_rev*p_per_step # Max particles for memory pre-allocation
+
+    max_particles = 2*max_particles;    #This allows the simulation to run with ground_effect enabled.
+    
     plot_disc = true                    # Plot blade discretization for debugging
 
 
