@@ -143,8 +143,11 @@ function shed_wake(self::VLMVehicle, Vinf::Function,
 end
 
 
-function generate_static_particle_fun(pfield::vpm.ParticleField, self::VLMVehicle,
+function generate_static_particle_fun(pfield::vpm.ParticleField, pfield_static::vpm.ParticleField,
+                                        self::VLMVehicle,
                                         sigma_vlm::Real, sigma_rotor::Real;
+                                        vlm_vortexsheet=false,
+                                        vlm_vortexsheet_overlap=2.125,
                                         save_path=nothing, run_name="", suff="_staticpfield",
                                         nsteps_save=1)
 
@@ -156,22 +159,17 @@ function generate_static_particle_fun(pfield::vpm.ParticleField, self::VLMVehicl
 
     flag = save_path!=nothing
 
-    # Create auxiliary particle field used for saving vtks with static particles
-    if flag
-        maxparticles = vlm.get_m(self.vlm_system)
-        for rotors in self.rotor_systems
-            for rotor in rotors
-                maxparticles += vlm.get_m(rotor)
-            end
-        end
-        pfield_static = vpm.ParticleField(3*maxparticles; nt=0, t=0)
-    end
-
     function static_particles_function(pfield, args...)
 
         # Particles from vlm system
-        _static_particles(pfield, self.vlm_system, sigma_vlm)
-        if flag; _static_particles(pfield_static, self.vlm_system, sigma_vlm); end;
+        _static_particles(pfield, self.vlm_system, sigma_vlm;
+                                vortexsheet=vlm_vortexsheet,
+                                vortexsheet_overlap=vlm_vortexsheet_overlap)
+        if flag
+            _static_particles(pfield_static, self.vlm_system, sigma_vlm;
+                                vortexsheet=vlm_vortexsheet,
+                                vortexsheet_overlap=vlm_vortexsheet_overlap)
+        end
 
         # Particles from rotor systems
         for rotors in self.rotor_systems
@@ -206,14 +204,106 @@ save_vtk(self::VLMVehicle, args...;
 ##### INTERNAL FUNCTIONS  ######################################################
 function _static_particles(pfield::vpm.ParticleField,
                             system::Union{vlm.Wing, vlm.WingSystem, vlm.Rotor},
-                            sigma::Real)
+                            sigma::Real;
+                            vortexsheet::Bool=false,
+                            vortexsheet_overlap::Real=2.125,
+                            vortices=1:3, # Bound vortices to add (1==AB, 2==ApA, 3==BBp)
+                            )
+
+    X, Gamma, dl = (zeros(3) for i in 1:3)
 
     # Adds a particle for every bound vortex of the VLM
     for i in 1:vlm.get_m(system)
-        (Ap, A, B, Bp, _, _, _, Gamma) = vlm.getHorseshoe(system, i)
-        for (i,(x1, x2)) in enumerate(((Ap,A), (A,B), (B,Bp)))
-            vpm.add_particle(pfield, (x1+x2)/2, Gamma*(x2-x1), sigma;
-                                    vol=0, circulation=abs(Gamma), static=true)
+        (Ap, A, B, Bp, _, _, _, gamma) = vlm.getHorseshoe(system, i)
+        for (j, (x1, x2)) in enumerate(((A,B), (Ap,A), (B,Bp)))
+
+            # Mid-point along bound vortex
+            X .= x1
+            X .+= x2
+            X ./=2
+
+            # Vortex strength
+            Gamma .= x2
+            Gamma .-= x1
+            Gamma .*= gamma
+
+            if !(j in vortices)            # Case that bound vortex is not added
+                nothing
+
+            elseif !vortexsheet            # Case of no vortex sheet
+
+                vpm.add_particle(pfield, X, Gamma, sigma;
+                                    vol=0, circulation=abs(gamma), static=true,
+                                    index=i)
+
+            elseif j==2 || j==3            # Case of trailing vortex with vortex sheet
+                # Length of bound vortex
+                dl .= x2
+                dl .-= x1
+
+                l = sqrt(dl[1]^2 + dl[2]^2 + dl[3]^2)   # Length (TE to lifting line)
+                                                        # Number of particles to use
+                np           = ceil(Int, l / (sigma/vortexsheet_overlap) )
+                dl ./= np                   # Step length
+
+
+                # Start at x1 and shift by half a step to center particles
+                dl ./= 2
+                X .= x1
+                X .-= dl
+                dl .*= 2
+
+                # Break vortex strength down
+                Gamma ./= np
+
+                # Add particles
+                for ni in 1:np
+                    X .+= dl
+
+                    vpm.add_particle(pfield, X, Gamma, sigma;
+                                        vol=0, circulation=abs(gamma), static=true,
+                                        index=i) # NOTE: Here I'm using the index to indicate
+                                                 # the horseshoe that this particle belongs to
+                end
+
+            else                           # Case of spreading lifting vortex as a vortex sheet
+
+                # Take the average between both bound vortices and extend
+                # that length from TE to LE
+                dl .= Ap
+                dl .-= A
+                dl .+= Bp
+                dl .-= B
+                dl ./= 2*(1-vlm.pn)
+
+                # Move X from mid-point of bound vortex to mid-point of LE
+                dl .*= -vlm.pn
+                X .+= dl
+                dl ./= -vlm.pn
+
+                l = sqrt(dl[1]^2 + dl[2]^2 + dl[3]^2)   # Sheet width (TE to LE)
+                                            # Number of particles to use
+                np           = ceil(Int, l / (sigma/vortexsheet_overlap) )
+                dl ./= np                   # Step width
+
+                # Shift position by one step as preparation to adding particles
+                X .-= dl
+
+                # Spread vortex strength among sheet particles
+                Gamma ./= np
+
+                # Add particles
+                for ni in 1:np
+                    X .+= dl
+
+                    vpm.add_particle(pfield, X, Gamma, sigma;
+                                        vol=0, circulation=abs(gamma/np), static=true,
+                                        index=i) # NOTE: Here I'm using the index to indicate
+                                                 # the horseshoe that this particle belongs to
+                end
+
+            end
+
         end
     end
 end

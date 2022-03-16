@@ -21,6 +21,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
                              tquit=Inf,                 # (s) time at which to quit the simulation
                              # SOLVERS OPTIONS
                              max_particles=Int(1e5),    # Maximum number of particles
+                             max_static_particles=nothing, # Maximum number of static particles (nothing to automatically estimate it)
                              p_per_step=1,              # Particle sheds per time step
                              vpm_formulation=vpm.formulation_rVPM, # VPM formulation
                              vpm_kernel=vpm.gaussianerf,# VPM kernel
@@ -32,6 +33,8 @@ function run_simulation(sim::Simulation, nsteps::Int;
                              vpm_fmm=vpm.FMM(; p=4, ncrit=50, theta=0.4, phi=0.5), # VPM's FMM options
                              vpm_relaxation=vpm.pedrizzetti, # VPM relaxation scheme
                              vpm_surface=true,          # Whether to include surfaces in the VPM
+                             vlm_vortexsheet=false,     # Whether to spread the surface circulation of the VLM as a vortex sheet in the VPM
+                             vlm_vortexsheet_overlap=2.125, # Overlap of particles that make the vortex sheet
                              vlm_rlx=-1,                # VLM relaxation
                              vlm_init=false,            # Initialize the first step with the VLM semi-infinite wake solution
                              hubtiploss_correction=vlm.hubtiploss_nocorrection, # Hub and tip loss correction of rotors (ignored by quasi-steady solver)
@@ -128,8 +131,18 @@ function run_simulation(sim::Simulation, nsteps::Int;
     Xdummy = zeros(3)
     pfield = vpm.ParticleField(max_particles; Uinf=t->Vinf(Xdummy, t),
                                                                   vpm_solver...)
-    staticpfield = vpm.ParticleField(_get_m_static(sim.vehicle);
-                                         Uinf=t->Vinf(Xdummy, t), vpm_solver...)
+
+    max_staticp = max_static_particles==nothing ? _get_m_static(sim.vehicle) : max_static_particles
+    staticpfield = vpm.ParticleField(max_staticp; Uinf=t->Vinf(Xdummy, t),
+                                                                  vpm_solver...)
+
+    if vpm_surface && max_static_particles==nothing && vlm_vortexsheet
+        @warn("Vortex sheet representation of VLM has been requested, but "*
+              "no `max_static_particles` has been provided. It will be set to "*
+              "$(max_staticp) which may lead to particle overflow. Please "*
+              "provide a higher `max_static_particles` in order to avoid "*
+              "overflow.")
+    end
 
     if restart_vpmfile!=nothing
         vpm.read!(pfield, restart_vpmfile; overwrite=true, load_time=false)
@@ -206,8 +219,10 @@ function run_simulation(sim::Simulation, nsteps::Int;
     end
 
     if vpm_surface
-        static_particles_function = generate_static_particle_fun(pfield,
+        static_particles_function = generate_static_particle_fun(pfield, staticpfield,
                                     sim.vehicle, sigma_vlm_surf, sigma_rotor_surf;
+                                    vlm_vortexsheet=vlm_vortexsheet,
+                                    vlm_vortexsheet_overlap=vlm_vortexsheet_overlap,
                                     save_path=save_static_particles ? save_path : nothing,
                                     run_name=run_name, nsteps_save=nsteps_save)
     else
