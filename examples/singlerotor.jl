@@ -27,7 +27,8 @@ using PyPlot
 # ------------ GLOBAL VARIABLES ------------------------------------------------
 # Default path where to save data
 # extdrive_path = "/media/edoalvar/MyExtDrive/simulationdata7/"
-extdrive_path = "/Users/brigham/Desktop/Winter_2022/Research"
+# extdrive_path = "/Users/brigham/Desktop/Winter_2022/Research"
+extdrive_path = "/home/flowlab/bostergaard/VPMGround/data"
 # extdrive_path = "temps/"
 
 
@@ -42,7 +43,7 @@ function run_singlerotor_hover(; xfoil=false, prompt=true)
                     VehicleType=uns.VLMVehicle,
                     J=J,
                     DVinf=[cos(pi/180*angle), sin(pi/180*angle), 0],
-                    save_path=extdrive_path*"singlerotor_hover_test00/",
+                    save_path=extdrive_path*"singlerotor_hover_test_03162022_01/",
                     prompt=prompt)
 end
 
