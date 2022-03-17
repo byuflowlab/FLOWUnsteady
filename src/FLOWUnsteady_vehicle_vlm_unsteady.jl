@@ -290,14 +290,16 @@ function _static_particles(pfield::vpm.ParticleField,
                 X .-= dl
 
                 # Spread vortex strength among sheet particles
-                Gamma ./= np
+                # Gamma ./= np
+                Gamma ./= np^(2/3)
 
                 # Add particles
                 for ni in 1:np
                     X .+= dl
 
                     vpm.add_particle(pfield, X, Gamma, sigma;
-                                        vol=0, circulation=abs(gamma/np), static=true,
+                                        # vol=0, circulation=abs(gamma/np), static=true,
+                                        vol=0, circulation=abs(gamma/np^(2/3)), static=true,
                                         index=i) # NOTE: Here I'm using the index to indicate
                                                  # the horseshoe that this particle belongs to
                 end
