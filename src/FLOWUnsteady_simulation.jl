@@ -132,7 +132,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
     pfield = vpm.ParticleField(max_particles; Uinf=t->Vinf(Xdummy, t),
                                                                   vpm_solver...)
 
-    max_staticp = max_static_particles==nothing ? _get_m_static(sim.vehicle) : max_static_particles
+    max_staticp = max_static_particles==nothing ? 3*_get_m_static(sim.vehicle) : max_static_particles
     staticpfield = vpm.ParticleField(max_staticp; Uinf=t->Vinf(Xdummy, t),
                                                                   vpm_solver...)
 
