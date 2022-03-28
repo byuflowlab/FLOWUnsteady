@@ -35,6 +35,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
                              vpm_surface=true,          # Whether to include surfaces in the VPM
                              vlm_vortexsheet=false,     # Whether to spread the surface circulation of the VLM as a vortex sheet in the VPM
                              vlm_vortexsheet_overlap=2.125, # Overlap of particles that make the vortex sheet
+                             vlm_vortexsheet_distribution=g_uniform, # Circulation distribution of vortex sheet
                              vlm_rlx=-1,                # VLM relaxation
                              vlm_init=false,            # Initialize the first step with the VLM semi-infinite wake solution
                              hubtiploss_correction=vlm.hubtiploss_nocorrection, # Hub and tip loss correction of rotors (ignored by quasi-steady solver)
@@ -223,6 +224,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
                                     sim.vehicle, sigma_vlm_surf, sigma_rotor_surf;
                                     vlm_vortexsheet=vlm_vortexsheet,
                                     vlm_vortexsheet_overlap=vlm_vortexsheet_overlap,
+                                    vlm_vortexsheet_distribution=vlm_vortexsheet_distribution,
                                     save_path=save_static_particles ? save_path : nothing,
                                     run_name=run_name, nsteps_save=nsteps_save)
     else

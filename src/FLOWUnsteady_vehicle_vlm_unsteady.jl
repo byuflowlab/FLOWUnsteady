@@ -143,11 +143,19 @@ function shed_wake(self::VLMVehicle, Vinf::Function,
 end
 
 
+g_uniform(x) = 0 <= x <= 1 ? 1 : 0   # Uniform distribution
+g_linear(x) = x < 0 ? 0 :
+           x < 0.25 ? 0.4 + 3.04 * x/0.25 :         # Piece-wise linear distribution centered at quarter-chord
+           x < 0.50 ? 3.44 - 3.2 * (x-0.25)/0.25 :  # as given by Kim 2015, Improved actuator surface method for wind turbine application.
+           x <=1.00 ? 0.24 - 0.24 * (x-0.5)/0.5  :
+           0
+
 function generate_static_particle_fun(pfield::vpm.ParticleField, pfield_static::vpm.ParticleField,
                                         self::VLMVehicle,
                                         sigma_vlm::Real, sigma_rotor::Real;
                                         vlm_vortexsheet=false,
                                         vlm_vortexsheet_overlap=2.125,
+                                        vlm_vortexsheet_distribution=g_uniform,
                                         save_path=nothing, run_name="", suff="_staticpfield",
                                         nsteps_save=1)
 
@@ -164,11 +172,13 @@ function generate_static_particle_fun(pfield::vpm.ParticleField, pfield_static::
         # Particles from vlm system
         _static_particles(pfield, self.vlm_system, sigma_vlm;
                                 vortexsheet=vlm_vortexsheet,
-                                vortexsheet_overlap=vlm_vortexsheet_overlap)
+                                vortexsheet_overlap=vlm_vortexsheet_overlap,
+                                vortexsheet_distribution=vlm_vortexsheet_distribution)
         if flag
             _static_particles(pfield_static, self.vlm_system, sigma_vlm;
                                 vortexsheet=vlm_vortexsheet,
-                                vortexsheet_overlap=vlm_vortexsheet_overlap)
+                                vortexsheet_overlap=vlm_vortexsheet_overlap,
+                                vortexsheet_distribution=vlm_vortexsheet_distribution)
         end
 
         # Particles from rotor systems
@@ -202,11 +212,13 @@ save_vtk(self::VLMVehicle, args...;
                         optargs...) = save_vtk_base(self, args...; optargs...)
 
 ##### INTERNAL FUNCTIONS  ######################################################
+
 function _static_particles(pfield::vpm.ParticleField,
                             system::Union{vlm.Wing, vlm.WingSystem, vlm.Rotor},
                             sigma::Real;
                             vortexsheet::Bool=false,
                             vortexsheet_overlap::Real=2.125,
+                            vortexsheet_distribution::Function=g_uniform,
                             vortices=1:3, # Bound vortices to add (1==AB, 2==ApA, 3==BBp)
                             )
 
@@ -289,15 +301,25 @@ function _static_particles(pfield::vpm.ParticleField,
                 # Shift position by one step as preparation to adding particles
                 X .-= dl
 
-                # Spread vortex strength among sheet particles
-                Gamma ./= np
+                # Calculate normalization of distribution
+                gnorm = 0
+                for ni in 1:np
+                    gnorm += vortexsheet_distribution( (ni-1)/(np-1) )
+                end
 
                 # Add particles
                 for ni in 1:np
                     X .+= dl
 
+                    # Spread circulation among sheet particles
+                    circulation = gamma * vortexsheet_distribution( (ni-1)/(np-1) ) / gnorm
+
+                    Gamma .= x2
+                    Gamma .-= x1
+                    Gamma .*= circulation
+
                     vpm.add_particle(pfield, X, Gamma, sigma;
-                                        vol=0, circulation=abs(gamma/np), static=true,
+                                        vol=0, circulation=abs(circulation), static=true,
                                         index=i) # NOTE: Here I'm using the index to indicate
                                                  # the horseshoe that this particle belongs to
                 end
