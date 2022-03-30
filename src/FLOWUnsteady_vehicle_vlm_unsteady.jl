@@ -153,6 +153,7 @@ g_linear(x) = x < 0 ? 0 :
 function generate_static_particle_fun(pfield::vpm.ParticleField, pfield_static::vpm.ParticleField,
                                         self::VLMVehicle,
                                         sigma_vlm::Real, sigma_rotor::Real;
+                                        sigma_vpm_overwrite=nothing,
                                         vlm_vortexsheet=false,
                                         vlm_vortexsheet_overlap=2.125,
                                         vlm_vortexsheet_distribution=g_uniform,
@@ -171,11 +172,13 @@ function generate_static_particle_fun(pfield::vpm.ParticleField, pfield_static::
 
         # Particles from vlm system
         _static_particles(pfield, self.vlm_system, sigma_vlm;
+                                sigma_vpm_overwrite=sigma_vpm_overwrite,
                                 vortexsheet=vlm_vortexsheet,
                                 vortexsheet_overlap=vlm_vortexsheet_overlap,
                                 vortexsheet_distribution=vlm_vortexsheet_distribution)
         if flag
             _static_particles(pfield_static, self.vlm_system, sigma_vlm;
+                                sigma_vpm_overwrite=sigma_vpm_overwrite,
                                 vortexsheet=vlm_vortexsheet,
                                 vortexsheet_overlap=vlm_vortexsheet_overlap,
                                 vortexsheet_distribution=vlm_vortexsheet_distribution)
@@ -216,6 +219,7 @@ save_vtk(self::VLMVehicle, args...;
 function _static_particles(pfield::vpm.ParticleField,
                             system::Union{vlm.Wing, vlm.WingSystem, vlm.Rotor},
                             sigma::Real;
+                            sigma_vpm_overwrite=nothing,
                             vortexsheet::Bool=false,
                             vortexsheet_overlap::Real=2.125,
                             vortexsheet_distribution::Function=g_uniform,
@@ -249,31 +253,63 @@ function _static_particles(pfield::vpm.ParticleField,
                                     index=i)
 
             elseif j==2 || j==3            # Case of trailing vortex with vortex sheet
+
+                # If sigma_vpm is given, it discretizes trailing vortices with
+                # the same sigma than the wake
+                this_sigma = sigma_vpm_overwrite != nothing ? sigma_vpm_overwrite : sigma
+
                 # Length of bound vortex
                 dl .= x2
                 dl .-= x1
+                dl ./= (1-vlm.pn)
+
+                # Position of LE
+                if j==2
+                    X .= x1
+                    X .+= dl
+                else
+                    X .= x2
+                    X .-= dl
+                end
 
                 l = sqrt(dl[1]^2 + dl[2]^2 + dl[3]^2)   # Length (TE to lifting line)
                                                         # Number of particles to use
-                np           = ceil(Int, l / (sigma/vortexsheet_overlap) )
+                np           = ceil(Int, l / (this_sigma/vortexsheet_overlap) )
                 dl ./= np                   # Step length
 
+                # Calculate normalization of distribution
+                gnorm = 0
+                for ni in 1:np
+                    gnorm += vortexsheet_distribution( (ni-1)/(np-1) )
+                end
 
-                # Start at x1 and shift by half a step to center particles
+                # Start at LE and shift by half a step to center particles
                 dl ./= 2
-                X .= x1
-                X .-= dl
+                if j==2
+                    X .+= dl
+                else
+                    X .-= dl
+                end
                 dl .*= 2
 
-                # Break vortex strength down
-                Gamma ./= np
+                circulation = 0             # Cumulative circulation
 
                 # Add particles
                 for ni in 1:np
-                    X .+= dl
+                    if j==2
+                        X .-= dl
+                    else
+                        X .+= dl
+                    end
 
-                    vpm.add_particle(pfield, X, Gamma, sigma;
-                                        vol=0, circulation=abs(gamma), static=true,
+                    # Spread circulation among sheet particles
+                    circulation += gamma * vortexsheet_distribution( (ni-1)/(np-1) ) / gnorm
+
+                    Gamma .= dl
+                    Gamma .*= circulation
+
+                    vpm.add_particle(pfield, X, Gamma, this_sigma;
+                                        vol=0, circulation=abs(circulation), static=true,
                                         index=i) # NOTE: Here I'm using the index to indicate
                                                  # the horseshoe that this particle belongs to
                 end

@@ -222,6 +222,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
     if vpm_surface
         static_particles_function = generate_static_particle_fun(pfield, staticpfield,
                                     sim.vehicle, sigma_vlm_surf, sigma_rotor_surf;
+                                    sigma_vpm_overwrite=sigma_vpm_overwrite,
                                     vlm_vortexsheet=vlm_vortexsheet,
                                     vlm_vortexsheet_overlap=vlm_vortexsheet_overlap,
                                     vlm_vortexsheet_distribution=vlm_vortexsheet_distribution,
