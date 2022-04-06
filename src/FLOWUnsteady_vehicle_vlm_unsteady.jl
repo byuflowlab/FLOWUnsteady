@@ -123,7 +123,8 @@ function generate_static_particle_fun(pfield::vpm.ParticleField,
                                                 save_path=nothing, run_name="",
                                                 suff="_staticpfield",
                                                 ground_effect = true,
-                                                altitude = 1)
+                                                altitude = 0.8382*4)    #Healy tip radius is 0.8382
+                                                # altitude = 0.12*2) #radius of blade*2
 
     if sigma<=0
         error("Invalid smoothing radius $sigma.")
@@ -139,7 +140,7 @@ function generate_static_particle_fun(pfield::vpm.ParticleField,
                 maxparticles += vlm.get_m(rotor)
             end
         end
-        pfield_static = vpm.ParticleField(3*maxparticles; nt=0, t=0)
+        pfield_static = vpm.ParticleField((3*maxparticles)+ Int(1e5); nt=0, t=0)
     end
 
     function static_particles_function(pfield, args...)
@@ -160,20 +161,25 @@ function generate_static_particle_fun(pfield::vpm.ParticleField,
 
         #----------------Ground Effect Particles----------------------------------
         if ground_effect
+            println("===== Toggling ground effect =====")
             np = pfield.np;
             for i = 1:np
                 X_i = pfield.particles[i].X;
-                new_z = -2*(altitude + X_i[3]);        #Change z to flip over z_axis defined by altitude.
+                # new_x = -2*(altitude + X_i[1]);        #Change x to flip over x_axis defined by altitude.
 
-                X_i = [X_i[1], X_i[2], new_z];
+                # new_x = (alititude - X_i[1])*2 + X_i[1];
+                new_x = 2*altitude - X_i[1];            #change the mirror to be arround ground
+
+                X_i = [new_x, X_i[2], X_i[3]];
 
                 Γ_new = pfield.particles[i].Gamma;
-                Γ_new = [-Γ_new[1], -Γ_new[2], Γ_new[3]];       #Change direction of Γ
+                Γ_new = [Γ_new[1], -Γ_new[2], -Γ_new[3]];       #Change direction of Γ
                 
                 sigma = pfield.particles[i].sigma;
                 vpm.add_particle(pfield, X_i, Γ_new, sigma; 
                                     #static=true    #This isn't a part of the vpm
                                     ); 
+                if flag; vpm.add_particle(pfield_static, X_i, Γ_new, sigma;); end
             end
         end
 

@@ -194,9 +194,12 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
     airfoil_contours = Tuple{Float64,Array{Float64, 2},String}[]
     airfoil_path = joinpath(data_path, "airfoils")
     for (r, rfl_file, clcurve_file) in airfoil_files
+        println("Sherlock!")
+        println("rfl_file = $(rfl_file)")
+        println("airfoil_path = $airfoil_path")
+        ########PROBLEM LINE BELOW################
         x,y = gt.readcontour(rfl_file; delim=",", path=airfoil_path, header_len=1)
         rfl = hcat(x,y)
-
         push!(airfoil_contours, (r, rfl, clcurve_file))
     end
 
@@ -212,7 +215,6 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int, blade_file::String;
      sweepdist, heightdist,
      airfoil_files, spl_k,
      spl_s) = read_blade(blade_file; data_path=data_path)
-
     return generate_rotor(Rtip, Rhub, B, chorddist, pitchdist, sweepdist,
                             heightdist, airfoil_files;
                             data_path=data_path,
@@ -232,7 +234,7 @@ end
 function read_rotor(rotor_file::String; data_path=def_data_path)
 
     # Path to rotor files
-    rotor_path = joinpath(data_path, "rotors")
+    rotor_path = joinpath(data_path, "rotors")    
 
     data = DataFrames.DataFrame(CSV.File(joinpath(rotor_path, rotor_file)), copycols=false)
     Rtip = Meta.parse(data[1, 2])
@@ -248,7 +250,8 @@ end
 function read_blade(blade_file::String; data_path=def_data_path)
 
     # Path to rotor files
-    rotor_path = joinpath(data_path, "rotors")
+    rotor_path = joinpath(data_path, "rotors")    
+
 
     # Read blade
     files = DataFrames.DataFrame(CSV.File(joinpath(rotor_path, blade_file)), copycols=false)

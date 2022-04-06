@@ -24,11 +24,16 @@ gt = GeometricTools
 
 using PyPlot
 
+# # Supress Matplotlib depreciation warnings
+# import warnings
+# import matplotlib.cbook
+# warnings.filterwarnings("ignore",category=matplotlib.cbook.mplDeprecation)
+
 # ------------ GLOBAL VARIABLES ------------------------------------------------
 # Default path where to save data
 # extdrive_path = "/media/edoalvar/MyExtDrive/simulationdata7/"
-# extdrive_path = "/Users/brigham/Desktop/Winter_2022/Research"
-extdrive_path = "/home/flowlab/bostergaard/VPMGround/data"
+extdrive_path = "/Users/brigham/Desktop/Winter_2022/Research/Tests/"
+# extdrive_path = "/home/flowlab/bostergaard/VPMGround/data"
 # extdrive_path = "temps/"
 
 
@@ -39,12 +44,14 @@ function run_singlerotor_hover(; xfoil=false, prompt=true)
     J = 0.00                # Advance ratio Vinf/(nD)
     angle = 0.0             # (deg) angle of freestream (0 == climb, 90==forward flight)
 
-    singlerotor(;   xfoil=xfoil,
+    pfield, rotor = singlerotor(;   xfoil=xfoil,
                     VehicleType=uns.VLMVehicle,
                     J=J,
                     DVinf=[cos(pi/180*angle), sin(pi/180*angle), 0],
-                    save_path=extdrive_path*"singlerotor_hover_test_03162022_01/",
-                    prompt=prompt)
+                    save_path=extdrive_path*"4_6/Healy_rotor_04062022_01/",
+                    prompt=prompt,
+                    ground_effect = true)
+    return pfield, rotor
 end
 
 function run_singlerotor_forwardflight(; xfoil=true, prompt=true)
@@ -62,15 +69,17 @@ function run_singlerotor_forwardflight(; xfoil=true, prompt=true)
                     prompt=prompt)
 end
 
-
+# I have added an additional rotor if wanted (up to 2) but I don't have its spacing yet.
 # ------------------------------------------------------------------------------
 
 function singlerotor(;  xfoil       = true,             # Whether to run XFOIL
                         VehicleType = uns.VLMVehicle,   # Vehicle type
                         J           = 0.0,              # Advance ratio
                         DVinf       = [1.0, 0, 0],      # Freestream direction
-                        nrevs       = 6,                # Number of revolutions
+                        nrevs       = 30,                # Number of revolutions
                         nsteps_per_rev = 72,            # Time steps per revolution
+                        # nrevs       = 10,                # Number of revolutions
+                        # nsteps_per_rev = 25,            # Time steps per revolution
                         shed_unsteady = true,
                         lambda      = 2.125,
                         n           = 10,
@@ -81,7 +90,12 @@ function singlerotor(;  xfoil       = true,             # Whether to run XFOIL
                         prompt      = true,
                         verbose     = true,
                         v_lvl       = 0,
-                        rotor_file = "DJI-II.csv",           # Rotor geometry
+                        # rotor_file = "DJI-II.csv",           # Rotor geometry
+                        # rotor_file = "naca23012.csv",          #airfoil used, we'll see
+                        # rotor_file = "naca0012.csv",          #airfoil used, we'll see
+                        rotor_file = "Healy_rotor.csv",
+                        n_rotors = 1,                       #number of rotors used.
+                        ground_effect = true,
                         optargs...)
 
     # TODO: Wake removal ?
@@ -90,6 +104,7 @@ function singlerotor(;  xfoil       = true,             # Whether to run XFOIL
 
     # Rotor geometry
     data_path = uns.def_data_path       # Path to rotor database
+    # data_path = "/Users/brigham/.julia/dev/FLOWUnsteady/data/airfoils"
     pitch = 0.0                         # (deg) collective pitch of blades
     # n = 50                              # Number of blade elements
     # n = 10
@@ -100,8 +115,9 @@ function singlerotor(;  xfoil       = true,             # Whether to run XFOIL
     # Read radius of this rotor and number of blades
     R, B = uns.read_rotor(rotor_file; data_path=data_path)[[1,3]]
 
+
     # Simulation parameters
-    RPM = 81*60                         # RPM
+    RPM = 1600                         # RPM
     # J = 0.00001                       # Advance ratio Vinf/(nD)
     rho = 1.225                         # (kg/m^3) air density
     mu = 1.81e-5                        # (kg/ms) air dynamic viscosity
@@ -125,11 +141,12 @@ function singlerotor(;  xfoil       = true,             # Whether to run XFOIL
     # shed_unsteady = true                # Shed particles from unsteady loading
 
     max_particles = ((2*n+1)*B)*nrevs*nsteps_per_rev*p_per_step # Max particles for memory pre-allocation
-
-    max_particles = 2*max_particles;    #This allows the simulation to run with ground_effect enabled.
+    
+    # if ground_effect
+        max_particles = 2*max_particles;    #This allows the simulation to run with ground_effect enabled.
+    # end
     
     plot_disc = true                    # Plot blade discretization for debugging
-
 
     # ------------ SIMULATION SETUP --------------------------------------------
     # Generate rotor
@@ -142,13 +159,36 @@ function singlerotor(;  xfoil       = true,             # Whether to run XFOIL
                                             verbose=verbose, v_lvl = v_lvl,
                                             xfoil=xfoil, data_path=data_path,
                                             plot_disc=plot_disc)
+
+    if n_rotors > 1
+        rotor2 = uns.generate_rotor(rotor_file; pitch=pitch,
+                                    n=n, 
+                                    # blade_r = blade_r,
+                                    CW=!CW, ReD=ReD,
+                                    verbose=verbose, v_lvl = v_lvl,
+                                    xfoil=xfoil, data_path=data_path,
+                                    plot_disc=plot_disc)
+    end
+
+    vlm.setVinf(rotor, (X,t) -> [0,0,-1.0])
+    vlm.setRPM(rotor, RPM)
+
+    if n_rotors == 2 
+        vlm.setVinf(rotor2, (X,t) -> [0,0,-1.0])
+        vlm.setRPM(rotor2, RPM)
+    end
+
     # ----- VEHICLE DEFINITION
     # System of all FLOWVLM objects
     system = vlm.WingSystem()
     vlm.addwing(system, run_name, rotor)
+    if n_rotors == 2; vlm.addwing(system, run_name, rotor2); end
+    vlm.setVinf(system, (X,t) -> [0,0,-1.0])
 
     # Systems of rotors
-    rotors = vlm.Rotor[rotor]   # Defining this rotor as its own system
+    rotors = vlm.Rotor[]   # Defining this rotor as its own system
+    push!(rotors,rotor)   # Defining this rotor as its own system
+    if n_rotors == 2; push!(rotors,rotor2); end
     rotor_systems = (rotors,)
 
     # Wake-shedding system (doesn't include the rotor if quasi-steady vehicle)
@@ -183,11 +223,16 @@ function singlerotor(;  xfoil       = true,             # Whether to run XFOIL
     # Plot maneuver path and controls
     uns.plot_maneuver(maneuver; vis_nsteps=nsteps)
 
+  
 
     # ----- SIMULATION DEFINITION
     RPMref = RPM
     Vref = 0.0
     simulation = uns.Simulation(vehicle, maneuver, Vref, RPMref, ttot)
+
+    # save_path = "/Users/brigham/Desktop/Winter_2022/Research/RotorGeometryTest"
+    # vlm.setVinf(rotor, (X,t)->[0,0,-1.0])
+    # vlm.save_vtk(rotor,joinpath(save_path,"HealyRotorGeometry"))
 
     monitor = generate_monitor(J, rho, RPM, nsteps; save_path=save_path,
                                                             run_name=run_name)
@@ -371,4 +416,7 @@ function generate_monitor(J, rho, RPM, nsteps; save_path=nothing,
     end
 
     return extra_runtime_function
+
 end
+
+rotor, pfield = run_singlerotor_hover()
