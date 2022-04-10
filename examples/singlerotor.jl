@@ -104,8 +104,6 @@ function singlerotor(;  xfoil       = true,             # Whether to run XFOIL
                         verbose     = true,
                         v_lvl       = 0,
                         # rotor_file = "DJI-II.csv",           # Rotor geometry
-                        # rotor_file = "naca23012.csv",          #airfoil used, we'll see
-                        # rotor_file = "naca0012.csv",          #airfoil used, we'll see
                         rotor_file = "Healy_rotor.csv",
                         n_rotors = 1,                       #number of rotors used.
                         ground_effect = true,
@@ -157,8 +155,7 @@ function singlerotor(;  xfoil       = true,             # Whether to run XFOIL
     plot_disc = true                    # Plot blade discretization for debugging
 
     # ------------ SIMULATION SETUP --------------------------------------------
-    # Generate rotor
-    # blade_r = 1/20; 
+    # Generate rotor(s)
 
     rotor = uns.generate_rotor(rotor_file; pitch=pitch,
                                             n=n, 
@@ -290,6 +287,7 @@ function singlerotor(;  xfoil       = true,             # Whether to run XFOIL
 
 
     # ------------ RUN SIMULATION ----------------------------------------------
+    # if (ground_effect); println("========Toggling Ground Effect================="); end
     pfield = uns.run_simulation(simulation, nsteps;
                                       # SIMULATION OPTIONS
                                       Vinf=Vinf,

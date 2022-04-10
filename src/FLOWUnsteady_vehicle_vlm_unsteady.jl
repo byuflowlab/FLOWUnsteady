@@ -173,7 +173,7 @@ function generate_static_particle_fun(pfield::vpm.ParticleField,
                 X_i = [new_x, X_i[2], X_i[3]];
 
                 Γ_new = pfield.particles[i].Gamma;  #This looks right. Gamma is a properity of particle, which are the elements of particle fields.
-                pfield.particles[i].
+
                 Γ_new = [Γ_new[1], -Γ_new[2], -Γ_new[3]];       #Change direction of Γ
                 
                 sigma = pfield.particles[i].sigma;
