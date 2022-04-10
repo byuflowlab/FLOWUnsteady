@@ -168,11 +168,12 @@ function generate_static_particle_fun(pfield::vpm.ParticleField,
                 # new_x = -2*(altitude + X_i[1]);        #Change x to flip over x_axis defined by altitude.
 
                 # new_x = (alititude - X_i[1])*2 + X_i[1];
-                new_x = 2*altitude - X_i[1];            #change the mirror to be arround ground
+                new_x = 2*altitude - X_i[1];            #change the mirror to be around ground
 
                 X_i = [new_x, X_i[2], X_i[3]];
 
-                Γ_new = pfield.particles[i].Gamma;
+                Γ_new = pfield.particles[i].Gamma;  #This looks right. Gamma is a properity of particle, which are the elements of particle fields.
+                pfield.particles[i].
                 Γ_new = [Γ_new[1], -Γ_new[2], -Γ_new[3]];       #Change direction of Γ
                 
                 sigma = pfield.particles[i].sigma;

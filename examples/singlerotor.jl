@@ -44,12 +44,25 @@ function run_singlerotor_hover(; xfoil=false, prompt=true)
     J = 0.00                # Advance ratio Vinf/(nD)
     angle = 0.0             # (deg) angle of freestream (0 == climb, 90==forward flight)
 
+    n_rotors = 4;
+
+    if n_rotors == 2; run_name = "dualrotors"; #otherwise, single_rotor, so you can comment this out if not this.
+    elseif n_rotors == 4; run_name = "quadrotors";
+    else run_name = "singlerotors"; end
+
+    date = "4_9/"
+    num_rotor_name = "QuadRotors/"
+    run_num ="Healy_rotor_04092022_09/"
+    save_name = date*num_rotor_name*run_num;
+
     pfield, rotor = singlerotor(;   xfoil=xfoil,
                     VehicleType=uns.VLMVehicle,
                     J=J,
                     DVinf=[cos(pi/180*angle), sin(pi/180*angle), 0],
-                    save_path=extdrive_path*"4_6/Healy_rotor_04062022_01/",
+                    save_path=extdrive_path*save_name,
                     prompt=prompt,
+                    run_name=run_name,
+                    n_rotors=4,   #This is to determine # of rotors.
                     ground_effect = true)
     return pfield, rotor
 end
@@ -77,9 +90,9 @@ function singlerotor(;  xfoil       = true,             # Whether to run XFOIL
                         J           = 0.0,              # Advance ratio
                         DVinf       = [1.0, 0, 0],      # Freestream direction
                         nrevs       = 30,                # Number of revolutions
-                        nsteps_per_rev = 72,            # Time steps per revolution
+                        # nsteps_per_rev = 72,            # Time steps per revolution
                         # nrevs       = 10,                # Number of revolutions
-                        # nsteps_per_rev = 25,            # Time steps per revolution
+                        nsteps_per_rev = 25,            # Time steps per revolution
                         shed_unsteady = true,
                         lambda      = 2.125,
                         n           = 10,
@@ -104,10 +117,7 @@ function singlerotor(;  xfoil       = true,             # Whether to run XFOIL
 
     # Rotor geometry
     data_path = uns.def_data_path       # Path to rotor database
-    # data_path = "/Users/brigham/.julia/dev/FLOWUnsteady/data/airfoils"
     pitch = 0.0                         # (deg) collective pitch of blades
-    # n = 50                              # Number of blade elements
-    # n = 10
     CW = false                          # Clock-wise rotation
 
     # xfoil = false                     # Whether to run XFOIL
@@ -127,8 +137,6 @@ function singlerotor(;  xfoil       = true,             # Whether to run XFOIL
     Vinf(X,t) = magVinf*DVinf           # (m/s) freestream velocity
 
     # Solver parameters
-    # nrevs = 6                         # Number of revolutions in simulation
-    # nsteps_per_rev = 72                 # Time steps per revolution
     p_per_step = 2                      # Sheds per time step
     ttot = nrevs/(RPM/60)               # (s) total simulation time
     nsteps = nrevs*nsteps_per_rev       # Number of time steps
@@ -142,9 +150,9 @@ function singlerotor(;  xfoil       = true,             # Whether to run XFOIL
 
     max_particles = ((2*n+1)*B)*nrevs*nsteps_per_rev*p_per_step # Max particles for memory pre-allocation
     
-    # if ground_effect
+    if ground_effect
         max_particles = 2*max_particles;    #This allows the simulation to run with ground_effect enabled.
-    # end
+    end
     
     plot_disc = true                    # Plot blade discretization for debugging
 
@@ -160,35 +168,72 @@ function singlerotor(;  xfoil       = true,             # Whether to run XFOIL
                                             xfoil=xfoil, data_path=data_path,
                                             plot_disc=plot_disc)
 
-    if n_rotors > 1
-        rotor2 = uns.generate_rotor(rotor_file; pitch=pitch,
-                                    n=n, 
-                                    # blade_r = blade_r,
-                                    CW=!CW, ReD=ReD,
-                                    verbose=verbose, v_lvl = v_lvl,
-                                    xfoil=xfoil, data_path=data_path,
-                                    plot_disc=plot_disc)
-    end
-
     vlm.setVinf(rotor, (X,t) -> [0,0,-1.0])
     vlm.setRPM(rotor, RPM)
 
-    if n_rotors == 2 
+    println("n_rotors = $n_rotors")
+
+    if n_rotors >= 2
+        println("========Creating Second Rotor Set=============")
+        rotor2 = uns.generate_rotor(rotor_file; pitch=pitch,
+                                    n=n, 
+                                    # blade_r = blade_r,
+                                    CW=CW, ReD=ReD,
+                                    verbose=verbose, v_lvl = v_lvl,
+                                    xfoil=xfoil, data_path=data_path,
+                                    plot_disc=plot_disc)
+        spacing = 2.5*R;
+        vlm.setcoordsystem(rotor2, [0,spacing,0], Float64[1 0 0; 0 1 0; 0 0 1])
         vlm.setVinf(rotor2, (X,t) -> [0,0,-1.0])
         vlm.setRPM(rotor2, RPM)
+
+        if n_rotors == 4
+            println("========Creating Third Rotor Set=============")
+            rotor3 = uns.generate_rotor(rotor_file; pitch=pitch,
+                                        n=n, 
+                                        # blade_r = blade_r,
+                                        CW=!CW, ReD=ReD,
+                                        verbose=verbose, v_lvl = v_lvl,
+                                        xfoil=xfoil, data_path=data_path,
+                                        plot_disc=plot_disc)
+            spacing2 = 4*R;
+            vlm.setcoordsystem(rotor3, [0,0,spacing2], Float64[1 0 0; 0 1 0; 0 0 1])
+            vlm.setVinf(rotor3, (X,t) -> [0,0,-1.0])
+            vlm.setRPM(rotor3, RPM)
+
+            println("========Creating Fourth Rotor Set=============")
+            rotor4 = uns.generate_rotor(rotor_file; pitch=pitch,
+                                        n=n, 
+                                        # blade_r = blade_r,
+                                        CW=CW, ReD=ReD,
+                                        verbose=verbose, v_lvl = v_lvl,
+                                        xfoil=xfoil, data_path=data_path,
+                                        plot_disc=plot_disc)
+            vlm.setcoordsystem(rotor4, [0,spacing,spacing2], Float64[1 0 0; 0 1 0; 0 0 1])
+            vlm.setVinf(rotor4, (X,t) -> [0,0,-1.0])
+            vlm.setRPM(rotor4, RPM)
+        end
     end
 
     # ----- VEHICLE DEFINITION
     # System of all FLOWVLM objects
     system = vlm.WingSystem()
     vlm.addwing(system, run_name, rotor)
-    if n_rotors == 2; vlm.addwing(system, run_name, rotor2); end
+    if n_rotors >= 2; vlm.addwing(system, "$run_name 2", rotor2); end
+    if n_rotors == 4
+        vlm.addwing(system, "$run_name 3", rotor3);
+        vlm.addwing(system, "$run_name 4", rotor4);
+    end
     vlm.setVinf(system, (X,t) -> [0,0,-1.0])
 
     # Systems of rotors
     rotors = vlm.Rotor[]   # Defining this rotor as its own system
-    push!(rotors,rotor)   # Defining this rotor as its own system
-    if n_rotors == 2; push!(rotors,rotor2); end
+    push!(rotors,)   # Defining this rotor as its own system
+    if n_rotors >= 2; push!(rotors,rotor2); end
+    if n_rotors == 4
+        push!(rotors,rotor3);
+        push!(rotors,rotor4);
+    end
     rotor_systems = (rotors,)
 
     # Wake-shedding system (doesn't include the rotor if quasi-steady vehicle)
@@ -196,11 +241,17 @@ function singlerotor(;  xfoil       = true,             # Whether to run XFOIL
 
     if VehicleType != uns.QVLMVehicle
         vlm.addwing(wake_system, run_name, rotor)
+        if n_rotors>=2; vlm.addwing(wake_system, "$run_name 2",rotor2); end;       #add second rotor
+        if n_rotors==4    
+            vlm.addwing(wake_system, "$run_name 3",rotor3);
+            vlm.addwing(wake_system, "$run_name 4",rotor4);
+        end
     else
         # Mute colinear warnings. This is needed since the quasi-steady solver
         #   will probe induced velocities at the lifting line of the blade
         uns.vlm.VLMSolver._mute_warning(true)
     end
+
 
     # FVS's Vehicle object
     vehicle = VehicleType(   system;
