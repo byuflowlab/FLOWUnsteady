@@ -250,7 +250,8 @@ function _static_particles(pfield::vpm.ParticleField,
 
                 vpm.add_particle(pfield, X, Gamma, sigma;
                                     vol=0, circulation=abs(gamma), static=true,
-                                    index=i)
+                                    # index=i
+                                    )
 
             elseif j==2 || j==3            # Case of trailing vortex with vortex sheet
 
