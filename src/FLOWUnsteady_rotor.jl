@@ -194,9 +194,9 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
     airfoil_contours = Tuple{Float64,Array{Float64, 2},String}[]
     airfoil_path = joinpath(data_path, "airfoils")
     for (r, rfl_file, clcurve_file) in airfoil_files
-        println("Sherlock!")
-        println("rfl_file = $(rfl_file)")
-        println("airfoil_path = $airfoil_path")
+        # println("Sherlock!")
+        # println("rfl_file = $(rfl_file)")
+        # println("airfoil_path = $airfoil_path")
         ########PROBLEM LINE BELOW################
         x,y = gt.readcontour(rfl_file; delim=",", path=airfoil_path, header_len=1)
         rfl = hcat(x,y)

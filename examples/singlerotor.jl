@@ -37,6 +37,10 @@ extdrive_path = "/Users/brigham/Desktop/Winter_2022/Research/Tests/"
 # extdrive_path = "temps/"
 
 
+# ------------ TO DO -----------------------------------------------------------
+# The current simulation has the wake being shed upward, away from the ground
+# I need to reverse the flow, or figure out if the reflection just needs to be the other way.
+
 
 # ------------ DRIVERS ---------------------------------------------------------
 function run_singlerotor_hover(; xfoil=false, prompt=true)
@@ -46,13 +50,13 @@ function run_singlerotor_hover(; xfoil=false, prompt=true)
 
     n_rotors = 4;
 
-    if n_rotors == 2; run_name = "dualrotors"; #otherwise, single_rotor, so you can comment this out if not this.
+    if n_rotors == 2; run_name = "dualrotors"; 
     elseif n_rotors == 4; run_name = "quadrotors";
     else run_name = "singlerotors"; end
 
-    date = "4_9/"
+    date = "4_14/"
     num_rotor_name = "QuadRotors/"
-    run_num ="Healy_rotor_04092022_09/"
+    run_num ="Reduced_Healy_rotor_04142022_02/"
     save_name = date*num_rotor_name*run_num;
 
     pfield, rotor = singlerotor(;   xfoil=xfoil,
@@ -82,16 +86,15 @@ function run_singlerotor_forwardflight(; xfoil=true, prompt=true)
                     prompt=prompt)
 end
 
-# I have added an additional rotor if wanted (up to 2) but I don't have its spacing yet.
 # ------------------------------------------------------------------------------
 
 function singlerotor(;  xfoil       = true,             # Whether to run XFOIL
                         VehicleType = uns.VLMVehicle,   # Vehicle type
                         J           = 0.0,              # Advance ratio
                         DVinf       = [1.0, 0, 0],      # Freestream direction
-                        nrevs       = 30,                # Number of revolutions
+                        # nrevs       = 30,                # Number of revolutions
                         # nsteps_per_rev = 72,            # Time steps per revolution
-                        # nrevs       = 10,                # Number of revolutions
+                        nrevs       = 10,                # Number of revolutions
                         nsteps_per_rev = 25,            # Time steps per revolution
                         shed_unsteady = true,
                         lambda      = 2.125,
@@ -157,6 +160,7 @@ function singlerotor(;  xfoil       = true,             # Whether to run XFOIL
     # ------------ SIMULATION SETUP --------------------------------------------
     # Generate rotor(s)
 
+    println("========Creating First Rotor Set=============")
     rotor = uns.generate_rotor(rotor_file; pitch=pitch,
                                             n=n, 
                                             # blade_r = blade_r,
@@ -164,11 +168,11 @@ function singlerotor(;  xfoil       = true,             # Whether to run XFOIL
                                             verbose=verbose, v_lvl = v_lvl,
                                             xfoil=xfoil, data_path=data_path,
                                             plot_disc=plot_disc)
-
+    vlm.setcoordsystem(rotor, [0.0,0.0,0.0], Float64[1 0 0; 0 1 0; 0 0 1])
     vlm.setVinf(rotor, (X,t) -> [0,0,-1.0])
     vlm.setRPM(rotor, RPM)
 
-    println("n_rotors = $n_rotors")
+    # println("n_rotors = $n_rotors")
 
     if n_rotors >= 2
         println("========Creating Second Rotor Set=============")
@@ -181,7 +185,7 @@ function singlerotor(;  xfoil       = true,             # Whether to run XFOIL
                                     plot_disc=plot_disc)
         spacing = 2.5*R;
         vlm.setcoordsystem(rotor2, [0,spacing,0], Float64[1 0 0; 0 1 0; 0 0 1])
-        vlm.setVinf(rotor2, (X,t) -> [0,0,-1.0])
+        vlm.setVinf(rotor2, (X,t) -> [0,0,1.0])
         vlm.setRPM(rotor2, RPM)
 
         if n_rotors == 4
@@ -195,7 +199,7 @@ function singlerotor(;  xfoil       = true,             # Whether to run XFOIL
                                         plot_disc=plot_disc)
             spacing2 = 4*R;
             vlm.setcoordsystem(rotor3, [0,0,spacing2], Float64[1 0 0; 0 1 0; 0 0 1])
-            vlm.setVinf(rotor3, (X,t) -> [0,0,-1.0])
+            vlm.setVinf(rotor3, (X,t) -> [0,0,1.0])
             vlm.setRPM(rotor3, RPM)
 
             println("========Creating Fourth Rotor Set=============")
@@ -207,7 +211,7 @@ function singlerotor(;  xfoil       = true,             # Whether to run XFOIL
                                         xfoil=xfoil, data_path=data_path,
                                         plot_disc=plot_disc)
             vlm.setcoordsystem(rotor4, [0,spacing,spacing2], Float64[1 0 0; 0 1 0; 0 0 1])
-            vlm.setVinf(rotor4, (X,t) -> [0,0,-1.0])
+            vlm.setVinf(rotor4, (X,t) -> [0,0,1.0])
             vlm.setRPM(rotor4, RPM)
         end
     end
@@ -215,21 +219,22 @@ function singlerotor(;  xfoil       = true,             # Whether to run XFOIL
     # ----- VEHICLE DEFINITION
     # System of all FLOWVLM objects
     system = vlm.WingSystem()
-    vlm.addwing(system, run_name, rotor)
-    if n_rotors >= 2; vlm.addwing(system, "$run_name 2", rotor2); end
+    vlm.addwing(system, run_name, rotor)                                    #add first rotor
+    if n_rotors >= 2; vlm.addwing(system, "$run_name 2", rotor2); end       #add second rotor
     if n_rotors == 4
-        vlm.addwing(system, "$run_name 3", rotor3);
-        vlm.addwing(system, "$run_name 4", rotor4);
+        vlm.addwing(system, "$run_name 3", rotor3);                         #add thirst rotor
+        vlm.addwing(system, "$run_name 4", rotor4);                         #add fourth rotor
     end
-    vlm.setVinf(system, (X,t) -> [0,0,-1.0])
+    vlm.setVinf(system, (X,t) -> [0,0,1.0])
 
     # Systems of rotors
     rotors = vlm.Rotor[]   # Defining this rotor as its own system
     push!(rotors,)   # Defining this rotor as its own system
-    if n_rotors >= 2; push!(rotors,rotor2); end
+    push!(rotors, rotor)                                                    #add first rotor to rotor system
+    if n_rotors >= 2; push!(rotors,rotor2); end                             #add second rotor
     if n_rotors == 4
-        push!(rotors,rotor3);
-        push!(rotors,rotor4);
+        push!(rotors,rotor3);                                               #add third rotor
+        push!(rotors,rotor4);                                               #add fourth rotor
     end
     rotor_systems = (rotors,)
 
