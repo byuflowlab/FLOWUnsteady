@@ -207,8 +207,7 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
                                 L_dir=[0,0,1],      # Direction of lift component
                                 D_dir=[1,0,0],      # Direction of drag component
                                 include_trailingboundvortex=false,
-                                calc_aerodynamicforce_fun=calc_aerodynamicforce_kuttajoukowski,
-                                calc_aerodynamicforce_optargs=[],
+                                calc_aerodynamicforce_fun=generate_calc_aerodynamicforce_default(),
                                 # OUTPUT OPTIONS
                                 out_Lwing=nothing,
                                 out_Dwing=nothing,
@@ -222,14 +221,11 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
                                 CL_lbl=L"Lift Coefficient $C_L$",
                                 CD_lbl=L"Drag Coefficient $C_D$",
                                 y2b_i=2,
-                                y2b_ref=nothing,
-                                ClCL_ref=nothing, CdCD_ref=nothing,
-                                CL_ref=nothing, CD_ref=nothing,
-                                ref_lbl="Reference", ref_stl="ok",
                                 conv_suff="_convergence.csv",
                                 figsize_factor=5/6,
                                 nsteps_plot=10,
-                                nsteps_savefig=1)
+                                nsteps_savefig=1,
+                                debug=false)
 
     fcalls = 0                  # Number of function calls
 
@@ -254,13 +250,13 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
         ax = axs1[1]
         # xlim([-1,1])
         ax.set_xlabel(L"$\frac{2y}{b}$")
-        ax.set_ylabel(L"$\frac{Cl}{CL}$")
+        ax.set_ylabel(L"Sectional lift $c_\ell$")
         ax.title.set_text("Spanwise lift distribution")
 
         ax = axs1[2]
         # xlim([-1,1])
         ax.set_xlabel(L"$\frac{2y}{b}$")
-        ax.set_ylabel(L"$\frac{Cd}{CD}$")
+        ax.set_ylabel(L"Sectional drag $c_d$")
         ax.title.set_text("Spanwise drag distribution")
 
         ax = axs1[3]
@@ -307,7 +303,7 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
                                                             spandir=cross(L_dir, D_dir),
                                                             lencrit=lencrit,
                                                             include_trailingboundvortex=include_trailingboundvortex,
-                                                            calc_aerodynamicforce_optargs...)
+                                                            debug=debug)
             L, D, S = decompose(Ftot, L_dir, D_dir)
             vlm._addsolution(wing, "L", L)
             vlm._addsolution(wing, "D", D)
@@ -319,23 +315,23 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
                                         spandir=cross(L_dir, D_dir),
                                         lencrit=lencrit,
                                         include_trailingboundvortex=include_trailingboundvortex,
-                                        calc_aerodynamicforce_optargs...)
+                                        debug=debug)
             l, d, s = decompose(ftot, L_dir, D_dir)
 
             # Lift of the wing
             Lwing = sum(L)
             Lwing = sign(dot(Lwing, L_dir))*norm(Lwing)
             CLwing = Lwing/(qinf_ref*b_ref^2/ar_ref)
-            ClCL = [sign(dot(this_l, L_dir)) for this_l in l].*norm.(l) / abs(Lwing/b_ref)
+            cl = broadcast(x -> sign(dot(x, L_dir)), l) .* norm.(l) / (qinf_ref*b_ref/ar_ref)
 
             # Drag of the wing
             Dwing = sum(D)
             Dwing = sign(dot(Dwing, D_dir))*norm(Dwing)
             CDwing = Dwing/(qinf_ref*b_ref^2/ar_ref)
-            CdCD = [sign(dot(this_d, D_dir)) for this_d in d].*norm.(d) / abs(Dwing/b_ref) # Preserves the sign of drag
+            cd = broadcast(x -> sign(dot(x, D_dir)), d) .* norm.(d) / (qinf_ref*b_ref/ar_ref)
 
-            vlm._addsolution(wing, "Cl/CL", ClCL)
-            vlm._addsolution(wing, "Cd/CD", CdCD)
+            # vlm._addsolution(wing, "cl", cl)
+            # vlm._addsolution(wing, "cd", cd)
 
             if out_Lwing!=nothing; push!(out_Lwing, Lwing); end;
             if out_Dwing!=nothing; push!(out_Dwing, Dwing); end;
@@ -345,27 +341,15 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
             if PFIELD.nt%nsteps_plot==0 && disp_plot
 
                 ax = axs1[1]
-                if y2b_ref!=nothing && ClCL_ref!=nothing
-                    ax.plot(y2b_ref, ClCL_ref, ref_stl, label=ref_lbl)
-                end
-                ax.plot(y2b, ClCL, "-", alpha=0.5, color=clr)
+                ax.plot(y2b, cl, "-", alpha=0.5, color=clr)
 
                 ax = axs1[2]
-                if y2b_ref!=nothing && CdCD_ref!=nothing
-                    ax.plot(y2b_ref, CdCD_ref, ref_stl, label=ref_lbl)
-                end
-                ax.plot(y2b, CdCD, "-", alpha=0.5, color=clr)
+                ax.plot(y2b, cd, "-", alpha=0.5, color=clr)
 
                 ax = axs1[3]
-                if CL_ref!=nothing
-                    ax.plot([0, T], CL_ref*ones(2), ":k", label=ref_lbl)
-                end
                 ax.plot([T], [CLwing], "o", alpha=0.5, color=clr)
 
                 ax = axs1[4]
-                if CD_ref!=nothing
-                    ax.plot([0, T], CD_ref*ones(2), ":k", label=ref_lbl)
-                end
                 ax.plot([T], [CDwing], "o", alpha=0.5, color=clr)
 
                 ax = axs2[1]

@@ -23,8 +23,15 @@ clrs = [
             [252, 127, 178]/255
         ]
 
-dot(X, Y) = X[1]*Y[1] + X[2]*Y[2] + X[3]*Y[3]
+# dot(X, Y) = X[1]*Y[1] + X[2]*Y[2] + X[3]*Y[3]
+dot(A, B) = sum(a*b for (a,b) in zip(A, B))
 norm(X) = sqrt(dot(X,X))
+
+function cross!(out, A, B)
+    out[1] = A[2]*B[3] - A[3]*B[2]
+    out[2] = A[3]*B[1] - A[1]*B[3]
+    out[3] = A[1]*B[2] - A[2]*B[1]
+end
 
 """
     `plot_maneuver(maneuver::KinematicManeuver; ti::Real=0, tf::Real=1,
