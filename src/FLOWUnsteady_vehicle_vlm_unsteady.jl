@@ -144,18 +144,23 @@ end
 
 
 g_uniform(x) = 0 <= x <= 1 ? 1 : 0   # Uniform distribution
-g_linear(x) = x < 0 ? 0 :
-           x < 0.25 ? 0.4 + 3.04 * x/0.25 :         # Piece-wise linear distribution centered at quarter-chord
-           x < 0.50 ? 3.44 - 3.2 * (x-0.25)/0.25 :  # as given by Kim 2015, Improved actuator surface method for wind turbine application.
+g_linear(x) = x < 0 ? 0 :                           # Piece-wise linear distribution centered at quarter-chord
+           x < 0.25 ? 0.4 + 3.04 * x/0.25 :         # as given by Kim 2015, "Improved actuator surface method for wind turbine application."
+           x < 0.50 ? 3.44 - 3.2 * (x-0.25)/0.25 :
            x <=1.00 ? 0.24 - 0.24 * (x-0.5)/0.5  :
            0
+g_pressure(x) = x <= 0 ? 0 :         # Pressure-like distribution: peaking by the LE with aerodynamic center at to quarter-chord.
+                x <= 1 ? (1-exp(-(x/0.02)^3))/(4*pi*x) / 0.3266200204514099 :
+                0
+                
+const g_piecewiselinear = g_linear
 
 function generate_static_particle_fun(pfield::vpm.ParticleField, pfield_static::vpm.ParticleField,
                                         self::VLMVehicle,
                                         sigma_vlm::Real, sigma_rotor::Real;
                                         vlm_vortexsheet=false,
                                         vlm_vortexsheet_overlap=2.125,
-                                        vlm_vortexsheet_distribution=g_uniform,
+                                        vlm_vortexsheet_distribution=g_pressure,
                                         save_path=nothing, run_name="", suff="_staticpfield",
                                         nsteps_save=1)
 
