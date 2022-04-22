@@ -152,12 +152,13 @@ g_linear(x) = x < 0 ? 0 :                           # Piece-wise linear distribu
 g_pressure(x) = x <= 0 ? 0 :         # Pressure-like distribution: peaking by the LE with aerodynamic center at to quarter-chord.
                 x <= 1 ? (1-exp(-(x/0.02)^3))/(4*pi*x) / 0.3266200204514099 :
                 0
-                
+
 const g_piecewiselinear = g_linear
 
 function generate_static_particle_fun(pfield::vpm.ParticleField, pfield_static::vpm.ParticleField,
                                         self::VLMVehicle,
                                         sigma_vlm::Real, sigma_rotor::Real;
+                                        sigma_vpm=nothing,
                                         vlm_vortexsheet=false,
                                         vlm_vortexsheet_overlap=2.125,
                                         vlm_vortexsheet_distribution=g_pressure,
@@ -176,11 +177,13 @@ function generate_static_particle_fun(pfield::vpm.ParticleField, pfield_static::
 
         # Particles from vlm system
         _static_particles(pfield, self.vlm_system, sigma_vlm;
+                                sigma_vpm=sigma_vpm,
                                 vortexsheet=vlm_vortexsheet,
                                 vortexsheet_overlap=vlm_vortexsheet_overlap,
                                 vortexsheet_distribution=vlm_vortexsheet_distribution)
         if flag
             _static_particles(pfield_static, self.vlm_system, sigma_vlm;
+                                sigma_vpm=sigma_vpm,
                                 vortexsheet=vlm_vortexsheet,
                                 vortexsheet_overlap=vlm_vortexsheet_overlap,
                                 vortexsheet_distribution=vlm_vortexsheet_distribution)
@@ -221,6 +224,7 @@ save_vtk(self::VLMVehicle, args...;
 function _static_particles(pfield::vpm.ParticleField,
                             system::Union{vlm.Wing, vlm.WingSystem, vlm.Rotor},
                             sigma::Real;
+                            sigma_vpm=nothing,
                             vortexsheet::Bool=false,
                             vortexsheet_overlap::Real=2.125,
                             vortexsheet_distribution::Function=g_uniform,
@@ -256,6 +260,10 @@ function _static_particles(pfield::vpm.ParticleField,
 
             elseif j==2 || j==3            # Case of trailing vortex with vortex sheet
 
+                # If sigma_vpm is given, it discretizes trailing vortices with
+                # the same sigma than the wake
+                this_sigma = sigma_vpm != nothing ? sigma_vpm : sigma
+
                 # Length of bound vortex
                 dl .= x2
                 dl .-= x1
@@ -272,7 +280,7 @@ function _static_particles(pfield::vpm.ParticleField,
 
                 l = sqrt(dl[1]^2 + dl[2]^2 + dl[3]^2)   # Length (TE to lifting line)
                                                         # Number of particles to use
-                np           = ceil(Int, l / (sigma/vortexsheet_overlap) )
+                np           = ceil(Int, l / (this_sigma/vortexsheet_overlap) )
                 dl ./= np                   # Step length
 
                 # Calculate normalization of distribution
@@ -306,7 +314,7 @@ function _static_particles(pfield::vpm.ParticleField,
                     Gamma .= dl
                     Gamma .*= circulation
 
-                    vpm.add_particle(pfield, X, Gamma, sigma;
+                    vpm.add_particle(pfield, X, Gamma, this_sigma;
                                         vol=0, circulation=abs(circulation), static=true,
                                         index=i) # NOTE: Here I'm using the index to indicate
                                                  # the horseshoe that this particle belongs to
