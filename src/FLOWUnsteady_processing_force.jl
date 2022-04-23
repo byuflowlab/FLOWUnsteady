@@ -21,7 +21,7 @@ function generate_calc_aerodynamicforce_default()
     kuttajoukowski = generate_calc_aerodynamicforce_kuttajoukowski("regular",
                                                                     nothing, nothing,
                                                                     nothing, nothing,
-                                                                    nothing)
+                                                                    nothing, nothing)
 
     # Parasitic drag
     parasiticdrag = generate_aerodynamicforce_parasiticdrag("xf-n0012-il-500000-n5.csv";
@@ -74,7 +74,8 @@ of freestream, kinematic, and induced velocities on bound vortices.
 function generate_calc_aerodynamicforce_kuttajoukowski(KJforce_type::String,
                                 sigma_vlm_surf, sigma_rotor_surf,
                                 vlm_vortexsheet, vlm_vortexsheet_overlap,
-                                vlm_vortexsheet_distribution;
+                                vlm_vortexsheet_distribution,
+                                vlm_vortexsheet_sigma_tbv;
                                 vehicle=nothing
                                 )
 
@@ -144,7 +145,8 @@ function generate_calc_aerodynamicforce_kuttajoukowski(KJforce_type::String,
                                             sigma_vlm_surf, sigma_rotor_surf;
                                             vlm_vortexsheet=vlm_vortexsheet,
                                             vlm_vortexsheet_overlap=vlm_vortexsheet_overlap,
-                                            vlm_vortexsheet_distribution=vlm_vortexsheet_distribution)
+                                            vlm_vortexsheet_distribution=vlm_vortexsheet_distribution,
+                                            vlm_vortexsheet_sigma_tbv=vlm_vortexsheet_sigma_tbv)
 
             # Pre-calculate direction of lifting bound vortices
             BVdir = [zeros(3) for i in 1:m]
@@ -652,7 +654,8 @@ end
 function generate_calc_aerodynamicforce_freevortices(maxboundparticles::Int,
                                 sigma_vlm_surf,
                                 vlm_vortexsheet, vlm_vortexsheet_overlap,
-                                vlm_vortexsheet_distribution;
+                                vlm_vortexsheet_distribution,
+                                vlm_vortexsheet_sigma_tbv;
                                                         Ffv::Function=Ffv_direct,
                                                         include_TBVs::Bool=false,
                                                         save_path=nothing
@@ -685,6 +688,7 @@ function generate_calc_aerodynamicforce_freevortices(maxboundparticles::Int,
                                     vortexsheet=vlm_vortexsheet,
                                     vortexsheet_overlap=vlm_vortexsheet_overlap,
                                     vortexsheet_distribution=vlm_vortexsheet_distribution,
+                                    vlm_vortexsheet_sigma_tbv=vlm_vortexsheet_sigma_tbv,
                                     vortices=vortices
                                     )
 

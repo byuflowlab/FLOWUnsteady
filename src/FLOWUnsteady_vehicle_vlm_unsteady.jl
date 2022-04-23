@@ -158,10 +158,10 @@ const g_piecewiselinear = g_linear
 function generate_static_particle_fun(pfield::vpm.ParticleField, pfield_static::vpm.ParticleField,
                                         self::VLMVehicle,
                                         sigma_vlm::Real, sigma_rotor::Real;
-                                        sigma_vpm=nothing,
                                         vlm_vortexsheet=false,
                                         vlm_vortexsheet_overlap=2.125,
                                         vlm_vortexsheet_distribution=g_pressure,
+                                        vlm_vortexsheet_sigma_tbv=nothing,
                                         save_path=nothing, run_name="", suff="_staticpfield",
                                         nsteps_save=1)
 
@@ -177,16 +177,16 @@ function generate_static_particle_fun(pfield::vpm.ParticleField, pfield_static::
 
         # Particles from vlm system
         _static_particles(pfield, self.vlm_system, sigma_vlm;
-                                sigma_vpm=sigma_vpm,
                                 vortexsheet=vlm_vortexsheet,
                                 vortexsheet_overlap=vlm_vortexsheet_overlap,
-                                vortexsheet_distribution=vlm_vortexsheet_distribution)
+                                vortexsheet_distribution=vlm_vortexsheet_distribution,
+                                vortexsheet_sigma_tbv=vlm_vortexsheet_sigma_tbv)
         if flag
             _static_particles(pfield_static, self.vlm_system, sigma_vlm;
-                                sigma_vpm=sigma_vpm,
                                 vortexsheet=vlm_vortexsheet,
                                 vortexsheet_overlap=vlm_vortexsheet_overlap,
-                                vortexsheet_distribution=vlm_vortexsheet_distribution)
+                                vortexsheet_distribution=vlm_vortexsheet_distribution,
+                                vortexsheet_sigma_tbv=vlm_vortexsheet_sigma_tbv)
         end
 
         # Particles from rotor systems
@@ -228,6 +228,7 @@ function _static_particles(pfield::vpm.ParticleField,
                             vortexsheet::Bool=false,
                             vortexsheet_overlap::Real=2.125,
                             vortexsheet_distribution::Function=g_uniform,
+                            vortexsheet_sigma_tbv=nothing,
                             vortices=1:3, # Bound vortices to add (1==AB, 2==ApA, 3==BBp)
                             )
 
@@ -260,9 +261,9 @@ function _static_particles(pfield::vpm.ParticleField,
 
             elseif j==2 || j==3            # Case of trailing vortex with vortex sheet
 
-                # If sigma_vpm is given, it discretizes trailing vortices with
+                # If sigma_tbv is given, it discretizes trailing vortices with
                 # the same sigma than the wake
-                this_sigma = sigma_vpm != nothing ? sigma_vpm : sigma
+                this_sigma = vortexsheet_sigma_tbv != nothing ? vortexsheet_sigma_tbv : sigma
 
                 # Length of bound vortex
                 dl .= x2
