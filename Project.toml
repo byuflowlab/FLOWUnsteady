@@ -4,32 +4,28 @@ authors = ["Eduardo J. Alvarez <Edo.AlvarezR@gmail.com>"]
 version = "3.0.0"
 
 [deps]
-PyPlot = "d330b81b-6aea-500a-939a-2ce795aea3ee"
-Dierckx = "39dd38d3-220a-591b-8e3c-4c3a8c710a94"
+AirfoilPrep = "008c61af-3522-4e14-81c5-9301d18a9f66"
+BPM = "f91b385c-3ede-44c9-92c8-2a04f762ef2f"
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
+Dierckx = "39dd38d3-220a-591b-8e3c-4c3a8c710a94"
+FLOWExaFMM = "a07d1f4e-0e34-4d8b-bfef-e5b961477d34"
+FLOWNoise = "d27480ee-285d-533b-ae3d-5018956ae0bc"
+FLOWVLM = "1a3ff0be-0410-4572-aa62-b496bdd1f33b"
+FLOWVPM = "6e19019d-7c31-4940-9d16-c3f15dfe6020"
+GeometricTools = "83792f5e-c6a1-11e8-2e0a-93511f02ae5f"
 JLD = "4138dd39-2aa7-5051-a626-17a0bb65d9c8"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
-Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
-DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
-GeometricTools = "83792f5e-c6a1-11e8-2e0a-93511f02ae5f"
-FLOWVLM = "1a3ff0be-0410-4572-aa62-b496bdd1f33b"
-FLOWNoise = "d27480ee-285d-533b-ae3d-5018956ae0bc"
-BPM = "f91b385c-3ede-44c9-92c8-2a04f762ef2f"
-# FLOWVPM = "6e19019d-7c31-4940-9d16-c3f15dfe6020"
-
+PyPlot = "d330b81b-6aea-500a-939a-2ce795aea3ee"
 
 [compat]
 julia = "1.4"
-GeometricTools = "2.1.1"
-FLOWVLM = "2.1.1"
-FLOWNoise = "2.1.1"
-BPM = "2.0.0"
-# FLOWVPM = "2.0.0"
 
 [extras]
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
-Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 FLOWVPM = "6e19019d-7c31-4940-9d16-c3f15dfe6020"
+Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
 test = ["Test", "Printf", "FLOWVPM"]

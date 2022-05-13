@@ -205,7 +205,7 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
                             airfoil_contours; data_path=data_path, optargs...)
 end
 
-function generate_rotor(Rtip::Real, Rhub::Real, B::Int, blade_file::String;
+function generate_rotor(Rtip::Real, Rhub::Real, B::Int, blade_file;
                         data_path=def_data_path, optargs...)
 
     (chorddist, pitchdist,
@@ -220,7 +220,7 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int, blade_file::String;
 end
 
 
-function generate_rotor(rotor_file::String;
+function generate_rotor(rotor_file;
                         data_path=def_data_path, optargs...)
 
     Rtip, Rhub, B, blade_file = read_rotor(rotor_file; data_path=data_path)
@@ -229,7 +229,7 @@ function generate_rotor(rotor_file::String;
                             data_path=data_path, optargs...)
 end
 
-function read_rotor(rotor_file::String; data_path=def_data_path)
+function read_rotor(rotor_file; data_path=def_data_path)
 
     # Path to rotor files
     rotor_path = joinpath(data_path, "rotors")
@@ -243,7 +243,7 @@ function read_rotor(rotor_file::String; data_path=def_data_path)
     return Rtip, Rhub, B, blade_file
 end
 
-function read_blade(blade_file::String; data_path=def_data_path)
+function read_blade(blade_file; data_path=def_data_path)
 
     # Path to rotor files
     rotor_path = joinpath(data_path, "rotors")

@@ -1,0 +1,8 @@
+property,file,description
+chorddist,Healy_rotor_chorddist.csv,Chord distribution
+pitchdist,Healy_rotor_pitchdist.csv,Pitch distribution
+sweepdist,Healy_rotor_sweepdist.csv,LE sweep distribution
+heightdist,Healy_rotor_heightdist.csv,LE height distribution
+airfoil_files,Healy_rotor_airfoils.csv,Airfoil distribution
+spl_k,1,Spline order
+spl_s,2.00E-07,Spline smoothing

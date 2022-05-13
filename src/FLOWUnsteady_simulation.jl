@@ -163,6 +163,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
 
         # Output vtks
         if save_path!=nothing && PFIELD.nt%nsteps_save==0
+            # return sim # sherlock
             strn = save_vtk(sim, run_name; path=save_path,
                             save_horseshoes=save_horseshoes,
                             save_wopwopin=save_wopwopin)
@@ -184,6 +185,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
     # RUN SIMULATION
     ############################################################################
     # Here it uses the VPM-time-stepping to run the simulation
+    # return vpm.run_vpm!(pfield, dt, nsteps; # sherlock
     vpm.run_vpm!(pfield, dt, nsteps;
                       save_path=save_path, run_name=run_name*"_pfield",
                       verbose=verbose, verbose_nsteps=verbose_nsteps,
