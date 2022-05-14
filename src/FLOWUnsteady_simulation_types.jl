@@ -81,6 +81,10 @@ function nextstep_kinematic(self::Simulation, dt::Real)
         if self.Vinit!=nothing; set_V(self.vehicle, self.Vinit); end;
         if self.Winit!=nothing; set_W(self.vehicle, self.Winit); end;
 
+        # Rotate tilting systems
+        angles = get_angles(self.maneuver, self.t/self.ttot)
+        tilt_systems(self.vehicle, angles)
+
     else
         # Linear velocity increment
         dV = calc_dV(self.maneuver, self.vehicle, self.t, dt, self.ttot, self.Vref)
