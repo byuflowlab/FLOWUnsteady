@@ -3,6 +3,7 @@ uns = FLOWUnsteady
 vpm = uns.vpm
 vlm = uns.vlm
 PS = uns.PanelSolver
+using LaTeXStrings
 import PyPlot
 plt = PyPlot
 
