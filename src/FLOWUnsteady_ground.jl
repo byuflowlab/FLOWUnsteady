@@ -76,7 +76,7 @@ function generate_ground_effect_fun(pfield::vpm.ParticleField, ground_method::Pa
 
     # build ground function
     ground_function(pfield, t, dt; kwargs...) =
-        ground_effect!(pfield, gfield, dt; panel_collection=panel_collection, save_ground, run_name, save_path)
+        ground_effect!(pfield, gfield, dt, save_ground, run_name, save_path)
 
     return ground_function
 end
