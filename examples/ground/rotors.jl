@@ -18,8 +18,8 @@ if !isdir(extdrive_path); mkpath(extdrive_path); end
 
 
 # ------------ DRIVERS ---------------------------------------------------------
-function run_singlerotor_hover_ground_panel(; xfoil=true, prompt=true, disp_conv=false,
-        ground_point = [0.0,0,0], ground_axes = [1.0 0 0; 0 1 0; 0 0 1],
+function run_singlerotor_hover_ground_panel(; xfoil=false, prompt=false, disp_conv=false,
+        ground_point = [0.0,0,-0.5], ground_axes = [1.0 0 0; 0 1 0; 0 0 1],
         Delta_x = 4.0, Delta_y = 4.0, nx = 10, ny = 10,
         kernel = PS.Source(), panel_shape = PS.Quad()
     )
@@ -38,7 +38,7 @@ function run_singlerotor_hover_ground_panel(; xfoil=true, prompt=true, disp_conv
                     ground_type=ground_type)
 end
 
-function run_singlerotor_hover_ground_mirror(; xfoil=true, prompt=true, disp_conv=false,
+function run_singlerotor_hover_ground_mirror(; xfoil=false, prompt=false, disp_conv=false,
         ground_point = [0.0,0,0], ground_axes = [1.0 0 0; 0 1 0; 0 0 1]
     )
 
