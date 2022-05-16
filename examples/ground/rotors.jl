@@ -6,9 +6,12 @@ PS = uns.PanelSolver
 import PyPlot
 plt = PyPlot
 
+import Dates
+const TODAY = replace(string(Dates.today()), '-' => "")
+
 # ------------ GLOBAL VARIABLES ------------------------------------------------
 # Default path where to save data
-extdrive_path = joinpath(module_path,"..","data",TODAY)
+extdrive_path = joinpath(uns.module_path,"..","data",TODAY)
 if !isdir(extdrive_path); mkpath(extdrive_path); end
 
 
