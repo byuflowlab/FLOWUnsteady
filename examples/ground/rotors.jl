@@ -35,7 +35,8 @@ function run_singlerotor_hover_ground_panel(; xfoil=false, prompt=false, disp_co
                     DVinf=[cos(pi/180*angle), sin(pi/180*angle), 0],
                     save_path=joinpath(extdrive_path,"singlerotor_hover_test00"),
                     prompt=prompt, disp_conv,
-                    ground_method=ground_method)
+                    ground_method=ground_method,
+                    vpm_UJ=vpm.UJ_direct)
 end
 
 function run_singlerotor_hover_ground_mirror(; xfoil=false, prompt=false, disp_conv=false,
@@ -52,7 +53,8 @@ function run_singlerotor_hover_ground_mirror(; xfoil=false, prompt=false, disp_c
                     J=J,
                     DVinf=[cos(pi/180*angle), sin(pi/180*angle), 0],
                     save_path=joinpath(extdrive_path,"singlerotor_hover_test00"),
-                    prompt=prompt, disp_conv, ground_method=ground_method)
+                    prompt=prompt, disp_conv, ground_method=ground_method,
+                    vpm_UJ=vpm.UJ_direct)
 end
 
 function run_singlerotor_forwardflight(; xfoil=true, prompt=true)
