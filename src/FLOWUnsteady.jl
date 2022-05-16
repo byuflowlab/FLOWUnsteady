@@ -42,6 +42,10 @@ const noise = FLOWNoise
 # BPM https://github.com/byuflowlab/BPM.jl
 import BPM
 
+# PanelSolver
+import PanelSolver
+PS = PanelSolver
+
 # ------------ GLOBAL VARIABLES ------------------------------------------------
 const module_path = splitdir(@__FILE__)[1]                # Path to this module
 const def_data_path = joinpath(module_path, "../data/")   # Default path to data folder

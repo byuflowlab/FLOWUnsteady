@@ -46,6 +46,10 @@ function run_simulation(sim::Simulation, nsteps::Int;
                              unsteady_shedcrit=0.01,    # Criterion for unsteady-loading shedding
                              omit_shedding=[],          # Indices of elements in `sim.vehicle.wake_system` on which omit shedding VPM particles
                              extra_runtime_function=(sim, PFIELD,T,DT)->false,
+                             ground_point=[0.0,0,0],
+                             ground_plane=[1.0,0,0],
+                             ground_method::Ground=Panel(),
+                             save_ground=true,
                              # OUTPUT OPTIONS
                              save_path="temps/vahanasimulation00",
                              run_name="FLOWUsimulation",
@@ -181,6 +185,14 @@ function run_simulation(sim::Simulation, nsteps::Int;
         static_particles_function = (pfield, t, dt)->nothing
     end
 
+    if ground_effect
+        ground_effect_function = generate_ground_effect_fun(ground_point, ground_plane, ground_method;
+                                    save_ground, save_path=save_path,
+                                    run_name=run_name)
+    else
+        ground_effect_function = (pfield, t, dt)->nothing
+    end
+
     ############################################################################
     # RUN SIMULATION
     ############################################################################
@@ -196,6 +208,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
                       prompt=prompt,
                       nsteps_relax=vpm_nsteps_relax,
                       static_particles_function=static_particles_function,
+                      ground_effect_function=ground_effect_function,
                       save_time=false
                       )
 
