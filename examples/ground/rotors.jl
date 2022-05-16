@@ -27,7 +27,7 @@ function run_singlerotor_hover_ground_panel(; xfoil=false, prompt=false, disp_co
     J = 0.00                # Advance ratio Vinf/(nD)
     angle = 0.0             # (deg) angle of freestream (0 == climb, 90==forward flight)
 
-    ground_type = uns.Panel(ground_point, ground_axes, Delta_x, Delta_y, nx, ny, kernel, panel_shape)
+    ground_method = uns.Panel(ground_point, ground_axes, Delta_x, Delta_y, nx, ny, kernel, panel_shape)
 
     singlerotor(;   xfoil=xfoil,
                     VehicleType=uns.VLMVehicle,
@@ -35,7 +35,7 @@ function run_singlerotor_hover_ground_panel(; xfoil=false, prompt=false, disp_co
                     DVinf=[cos(pi/180*angle), sin(pi/180*angle), 0],
                     save_path=joinpath(extdrive_path,"singlerotor_hover_test00"),
                     prompt=prompt, disp_conv,
-                    ground_type=ground_type)
+                    ground_method=ground_method)
 end
 
 function run_singlerotor_hover_ground_mirror(; xfoil=false, prompt=false, disp_conv=false,
@@ -45,14 +45,14 @@ function run_singlerotor_hover_ground_mirror(; xfoil=false, prompt=false, disp_c
     J = 0.00                # Advance ratio Vinf/(nD)
     angle = 0.0             # (deg) angle of freestream (0 == climb, 90==forward flight)
 
-    ground_type = uns.Mirror(ground_point, ground_axes)
+    ground_method = uns.Mirror(ground_point, ground_axes)
 
     singlerotor(;   xfoil=xfoil,
                     VehicleType=uns.VLMVehicle,
                     J=J,
                     DVinf=[cos(pi/180*angle), sin(pi/180*angle), 0],
                     save_path=joinpath(extdrive_path,"singlerotor_hover_test00"),
-                    prompt=prompt, disp_conv, ground_type=ground_type)
+                    prompt=prompt, disp_conv, ground_method=ground_method)
 end
 
 function run_singlerotor_forwardflight(; xfoil=true, prompt=true)
