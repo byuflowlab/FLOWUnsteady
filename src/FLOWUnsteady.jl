@@ -53,7 +53,7 @@ const def_data_path = joinpath(module_path, "../data/")   # Default path to data
 
 # ------------ HEADERS ---------------------------------------------------------
 # Load modules
-for module_name in ["vehicle", "vehicle_vlm",
+for module_name in ["vehicle", "vehicle_vlm", "ground",
                     "maneuver", "rotor",
                     "simulation_types", "simulation", "utils",
                     "processing", "monitors",

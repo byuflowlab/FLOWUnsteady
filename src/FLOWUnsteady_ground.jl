@@ -1,19 +1,19 @@
 abstract type Ground end
 
-struct Lattice <: Ground
-    gfield::ParticleGround
-    save_ground::Bool
-    run_name::Bool
-    save_path::String
-    update_A::Bool
-end
+# struct Lattice <: Ground
+#     gfield::ParticleGround
+#     save_ground::Bool
+#     run_name::Bool
+#     save_path::String
+#     update_A::Bool
+# end
 
 struct Mirror{TF} <: Ground
     ground_point::Array{TF,1}
     ground_normal::Array{TF,1}
 end
 
-struct Panel <: Ground
+struct Panel{TF} <: Ground
     ground_point::Vector{TF}
     ground_axes::Matrix{TF}
     Delta_x::TF
