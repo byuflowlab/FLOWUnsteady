@@ -184,9 +184,9 @@ function run_simulation(sim::Simulation, nsteps::Int;
     end
 
     if !isnothing(ground_method)
-        ground_effect_function = generate_ground_effect_fun(ground_point, ground_plane, ground_method;
-                                    save_ground, save_path=save_path,
-                                    run_name=run_name)
+        ground_effect_function = generate_ground_effect_fun(pfield, ground_method,
+                                    save_ground, save_path,
+                                    run_name)
     else
         ground_effect_function = (pfield, t, dt)->nothing
     end
