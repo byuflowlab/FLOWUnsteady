@@ -64,5 +64,5 @@ function get_function_strings(RPM, hd_list, dx_list, nx_list; include_no_ground=
         nx = nx_list[i]
         push!(ex_funs, rotor_function_panel_ground("_hd$(hd)_dx$(dx)_nx$(nx)", parse(Float64,hd), parse(Float64,dx), parse(Int64,nx), RPM))
     end
-
+    return ex_funs
 end
