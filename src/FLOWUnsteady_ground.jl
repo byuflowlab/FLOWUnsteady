@@ -42,7 +42,8 @@ function generate_ground_effect_fun(pfield::vpm.ParticleField, ground_method::Mi
     return ground_function
 end
 
-function generate_ground_effect_fun(pfield::vpm.ParticleField, ground_method::Panel, save_ground, save_path, run_name; optargs...)
+"Writes a function to update ground panel strengths and updates pfield.Uextra."
+function generate_ground_effect_fun(pfield::vpm.ParticleField, ground_method::Panel, save_ground, save_path, run_name; save_time = false, optargs...)
 
     # extract user input
     ground_point = ground_method.ground_point
@@ -63,7 +64,8 @@ function generate_ground_effect_fun(pfield::vpm.ParticleField, ground_method::Pa
     extrude_sections = range(-0.5,stop=0.5,length=ny)
     grid = PS._extrude(points, extrude_vector, extrude_sections)
 
-    @show grid
+    # translate to point
+    grid .+= ground_point
 
     # build panels
     panels = PS.Panels(grid; kernel, panel_shape)
@@ -76,7 +78,11 @@ function generate_ground_effect_fun(pfield::vpm.ParticleField, ground_method::Pa
 
     # build ground function
     ground_function(pfield, t, dt; kwargs...) =
-        ground_effect!(pfield, gfield, dt, save_ground, run_name, save_path)
+        ground_effect!(pfield, gfield, dt, save_ground, run_name, save_path, save_time)
+
+    # set pfield.Uextra
+    Uextra(X) = PS.v_induced(panels, kernel, panel_shape, X)
+    pfield.Uextra = Uextra
 
     return ground_function
 end

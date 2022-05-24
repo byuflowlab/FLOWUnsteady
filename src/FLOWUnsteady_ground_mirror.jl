@@ -1,8 +1,7 @@
 """
 Adds mirrored particles to `pfield` to impose flow tangency at the ground plane.
 """
-function mirror_ground!(pfield; ground_point = [0.0,0,0], ground_normal = [0,0,1.0], save_field=true, run_name="", save_path="", kwargs...)
-
+function mirror_ground!(pfield, ground_point, ground_normal, save_ground, run_name, save_path)
     np = pfield.np
     n_sources = np
 
@@ -14,11 +13,11 @@ function mirror_ground!(pfield; ground_point = [0.0,0,0], ground_normal = [0,0,1
 
         # get new X
         r = X .- ground_point
-        dz = r .* ground_normal
+        dz = (r' * ground_normal) * ground_normal
         Xnew = X .- 2*dz
 
         # get new Gamma
-        G_perp = G .* ground_normal
+        G_perp = (G' * ground_normal) * ground_normal
         G_para = G .- G_perp
         Gnew = G_perp .- G_para
 
@@ -27,10 +26,10 @@ function mirror_ground!(pfield; ground_point = [0.0,0,0], ground_normal = [0,0,1
     end
 
     # save particle field
-    if save_field
+    if save_ground
         start_i = np+1
         end_i = np+n_sources
-        vpm.save(pfield, run_name*"_ground"; path=save_path, start_i=start_i, end_i=end_i)
+        vpm.save(pfield, run_name*"_mirror"; path=save_path, start_i=start_i, end_i=end_i, overwrite_time=pfield.nt)
     end
 
     return false

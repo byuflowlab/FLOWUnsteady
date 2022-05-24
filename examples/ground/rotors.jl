@@ -6,6 +6,8 @@ PS = uns.PanelSolver
 using LaTeXStrings
 import PyPlot
 plt = PyPlot
+import DelimitedFiles
+DF = DelimitedFiles
 
 import Dates
 const TODAY = replace(string(Dates.today()), '-' => "")
@@ -15,13 +17,12 @@ const TODAY = replace(string(Dates.today()), '-' => "")
 extdrive_path = joinpath(uns.module_path,"..","data",TODAY)
 if !isdir(extdrive_path); mkpath(extdrive_path); end
 
-
-
 # ------------ DRIVERS ---------------------------------------------------------
-function run_singlerotor_hover_ground_panel(; xfoil=false, prompt=false, disp_conv=false,
-        ground_point = [0.0,0,0.5], ground_axes = [0.0 1.0 0; 0 0 -1; -1.0 0 0],
-        Delta_x = 4.0, Delta_y = 4.0, nx = 10, ny = 10,
-        kernel = PS.Source(), panel_shape = PS.Quad()
+function run_singlerotor_hover_ground_panel(; run_name="healy_rotor", xfoil=false, prompt=false, disp_conv=false,
+        ground_point = [5.5*0.3048 * 0.5,0,0], ground_axes = [0.0 0.0 1.0; 0.0 1.0 0.0; -1.0 0 0.0],
+        Delta_x = 1.5, Delta_y = 1.5, nx = 10, ny = 10,
+        kernel = PS.Source(), panel_shape = PS.Quad(),
+        RPM = 1600
     )
 
     J = 0.00                # Advance ratio Vinf/(nD)
@@ -33,28 +34,30 @@ function run_singlerotor_hover_ground_panel(; xfoil=false, prompt=false, disp_co
                     VehicleType=uns.VLMVehicle,
                     J=J,
                     DVinf=[cos(pi/180*angle), sin(pi/180*angle), 0],
-                    save_path=joinpath(extdrive_path,"singlerotor_hover_test00"),
+                    save_path=joinpath(extdrive_path,run_name),
                     prompt=prompt, disp_conv,
-                    ground_method=ground_method,
-                    vpm_UJ=vpm.UJ_direct)
+                    ground_method=ground_method, save_ground=true,
+                    vpm_UJ=vpm.UJ_direct,
+                    RPM=RPM)
 end
 
-function run_singlerotor_hover_ground_mirror(; xfoil=false, prompt=false, disp_conv=false,
-        ground_point = [0.0,0,0], ground_axes = [1.0 0 0; 0 1 0; 0 0 1]
+function run_singlerotor_hover_ground_mirror(; run_name="rotor_mirror", xfoil=false, prompt=false, disp_conv=false,
+        ground_point = [0.05,0,0], ground_normal = [-1.0, 0,0], RPM = 1600,
     )
 
     J = 0.00                # Advance ratio Vinf/(nD)
     angle = 0.0             # (deg) angle of freestream (0 == climb, 90==forward flight)
 
-    ground_method = uns.Mirror(ground_point, ground_axes)
+    ground_method = uns.Mirror(ground_point, ground_normal)
 
     singlerotor(;   xfoil=xfoil,
                     VehicleType=uns.VLMVehicle,
                     J=J,
                     DVinf=[cos(pi/180*angle), sin(pi/180*angle), 0],
-                    save_path=joinpath(extdrive_path,"singlerotor_hover_test00"),
-                    prompt=prompt, disp_conv, ground_method=ground_method,
-                    vpm_UJ=vpm.UJ_direct)
+                    save_path=joinpath(extdrive_path,run_name),
+                    prompt=prompt, disp_conv, ground_method=ground_method, save_ground=true,
+                    vpm_UJ=vpm.UJ_direct,
+                    RPM=RPM)
 end
 
 function run_singlerotor_forwardflight(; xfoil=true, prompt=true)
@@ -91,8 +94,10 @@ function singlerotor(;  xfoil       = true,             # Whether to run XFOIL
                         prompt      = true,
                         verbose     = true,
                         v_lvl       = 0,
-                        rotor_file = "DJI-II.csv",           # Rotor geometry
+                        # rotor_file = "DJI-II.csv",           # Rotor geometry
+                        rotor_file = "Healy_rotor.csv",           # Rotor geometry
                         disp_conv = true,
+                        RPM = 81*60,
                         optargs...)
 
     # TODO: Wake removal ?
@@ -111,8 +116,6 @@ function singlerotor(;  xfoil       = true,             # Whether to run XFOIL
     R, B = uns.read_rotor(rotor_file; data_path=data_path)[[1,3]]
 
     # Simulation parameters
-    RPM = 81*60                         # RPM
-    # J = 0.00001                       # Advance ratio Vinf/(nD)
     rho = 1.225                         # (kg/m^3) air density
     mu = 1.81e-5                        # (kg/ms) air dynamic viscosity
     ReD = 2*pi*RPM/60*R * rho/mu * 2*R  # Diameter-based Reynolds number
@@ -215,6 +218,9 @@ function singlerotor(;  xfoil       = true,             # Whether to run XFOIL
                                       verbose=verbose, v_lvl=v_lvl,
                                       optargs...
                                       )
+
+    plot_rotor_convergence(joinpath(save_path, run_name*"_convergence.csv"), run_name*"_convergence", save_path)
+
     return pfield, rotor
 end
 
@@ -374,4 +380,33 @@ function generate_monitor(J, rho, RPM, nsteps; save_path=nothing,
     end
 
     return extra_runtime_function
+end
+
+function plot_rotor_convergence(convergence_file, figname, savepath)
+    # extract data
+    data, header = DF.readdlm(convergence_file, ','; header=true)
+    t = data[:,2]
+    CT = data[:,5]
+    CQ = data[:,6]
+    eta = data[:,7]
+
+    # header is expected to be formatted as:
+    # age (deg),T,DT,RPM_1,CT_1,CQ_1,eta_1
+
+    # make plot
+    fig = plt.figure(figname)
+    fig.clear()
+    fig.add_subplot(131, xlabel="time, " * L"s", ylabel="Thrust Coefficient")
+    fig.add_subplot(132, xlabel="time, " * L"s", ylabel="Torque Coefficient")
+    fig.add_subplot(133, xlabel="time, " * L"s", ylabel="Propulsive Efficiency")
+    axs = fig.get_axes()
+    axs[1].plot(t, CT)
+    axs[2].plot(t, CQ)
+    axs[3].plot(t, eta)
+
+    # save plot
+    fig.tight_layout()
+    fig.savefig(joinpath(savepath, figname*".png"))
+
+    return nothing
 end

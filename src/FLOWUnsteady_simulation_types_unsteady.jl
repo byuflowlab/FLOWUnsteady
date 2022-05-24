@@ -42,7 +42,7 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
     # On the first time step (pfield.nt==0), it only does steps (5) and (7),
     # meaning that the unsteady wake of the first time step is never shed.
     if self.nt==0
-        # NOTE: VLMs and Rotors solutions are losely coupled
+        # NOTE: VLMs and Rotors solutions are loosely coupled
 
         # Set Vinf on system to get horseshoes
         vlm.setVinf(vhcl.system, Vinf)
@@ -117,7 +117,6 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
 
         # Calculate VPM velocity on all points (VLM and rotors)
         Vvpm = Vvpm_on_Xs(pfield, vcat(Xs_cp_vlm, Xs_ApA_AB_BBp_vlm, Xs_rotors); dt=dt, fsgm=vlm_fsgm)
-
         Vvpm_cp_vlm = Vvpm[1:m]
         Vvpm_ApA_AB_BBp_vlm = Vvpm[m+1:4*m]
         Vvpm_rotors = Vvpm[4*m+1:end]
@@ -206,7 +205,6 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
 
                 # Get velocities induced at every blade of this rotor
                 this_Vinds = _parse_midXs(vhcl.rotor_systems, Vinds, si, ri)
-
                 VindVkin = _format_blades(this_Vinds + Vkin, vhcl.rotor_systems,
                                                                         si, ri)
                 if wake_coupled

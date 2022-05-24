@@ -60,6 +60,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
                              save_horseshoes=false,     # Save VLM horseshoes
                              save_static_particles=true,# Whether to save particles to represent the VLM
                              save_wopwopin=true,        # Generate inputs for PSU-WOPWOP
+                             save_time=false             # TODO: change default to false
                              )
 
 
@@ -207,7 +208,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
                       nsteps_relax=vpm_nsteps_relax,
                       static_particles_function=static_particles_function,
                       ground_effect_function=ground_effect_function,
-                      save_time=false
+                      save_time=save_time
                       )
 
     return pfield
@@ -285,7 +286,8 @@ function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs::Array{T, 1}; static_particles
         pfield.UJ(pfield)
 
         # Retrieve velocity at probes
-        Vvpm = [Array(P.U) for P in vpm.iterator(pfield; start_i=sta_np+1)]
+        Vpanel = pfield.Uextra.(Xs)
+        Vvpm = [Array(P.U) for P in vpm.iterator(pfield; start_i=sta_np+1)] .+ Vpanel
 
         # De-singularize particles
         if abs(fsgm) != 1

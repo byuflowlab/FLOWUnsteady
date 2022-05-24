@@ -446,7 +446,7 @@ function VLM2VPM(system::Union{vlm.Wing, vlm.WingSystem, vlm.Rotor}, pfield, dt,
     cntgs = true          # Contiguous horseshoes flag
 
     if nothing in HS; error("Logic error! $HS"); end;
-    if true in [isnan.(elem) for elem in HS]; error("Logic error! $HS"); end;
+    if true in [isnan.(elem) for elem in HS]; error("Logic error! $HS, i=$i"); end;
 
     # ----------- Case of left wing tip ---------------------------
     if i==1

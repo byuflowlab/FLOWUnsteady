@@ -2,4 +2,4 @@ property,file,description
 Rtip,0.8382,tip radius
 Rhub,0.16764,hub radius
 B,3,number of blades
-blade,Healy_rotor_blade.csv,blade file
+blade,Healy_rotor_bladedist.csv,blade file
