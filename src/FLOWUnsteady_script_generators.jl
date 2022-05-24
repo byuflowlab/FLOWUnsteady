@@ -9,7 +9,7 @@ function write_script_example(script_path, example_file, call_example_functions.
         write(io, "", "\n")
 
         # include example file
-        write(io, "include($(joinpath(module_path, "..", "examples", example_file)))", "\n", "\n")
+        write(io, "include(\"$(joinpath(module_path, "..", "examples", example_file))\")", "\n", "\n")
 
         # call specified function
         if typeof(call_example_functions) <: String
