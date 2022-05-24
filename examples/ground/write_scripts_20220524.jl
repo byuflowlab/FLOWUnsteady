@@ -35,7 +35,6 @@ rotor_function_no_ground(RPM) =
 """
 run_singlerotor_hover(; xfoil=false, RPM=$RPM, rotor_file="Healy_rotor.csv", prompt=false, save_path=joinpath(extdrive_path,"singlerotor_hover_test01/"))
 """
-)
 
 rotor_function_panel_ground(tag, h_over_d, dx, nx, RPM) =
 """
