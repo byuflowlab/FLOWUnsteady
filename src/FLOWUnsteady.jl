@@ -10,6 +10,7 @@ Mixed-fidelity unsteady aerodynamics simulation engine.
 module FLOWUnsteady
 
 # ------------ GENERIC MODULES -------------------------------------------------
+import Dates
 import Dierckx
 import CSV
 import DataFrames

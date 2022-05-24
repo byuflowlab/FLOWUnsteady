@@ -22,7 +22,8 @@ function run_singlerotor_hover_ground_panel(; run_name="healy_rotor", xfoil=fals
         ground_point = [5.5*0.3048 * 0.5,0,0], ground_axes = [0.0 0.0 1.0; 0.0 1.0 0.0; -1.0 0 0.0],
         Delta_x = 1.5, Delta_y = 1.5, nx = 10, ny = 10,
         kernel = PS.Source(), panel_shape = PS.Quad(),
-        RPM = 1600
+        RPM = 1600,
+        save_path=joinpath(extdrive_path,"single_rotor_hover_ground_panel")
     )
 
     J = 0.00                # Advance ratio Vinf/(nD)
@@ -34,15 +35,16 @@ function run_singlerotor_hover_ground_panel(; run_name="healy_rotor", xfoil=fals
                     VehicleType=uns.VLMVehicle,
                     J=J,
                     DVinf=[cos(pi/180*angle), sin(pi/180*angle), 0],
-                    save_path=joinpath(extdrive_path,run_name),
+                    save_path=save_path,
                     prompt=prompt, disp_conv,
                     ground_method=ground_method, save_ground=true,
-                    vpm_UJ=vpm.UJ_direct,
+                    vpm_UJ=vpm.UJ_fmm,
                     RPM=RPM)
 end
 
 function run_singlerotor_hover_ground_mirror(; run_name="rotor_mirror", xfoil=false, prompt=false, disp_conv=false,
         ground_point = [0.05,0,0], ground_normal = [-1.0, 0,0], RPM = 1600,
+        save_path=joinpath(extdrive_path,"single_rotor_hover_ground_images")
     )
 
     J = 0.00                # Advance ratio Vinf/(nD)
@@ -54,13 +56,30 @@ function run_singlerotor_hover_ground_mirror(; run_name="rotor_mirror", xfoil=fa
                     VehicleType=uns.VLMVehicle,
                     J=J,
                     DVinf=[cos(pi/180*angle), sin(pi/180*angle), 0],
-                    save_path=joinpath(extdrive_path,run_name),
+                    save_path=save_path,
                     prompt=prompt, disp_conv, ground_method=ground_method, save_ground=true,
-                    vpm_UJ=vpm.UJ_direct,
+                    vpm_UJ=vpm.UJ_fmm,
                     RPM=RPM)
 end
 
-function run_singlerotor_forwardflight(; xfoil=true, prompt=true)
+function run_singlerotor_hover(; xfoil=false, RPM=1600, rotor_file="Healy_rotor.csv", prompt=false, save_path=joinpath(extdrive_path,"singlerotor_hover_test01/"))
+
+    J = 0.00                # Advance ratio Vinf/(nD)
+    angle = 0.0             # (deg) angle of freestream (0 == climb, ~90==forward flight)
+
+    singlerotor(;   xfoil=xfoil,
+                    VehicleType=uns.VLMVehicle,
+                    J=J,
+                    DVinf=[cos(pi/180*angle), sin(pi/180*angle), 0],
+                    nrevs=2,
+                    nsteps_per_rev=120,
+                    rotor_file=rotor_file,
+                    save_path=save_path,
+                    prompt=prompt,
+                    RPM=RPM)
+end
+
+function run_singlerotor_forwardflight(; xfoil=true, prompt=true, save_path=joinpath(extdrive_path,"singlerotor_fflight_test01/"))
 
     J = 0.15                # Advance ratio Vinf/(nD)
     angle = 60.0            # (deg) angle of freestream (0 == climb, ~90==forward flight)
@@ -71,7 +90,7 @@ function run_singlerotor_forwardflight(; xfoil=true, prompt=true)
                     DVinf=[cos(pi/180*angle), sin(pi/180*angle), 0],
                     nrevs=2,
                     nsteps_per_rev=120,
-                    save_path=joinpath(extdrive_path,"singlerotor_fflight_test01/"),
+                    save_path=save_path,
                     prompt=prompt)
 end
 
@@ -218,8 +237,9 @@ function singlerotor(;  xfoil       = true,             # Whether to run XFOIL
                                       verbose=verbose, v_lvl=v_lvl,
                                       optargs...
                                       )
-
-    plot_rotor_convergence(joinpath(save_path, run_name*"_convergence.csv"), run_name*"_convergence", save_path)
+    if !disp_conv
+        plot_rotor_convergence(joinpath(save_path, run_name*"_convergence.csv"), run_name*"_convergence", save_path)
+    end
 
     return pfield, rotor
 end
