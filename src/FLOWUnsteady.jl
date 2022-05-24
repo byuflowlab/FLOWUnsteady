@@ -58,7 +58,8 @@ for module_name in ["vehicle", "vehicle_vlm", "ground",
                     "maneuver", "rotor",
                     "simulation_types", "simulation", "utils",
                     "processing", "monitors",
-                    "noise_wopwop", "noise_bpm"]
+                    "noise_wopwop", "noise_bpm",
+                    "script_generators"]
     include("FLOWUnsteady_"*module_name*".jl")
 end
 
