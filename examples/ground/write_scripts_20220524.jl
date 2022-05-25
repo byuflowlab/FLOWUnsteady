@@ -31,8 +31,8 @@ function write_script_20220524(name="healy_";
         uns.write_script_example(joinpath(write_dir, script_names[i]), example_file, call_example_function)
     end
     uns.write_batch(joinpath(write_dir, name*"batch.sh"), joinpath.(Ref(write_dir), script_names), FLOWExaFMM_dir;
-        test=true, email_notifications=false, email_address="",
-        time="08:00:00", ntasks=16, mem_per_cpu="1024M"
+        test=false, email_notifications=false, email_address="",
+        time="12:00:00", ntasks=16, mem_per_cpu="1024M"
     )
     return nothing
 end
