@@ -183,8 +183,10 @@ function precalculations(self::AbstractVLMVehicle, Vinf::Function,
 end
 
 function save_vtk_base(self::AbstractVLMVehicle, filename; path=nothing,
-                                   num=nothing, save_wopwopin=false, optargs...)
-    strn = vlm.save(self.system, filename; path=path, num=num, optargs...)
+                                   num=nothing, save_wopwopin=false,
+                                   infinite_vortex=false, optargs...)
+    strn = vlm.save(self.system, filename; path=path, num=num,
+                                    infinite_vortex=infinite_vortex, optargs...)
 
     for (i, grid) in enumerate(self.grids)
         strn *= gt.save(grid, filename*"_Grid$i"; format="vtk", path=path, num=num)
