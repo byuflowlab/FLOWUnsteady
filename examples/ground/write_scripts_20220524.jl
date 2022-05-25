@@ -12,7 +12,7 @@ uns = FLOWUnsteady
 function write_script_20220524(name="healy_";
         write_dir = save_path,
         # script_path = joinpath(save_path, name*".jl"),
-        get_fun_list = [rotor_function_images_ground, rotor_function_images_ground, rotor_function_panel_ground, rotor_function_panel_ground, rotor_function_panel_ground, rotor_function_panel_ground]
+        get_fun_list = [rotor_function_images_ground, rotor_function_images_ground, rotor_function_panel_ground, rotor_function_panel_ground, rotor_function_panel_ground, rotor_function_panel_ground],
         script_names = name .* ["noground_npr72", "images_ground_hd05_npr72", "images_ground_hd1_npr72", "panels_hd05_dx3_nx10_npr72","panels_hd1_dx3_nx10_npr72","panels_hd05_dx6_nx20_npr72","panels_hd1_dx6_nx20_npr72"] .* ".jl",
         example_file = joinpath("ground", "rotors.jl"),
         include_no_ground=true, include_images_ground=true,
