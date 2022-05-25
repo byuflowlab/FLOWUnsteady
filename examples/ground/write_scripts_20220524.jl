@@ -30,7 +30,7 @@ function write_script_20220524(name="healy_";
     for (i,call_example_function) in enumerate(call_example_functions)
         uns.write_script_example(joinpath(write_dir, script_names[i]), example_file, call_example_function)
     end
-    uns.write_batch(joinpath(write_dir, name*"batch.sh"), script_names, FLOWExaFMM_dir;
+    uns.write_batch(joinpath(write_dir, name*"batch.sh"), joinpath.(Ref(write_dir), script_names), FLOWExaFMM_dir;
         test=true, email_notifications=false, email_address="",
         time="08:00:00", ntasks=16, mem_per_cpu="1024M"
     )
