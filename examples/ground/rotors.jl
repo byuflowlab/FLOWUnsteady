@@ -23,7 +23,8 @@ function run_singlerotor_hover_ground_panel(; run_name="healy_rotor", xfoil=fals
         Delta_x = 1.5, Delta_y = 1.5, nx = 10, ny = 10,
         kernel = PS.Source(), panel_shape = PS.Quad(),
         RPM = 1600,
-        save_path=joinpath(extdrive_path,"single_rotor_hover_ground_panel")
+        save_path=joinpath(extdrive_path,"single_rotor_hover_ground_panel"),
+        nsteps_per_rev=72, nrevs=14
     )
 
     J = 0.00                # Advance ratio Vinf/(nD)
@@ -39,14 +40,15 @@ function run_singlerotor_hover_ground_panel(; run_name="healy_rotor", xfoil=fals
                     prompt=prompt, disp_conv,
                     ground_method=ground_method, save_ground=true,
                     vpm_UJ=vpm.UJ_fmm,
-                    nrevs=14,
-                    nsteps_per_rev=120,
+                    nrevs=nrevs,
+                    nsteps_per_rev=nsteps_per_rev,
                     RPM=RPM)
 end
 
 function run_singlerotor_hover_ground_mirror(; run_name="rotor_mirror", xfoil=false, prompt=false, disp_conv=false,
         ground_point = [0.05,0,0], ground_normal = [-1.0, 0,0], RPM = 1600,
-        save_path=joinpath(extdrive_path,"single_rotor_hover_ground_images")
+        save_path=joinpath(extdrive_path,"single_rotor_hover_ground_images"),
+        nsteps_per_rev=72, nrevs=14
     )
 
     J = 0.00                # Advance ratio Vinf/(nD)
@@ -61,12 +63,14 @@ function run_singlerotor_hover_ground_mirror(; run_name="rotor_mirror", xfoil=fa
                     save_path=save_path,
                     prompt=prompt, disp_conv, ground_method=ground_method, save_ground=true,
                     vpm_UJ=vpm.UJ_fmm,
-                    nrevs=14,
-                    nsteps_per_rev=120,
+                    nrevs=nrevs,
+                    nsteps_per_rev=nsteps_per_rev,
                     RPM=RPM)
 end
 
-function run_singlerotor_hover(; xfoil=false, RPM=1600, rotor_file="Healy_rotor.csv", prompt=false, save_path=joinpath(extdrive_path,"singlerotor_hover_test01/"))
+function run_singlerotor_hover(; xfoil=false, RPM=1600, rotor_file="Healy_rotor.csv", prompt=false, save_path=joinpath(extdrive_path,"singlerotor_hover_test01/")
+        nsteps_per_rev=72, nrevs=14
+    )
 
     J = 0.00                # Advance ratio Vinf/(nD)
     angle = 0.0             # (deg) angle of freestream (0 == climb, ~90==forward flight)
@@ -75,8 +79,8 @@ function run_singlerotor_hover(; xfoil=false, RPM=1600, rotor_file="Healy_rotor.
                     VehicleType=uns.VLMVehicle,
                     J=J,
                     DVinf=[cos(pi/180*angle), sin(pi/180*angle), 0],
-                    nrevs=14,
-                    nsteps_per_rev=120,
+                    nrevs=nrevs,
+                    nsteps_per_rev=nsteps_per_rev,
                     rotor_file=rotor_file,
                     save_path=save_path,
                     prompt=prompt,
