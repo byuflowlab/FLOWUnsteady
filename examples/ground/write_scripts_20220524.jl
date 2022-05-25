@@ -45,7 +45,7 @@ run_singlerotor_hover(; xfoil=false, RPM=$RPM, rotor_file="Healy_rotor.csv", pro
 
 rotor_function_panel_ground(tag, h_over_d, RPM, nsteps_per_rev, dx, nx) =
 """
-run_singlerotor_hover_ground_panel(; run_name="healy_rotor_panel"*$tag, xfoil=false, prompt=false, disp_conv=true,
+run_singlerotor_hover_ground_panel(; run_name="healy_rotor_panel"*"$tag", xfoil=false, prompt=false, disp_conv=true,
         ground_point = [5.5*0.3048 * $h_over_d,0,0], ground_axes = [0.0 0.0 1.0; 0.0 1.0 0.0; -1.0 0 0.0],
         Delta_x = $dx, Delta_y = $dx, nx = $nx, ny = $nx,
         kernel = PS.Source(), panel_shape = PS.Quad(),
@@ -57,7 +57,7 @@ run_singlerotor_hover_ground_panel(; run_name="healy_rotor_panel"*$tag, xfoil=fa
 
 rotor_function_images_ground(tag, h_over_d, RPM, nsteps_per_rev, args...) =
 """
-run_singlerotor_hover_ground_mirror(; run_name="rotor_mirror"*$tag, xfoil=false, prompt=false, disp_conv=false,
+run_singlerotor_hover_ground_mirror(; run_name="rotor_mirror"*"$tag", xfoil=false, prompt=false, disp_conv=false,
         ground_point = [5.5*0.3048 * $h_over_d,0,0], ground_normal = [-1.0, 0,0], RPM = $RPM,
         nrevs = 14, nsteps_per_rev = $(nsteps_per_rev),
         save_path=joinpath("$save_path","healy_images_hd$(h_over_d)_npr$(nsteps_per_rev)"),
