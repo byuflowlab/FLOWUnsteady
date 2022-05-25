@@ -39,6 +39,8 @@ function run_singlerotor_hover_ground_panel(; run_name="healy_rotor", xfoil=fals
                     prompt=prompt, disp_conv,
                     ground_method=ground_method, save_ground=true,
                     vpm_UJ=vpm.UJ_fmm,
+                    nrevs=14,
+                    nsteps_per_rev=120,
                     RPM=RPM)
 end
 
@@ -59,6 +61,8 @@ function run_singlerotor_hover_ground_mirror(; run_name="rotor_mirror", xfoil=fa
                     save_path=save_path,
                     prompt=prompt, disp_conv, ground_method=ground_method, save_ground=true,
                     vpm_UJ=vpm.UJ_fmm,
+                    nrevs=14,
+                    nsteps_per_rev=120,
                     RPM=RPM)
 end
 
@@ -71,7 +75,7 @@ function run_singlerotor_hover(; xfoil=false, RPM=1600, rotor_file="Healy_rotor.
                     VehicleType=uns.VLMVehicle,
                     J=J,
                     DVinf=[cos(pi/180*angle), sin(pi/180*angle), 0],
-                    nrevs=2,
+                    nrevs=14,
                     nsteps_per_rev=120,
                     rotor_file=rotor_file,
                     save_path=save_path,
