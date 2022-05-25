@@ -9,22 +9,27 @@ if !isdir(save_path); mkdir(save_path); end
 import FLOWUnsteady
 uns = FLOWUnsteady
 
-function write_script_20220524(name="healy_rotors";
-        script_path = joinpath(save_path, name*".jl"),
+function write_script_20220524(name="healy_";
+        write_dir = save_path,
+        # script_path = joinpath(save_path, name*".jl"),
+        script_names = name .* ["noground_npr72", "panels_hd05_dx3_nx10_npr72","panels_hd1_dx3_nx10_npr72","panels_hd05_dx6_nx20_npr72","panels_hd1_dx6_nx20_npr72"] .* ".jl",
         example_file = joinpath("ground", "rotors.jl"),
         include_no_ground=true,
-        FLOWExaFMM_dir=joinpath(ENV["HOME"], "julia", "dev", "FLOWExaFMM")
+        FLOWExaFMM_dir=joinpath(ENV["HOME"], "julia", "dev", "FLOWExaFMM"),
+        RPM = 1600.0,
+        hd_list = ["0.5", "1.0", "0.5", "1.0"],
+        dx_list = ["3.0", "3.0", "6.0", "6.0"],
+        nx_list = ["10", "10", "20", "20"],
+        npr_list = ["72", "72", "72", "72"],
     )
 
-    RPM = 1600.0
-    hd_list = ["0.5", "1.0", "0.5", "1.0"]
-    dx_list = ["3.0", "3.0", "6.0", "6.0"]
-    nx_list = ["10", "10", "20", "20"]
-    npr_list = ["72", "72", "72", "72"]
     call_example_functions = get_function_strings(RPM, hd_list, dx_list, nx_list, npr_list; include_no_ground)
-    @show call_example_functions
-    uns.write_script_example(script_path, example_file, call_example_functions...)
-    uns.write_batch(script_path[1:end-2]*"sh", [script_path], FLOWExaFMM_dir;
+    @assert length(script_names) == length(hd_list) + include_no_ground
+    @assert length(call_example_functions) == length(script_names)
+    for (i,call_example_function) in enumerate(call_example_functions)
+        uns.write_script_example(joinpath(write_dir, script_names[i]), example_file, call_example_function)
+    end
+    uns.write_batch(joinpath(write_dir, name*"batch.sh"), script_names, FLOWExaFMM_dir;
         test=true, email_notifications=false, email_address="",
         time="01:00:00", ntasks=24, mem_per_cpu="1024M"
     )
