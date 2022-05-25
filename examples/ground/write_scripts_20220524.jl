@@ -21,7 +21,7 @@ function write_script_20220524(name="healy_rotors";
     dx_list = ["3.0", "3.0", "6.0", "6.0"]
     nx_list = ["10", "10", "20", "20"]
     npr_list = ["72", "72", "72", "72"]
-    call_example_functions = get_function_strings(RPM, hd_list, dx_list, nx_list; include_no_ground)
+    call_example_functions = get_function_strings(RPM, hd_list, dx_list, nx_list, npr_list; include_no_ground)
     @show call_example_functions
     uns.write_script_example(script_path, example_file, call_example_functions...)
     uns.write_batch(script_path[1:end-2]*"sh", [script_path], FLOWExaFMM_dir;
