@@ -60,13 +60,13 @@ run_singlerotor_hover_ground_mirror(; run_name="rotor_mirror"*$tag, xfoil=false,
 
 function get_function_strings(RPM, hd_list, dx_list, nx_list, npr_list; include_no_ground=true)
     ex_funs = String[]
-    if include_no_ground; push!(ex_funs, rotor_function_no_ground(RPM, parse(Float64,npr_list[1]))); end
+    if include_no_ground; push!(ex_funs, rotor_function_no_ground(RPM, parse(Int64,npr_list[1]))); end
     for i in 1:length(hd_list)
         hd = hd_list[i]
         dx = dx_list[i]
         nx = nx_list[i]
         npr = npr_list[i]
-        push!(ex_funs, rotor_function_panel_ground("_hd$(hd)_dx$(dx)_nx$(nx)_npr$npr", parse(Float64,hd), parse(Float64,dx), parse(Int64,nx), RPM, parse(Float64,npr)))
+        push!(ex_funs, rotor_function_panel_ground("_hd$(hd)_dx$(dx)_nx$(nx)_npr$npr", parse(Float64,hd), parse(Float64,dx), parse(Int64,nx), RPM, parse(Int64,npr)))
     end
     return ex_funs
 end
