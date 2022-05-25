@@ -43,7 +43,7 @@ run_singlerotor_hover_ground_panel(; run_name="healy_rotor_panel"*$tag, xfoil=fa
         Delta_x = $dx, Delta_y = $dx, nx = $nx, ny = $nx,
         kernel = PS.Source(), panel_shape = PS.Quad(),
         RPM = $RPM,
-        save_path=$save_path
+        save_path="$save_path"
     )
 """
 
