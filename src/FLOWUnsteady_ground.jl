@@ -38,7 +38,7 @@ end
 function generate_ground_effect_fun(pfield::vpm.ParticleField, ground_method::Mirror, save_ground, save_path, run_name)
     ground_point = ground_method.ground_point
     ground_normal = ground_method.ground_normal
-    ground_function(pfield, t, dt; kwargs...) = mirror_ground!(pfield, ground_point, ground_normal, save_ground, run_name, save_path)
+    ground_function(pfield, t, dt) = mirror_ground!(pfield, ground_point, ground_normal, save_ground, run_name, save_path)
     return ground_function
 end
 
@@ -77,7 +77,7 @@ function generate_ground_effect_fun(pfield::vpm.ParticleField, ground_method::Pa
     gfield = PanelGround(panels, panel_collection)
 
     # build ground function
-    ground_function(pfield, t, dt; kwargs...) =
+    ground_function(pfield, t, dt) =
         ground_effect!(pfield, gfield, dt, save_ground, run_name, save_path, save_time)
 
     # set pfield.Uextra
