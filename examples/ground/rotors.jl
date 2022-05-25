@@ -68,7 +68,7 @@ function run_singlerotor_hover_ground_mirror(; run_name="rotor_mirror", xfoil=fa
                     RPM=RPM)
 end
 
-function run_singlerotor_hover(; xfoil=false, RPM=1600, rotor_file="Healy_rotor.csv", prompt=false, save_path=joinpath(extdrive_path,"singlerotor_hover_test01/")
+function run_singlerotor_hover(; xfoil=false, RPM=1600, rotor_file="Healy_rotor.csv", prompt=false, save_path=joinpath(extdrive_path,"singlerotor_hover_test01/"),
         nsteps_per_rev=72, nrevs=14
     )
 
