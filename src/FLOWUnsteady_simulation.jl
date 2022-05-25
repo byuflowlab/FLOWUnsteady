@@ -189,7 +189,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
                                     save_ground, save_path,
                                     run_name)
     else
-        ground_effect_function = (pfield, t, dt)->nothing
+        ground_effect_function = (args...)->nothing
     end
 
     ############################################################################

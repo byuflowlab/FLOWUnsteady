@@ -116,7 +116,7 @@ function singlerotor(;  xfoil       = true,             # Whether to run XFOIL
                         # rotor_file = "DJI-II.csv",           # Rotor geometry
                         rotor_file = "Healy_rotor.csv",           # Rotor geometry
                         disp_conv = true,
-                        RPM = 81*60,
+                        RPM = 1600,
                         optargs...)
 
     # TODO: Wake removal ?
