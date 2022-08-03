@@ -18,12 +18,23 @@
 
 #=
     CHANGE LOG
+    * Add variable pitch, add collective pitch in cruise to get propulsion to
+        overcome drag of 300 N, increase cruise speed and AOA of main and tandem
+        wing to get a lift of about 4000 N in cruise.
+    * Cruise (tstart = 0.50*telapsed),
+        max_particles=30e6 for workstation run.
+    * Increased pitch of stacked rotors by 5 degs. No starting vortex.
+        MaxGamma removal threshold minmaxGamma = rmv_strngth*[0.0001, 0.05].
+    * start_kinmaneuver=true, sigma_vlm_surf=wing_thickness/4 * 3/4 (wich is
+        close to R/50---before it was R/20), vlm_vortexsheet=true,
+        r_RPMh_stup=3.50 (stacked rotors at 0.42 Mach in hover, before it was 2.0
+        or Mach 0.24), custom force calculation routine.
     * lambda = 2.125*1.2, nsteps = 2*4*5400, p_per_step=5
     * Remove !(0.1<sigma<5), Remove Gamma<0.0001
     * sigma_vlm_surf=sigma_rotor_surf=R/20, directional and magnitude SFS control.
 
     TODO
-    * Re-run simulation with start_kinmaneuver=true
+    * [x] Re-run simulation with start_kinmaneuver=true
 =#
 
 # ------------ MODULES ---------------------------------------------------------
@@ -44,13 +55,18 @@ include(vpm_path*"examples/utilities/utilities.jl")
 
 
 # ------------ GLOBAL VARIABLES ------------------------------------------------
+this_folder_path = splitdir(splitdir(@__FILE__)[1])[1]
+this_folder_name = splitdir(splitdir(@__FILE__)[1])[2]
+
 # Default path where to save data
 # extdrive_path = "/media/edoalvar/Samsung_T51/simulationdata202202/"
 # extdrive_path = "/media/flowlab/Storage/ealvarez/simulations/"
-extdrive_path = "/fslhome/edoalvar/simulationdataFSLG1/"
+# extdrive_path = "/fslhome/edoalvar/simulationdataFSLG4/"
+extdrive_path  = this_folder_path*"/"
 
 # Default data path where to find rotor and airfoil data
 data_path = uns.def_data_path
+
 
 # ------------ HEADERS ---------------------------------------------------------
 for header_name in ["geometry", "kinematics", "monitor", "postprocessing"]
@@ -59,8 +75,7 @@ end
 
 
 # ------------ DRIVERS ---------------------------------------------------------
-
-function run_simulation_vahana(;    save_path=extdrive_path*"vahana2-transition-005",
+function run_simulation_vahana(;    save_path=extdrive_path*"run-"*this_folder_name,
                                     prompt=true,
                                     run_name="vahana2",
                                     verbose=true, v_lvl=1)
@@ -68,20 +83,34 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana2-transition-
     # ----------------- PARAMETERS ---------------------------------------------
 
     # Geometry options
-    n_factor = 1*4                            # Refinement factor
+    n_factor = 1*4                          # Refinement factor
+    add_wings = true                        # Whether to include wings
     add_rotors = true                       # Whether to include rotors
 
-    ## 72 steps per rev settings
-    Vcruise = 0.25 * 125*0.44704            # Cruise speed
+
+    ## 72 steps per rev setting with a realistic cruise speed to achieve 400 N of lift
+    Vcruise = 30.0                          # Cruise speed
     Vinf(x,t) = 1e-5*[1,0,-1]               # (m/s) freestream velocity, if 0 the simulation might crash
     RPMh_w = 600.0                          # RPM of main wing rotors in hover
     telapsed = 30.0                         # Total time to perform maneuver
     nsteps = 2*4*5400                         # Time steps for complete maneuver
-    lambda = 1.5*2.125                          # Target minimum core overlap
+    lambda = 1.2*2.125                          # Target minimum core overlap
     # p_per_step = 2                          # Particle sheds per time step
     vlm_rlx = 0.2                           # VLM relaxation (deactivated with -1)
 
     p_per_step = 5                          # Particle sheds per time step
+
+    # ## 72 steps per rev settings
+    # Vcruise = 0.25 * 125*0.44704            # Cruise speed
+    # Vinf(x,t) = 1e-5*[1,0,-1]               # (m/s) freestream velocity, if 0 the simulation might crash
+    # RPMh_w = 600.0                          # RPM of main wing rotors in hover
+    # telapsed = 30.0                         # Total time to perform maneuver
+    # nsteps = 2*4*5400                         # Time steps for complete maneuver
+    # lambda = 1.5*2.125                          # Target minimum core overlap
+    # # p_per_step = 2                          # Particle sheds per time step
+    # vlm_rlx = 0.2                           # VLM relaxation (deactivated with -1)
+    #
+    # p_per_step = 5                          # Particle sheds per time step
 
     # # Maneuver to perform
     # ## 18 steps per rev settings
@@ -115,18 +144,28 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana2-transition-
     # tstart = 0
     # tquit = Inf
 
-    ## Hover segment
-    # tstart = 0.07*telapsed
-    # tquit = 0.14*telapsed
+    # # Hover segment
+    # tstart = 0.185*telapsed
+    # tquit = 0.99*telapsed
 
-    # Hover-cruise transition segment
-    tstart = 0.20*telapsed
-    tquit = 0.35*telapsed
+    # # Hover-cruise transition segment
+    # tstart = 0.20*telapsed
+    # tquit = 0.35*telapsed
 
-    start_kinmaneuver = false               # If true, it starts the maneuver with the
+    # Mid transition segment
+    tstart = 0.25*telapsed
+    tquit = 0.99*telapsed
+
+    # # Cruise
+    # tstart = 0.40*telapsed
+    # tquit = 0.99*telapsed
+
+    start_kinmaneuver = true                # If true, it starts the maneuver with the
                                             # velocity and angles of tstart.
                                             # If false, starts with velocity=0
                                             # and angles as initiated by the geometry
+    use_variable_pitch = true               # Whether to use variable pitch to
+                                            # add collective in cruise
 
 
     dt = telapsed/nsteps
@@ -136,14 +175,17 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana2-transition-
     mu = 1.81e-5                            # Air dynamic viscosity
 
     # Solver options
-    R = 0.75                                # (m) Reference blade radius
+    R = 0.75                                # (m) reference blade radius
+    wing_thickness = R/10                   # (m) reference wing thickness
     # lambda = 2.125                          # Target minimum core overlap
     # p_per_step = 4                          # Particle sheds per time step
     sigma_vpm_overwrite = lambda * (2*pi*RPMh_w/60*R + Vcruise)*dt / p_per_step
 
 
-    # sigma_vlm_surf  = R/50                 # Size of embedded particles representing VLM surfaces (for VLM-on-VPM and VLM-on-Rotor)
-    sigma_vlm_surf  = R/20
+
+    # sigma_vlm_surf  = R/20                 # Size of embedded particles representing VLM surfaces (for VLM-on-VPM and VLM-on-Rotor)
+    # sigma_vlm_surf  = wing_thickness/4 * 2   # == R/20
+    sigma_vlm_surf  = wing_thickness/4 * 3/4 # == ~R/50
     # sigma_rotor_surf= R/80                 # Size of embedded particles representing rotor blade surfaces (for Rotor-on-VPM, Rotor-on-VLM, and Rotor-on-Rotor)
     sigma_rotor_surf= R/20
     sigma_vlm_solver= -1                   # Regularization of VLM solver (internal)
@@ -152,13 +194,27 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana2-transition-
     # vlm_rlx         = 0.5                # VLM relaxation
     # vlm_rlx         = 0.3
 
+    # vlm_vortexsheet = false              # Whether to spread the surface circulation of the VLM as a vortex sheet in the VPM
+    vlm_vortexsheet = true
+    vlm_vortexsheet_overlap = 2.125        # Overlap of particles that make the vortex sheet
+    vlm_vortexsheet_distribution = uns.g_pressure   # Distribution of vortex sheet
+    # vlm_vortexsheet_distribution = uns.g_piecewiselinear
+    # vlm_vortexsheet_distribution = uns.g_uniform
+    vlm_vortexsheet_sigma_tbv = sigma_vpm_overwrite     # Size of particles in trailing bound vortices
+    # vlm_vortexsheet_sigma_tbv = sigma_vlm_surf
+    # vlm_vortexsheet_sigma_tbv = thickness_w*b/ar/4 * 1/32
+    # vlm_vortexsheet_sigma_tbv = thickness_w*b/ar/4 * 1/16
+
+    # vlm_vortexsheet_maxstaticparticle = vlm_vortexsheet==false ? nothing : ceil(Int, 300e3 * (thickness_w*b/ar/4 * 3/4)/sigma_vlm_surf)
+    vlm_vortexsheet_maxstaticparticle = vlm_vortexsheet==false ? nothing : ceil(Int, 3e6)
+
 
     # shed_unsteady = false                   # Shed unsteady-loading particles
     shed_unsteady = true
     # unsteady_shedcrit      = 0.0001      # Shed unsteady loading whenever circulation fluctuates more than this ratio
     unsteady_shedcrit      = 0.001
-    shed_starting   = true                 # Shed starting vortex
-    # shed_starting   = false
+    # shed_starting   = true                 # Shed starting vortex
+    shed_starting   = false
 
     # VehicleType = uns.QVLMVehicle           # Type of vehicle to generate
     VehicleType = uns.UVLMVehicle           # Type of vehicle to generate
@@ -178,6 +234,24 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana2-transition-
     vpm_relaxation  = vpm.pedrizzetti
     # vpm_relaxation  = vpm.correctedpedrizzetti
 
+
+    # ----- Force calculation
+    KJforce_type                = "regular"     # KJ force evaluated at middle of BV
+    # KJforce_type                = "averaged"  # KJ force evaluated at average vortex sheet (if vlm_vortexsheet also true)
+    # KJforce_type                = "weighted"  # KJ force evaluated at strength-weighted vortex sheet (if vlm_vortexsheet also true)
+
+    include_trailingboundvortex = false     # Include bound vortices in force calculations
+
+    include_unsteadyforce       = true      # Include unsteady force
+    add_unsteadyforce           = false     # Whether to add the unsteady force to Ftot or to simply output it
+
+    include_parasiticdrag       = true      # Include parasitic-drag force
+    add_skinfriction            = true      # If false, the parasitic drag is purely form, meaning no skin friction
+    calc_cd_from_cl             = false     # Whether to calculate cd from cl or effective AOA
+
+    wing_polar_file  = "xf-n0012-il-500000-n5.csv"   # Polar file from airfoiltools.com for wing parasitic-drag force.
+
+    debug_forces                = true      # Force calculations will output intermediate fields if true
 
 
     # ----------------- MANEUVER DEFINITION ------------------------------------
@@ -214,21 +288,81 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana2-transition-
     if tquit != Inf
         max_particles = ceil(Int, max_particles*(tquit-tstart)/ttot)
     end
+    if VehicleType==uns.QVLMVehicle
+        max_particles = Int(10e3)
+    end
 
-    max_particles = min(Int(10e6), max_particles)
+    # max_particles = min(Int(15e6), max_particles)
+    max_particles = min(Int(30e6), max_particles)
 
     t0 = tstart/ttot*start_kinmaneuver
 
     Vinit = Vref*maneuver.Vvehicle(t0)       # (m/s) initial vehicle velocity
-                                            # (rad/s) initial vehicle angular velocity
+                                             # (rad/s) initial vehicle angular velocity
     Winit = pi/180 * (maneuver.anglevehicle(t0+1e-12)- maneuver.anglevehicle(t0))/(ttot*1e-12)
 
     simulation = uns.Simulation(vehicle, maneuver, Vref, RPMref, ttot;
                                                     Vinit=Vinit, Winit=Winit,
                                                     t=tstart)
 
+
+    # ------------ ROUTINE FOR CALCULATION OF FORCES ---------------------------
+    forces = []
+
+    # Calculate Kutta-Joukowski force
+    kuttajoukowski = uns.generate_calc_aerodynamicforce_kuttajoukowski(KJforce_type,
+                                    sigma_vlm_surf, sigma_rotor_surf,
+                                    vlm_vortexsheet, vlm_vortexsheet_overlap,
+                                    vlm_vortexsheet_distribution,
+                                    vlm_vortexsheet_sigma_tbv;
+                                    vehicle=vehicle)
+    push!(forces, kuttajoukowski)
+
+    # Force due to unsteady circulation
+    if include_unsteadyforce
+        unsteady(args...; optargs...) = uns.calc_aerodynamicforce_unsteady(args...; add_to_Ftot=add_unsteadyforce, optargs...)
+        push!(forces, unsteady)
+    end
+
+    # Parasatic-drag force (form drag and skin friction)
+    if include_parasiticdrag
+        parasiticdrag = uns.generate_aerodynamicforce_parasiticdrag(wing_polar_file;
+                                                                read_path=joinpath(data_path, "airfoils"),
+                                                                calc_cd_from_cl=calc_cd_from_cl,
+                                                                add_skinfriction=add_skinfriction)
+        push!(forces, parasiticdrag)
+    end
+
+    # Calculation and addition of all forces
+    function calc_forces(vlm_system, args...; per_unit_span=false, optargs...)
+
+        # Delete any previous force field
+        fieldname = per_unit_span ? "ftot" : "Ftot"
+        if fieldname in keys(vlm_system.sol)
+            pop!(vlm_system.sol, fieldname)
+        end
+
+        Ftot = nothing
+
+        for (fi, force) in enumerate(forces)
+            Ftot = force(vlm_system, args...; per_unit_span=per_unit_span, optargs...)
+        end
+
+        return Ftot
+    end
+
+    # Extra options for generation of wing monitors
+    wingmonitor_optargs = (
+                            include_trailingboundvortex=include_trailingboundvortex,
+                            calc_aerodynamicforce_fun=calc_forces,
+                            debug=debug_forces
+                          )
+
     # ----------------- SIMULATION MONITOR -------------------------------------
-    monitor_vahana = generate_monitor_vahana(vehicle, rho, RPMref, nsteps, save_path, Vinf)
+    monitor_vahana = generate_monitor_vahana(vehicle, rho, RPMref, nsteps,
+                                             save_path, Vinf;
+                                             add_wings=add_wings,
+                                             wingmonitor_optargs=wingmonitor_optargs)
 
     monitors_vpm = []
     if VehicleType == uns.UVLMVehicle
@@ -247,9 +381,69 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana2-transition-
     monitor(args...; optargs...) = monitor_vahana(args...; optargs...) || monitor_vpm(args...; optargs...)
 
 
+
+
+    # ----------------- VARIABLE PITCH FUNCTION --------------------------------
+    org_theta = [                               # Original blade twist
+                    [
+                        deepcopy(rotor._theta) for (ri, rotor) in enumerate(rotors)
+                    ]
+                    for (si, rotors) in enumerate(simulation.vehicle.rotor_systems)
+                ]
+
+    # End time of each stage
+    #  Stage 1: [0, t1]  -> Take off
+    #  Stage 2: [t1, t2] -> Transition
+    #  Stage 3: [t2, t3] -> Cruise
+    #  Stage 4: [t3, t4] -> Transition
+    #  Stage 5: [t4, 1]  -> Landing
+    t1, t2, t3, t4 = 0.2, 0.3, 0.5, 0.6
+    pitch_takeoff  = 0
+    pitch_cruise   = 35
+    pitch_landing  = 0
+    collective(tstr) =  tstr < t1 ? pitch_takeoff :
+                        tstr < t2 ? pitch_takeoff + (pitch_cruise-pitch_takeoff)*(tstr-t1)/(t2-t1) :
+                        tstr < t3 ? pitch_cruise :
+                        tstr < t4 ? pitch_cruise + (pitch_landing-pitch_cruise)*(tstr-t3)/(t4-t3) :
+                                    pitch_landing
+
+    function variable_pitch(sim, args...; optargs...)
+
+        if !use_variable_pitch
+            return false
+        end
+
+        tstr = sim.t/sim.ttot               # Non-dimensional time
+
+        for (si, rotors) in enumerate(sim.vehicle.rotor_systems)
+            for (ri, rotor) in enumerate(rotors)
+
+                if si==1                            # Main wing rotors
+                    # Restore original twist distribution
+                    rotor._theta .=  org_theta[si][ri]
+                    # Add collective pitch
+                    rotor._theta .+= 1 * (-1)^(rotor.CW)*collective(tstr)
+                elseif si==2                        # Stacked upper rotors
+                    nothing
+                elseif si==3                        # Stacked lower rotors
+                    nothing
+                elseif si==4                        # Tandem-wing rotors
+                    rotor._theta .=  org_theta[si][ri]
+                    rotor._theta .+= 1.25 * (-1)^(rotor.CW)*collective(tstr)
+                end
+
+            end
+        end
+
+        return false
+    end
+
+
+
     # ----------------- WAKE TREATMENT FUNCTION --------------------------------
     rmv_strngth = 2*2/p_per_step * dt/(30/(4*5400))
-    minmaxGamma = rmv_strngth*[0.0001, Inf]
+    # minmaxGamma = rmv_strngth*[0.0001, Inf]
+    minmaxGamma = rmv_strngth*[0.0001, 0.05]
     minmaxsigma = sigma_vpm_overwrite*[0.1, 5]
     @show minmaxGamma
     @show minmaxsigma
@@ -261,7 +455,7 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana2-transition-
                                              wake_treatment_sphere(args...; optargs...))
 
     # ----------------- RUNTIME FUNCTION ---------------------------------------
-    runtime_function(args...; optargs...) = remove_particles(args...; optargs...) || monitor(args...; optargs...)
+    runtime_function(args...; optargs...) = remove_particles(args...; optargs...) || monitor(args...; optargs...) || variable_pitch(args...; optargs...)
 
     # ----------------- RUN SIMULATION -----------------------------------------
     pfield = uns.run_simulation(simulation, nsteps;
@@ -272,11 +466,16 @@ function run_simulation_vahana(;    save_path=extdrive_path*"vahana2-transition-
                                       tquit=tquit,
                                       # SOLVERS OPTIONS
                                       max_particles=max_particles,
+                                      max_static_particles=vlm_vortexsheet_maxstaticparticle,
                                       p_per_step=p_per_step,
                                       vpm_formulation=vpm_formulation,
                                       vpm_SFS=vpm_SFS,
                                       vpm_relaxation=vpm_relaxation,
                                       vlm_rlx=vlm_rlx,
+                                      vlm_vortexsheet=vlm_vortexsheet,
+                                      vlm_vortexsheet_overlap=vlm_vortexsheet_overlap,
+                                      vlm_vortexsheet_distribution=vlm_vortexsheet_distribution,
+                                      vlm_vortexsheet_sigma_tbv=vlm_vortexsheet_sigma_tbv,
                                       sigma_vpm_overwrite=sigma_vpm_overwrite,
                                       sigma_vlm_solver=sigma_vlm_solver,
                                       sigma_vlm_surf=sigma_vlm_surf,

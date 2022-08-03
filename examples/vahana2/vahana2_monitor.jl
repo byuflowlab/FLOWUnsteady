@@ -10,7 +10,9 @@
 =###############################################################################
 
 
-function generate_monitor_vahana(vehicle, rho, RPMref, nsteps, save_path, Vinf)
+function generate_monitor_vahana(vehicle, rho, RPMref, nsteps, save_path, Vinf;
+                                                        add_wings=true,
+                                                        wingmonitor_optargs=[])
 
     # Reference parameters for calculating coefficients
     # NOTE: make b, ar, and qinf equals to 1.0 to obtain dimensional force
@@ -40,31 +42,35 @@ function generate_monitor_vahana(vehicle, rho, RPMref, nsteps, save_path, Vinf)
         push!(rotors_monitors, rotors_monitor)
     end
 
-    # Main wing monitor
-    monitor_name = "wing_main"
-    mainwing_system = vlm.get_wing(vehicle.vlm_system, "MWing")
-    mainwing_monitor = uns.generate_monitor_wing(mainwing_system, Vinf, b_ref, ar_ref,
-                                                    rho, qinf, nsteps;
-                                                    save_path=save_path,
-                                                    run_name=monitor_name,
-                                                    figname=monitor_name,
-                                                    CL_lbl=CL_lbl,
-                                                    CD_lbl=CD_lbl,
-                                                    L_dir=L_dir,
-                                                    D_dir=D_dir)
+    if add_wings
+        # Main wing monitor
+        monitor_name = "wing_main"
+        mainwing_system = vlm.get_wing(vehicle.vlm_system, "MWing")
+        mainwing_monitor = uns.generate_monitor_wing(mainwing_system, Vinf, b_ref, ar_ref,
+                                                        rho, qinf, nsteps;
+                                                        save_path=save_path,
+                                                        run_name=monitor_name,
+                                                        figname=monitor_name,
+                                                        CL_lbl=CL_lbl,
+                                                        CD_lbl=CD_lbl,
+                                                        L_dir=L_dir,
+                                                        D_dir=D_dir,
+                                                        wingmonitor_optargs...)
 
-    # Tandem wing monitor
-    monitor_name = "wing_tandem"
-    tandemwing_system = vlm.get_wing(vehicle.vlm_system, "TWing")
-    tandemwing_monitor = uns.generate_monitor_wing(tandemwing_system, Vinf, b_ref, ar_ref,
-                                                    rho, qinf, nsteps;
-                                                    save_path=save_path,
-                                                    run_name=monitor_name,
-                                                    figname=monitor_name,
-                                                    CL_lbl=CL_lbl,
-                                                    CD_lbl=CD_lbl,
-                                                    L_dir=L_dir,
-                                                    D_dir=D_dir)
+        # Tandem wing monitor
+        monitor_name = "wing_tandem"
+        tandemwing_system = vlm.get_wing(vehicle.vlm_system, "TWing")
+        tandemwing_monitor = uns.generate_monitor_wing(tandemwing_system, Vinf, b_ref, ar_ref,
+                                                        rho, qinf, nsteps;
+                                                        save_path=save_path,
+                                                        run_name=monitor_name,
+                                                        figname=monitor_name,
+                                                        CL_lbl=CL_lbl,
+                                                        CD_lbl=CD_lbl,
+                                                        L_dir=L_dir,
+                                                        D_dir=D_dir,
+                                                        wingmonitor_optargs...)
+    end
 
     # State-variable monitor
     statevariable_monitor = uns.generate_monitor_statevariables(; save_path=save_path)
@@ -76,9 +82,11 @@ function generate_monitor_vahana(vehicle, rho, RPMref, nsteps, save_path, Vinf)
             rotors_monitor(args...; optargs...)
         end
 
-        mainwing_monitor(args...; optargs...)
-        tandemwing_monitor(args...; optargs...)
-        statevariable_monitor(args...; optargs...)
+        if add_wings
+            mainwing_monitor(args...; optargs...)
+            tandemwing_monitor(args...; optargs...)
+            statevariable_monitor(args...; optargs...)
+        end
 
         return false
     end
