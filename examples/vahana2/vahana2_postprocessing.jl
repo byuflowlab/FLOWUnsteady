@@ -29,8 +29,9 @@ function postprocessing_fluiddomain(read_path, save_path, nums;
                                     # PROCESSING OPTIONS
                                     fdx=1/80,                # Scaling of cell length
                                     static_particles=false,  # Add static particles
-                                    fsgm=1.0,                # Scaling of smoothing radii
                                     maxparticles=Int(2e6),
+                                    maxsigma=Inf,            # Any particles larger than this get shrunk to this value
+                                    maxmagGamma=Inf,         # Any vortex strengths larger than this get clipped to this value
                                     # SIMULATION INFORMATION
                                     ttot=30.0,
                                     nsteps=4*5400,
@@ -40,9 +41,8 @@ function postprocessing_fluiddomain(read_path, save_path, nums;
                                     # OUTPUT OPTIONS
                                     run_name="vahana2",
                                     prompt=true, paraview=false, debug=false,
-                                    verbose=true, v_lvl=0)
-
-    # fsgm          = 0.35                             # Scaling of smoothing radii
+                                    verbose=true, v_lvl=0,
+                                    optargs...)
 
     # Maneuver parameters
     # ttot          = 30.0                             # Total time to perform maneuver
@@ -65,36 +65,125 @@ function postprocessing_fluiddomain(read_path, save_path, nums;
     L             = 1.6*b                            # Length of fluid domain
     dx            = fdx*b                            # Cell length
 
-    Lx, Ly, Lz    = 1.2*L, L, 0.6*L                  # Length in each direction
+    # Lx, Ly, Lz    = 1.2*L, L, 0.6*L                # Length in each direction
+    Lx, Ly, Lz    = 1.08*L, L, 0.55*L
     dx, dy, dz    = dx, 1*dx, 0.5*dx                 # Cell length in each direction
     nx, ny, nz    = Lx/dx, Ly/dy, Lz/dz              # Number of cells in each direction
 
-    X0            = [0.35*L, 0, 0.125*L]              # Center of fluid domain
+    # X0            = [0.35*L, 0, 0.125*L]             # Center of fluid domain
+    X0            = [0.40*L, 0, 0.115*L]
 
     P_min         = -[Lx, Ly, Lz]/2
     P_max         = [Lx, Ly, Lz]/2
     NDIVS         = Int.(ceil.([nx, ny, nz]))
 
+    origin(pfield, num) = X0 + Xn(num)
+    # origin(pfield, num) = X0
+    orientation(pfield, num) = gt.rotation_matrix(-angles(num)...)
+
+
+    # --------------  PROCESSING SETUP -----------------------------------------------
     file_pref = run_name*"_pfield"
     other_file_prefs = static_particles ? [run_name*"_staticpfield"] : []
     other_read_paths = static_particles ? [read_path] : []
     file_pref_out = run_name*"-fdom-"
 
-    # origin(pfield, num) = X0 + Xn(num) #NOTE: UNCOMMENT THIS
-    origin(pfield, num) = X0
-    orientation(pfield, num) = gt.rotation_matrix(-angles(num)...)
+    # Create save path
+    if save_path != read_path
+        gt.create_path(save_path, prompt)
+    end
+
+    # Copy this driver file
+    cp(splitdir(@__FILE__)[1], save_path*"/code"; force=true)
+
+
+    # Pre-processing function
+    function preprocessing(pfield, num, grids)
+        count = 0
+        count2 = 0
+        count3 = 0
+        countnan = 0
+        sigma_mean = 0
+        magGamma_mean = 0
+        magGamma2_mean = 0
+
+        for P in vpm.iterate(pfield; include_static=true)
+
+            # Check for large sigma
+            if P.sigma[1] > maxsigma
+                sigma_mean += P.sigma[1]
+                P.sigma[1] = maxsigma
+                count += 1
+            end
+
+            # Check for Gamma with NaN value
+            nangamma = !prod(isnan.(P.Gamma) .== false)
+
+            if nangamma
+                P.Gamma .= 1e-9
+                countnan += 1
+            end
+
+            # Check for blown-up Gamma
+            magGamma = norm(P.Gamma)
+
+            if magGamma > maxmagGamma
+                for i in 1:3; P.Gamma[i] = maxmagGamma * P.Gamma[i]/magGamma; end;
+                magGamma_mean += magGamma
+                count2 += 1
+            end
+
+            # Makes sure that the minimum Gamma is different than zero
+            if magGamma < 1e-13
+                P.Gamma .+= 1e-12
+                magGamma2_mean += magGamma
+                count3 += 1
+            end
+
+            if isnan(magGamma_mean)
+                println("NaN found in magGamma_mean!")
+                @show count
+                @show count2
+                @show countnan
+            end
+
+        end
+
+        sigma_mean /= count
+        magGamma_mean /= count2
+        magGamma2_mean /= count3
+
+        if verbose
+            if count!=0
+                println("\t"^(v_lvl+1)*"Shrunk $count particles."*
+                                       " Average sigma of shrunk particles:\t$(sigma_mean)")
+            end
+            if countnan!=0
+                println("\t"^(v_lvl+1)*"Found and corrected $(countnan) NaN values.")
+            end
+            if count2!=0
+                println("\t"^(v_lvl+1)*"Reset $count2 particle strengths (too strong)."*
+                                       " Average magGamma of reset particles:\t$(magGamma_mean)")
+            end
+            if count3!=0
+                println("\t"^(v_lvl+1)*"Reset $count3 particle strengths (too weak)."*
+                                       " Average magGamma of reset particles:\t$(magGamma2_mean)")
+            end
+        end
+    end
 
     evaluate_fluiddomain_vtk(P_min, P_max, NDIVS, maxparticles,
                              nums, read_path, file_pref;
                                         # O=X0,
                                         origin=origin,
                                         orientation=orientation,
-                                        scale_sigma=fsgm,
                                         other_file_prefs=other_file_prefs,
                                         other_read_paths=other_read_paths,
                                         verbose=verbose, v_lvl=v_lvl,
                                         debug=debug, save_path=save_path,
-                                        file_pref=file_pref_out
+                                        file_pref=file_pref_out,
+                                        userfunction_pfield=preprocessing,
+                                        optargs...
                                         )
 end
 
