@@ -238,7 +238,7 @@ function read_rotor(rotor_file::String; data_path=def_data_path)
     Rtip = Meta.parse(data[1, 2])
     Rhub = Meta.parse(data[2, 2])
     B = Meta.parse(data[3, 2])
-    blade_file = data[4, 2]
+    blade_file = convert(String,data[4, 2])
 
     return Rtip, Rhub, B, blade_file
 end
