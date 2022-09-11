@@ -210,7 +210,7 @@ function save_vtk_base(self::AbstractVLMVehicle, filename; path=nothing,
             # NOTE TO SELF: Ftot is a force per unit length
             save_Ftot = [[vlm.get_blade(rotor, i).sol["Ftot"]
                                       for i in 1:rotor.B] for rotor in rotors]
-            loadfname = "loading_Sys$(si)"*(num!=nothing ? ".$num" : "")*".jld"
+            loadfname = "loading_Sys$(si)"*(num!=nothing ? "-$num" : "")*".jld"#fix JLD error
             JLD.save(joinpath(path, loadfname), "rotorgammas", save_gammas,
                                                         "Ftot", save_Ftot)
         end
