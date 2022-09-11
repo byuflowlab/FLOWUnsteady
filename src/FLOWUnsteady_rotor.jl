@@ -225,7 +225,7 @@ function generate_rotor(rotor_file::String;
 
     Rtip, Rhub, B, blade_file = read_rotor(rotor_file; data_path=data_path)
 
-    return generate_rotor(Rtip, Rhub, B, blade_file;
+    return generate_rotor(Rtip, Rhub, B, convert(String,blade_file);
                             data_path=data_path, optargs...)
 end
 
