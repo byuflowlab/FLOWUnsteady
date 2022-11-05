@@ -26,20 +26,26 @@ using PyPlot
 
 # ------------ GLOBAL VARIABLES ------------------------------------------------
 # Default path where to save data
-extdrive_path = "/media/edoalvar/MyExtDrive/simulationdata7/"
-# extdrive_path = "temps/"
+# extdrive_path = "/media/edoalvar/MyExtDrive/simulationdata7/"
+extdrive_path = "temps/"
 
-
+Mtip = 0.4
+a = 343.0 # m/s
+v = Mtip * a
+R = 1.11
+omega = v / R
+const RPM = omega * 60 / 2 / pi
 
 # ------------ DRIVERS ---------------------------------------------------------
 function run_singlerotor_hover(; xfoil=true, prompt=true)
 
-    J = 0.00                # Advance ratio Vinf/(nD)
+    J = 0.0                # Advance ratio Vinf/(nD)
     angle = 0.0             # (deg) angle of freestream (0 == climb, 90==forward flight)
 
     singlerotor(;   xfoil=xfoil,
                     VehicleType=uns.VLMVehicle,
                     J=J,
+                    RPM = RPM,
                     DVinf=[cos(pi/180*angle), sin(pi/180*angle), 0],
                     save_path=extdrive_path*"singlerotor_hover_test00/",
                     prompt=prompt)
@@ -66,6 +72,7 @@ end
 function singlerotor(;  xfoil       = true,             # Whether to run XFOIL
                         VehicleType = uns.VLMVehicle,   # Vehicle type
                         J           = 0.0,              # Advance ratio
+                        RPM         = 81*60,            # RPM
                         DVinf       = [1.0, 0, 0],      # Freestream direction
                         nrevs       = 6,                # Number of revolutions
                         nsteps_per_rev = 72,            # Time steps per revolution
@@ -79,7 +86,7 @@ function singlerotor(;  xfoil       = true,             # Whether to run XFOIL
                         prompt      = true,
                         verbose     = true,
                         v_lvl       = 0,
-                        rotor_file = "DJI-II.csv",           # Rotor geometry
+                        rotor_file = "nasa_tiltwing.csv",           # Rotor geometry
                         optargs...)
 
     # TODO: Wake removal ?
@@ -98,7 +105,6 @@ function singlerotor(;  xfoil       = true,             # Whether to run XFOIL
     R, B = uns.read_rotor(rotor_file; data_path=data_path)[[1,3]]
 
     # Simulation parameters
-    RPM = 81*60                         # RPM
     # J = 0.00001                       # Advance ratio Vinf/(nD)
     rho = 1.225                         # (kg/m^3) air density
     mu = 1.81e-5                        # (kg/ms) air dynamic viscosity
@@ -188,18 +194,21 @@ function singlerotor(;  xfoil       = true,             # Whether to run XFOIL
                                       # SIMULATION OPTIONS
                                       Vinf=Vinf,
                                       # SOLVERS OPTIONS
-                                      p_per_step=p_per_step,
-                                      overwrite_sigma=overwrite_sigma,
-                                      vlm_sigma=vlm_sigma,
-                                      surf_sigma=surf_sigma,
+                                    #   p_per_step=p_per_step,
+                                    #   overwrite_sigma=overwrite_sigma,
+                                    #   vlm_sigma=vlm_sigma,
+                                    #   surf_sigma=surf_sigma,
+                                      sigma_vlm_surf=R/50,
+                                      sigma_rotor_surf=R/50,
                                       max_particles=max_particles,
-                                      shed_unsteady=shed_unsteady,
+                                    #   shed_unsteady=shed_unsteady,
                                       extra_runtime_function=monitor,
                                       # OUTPUT OPTIONS
                                       save_path=save_path,
                                       run_name=run_name,
                                       prompt=prompt,
                                       verbose=verbose, v_lvl=v_lvl,
+                                      save_wopwopin=false,
                                       optargs...
                                       )
     return pfield, rotor
@@ -227,7 +236,7 @@ function generate_monitor(J, rho, RPM, nsteps; save_path=nothing,
     # Function for run_vpm! to call on each iteration
     function extra_runtime_function(sim::uns.Simulation{V, M, R},
                                     PFIELD::uns.vpm.ParticleField,
-                                    T::Real, DT::Real
+                                    T::Real, DT::Real; optargs...
                                    ) where{V<:uns.AbstractVLMVehicle, M, R}
 
         rotors = vcat(sim.vehicle.rotor_systems...)

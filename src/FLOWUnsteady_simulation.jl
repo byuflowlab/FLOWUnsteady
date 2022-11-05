@@ -48,7 +48,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
                              boundarylayer_prescribedCd=0.1, # Prescribed Cd for boundary layer shedding used for wings
                              boundarylayer_d=0.0,       # Dipole width for boundary layer shedding
                              omit_shedding=[],          # Indices of elements in `sim.vehicle.wake_system` on which omit shedding VPM particles
-                             extra_runtime_function=(sim, PFIELD,T,DT)->false,
+                             extra_runtime_function=(sim, PFIELD,T,DT; optargs...)->false,
                              # REGULARIZATION OPTIONS
                              sigma_vlm_solver=-1,       # Regularization of VLM solver (internal)
                              sigma_vlm_surf=-1,         # Size of embedded particles representing VLM surfaces (for VLM-on-VPM and VLM-on-Rotor)
