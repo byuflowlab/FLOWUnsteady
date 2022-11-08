@@ -29,6 +29,7 @@ using PyPlot
 # extdrive_path = "/media/edoalvar/MyExtDrive/simulationdata7/"
 extdrive_path = "temps/"
 
+#=
 Mtip = 0.4
 a = 343.0 # m/s
 vtip = Mtip * a
@@ -37,9 +38,10 @@ R = 1.1
 # vtip = sqrt(omega^2*R^2 + vinf^2)
 omega = sqrt(vtip^2 - vinf^2)/R
 const RPM = omega * 60 / 2 / pi
+=#
 
 # ------------ DRIVERS ---------------------------------------------------------
-function run_singlerotor_nasa(RPM,vinf; xfoil=true, prompt=true)
+function run_singlerotor_nasa(RPM,vinf; xfoil=true, prompt=true, pitch=0.0)
 
     J = vinf/2/R/(RPM/60)                # Advance ratio Vinf/(nD)
     angle = 0.0             # (deg) angle of freestream (0 == climb, 90==forward flight)
@@ -47,6 +49,7 @@ function run_singlerotor_nasa(RPM,vinf; xfoil=true, prompt=true)
     singlerotor(;   xfoil=xfoil,
                     VehicleType=uns.VLMVehicle,
                     J=J,
+		    pitch=pitch,
                     RPM = RPM,
                     DVinf=[cos(pi/180*angle), sin(pi/180*angle), 0],
                     save_path=extdrive_path*"singlerotor_RPM$(Int(ceil(RPM)))_J$(round(J;digits=3))/",
@@ -75,7 +78,8 @@ function singlerotor(;  xfoil       = true,             # Whether to run XFOIL
                         VehicleType = uns.VLMVehicle,   # Vehicle type
                         J           = 0.0,              # Advance ratio
                         RPM         = 81*60,            # RPM
-                        DVinf       = [1.0, 0, 0],      # Freestream direction
+                        pitch	    = 0.0,		# collective pitch of blades 
+			DVinf       = [1.0, 0, 0],      # Freestream direction
                         nrevs       = 6,                # Number of revolutions
                         nsteps_per_rev = 72,            # Time steps per revolution
                         shed_unsteady = true,
@@ -97,7 +101,6 @@ function singlerotor(;  xfoil       = true,             # Whether to run XFOIL
 
     # Rotor geometry
     data_path = uns.def_data_path       # Path to rotor database
-    pitch = 0.0                         # (deg) collective pitch of blades
     # n = 50                              # Number of blade elements
     # n = 10
     CW = false                          # Clock-wise rotation
