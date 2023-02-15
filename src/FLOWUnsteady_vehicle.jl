@@ -130,7 +130,8 @@ end
 Returns a function that generates an array of particles representing the surface
 of the vehicle as a collection of vortex particles.
 """
-function generate_static_particle_fun(self::AbstractVehicle, sigma::Real)
+function generate_static_particle_fun(self::AbstractVehicle,
+                                            sigma_vlm::Real, sigma_rotor::Real)
     error("$(typeof(self)) has no implementation yet!")
 end
 

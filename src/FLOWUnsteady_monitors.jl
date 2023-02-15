@@ -34,6 +34,7 @@ function generate_monitor_rotors( rotors::Array{vlm.Rotor, 1},
                                     figname="monitor_rotor",
                                     disp_conv=true,
                                     conv_suff="_convergence.csv",
+                                    save_init_plots=true,
                                     nsteps_savefig=10,
                                     colors="rgbcmy"^100,
                                     stls="o^*.px"^100, )
@@ -55,7 +56,7 @@ function generate_monitor_rotors( rotors::Array{vlm.Rotor, 1},
     # Function for run_vpm! to call on each iteration
     function extra_runtime_function(sim::Simulation{V, M, R},
                                     PFIELD::vpm.ParticleField,
-                                    T::Real, DT::Real
+                                    T::Real, DT::Real; optargs...
                                    ) where{V<:AbstractVLMVehicle, M, R}
 
         # rotors = vcat(sim.vehicle.rotor_systems...)
@@ -92,6 +93,7 @@ function generate_monitor_rotors( rotors::Array{vlm.Rotor, 1},
                 ax.set_xlabel(t_lbl)
                 ax.set_ylabel(L"Propulsive efficiency $\eta$")
                 ax.grid(true, color="0.8", linestyle="--")
+                fig.tight_layout()
             end
 
             # Convergence file header
@@ -103,6 +105,15 @@ function generate_monitor_rotors( rotors::Array{vlm.Rotor, 1},
                 end
                 print(f, "\n")
                 close(f)
+            end
+
+            # Save initialization plots (including polars)
+            if save_init_plots && save_path!=nothing
+                for fi in PyPlot.get_fignums()
+                    this_fig = PyPlot.figure(fi)
+                    this_fig.savefig(joinpath(save_path, run_name*"_initplot$(fi).png"),
+                                                            transparent=false, dpi=300)
+                end
             end
         end
 
@@ -194,7 +205,9 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
                                 rho_ref::Real, qinf_ref::Real, nsteps_sim::Int;
                                 lencrit_f=0.5,      # Factor for critical length to ignore horseshoe forces
                                 L_dir=[0,0,1],      # Direction of lift component
-                                D_dir=[-1,0,0],     # Direction of drag component
+                                D_dir=[1,0,0],      # Direction of drag component
+                                include_trailingboundvortex=false,
+                                calc_aerodynamicforce_fun=generate_calc_aerodynamicforce_default(),
                                 # OUTPUT OPTIONS
                                 out_Lwing=nothing,
                                 out_Dwing=nothing,
@@ -208,14 +221,11 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
                                 CL_lbl=L"Lift Coefficient $C_L$",
                                 CD_lbl=L"Drag Coefficient $C_D$",
                                 y2b_i=2,
-                                y2b_ref=nothing,
-                                ClCL_ref=nothing, CdCD_ref=nothing,
-                                CL_ref=nothing, CD_ref=nothing,
-                                ref_lbl="Reference", ref_stl="ok",
                                 conv_suff="_convergence.csv",
                                 figsize_factor=5/6,
                                 nsteps_plot=10,
-                                nsteps_savefig=10)
+                                nsteps_savefig=1,
+                                debug=false)
 
     fcalls = 0                  # Number of function calls
 
@@ -240,13 +250,13 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
         ax = axs1[1]
         # xlim([-1,1])
         ax.set_xlabel(L"$\frac{2y}{b}$")
-        ax.set_ylabel(L"$\frac{Cl}{CL}$")
+        ax.set_ylabel(L"Sectional lift $c_\ell$")
         ax.title.set_text("Spanwise lift distribution")
 
         ax = axs1[2]
         # xlim([-1,1])
         ax.set_xlabel(L"$\frac{2y}{b}$")
-        ax.set_ylabel(L"$\frac{Cd}{CD}$")
+        ax.set_ylabel(L"Sectional drag $c_d$")
         ax.title.set_text("Spanwise drag distribution")
 
         ax = axs1[3]
@@ -257,6 +267,8 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
         ax.set_xlabel("Simulation time (s)")
         ax.set_ylabel(CD_lbl)
 
+        fig1.tight_layout()
+
         fig2 = figure(figname*"_2", figsize=[7*2, 5*1]*figsize_factor)
         axs2 = fig2.subplots(1, 2)
         ax = axs2[1]
@@ -265,9 +277,11 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
         ax = axs2[2]
         ax.set_xlabel(L"$\frac{2y}{b}$")
         ax.set_ylabel(L"Effective velocity $V_\infty$")
+
+        fig2.tight_layout()
     end
 
-    function extra_runtime_function(sim, PFIELD, T, DT)
+    function extra_runtime_function(sim, PFIELD, T, DT; optargs...)
 
         aux = PFIELD.nt/nsteps_sim
         clr = (1-aux, 0, aux)
@@ -284,35 +298,40 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
         if PFIELD.nt>2
 
             # Force at each VLM element
-            Ftot = calc_aerodynamicforce(wing, prev_wing, PFIELD, Vinf, DT,
+            Ftot = calc_aerodynamicforce_fun(wing, prev_wing, PFIELD, Vinf, DT,
                                                             rho_ref; t=PFIELD.t,
-                                                            lencrit=lencrit)
+                                                            spandir=cross(L_dir, D_dir),
+                                                            lencrit=lencrit,
+                                                            include_trailingboundvortex=include_trailingboundvortex,
+                                                            debug=debug)
             L, D, S = decompose(Ftot, L_dir, D_dir)
             vlm._addsolution(wing, "L", L)
             vlm._addsolution(wing, "D", D)
             vlm._addsolution(wing, "S", S)
 
             # Force per unit span at each VLM element
-            ftot = calc_aerodynamicforce(wing, prev_wing, PFIELD, Vinf, DT,
+            ftot = calc_aerodynamicforce_fun(wing, prev_wing, PFIELD, Vinf, DT,
                                         rho_ref; t=PFIELD.t, per_unit_span=true,
-                                        lencrit=lencrit)
+                                        spandir=cross(L_dir, D_dir),
+                                        lencrit=lencrit,
+                                        include_trailingboundvortex=include_trailingboundvortex,
+                                        debug=debug)
             l, d, s = decompose(ftot, L_dir, D_dir)
-            vlm._addsolution(wing, "l", l)
-            vlm._addsolution(wing, "d", d)
-            vlm._addsolution(wing, "s", s)
 
             # Lift of the wing
-            Lwing = norm(sum(L))
+            Lwing = sum(L)
+            Lwing = sign(dot(Lwing, L_dir))*norm(Lwing)
             CLwing = Lwing/(qinf_ref*b_ref^2/ar_ref)
-            ClCL = norm.(l) / (Lwing/b_ref)
+            cl = broadcast(x -> sign(dot(x, L_dir)), l) .* norm.(l) / (qinf_ref*b_ref/ar_ref)
 
             # Drag of the wing
-            Dwing = norm(sum(D))
+            Dwing = sum(D)
+            Dwing = sign(dot(Dwing, D_dir))*norm(Dwing)
             CDwing = Dwing/(qinf_ref*b_ref^2/ar_ref)
-            CdCD = [sign(dot(this_d, [1,0,0])) for this_d in d].*norm.(d) / (Dwing/b_ref) # Preserves the sign of drag
+            cd = broadcast(x -> sign(dot(x, D_dir)), d) .* norm.(d) / (qinf_ref*b_ref/ar_ref)
 
-            vlm._addsolution(wing, "Cl/CL", ClCL)
-            vlm._addsolution(wing, "Cd/CD", CdCD)
+            # vlm._addsolution(wing, "cl", cl)
+            # vlm._addsolution(wing, "cd", cd)
 
             if out_Lwing!=nothing; push!(out_Lwing, Lwing); end;
             if out_Dwing!=nothing; push!(out_Dwing, Dwing); end;
@@ -322,27 +341,15 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
             if PFIELD.nt%nsteps_plot==0 && disp_plot
 
                 ax = axs1[1]
-                if y2b_ref!=nothing && ClCL_ref!=nothing
-                    ax.plot(y2b_ref, ClCL_ref, ref_stl, label=ref_lbl)
-                end
-                ax.plot(y2b, ClCL, "-", alpha=0.5, color=clr)
+                ax.plot(y2b, cl, "-", alpha=0.5, color=clr)
 
                 ax = axs1[2]
-                if y2b_ref!=nothing && CdCD_ref!=nothing
-                    ax.plot(y2b_ref, CdCD_ref, ref_stl, label=ref_lbl)
-                end
-                ax.plot(y2b, CdCD, "-", alpha=0.5, color=clr)
+                ax.plot(y2b, cd, "-", alpha=0.5, color=clr)
 
                 ax = axs1[3]
-                if CL_ref!=nothing
-                    ax.plot([0, T], CL_ref*ones(2), ":k", label=ref_lbl)
-                end
                 ax.plot([T], [CLwing], "o", alpha=0.5, color=clr)
 
                 ax = axs1[4]
-                if CD_ref!=nothing
-                    ax.plot([0, T], CD_ref*ones(2), ":k", label=ref_lbl)
-                end
                 ax.plot([T], [CDwing], "o", alpha=0.5, color=clr)
 
                 ax = axs2[1]
@@ -406,8 +413,10 @@ function generate_monitor_statevariables(; figname="monitor_statevariables",
     ax.set_ylabel(L"$O$ position")
     Olbls = [L"O_x", L"O_y", L"O_z"]
 
+    fig.tight_layout()
 
-    function extra_runtime_function(sim, PFIELD, T, DT)
+
+    function extra_runtime_function(sim, PFIELD, T, DT; optargs...)
         for j in 1:3
             axs[1].plot(sim.t, sim.vehicle.V[j], ".", label=Vlbls[j], alpha=0.8,
                                                             color=clrs[j])
@@ -437,35 +446,117 @@ function generate_monitor_statevariables(; figname="monitor_statevariables",
 end
 
 
-function generate_monitor_enstrophy(; save_path=nothing,
-                                     figname="monitor_enstrophy", run_name="",
+function generate_monitor_enstrophy(; save_path=nothing, run_name="",
+                                     disp_plot=true,
+                                     figname="monitor_enstrophy",
                                      nsteps_savefig=10,
                                      nsteps_plot=10)
 
-    fig = figure(figname, figsize=[7*1, 5*1])
-    ax = fig.gca()
-    ax.set_xlabel("Simulation time")
-    ax.set_ylabel(L"Enstrophy ($\mathrm{m}^6/\mathrm{s}^2$)")
+    if disp_plot
+        fig = figure(figname, figsize=[7*1, 5*1])
+        ax = fig.gca()
+        ax.set_xlabel("Simulation time (s)")
+        ax.set_ylabel(L"Enstrophy ($\mathrm{m}^3/\mathrm{s}^2$)")
+    end
 
     enstrophy = []
     ts = []
 
-    function extra_runtime_function(sim, PFIELD, T, DT)
-        vpm.monitor_enstrophy(PFIELD, T, DT; save_path=save_path,
-                                               run_name=run_name, out=enstrophy)
+    function extra_runtime_function(sim, PFIELD, T, DT;
+                                                    vprintln=(args...)->nothing)
 
-        push!(ts, T)
+        vpm.monitor_enstrophy(PFIELD, T, DT;
+                                save_path=save_path, run_name=run_name,
+                                vprintln=vprintln, out=enstrophy)
 
-        if PFIELD.nt%nsteps_plot == 0
-            ax.plot(ts, enstrophy[end-length(ts)+1:end], ".k")
-            ts = []
+        if PFIELD.nt != 0
+            push!(ts, T)
+
+            if disp_plot
+                if PFIELD.nt%nsteps_plot == 0
+                    ax.plot(ts, enstrophy[end-length(ts)+1:end], ".k")
+                    ts = []
+                end
+
+                if save_path!=nothing && PFIELD.nt%nsteps_savefig==0
+                    fig.savefig(joinpath(save_path, run_name*"enstrophy.png"),
+                                                    transparent=false, dpi=300)
+                end
+            end
         end
 
-        if save_path!=nothing
-            if PFIELD.nt%nsteps_savefig==0
-                fig.savefig(joinpath(save_path, run_name*"enstrophy.png"),
+        return false
+    end
+
+    return extra_runtime_function
+end
+
+
+function generate_monitor_Cd(; save_path=nothing, run_name="",
+                                     disp_plot=true,
+                                     figname="monitor_Cd",
+                                     nsteps_savefig=10,
+                                     nsteps_plot=10,
+                                     ylims=[1e-5, 1e0])
+
+    if disp_plot
+        fig = figure(figname, figsize=[7*2, 5*1])
+        axs = fig.subplots(1, 2)
+
+        ax = axs[1]
+        ax.set_ylim(ylims)
+        ax.set_yscale("log")
+        ax.set_xlabel("Simulation time (s)")
+        ax.set_ylabel(L"Mean $\Vert C_d \Vert$")
+        ax = axs[2]
+        ax.set_xlabel("Simulation time")
+        ax.set_ylabel(L"Ratio of $C_d$-zeroes"*
+                      L" $\frac{n_\mathrm{zeroes}}{n_\mathrm{particles}}$")
+    end
+
+    meanCds, stdCds, zeroCds, ts, out  = [], [], [], [], []
+
+    function extra_runtime_function(sim, PFIELD, T, DT;
+                                                    vprintln=(args...)->nothing)
+
+        vpm.monitor_Cd(PFIELD, T, DT;
+                                save_path=save_path, run_name=run_name,
+                                vprintln=vprintln, out=out)
+
+        if PFIELD.nt != 0
+
+            t, rationzero, mean, stddev, skew, kurt, minC, maxC = out[end]
+            push!(ts, T)
+            push!(meanCds, mean)
+            push!(stdCds, stddev)
+            push!(zeroCds, rationzero)
+
+            if disp_plot
+                if PFIELD.nt%nsteps_plot == 0
+
+                    this_meanCds = view(meanCds, (length(meanCds)-length(ts)+1):length(meanCds))
+                    this_stdCds = view(stdCds, (length(stdCds)-length(ts)+1):length(stdCds))
+
+                    ax = axs[1]
+                    ax.plot(ts, this_meanCds, ".k")
+                    if nsteps_plot > 1
+                        ax.fill_between(ts, this_meanCds .+ this_stdCds,
+                                            this_meanCds .- this_stdCds;
+                                            alpha=0.1, color="tab:blue")
+                    end
+
+                    ax = axs[2]
+                    ax.plot(ts, zeroCds[end-length(ts)+1:end], ".k")
+
+                    ts = []
+                end
+
+                if save_path!=nothing && PFIELD.nt%nsteps_savefig==0
+                    fig.savefig(joinpath(save_path, run_name*"Chistory.png"),
                                                     transparent=false, dpi=300)
+                end
             end
+
         end
 
         return false

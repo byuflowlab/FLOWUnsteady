@@ -79,10 +79,10 @@ function bertin_VLM(;   # TEST OPTIONS
 
     # Solver options
     p_per_step = 1              # Number of particle sheds per time steps (dummy)
-    overwrite_sigma = lambda_vpm * magVinf * (telapsed/nsteps)/p_per_step # Smoothing core size
-    # vlm_sigma = -1            # VLM regularization core size (deactivated with -1)
-    vlm_sigma = vlm_fsgm*b
-    surf_sigma = surf_fsgm*b    # Smoothing radius of lifting surface on VPM
+    sigma_vpm_overwrite = lambda_vpm * magVinf * (telapsed/nsteps)/p_per_step # Smoothing core size
+    # sigma_vlm_solver = -1     # VLM regularization core size (deactivated with -1)
+    sigma_vlm_solver = vlm_fsgm*b
+    sigma_vlm_surf = surf_fsgm*b# Smoothing radius of lifting surface on VPM
     # wake_coupled = true       # Coupled VPM wake with VLM solution
     # shed_unsteady = true        # Whether to shed unsteady-loading wake
     # shed_unsteady = false
@@ -114,7 +114,7 @@ function bertin_VLM(;   # TEST OPTIONS
 
     if verbose
         println("\t"^(v_lvl+1)*"Core overlap:\t\t$(lambda_vpm)")
-        println("\t"^(v_lvl+1)*"Core size:\t\t$(round(overwrite_sigma/b, digits=3))*b")
+        println("\t"^(v_lvl+1)*"Core size:\t\t$(round(sigma_vpm_overwrite/b, digits=3))*b")
         println("\t"^(v_lvl+1)*"Time step translation:\t$(round(magVinf * (telapsed/nsteps)/b, digits=3))*b")
     end
 
@@ -141,7 +141,7 @@ function bertin_VLM(;   # TEST OPTIONS
     fig2 = figure(figname*"_2", figsize=[7*2, 5*1]*figsize_factor)
     axs2 = fig2.subplots(1, 2)
 
-    function monitor(sim, PFIELD, T, DT; nsteps_plot=1)
+    function monitor(sim, PFIELD, T, DT; nsteps_plot=1, optargs...)
 
         aux = PFIELD.nt/nsteps
         clr = (1-aux, 0, aux)
@@ -237,10 +237,11 @@ function bertin_VLM(;   # TEST OPTIONS
                                       Vinf=Vinf,
                                       # SOLVERS OPTIONS
                                       p_per_step=p_per_step,
-                                      overwrite_sigma=overwrite_sigma,
-                                      vlm_sigma=vlm_sigma,
-                                      surf_sigma=surf_sigma,
                                       vlm_init=vlm_init,
+                                      sigma_vlm_solver=sigma_vlm_solver,
+                                      sigma_vlm_surf=sigma_vlm_surf,
+                                      sigma_rotor_surf=sigma_vlm_surf,
+                                      sigma_vpm_overwrite=sigma_vpm_overwrite,
                                       max_particles=max_particles,
                                       wake_coupled=wake_coupled,
                                       shed_unsteady=shed_unsteady,
@@ -361,10 +362,10 @@ function bertin_kinematic(;   # TEST OPTIONS
 
     # Solver options
     # p_per_step = 1              # Number of particle sheds per time steps
-    overwrite_sigma = lambda_vpm * magVinf * (telapsed/nsteps)/p_per_step # Smoothing core size
-    # vlm_sigma = -1            # VLM regularization core size (deactivated with -1)
-    vlm_sigma = vlm_fsgm*b
-    surf_sigma = surf_fsgm*b    # Smoothing radius of lifting surface on VPM
+    sigma_vpm_overwrite = lambda_vpm * magVinf * (telapsed/nsteps)/p_per_step # Smoothing core size
+    # sigma_vlm_solver = -1     # VLM regularization core size (deactivated with -1)
+    sigma_vlm_solver = vlm_fsgm*b
+    sigma_vlm_surf = surf_fsgm*b# Smoothing radius of lifting surface on VPM
     # wake_coupled = true       # Coupled VPM wake with VLM solution
     # shed_unsteady = true        # Whether to shed unsteady-loading wake
     # shed_unsteady = false
@@ -397,7 +398,7 @@ function bertin_kinematic(;   # TEST OPTIONS
 
     if verbose
         println("\t"^(v_lvl+1)*"Core overlap:\t\t$(lambda_vpm)")
-        println("\t"^(v_lvl+1)*"Core size:\t\t$(round(overwrite_sigma/b, digits=3))*b")
+        println("\t"^(v_lvl+1)*"Core size:\t\t$(round(sigma_vpm_overwrite/b, digits=3))*b")
         println("\t"^(v_lvl+1)*"Time step translation:\t$(round(magVinf * (telapsed/nsteps)/b, digits=3))*b")
     end
 
@@ -426,7 +427,7 @@ function bertin_kinematic(;   # TEST OPTIONS
     fig2 = figure(figname*"_2", figsize=[7*2, 5*1]*figsize_factor)
     axs2 = fig2.subplots(1, 2)
 
-    function monitor(sim, PFIELD, T, DT; nsteps_plot=1)
+    function monitor(sim, PFIELD, T, DT; nsteps_plot=1, optargs...)
 
         aux = PFIELD.nt/nsteps
         clr = (1-aux, 0, aux)
@@ -541,9 +542,10 @@ function bertin_kinematic(;   # TEST OPTIONS
                                       Vinf=Vinf,
                                       # SOLVERS OPTIONS
                                       p_per_step=p_per_step,
-                                      overwrite_sigma=overwrite_sigma,
-                                      vlm_sigma=vlm_sigma,
-                                      surf_sigma=surf_sigma,
+                                      sigma_vpm_overwrite=sigma_vpm_overwrite,
+                                      sigma_vlm_solver=sigma_vlm_solver,
+                                      sigma_vlm_surf=sigma_vlm_surf,
+                                      sigma_rotor_surf=sigma_vlm_surf,
                                       vlm_rlx=vlm_rlx,
                                       vlm_init=vlm_init,
                                       max_particles=max_particles,

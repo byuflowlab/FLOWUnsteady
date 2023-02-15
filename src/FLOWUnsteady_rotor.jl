@@ -40,7 +40,7 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
                         pitch=0.0,
                         n=10, CW=true, blade_r=1.0,
                         ReD=5*10^5, altReD=nothing, Matip=0.0,
-                        ncrit=9,
+                        ncrit=9, alphas=[i for i in -20:1.0:20],
                         xfoil=false,
                         spline_k=5, spline_s=0.001, splines_s=nothing, spline_bc="extrapolate",
                         turbine_flag=false,
@@ -82,6 +82,16 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
 
     if verbose; println("\t"^v_lvl*"Generating airfoil data..."); end;
 
+    if Matip != 0 && xfoil
+        @warn("*"^73*"\n"*
+              "Tip Mach number received (Matip=$(Matip)). This will be used to"*
+              " pre-correct the airfoil polars in XFOIL for compressibility"*
+              " effects. However, FLOWUnsteady also automatically corrects for"*
+              " compressibility. Make sure to run simulation as"*
+              " `run_simulation(...; sound_spd=nothing, ...)` to avoid double"*
+              "-accounting for compressibility.\n"*"*"^73)
+    end
+
     airfoils = []
     Mas = xfoil ? [] : nothing
     for (rfli, (pos, contour, file_name)) in enumerate(airfoil_contours)
@@ -97,7 +107,7 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
 
                 if Matip != 0
                     speedofsnd = (2*pi*RPM/60)*Rtip / Matip
-                    this_Ma = calc_Veff(2*R, RPM, J, roR*Rtip) / speedofsnd
+                    this_Ma = calc_Veff(2*Rtip, RPM, J, roR*Rtip) / speedofsnd
                 else
                     this_Ma = Matip*roR
                 end
@@ -112,7 +122,7 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
             if verbose; print("\t"^(v_lvl+1)*"Running XFOIL on airfoil"*
                         " $(rfli) out of $(length(airfoil_contours))..."); end;
             polar = vlm.ap.runXFOIL(x, y, this_Re;
-                                    alphas=[i for i in -20:1.0:20],
+                                    alphas=alphas,
                                     verbose=verbose_xfoil, Mach=this_Ma,
                                     iter=100, ncrit=ncrit)
             if verbose; println(" done."); end;
@@ -140,8 +150,8 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
                     rediscretize=rediscretize_airfoils)
 
     if plot_disc
-        fig = figure("discretization_verif", figsize=[7*2,5*1]*figsize_factor)
-        fig.suptitle("Discretization Verification")
+        fig = figure("flowunsteady-discr", figsize=[7*2,5*1]*figsize_factor)
+        fig.suptitle("FLOWUnsteady Discretization Verification")
         axs = fig.subplots(1, 2)
 
         ax = axs[1]
@@ -153,7 +163,7 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
         ax.plot(r/Rtip, LE_z/Rtip, "--*b", label="LE-z Spline", alpha=0.75)
         ax.set_xlabel(L"$r/R$")
         ax.set_ylabel(L"$c/R$, $x/R$, $z/R$")
-        ax.legend(loc="best", frameon=true)
+        ax.legend(loc="best", frameon=false, fontsize=6)
         ax.grid(true, color="0.8", linestyle="--")
 
         ax = axs[2]
@@ -161,17 +171,24 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
         ax.plot(r/Rtip, theta, "--^r", label="Twist Spline", alpha=0.75)
         ax.set_xlabel(L"$r/R$")
         ax.set_ylabel(L"Twist $\theta$ ($^\circ$)")
-        ax.legend(loc="best", frameon=true)
+        ax.legend(loc="best", frameon=false, fontsize=8)
         ax.grid(true, color="0.8", linestyle="--")
 
-        fig = vlm.ap.figure("polars", figsize=[7*3, 5*1]*2/3)
+        fig.tight_layout(rect=[0, 0.03, 1, 0.95])
+
+        fig = vlm.ap.figure("polars", figsize=[7*3, 5*1]*7/9)
         axs = fig.subplots(1, 3)
         for (i,(pos, polar)) in enumerate(airfoils)
-            vlm.ap.plot(polar; geometry=true, label="pos=$pos, Re=$(vlm.ap.get_Re(polar))"*
+            vlm.ap.plot(polar; geometry=true, label="pos=$(round(pos, digits=3)), Re=$(ceil(Int, vlm.ap.get_Re(polar)))"*
                                         (Mas!=nothing ? ", Ma=$(round(Mas[i], digits=2))" : ""),
                     cdpolar=false, fig_id="prelim_curves", title_str="Re sweep",
                     rfl_figfactor=figsize_factor, fig=fig, axs=axs)
         end
+        axs[3].legend(loc="best", frameon=true, fontsize=7)
+        fig.tight_layout(rect=[0, 0.03, 1, 0.95])
+
+        # fig = figure("prelim_curves_rfl")
+        # fig.tight_layout(rect=[0, 0.03, 1, 0.95])
     end
 
     return propeller
@@ -234,7 +251,7 @@ function read_rotor(rotor_file::String; data_path=def_data_path)
     # Path to rotor files
     rotor_path = joinpath(data_path, "rotors")
 
-    data = DataFrames.DataFrame(CSV.File(joinpath(rotor_path, rotor_file)), copycols=false)
+    data = DataFrames.DataFrame(CSV.File(joinpath(rotor_path, rotor_file)))
     Rtip = Meta.parse(data[1, 2])
     Rhub = Meta.parse(data[2, 2])
     B = Meta.parse(data[3, 2])
@@ -249,12 +266,12 @@ function read_blade(blade_file::String; data_path=def_data_path)
     rotor_path = joinpath(data_path, "rotors")
 
     # Read blade
-    files = DataFrames.DataFrame(CSV.File(joinpath(rotor_path, blade_file)), copycols=false)
-    chorddist = DataFrames.DataFrame(CSV.File(joinpath(rotor_path, files[1, 2])), copycols=false)
-    pitchdist = DataFrames.DataFrame(CSV.File(joinpath(rotor_path, files[2, 2])), copycols=false)
-    sweepdist = DataFrames.DataFrame(CSV.File(joinpath(rotor_path, files[3, 2])), copycols=false)
-    heightdist = DataFrames.DataFrame(CSV.File(joinpath(rotor_path, files[4, 2])), copycols=false)
-    airfoil_files = DataFrames.DataFrame(CSV.File(joinpath(rotor_path, files[5, 2])), copycols=false)
+    files = DataFrames.DataFrame(CSV.File(joinpath(rotor_path, blade_file)))
+    chorddist = DataFrames.DataFrame(CSV.File(joinpath(rotor_path, files[1, 2])))
+    pitchdist = DataFrames.DataFrame(CSV.File(joinpath(rotor_path, files[2, 2])))
+    sweepdist = DataFrames.DataFrame(CSV.File(joinpath(rotor_path, files[3, 2])))
+    heightdist = DataFrames.DataFrame(CSV.File(joinpath(rotor_path, files[4, 2])))
+    airfoil_files = DataFrames.DataFrame(CSV.File(joinpath(rotor_path, files[5, 2])))
     spl_k = Meta.parse(files[6, 2])
     spl_s = Meta.parse(files[7, 2])
 

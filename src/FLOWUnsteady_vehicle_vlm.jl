@@ -183,11 +183,13 @@ function precalculations(self::AbstractVLMVehicle, Vinf::Function,
 end
 
 function save_vtk_base(self::AbstractVLMVehicle, filename; path=nothing,
-                                   num=nothing, save_wopwopin=false, optargs...)
-    strn = vlm.save(self.system, filename; path=path, num=num, optargs...)
+                                   num=nothing, save_wopwopin=false,
+                                   infinite_vortex=false, optargs...)
+    strn = vlm.save(self.system, filename; path=path, num=num,
+                                    infinite_vortex=infinite_vortex, optargs...)
 
     for (i, grid) in enumerate(self.grids)
-        strn *= gt.save(grid, filename*"_Grid$i"; path=path, num=num)
+        strn *= gt.save(grid, filename*"_Grid$i"; format="vtk", path=path, num=num)
     end
 
     # Generate inputs for PSU-WOPWOP
@@ -412,6 +414,7 @@ unsteady particles.
 function VLM2VPM(system::Union{vlm.Wing, vlm.WingSystem, vlm.Rotor}, pfield, dt,
                     Vinf;
                     t=0.0, prev_system=nothing, unsteady_shedcrit=-1.0,
+                    shed_starting=false,
                     p_per_step=1, sigmafactor=1.0, overwrite_sigma=nothing,
                     check=true, debug=false, tol=1e-6, omit_shedding=[])
 
@@ -572,20 +575,120 @@ function VLM2VPM(system::Union{vlm.Wing, vlm.WingSystem, vlm.Rotor}, pfield, dt,
           p_infDA, p_infDB, p_Gamma) = vlm.getHorseshoe(prev_system, i)
       X = (Ap+Bp)/2                               # LE midpoint position
       p_X = (p_Ap+p_Bp)/2                         # Previous LE midpoint position
-      gamma = Gamma - p_Gamma                     # Bound circulation increase
+      gamma = Gamma - p_Gamma                 # Bound circulation increase
       infD = (!cntgs || i==1 ? Ap : (prev_Ap+prev_Bp)/2) - X # Direction of circulation
       sigma = sigmafactor*norm(B-A)               # Vortex blob radius
       vol = 4/3*pi*(sigma/2)^3                    # Volume of particle
       l = -(X-p_X) + Vinf(X, t)*dt                # Distance the TE travels
 
-      # Adds particle only if difference is greater than 1%
+      # Adds particle only if difference is greater than certain threshold
       if abs(gamma/p_Gamma) > unsteady_shedcrit && !(i in omit_shedding)
-        add_particle(pfield, X, gamma, 1.0, 1.0, infD, sigma, vol,
+          add_particle(pfield, X, gamma, 1.0, 1.0, infD, sigma, vol,
                                         l, 1; overwrite_sigma=overwrite_sigma)
+      end
+
+      if shed_starting  && !(i in omit_shedding)
+          gamma = Gamma                           # Starting vortex circulation
+          add_particle(pfield, X, gamma, 1.0, 1.0, infD, sigma, vol,
+                                        2*l, 1; overwrite_sigma=overwrite_sigma)
       end
     end
 
     prev_HS = HS
   end
+end
+
+function VLM2VPM_draggingline(vlmobject::vlm.WingSystem, prev_vlmobject,
+                                                            args...; optargs...)
+    for (wi, wing) in enumerate(vlmobject.wings)
+        VLM2VPM_draggingline(wing, prev_vlmobject.wings[wi], args...; optargs...)
+    end
+end
+
+function VLM2VPM_draggingline(vlmobject::Union{vlm.Wing, vlm.Rotor}, prev_vlmobject,
+                    pfield, dt, Vinf,
+                    d;   # Dipole width
+                    t=0.0,
+                    prescribed_Cd=nothing,
+                    p_per_step=1, sigmafactor=1.0, overwrite_sigma=nothing,
+                    )
+
+    # NOTE: omite_shedding not implemented yet
+
+    m = vlm.get_m(vlmobject)   # Number of lattices
+
+    # Adds a particle at each infinite vortex
+    prev_HS = [nothing for i in 1:8]
+    for i in 1:m  # Iterates over lattices
+
+        HS = vlm.getHorseshoe(vlmobject, i)
+        Ap, A, B, Bp, CP, infDA, infDB, _ = HS
+
+        (p_Ap, p_A, p_B, p_Bp, p_CP,
+            p_infDA, p_infDB, _) = vlm.getHorseshoe(prev_vlmobject, i)
+
+        if nothing in HS; error("Logic error! $HS"); end;
+        if true in [isnan.(elem) for elem in HS]; error("Logic error! $HS"); end;
+
+        Xmid = (Ap + Bp)/2                          # Current TE midpoint
+        p_Xmid = (p_Ap + p_Bp)/2                    # Previous TE midpoint
+        l_TE = -(Xmid-p_Xmid) + Vinf(Xmid, t)*dt    # Distance the TE travels
+        l_span = Bp-Ap                              # Spanwise TE length
+        nhat = cross(CP-A, B-A)                     # Unit vector normal to the control point
+        nhat ./= norm(nhat)
+
+        if prescribed_Cd != nothing
+            # Dragging line dipole strength (see Caprace's thesis, 2020)
+            # NOTE: Here I'm correcting DG's model dividing by chord length and later
+            #       multiplying by the traveled distance to account for the time step
+            mu_drag = 0.5*norm(l_TE/dt)*prescribed_Cd
+        else
+            if typeof(vlmobject)==vlm.Rotor
+                mu_drag = vlmobject._wingsystem["mu"][i]
+            else
+                error("Automatic calculation of dipole strength for Wing"*
+                        " objects has not been implemented yet. Please provide"*
+                        " an airfoil drag coefficient Cd through `prescribed_Cd`")
+            end
+        end
+
+        gamma = mu_drag*norm(l_TE)                  # Circulation of the dragging vortex ring
+        sigma = sigmafactor*norm(Bp-Ap)             # Vortex blob radius
+        vol = 4/3*pi*(sigma/2)^3                    # Volume of particle
+
+        # Add lower vortex
+        X = Xmid - d/2*nhat
+        dir = Bp-Ap                                 # Direction and length of vortex
+        # if !(i in omit_shedding)
+            add_particle(pfield, X, gamma, 1.0, 1.0, dir, sigma, vol,
+                              l_TE, p_per_step; overwrite_sigma=overwrite_sigma)
+        # end
+
+        # Add right vortex
+        X = Bp
+        dir = d*nhat
+        # if !(i in omit_shedding)
+            add_particle(pfield, X, gamma, 1.0, 1.0, dir, sigma, vol,
+                              l_TE, p_per_step; overwrite_sigma=overwrite_sigma)
+        # end
+
+        # Add lower vortex
+        X = Xmid + d/2*nhat
+        dir = Ap-Bp
+        # if !(i in omit_shedding)
+            add_particle(pfield, X, gamma, 1.0, 1.0, dir, sigma, vol,
+                              l_TE, p_per_step; overwrite_sigma=overwrite_sigma)
+        # end
+
+        # Add left vortex
+        X = Ap
+        dir = -d*nhat
+        # if !(i in omit_shedding)
+            add_particle(pfield, X, gamma, 1.0, 1.0, dir, sigma, vol,
+                              l_TE, p_per_step; overwrite_sigma=overwrite_sigma)
+        # end
+
+        prev_HS = HS
+    end
 end
 ##### END OF ABSTRACT VLM VEHICLE ##############################################

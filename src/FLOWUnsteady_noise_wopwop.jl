@@ -101,6 +101,7 @@ function run_noise_wopwop(read_path::String,                        # Path from 
     cd(org_pwd)
 
     f = nothing
+    grid = nothing
 
 try
 

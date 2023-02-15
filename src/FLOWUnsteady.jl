@@ -52,7 +52,7 @@ const def_data_path = joinpath(module_path, "../data/")   # Default path to data
 for module_name in ["vehicle", "vehicle_vlm",
                     "maneuver", "rotor",
                     "simulation_types", "simulation", "utils",
-                    "processing", "monitors",
+                    "processing", "processing_force", "monitors",
                     "noise_wopwop", "noise_bpm"]
     include("FLOWUnsteady_"*module_name*".jl")
 end

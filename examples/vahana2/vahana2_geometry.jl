@@ -54,6 +54,7 @@ function generate_geometry_vahana(;
                                     data_path=uns.def_data_path,
                                     xfoil=true,                     # Run XFOIL
                                     n_factor::Int=1,                # Refinement factor
+                                    add_wings=true,
                                     add_rotors=true,
                                     VehicleType=uns.VLMVehicle,     # Type of vehicle to generate
                                     # OUTPUT OPTIONS
@@ -97,13 +98,14 @@ function generate_geometry_vahana(;
     stckd_zoR_offset = -0.05      # Stacking distance between stacked rotors over R
     stckd_corotating = true       # Co-rotating stacked rotors
     stckd_phase = -10             # Initial phase difference of stacked rotors
-    stckd_pitch = 7.5             # Pitch difference of stacked rotors
+    stckd_pitch_up = 5.0          # (deg) pitch of upper stacked rotor
+    stckd_pitch_low = stckd_pitch_up + 7.5 # (deg) pitch of lower stacked rotor
 
     # Wing
     b_w = 5.86                    # (m) span
     AR_w = 7.4                    # Aspect ratio
     tr_w = 1.0                    # Taper ratio
-    twist_r_w = 7.5               # (deg) twist at root
+    twist_r_w = 14.0              # (deg) twist at root
     twist_t_w = twist_r_w         # (deg) twist at tip
     lambda_w = main_outtilt       # (deg) sweep
     gamma_w = 5.0                 # (deg) dihedral
@@ -127,7 +129,7 @@ function generate_geometry_vahana(;
     b_tw = b_w*1.0                # (m) span
     AR_tw = 9.5                   # Aspect ratio
     tr_tw = 1.0                   # Taper ratio
-    twist_r_tw = 4.0              # (deg) twist at root
+    twist_r_tw = 14.0             # (deg) twist at root
     twist_t_tw = twist_r_tw       # (deg) twist at tip
     lambda_tw = 0.0               # (deg) sweep
     gamma_tw = 0.0                # (deg) dihedral
@@ -186,28 +188,53 @@ function generate_geometry_vahana(;
                                                 verbose=verbose, v_lvl=v_lvl+2, xfoil=xfoil,
                                                 data_path=data_path, plot_disc=false))
         if verbose; println("\t"^(v_lvl+1)*"Generating second tilt-rotor..."); end;
-        # push!(tiltrotors, generate_rotor(pitch; n=n_ccb, blade_r=blade_r, CW=CW_w, ReD=ReD,
-        #                         verbose=verbose, xfoil=xfoil, rotor_file=tiltrotor_file))
-        push!(tiltrotors, vlm.Rotor(!tiltrotors[1].CW, tiltrotors[1].r,
-                                  tiltrotors[1].chord, tiltrotors[1].theta,
-                                  tiltrotors[1].LE_x, tiltrotors[1].LE_z,
-                                  tiltrotors[1].B, tiltrotors[1].airfoils))
-        vlm.initialize(tiltrotors[2], tiltrotors[1].m)
+        push!(tiltrotors, uns.generate_rotor(tiltrotor_file; pitch=pitch,
+                                                n=n_ccb, blade_r=blade_r, CW=CW_w, ReD=ReD,
+                                                verbose=verbose, v_lvl=v_lvl+2, xfoil=xfoil,
+                                                data_path=data_path, plot_disc=false))
+
+        # NOTE: This doesn't work unless we also use the same blade_r and spl_k
+        # push!(tiltrotors, vlm.Rotor(!tiltrotors[1].CW, tiltrotors[1].r,
+        #                           tiltrotors[1].chord, tiltrotors[1].theta,
+        #                           tiltrotors[1].LE_x, tiltrotors[1].LE_z,
+        #                           tiltrotors[1].B, tiltrotors[1].airfoils))
+        # vlm.initialize(tiltrotors[2], tiltrotors[1].m)
 
         stackedrotors = vlm.Rotor[]
         if verbose; println("\t"^(v_lvl+1)*"Generating first stacked-rotor..."); end;
-        push!(stackedrotors, uns.generate_rotor(stackedrotor_file; pitch=pitch,
+        push!(stackedrotors, uns.generate_rotor(stackedrotor_file; pitch=stckd_pitch_up,
                                                 n=n_ccb, blade_r=blade_r, CW=!CW_w, ReD=ReD,
                                                 verbose=verbose, v_lvl=v_lvl+2, xfoil=xfoil,
                                                 data_path=data_path, plot_disc=false))
         if verbose; println("\t"^(v_lvl+1)*"Generating second stacked-rotor..."); end;
-        # push!(stackedrotors, generate_rotor(pitch; n=n_ccb, blade_r=blade_r, CW=CW_w, ReD=ReD,
-        #                         verbose=verbose, xfoil=xfoil, rotor_file=stackedrotor_file))
-        push!(stackedrotors, vlm.Rotor(!stackedrotors[1].CW, stackedrotors[1].r,
-                                  stackedrotors[1].chord, stackedrotors[1].theta,
-                                  stackedrotors[1].LE_x, stackedrotors[1].LE_z,
-                                  stackedrotors[1].B, stackedrotors[1].airfoils))
-        vlm.initialize(stackedrotors[2], stackedrotors[1].m)
+        push!(stackedrotors, uns.generate_rotor(stackedrotor_file; pitch=stckd_pitch_up,
+                                                n=n_ccb, blade_r=blade_r, CW=CW_w, ReD=ReD,
+                                                verbose=verbose, v_lvl=v_lvl+2, xfoil=xfoil,
+                                                data_path=data_path, plot_disc=false))
+        # push!(stackedrotors, vlm.Rotor(!stackedrotors[1].CW, stackedrotors[1].r,
+        #                           stackedrotors[1].chord, stackedrotors[1].theta,
+        #                           stackedrotors[1].LE_x, stackedrotors[1].LE_z,
+        #                           stackedrotors[1].B, stackedrotors[1].airfoils))
+        # vlm.initialize(stackedrotors[2], stackedrotors[1].m)
+
+
+        stackedrotors_low = vlm.Rotor[]
+        if stckd_pitch_up != stckd_pitch_low
+            if verbose; println("\t"^(v_lvl+1)*"Generating first lower-stacked-rotor..."); end;
+            push!(stackedrotors_low, uns.generate_rotor(stackedrotor_file; pitch=stckd_pitch_low,
+                                                    n=n_ccb, blade_r=blade_r, CW=!CW_w, ReD=ReD,
+                                                    verbose=verbose, v_lvl=v_lvl+2, xfoil=xfoil,
+                                                    data_path=data_path, plot_disc=false))
+            if verbose; println("\t"^(v_lvl+1)*"Generating second lower-stacked-rotor..."); end;
+            push!(stackedrotors_low, uns.generate_rotor(stackedrotor_file; pitch=stckd_pitch_low,
+                                                    n=n_ccb, blade_r=blade_r, CW=CW_w, ReD=ReD,
+                                                    verbose=verbose, v_lvl=v_lvl+2, xfoil=xfoil,
+                                                    data_path=data_path, plot_disc=false))
+        else
+            for rotor in stackedrotors
+                push!(stackedrotors_low, rotor)
+            end
+        end
     end
 
 
@@ -308,18 +335,8 @@ function generate_geometry_vahana(;
             else
                 push!(props_w_stacked_up, this_prop)
 
-                copy_prop = deepcopy(stackedrotors[ 1+(i+1*!stckd_corotating)%2 ])
-
-                # Generate lower rotor of stack and add pitch
-                if stckd_pitch != 0
-                    this_prop = vlm.Rotor(copy_prop.CW, copy_prop.r,
-                                              copy_prop.chord, copy_prop.theta .+ stckd_pitch,
-                                              copy_prop.LE_x, copy_prop.LE_z,
-                                              copy_prop.B, copy_prop.airfoils)
-                    vlm.initialize(this_prop, copy_prop.m)
-                else
-                    this_prop = copy_prop
-                end
+                copy_prop = stackedrotors_low[ 1+(i+1*!stckd_corotating)%2 ]
+                this_prop = deepcopy(copy_prop)
 
                 this_O += R_w*[0, 0, stckd_zoR_offset]
                 vlm.setcoordsystem(this_prop, this_O, this_Oaxis; user=true)
@@ -580,12 +597,16 @@ function generate_geometry_vahana(;
     vlm.addwing(vlm_system_t, "L", twing_L)
 
     vlm_system = vlm.WingSystem()
-    vlm.addwing(vlm_system, "MWing", vlm_system_m)
-    vlm.addwing(vlm_system, "TWing", vlm_system_t)
+    if add_wings
+        vlm.addwing(vlm_system, "MWing", vlm_system_m)
+        vlm.addwing(vlm_system, "TWing", vlm_system_t)
+    end
 
     # Wake-shedding system (`vlm_system`+`rotors`)
     wake_system = vlm.WingSystem()
-    vlm.addwing(wake_system, "SolveVLM", vlm_system)
+    if add_wings
+        vlm.addwing(wake_system, "SolveVLM", vlm_system)
+    end
     if add_rotors
         if VehicleType==uns.VLMVehicle
             for (i, rotor) in enumerate(rotors)
