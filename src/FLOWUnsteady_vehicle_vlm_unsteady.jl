@@ -3,9 +3,7 @@
     Vehicle with vortex-lattice method (VLM) and VPM-based propeller models
     shedding VPM wakes.
 
-# AUTHORSHIP
-  * Author    : Eduardo J. Alvarez
-  * Email     : Edo.AlvarezR@gmail.com
+# ABOUT
   * Created   : Oct 2019
   * License   : MIT
 =###############################################################################

@@ -5,9 +5,7 @@
     monitor-functions that can be passed to the simulation engine through the
     optional arguments `extra_runtime_function`.
 
-# AUTHORSHIP
-  * Author    : Eduardo J. Alvarez
-  * Email     : Edo.AlvarezR@gmail.com
+# ABOUT
   * Created   : Apr 2020
   * License   : MIT
 =###############################################################################

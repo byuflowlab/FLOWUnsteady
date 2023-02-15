@@ -2,9 +2,7 @@
 # DESCRIPTION
     Tools for processing the aerodynamic solution to calculate forces.
 
-# AUTHORSHIP
-  * Author    : Eduardo J. Alvarez
-  * Email     : Edo.AlvarezR@gmail.com
+# ABOUT
   * Created   : Apr 2022
   * License   : MIT
 =###############################################################################

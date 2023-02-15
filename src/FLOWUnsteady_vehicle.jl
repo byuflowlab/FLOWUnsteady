@@ -2,9 +2,7 @@
 # DESCRIPTION
     Vehicle type handling all defined geometries and their properties.
 
-# AUTHORSHIP
-  * Author    : Eduardo J. Alvarez
-  * Email     : Edo.AlvarezR@gmail.com
+# ABOUT
   * Created   : Oct 2019
   * License   : MIT
 =###############################################################################

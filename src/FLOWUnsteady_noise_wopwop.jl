@@ -3,9 +3,7 @@
     Coupling of FLOWUnsteady with PSU-WOPWOP v3.4.2 for aeroacoustic tonal
     noise.
 
-# AUTHORSHIP
-  * Author    : Eduardo J. Alvarez
-  * Email     : Edo.AlvarezR@gmail.com
+# ABOUT
   * Created   : Jan 2020
   * License   : MIT
 =###############################################################################

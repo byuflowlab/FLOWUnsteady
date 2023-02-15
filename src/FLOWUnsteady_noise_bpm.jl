@@ -2,9 +2,7 @@
 # DESCRIPTION
     Coupling of FLOWUnsteady with BPM code aeroacoustic broadband noise.
 
-# AUTHORSHIP
-  * Author    : Tyler Critchfield and Eduardo J. Alvarez
-  * Email     : Edo.AlvarezR@gmail.com
+# ABOUT
   * Created   : Jul 2020
   * License   : MIT
 =###############################################################################
@@ -96,7 +94,7 @@ function run_noise_bpm(rotors::Array{vlm.Rotor, 1},
     # RUN BPM CODE
     ############################################################################
     if verbose; println("\t"^v_lvl*"Calculating BPM noise..."); end;
-    if typeof(observer) == GeometricTools.Grid
+    if typeof(observer) == gt.Grid
 
         OASPL = zeros(grid.nnodes, 1)
         OASPLA = zeros(grid.nnodes, 1)

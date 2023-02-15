@@ -75,13 +75,11 @@ simple_box2()
 
 The following dependencies are unregistered Julia packages that need to be added manually through the command `] add github-url-to-the-package` in the Julia REPL.
 
-* GeometricTools: [https://github.com/byuflowlab/GeometricTools.jl](https://github.com/byuflowlab/GeometricTools.jl)
-* Xfoil: [https://github.com/byuflowlab/Xfoil.jl](https://github.com/byuflowlab/Xfoil.jl)
 * AirfoilPrep: [https://github.com/byuflowlab/AirfoilPrep.jl](https://github.com/byuflowlab/AirfoilPrep.jl)
 * FLOWVLM: [https://github.com/byuflowlab/FLOWVLM](https://github.com/byuflowlab/FLOWVLM)
 * BPM: [https://github.com/byuflowlab/BPM.jl](https://github.com/byuflowlab/BPM.jl)
 * FLOWNoise: [https://github.com/byuflowlab/FLOWNoise](https://github.com/byuflowlab/FLOWNoise)
-* FLOWVPM: Contact Ed Alvarez ([edoalvarez.com](https://edoalvarez.com)) or the FLOW Lab ([flow.byu.edu](http://flow.byu.edu/)). Guidelines for compilation/installation can be found at:
+* FLOWVPM: [https://github.com/byuflowlab/FLOWVPM](https://github.com/byuflowlab/FLOWVPM). Guidelines for compilation/installation can be found at:
   *  for Linux: [LINK](https://nbviewer.jupyter.org/url/edoalvar2.groups.et.byu.net/LabNotebook/202008/FLOWVPMSetupFinal.ipynb).
   *  for MacOS: [see Issue #26](https://github.com/byuflowlab/FLOWUnsteady/issues/26).
 * (Optional) MyPanel: [https://github.com/EdoAlvarezR/MyPanel.jl](https://github.com/EdoAlvarezR/MyPanel.jl)

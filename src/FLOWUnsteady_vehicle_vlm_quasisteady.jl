@@ -8,9 +8,7 @@
     are accounted for, meaning that the wake of each BEM rotor has no effect
     on other rotors and wings.
 
-# AUTHORSHIP
-  * Author    : Eduardo J. Alvarez
-  * Email     : Edo.AlvarezR@gmail.com
+# ABOUT
   * Created   : Apr 2020
   * License   : MIT
 =###############################################################################

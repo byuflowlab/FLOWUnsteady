@@ -1,11 +1,12 @@
 """
-Mixed-fidelity unsteady aerodynamics simulation engine.
+    An interactional aerodynamics and acoustics solver for multirotor aircraft
+    and wind energy.
 
-    # AUTHORSHIP
-      * Author    : Eduardo J. Alvarez
-      * Email     : Edo.AlvarezR@gmail.com
-      * Created   : Oct 2019
-      * License   : MIT
+    * Main developer  : Eduardo J. Alvarez (edoalvarez.com)
+    * Email           : Edo.AlvarezR@gmail.com
+    * Repo            : github.com/byuflowlab/FLOWUnsteady
+    * Created         : Oct 2019
+    * License         : MIT
 """
 module FLOWUnsteady
 
@@ -19,42 +20,34 @@ using PyPlot
 using LinearAlgebra: cross, I
 
 # ------------ FLOW CODES ------------------------------------------------------
-# FLOWVLM https://github.com/byuflowlab/FLOWVLM
+import GeometricTools as gt
+
+# NOTE: Unregistered packages available at https://github.com/byuflowlab
+import FLOWVPM
 import FLOWVLM
-const vlm = FLOWVLM
-
-# FLOWVPM https://github.com/byuflowlab/FLOWVPM.jl
-try                     # Load FLOWVPM if available
-    import FLOWVPM
-catch e                 # Otherwise load a dummy version of FLOWVPM
-    @warn("FLOWVPM module not found. Using dummy module instead.")
-    include("FLOWUnsteady_dummy_FLOWVPM.jl")
-end
-const vpm = FLOWVPM
-
-# GeometricTools https://github.com/byuflowlab/GeometricTools.jl
-import GeometricTools
-const gt = GeometricTools
-
 import FLOWNoise
-const noise = FLOWNoise
-
-# BPM https://github.com/byuflowlab/BPM.jl
 import BPM
 
+# Aliases
+const gt    = GeometricTools
+const vpm   = FLOWVPM
+const vlm   = FLOWVLM
+const noise = FLOWNoise
+
 # ------------ GLOBAL VARIABLES ------------------------------------------------
-const module_path = splitdir(@__FILE__)[1]                # Path to this module
-const def_data_path = joinpath(module_path, "../data/")   # Default path to data folder
+const module_path    = splitdir(@__FILE__)[1]              # Path to this module
+const def_data_path  = joinpath(module_path, "../data/")   # Default path to data folder
 
 
 # ------------ HEADERS ---------------------------------------------------------
-# Load modules
-for module_name in ["vehicle", "vehicle_vlm",
+for header_name in ["vehicle", "vehicle_vlm",
                     "maneuver", "rotor",
                     "simulation_types", "simulation", "utils",
                     "processing", "processing_force", "monitors",
                     "noise_wopwop", "noise_bpm"]
-    include("FLOWUnsteady_"*module_name*".jl")
+
+    include("FLOWUnsteady_"*header_name*".jl")
+
 end
 
 end # END OF MODULE

@@ -2,9 +2,7 @@
 # DESCRIPTION
     Tools for processing the aerodynamic solutions.
 
-# AUTHORSHIP
-  * Author    : Eduardo J. Alvarez
-  * Email     : Edo.AlvarezR@gmail.com
+# ABOUT
   * Created   : Oct 2019
   * License   : MIT
 =###############################################################################

@@ -2,9 +2,7 @@
 # DESCRIPTION
     Simulation interface connecting QVLMVehicle vehicles and maneuvers.
 
-# AUTHORSHIP
-  * Author    : Eduardo J. Alvarez
-  * Email     : Edo.AlvarezR@gmail.com
+# ABOUT
   * Created   : Apr 2020
   * License   : MIT
 =###############################################################################
