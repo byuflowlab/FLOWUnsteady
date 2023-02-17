@@ -24,6 +24,19 @@ const clrs = [
             [252, 127, 178]/255
         ]
 
+function formatpyplot()
+    # Fonts
+    plt.rc("font", family="Times New Roman")            # Text font
+    plt.rc("mathtext", fontset="stix")                  # Math font
+    plt.rc("font", size=12)          # controls default text sizes
+    plt.rc("axes", titlesize=12)     # fontsize of the axes title
+    plt.rc("axes", labelsize=14)     # fontsize of the x and y labels
+    plt.rc("xtick", labelsize=12)    # fontsize of the tick labels
+    plt.rc("ytick", labelsize=12)    # fontsize of the tick labels
+    plt.rc("legend", fontsize=12)    # legend fontsize
+    plt.rc("figure", titlesize=16)   # fontsize of the figure title
+end
+
 
 
 
@@ -65,6 +78,7 @@ function plot_maneuver(maneuver::KinematicManeuver;
     ts = range(ti, tf, length=vis_nsteps)
 
     # -------------------- Vehicle velocity history ----------------------------
+    formatpyplot()
     fig1 = figure(figname*"-kinematics", figsize=[7*3, 5*1]*size_factor;
                                                         constrained_layout=true)
     axs1 = fig1.subplots(1, 3)
@@ -245,6 +259,8 @@ function visualize_kinematics(sim::Simulation{V, KinematicManeuver{N, M}, R},
         println("\t"^(v_lvl)*"*"^(73-7*v_lvl))
         println("\t"^(v_lvl)*"START $(joinpath(save_path,run_name))")
         println("\t"^(v_lvl)*"*"^(73-7*v_lvl))
+
+        formatpyplot()
 
         fig = figure(run_name, figsize=[7*2, 5*1]; constrained_layout=true)
         axs = fig.subplots(1, 3)

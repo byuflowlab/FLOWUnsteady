@@ -157,7 +157,7 @@ monitor_wing = uns.generate_monitor_wing(wing, Vinf, b, ar,
                                             figname="wing monitor",
                                             disp_plot=true,
                                             figsize_factor=5/6,
-                                            nsteps_plot=1,
+                                            nsteps_plot=4,
                                             nsteps_savefig=10
                                             )
 

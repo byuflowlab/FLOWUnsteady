@@ -46,6 +46,7 @@ function generate_monitor_rotors( rotors::Array{vlm.Rotor, 1},
 
     # Call figure
     if disp_conv
+        formatpyplot()
         fig = figure(figname, figsize=(7*3,5*2))
         axs = fig.subplots(2, 3)
         axs = [axs[1], axs[3], axs[5], axs[2], axs[4], axs[6]]
@@ -241,6 +242,7 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
     end
 
     if disp_plot
+        formatpyplot()
         fig1 = figure(figname, figsize=[7*2, 5*2]*figsize_factor)
         fig1.suptitle(title_lbl)
         axs1 = fig1.subplots(2, 2)
@@ -396,6 +398,7 @@ function generate_monitor_statevariables(; figname="monitor_statevariables",
                                            run_name="",
                                            nsteps_savefig=10)
 
+    formatpyplot()
     fig = figure(figname, figsize=[7*2, 5*1])
     axs = fig.subplots(1, 3)
     ax = axs[1]
@@ -451,6 +454,7 @@ function generate_monitor_enstrophy(; save_path=nothing, run_name="",
                                      nsteps_plot=10)
 
     if disp_plot
+        formatpyplot()
         fig = figure(figname, figsize=[7*1, 5*1])
         ax = fig.gca()
         ax.set_xlabel("Simulation time (s)")
@@ -498,6 +502,7 @@ function generate_monitor_Cd(; save_path=nothing, run_name="",
                                      ylims=[1e-5, 1e0])
 
     if disp_plot
+        formatpyplot()
         fig = figure(figname, figsize=[7*2, 5*1])
         axs = fig.subplots(1, 2)
 
