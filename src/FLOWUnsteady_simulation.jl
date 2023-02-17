@@ -46,7 +46,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
                              boundarylayer_prescribedCd=0.1, # Prescribed Cd for boundary layer shedding used for wings
                              boundarylayer_d=0.0,       # Dipole width for boundary layer shedding
                              omit_shedding=[],          # Indices of elements in `sim.vehicle.wake_system` on which omit shedding VPM particles
-                             extra_runtime_function=(sim, PFIELD,T,DT)->false,
+                             extra_runtime_function=(sim, PFIELD, T, DT; optargs...)->false,
                              # REGULARIZATION OPTIONS
                              sigma_vlm_solver=-1,       # Regularization of VLM solver (internal)
                              sigma_vlm_surf=-1,         # Size of embedded particles representing VLM surfaces (for VLM-on-VPM and VLM-on-Rotor)
@@ -62,6 +62,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
                              create_savepath=true,      # Whether to create save_path
                              prompt=true,
                              verbose=true, v_lvl=0, verbose_nsteps=10,
+                             raisewarnings=true,        # Whether to raise warnings
                              debug=false,               # Output extra states for debugging
                              nsteps_save=1,             # Save vtks every this many steps
                              nsteps_restart=-1,         # Save jlds every this many steps
@@ -71,12 +72,11 @@ function run_simulation(sim::Simulation, nsteps::Int;
                              save_wopwopin=true,        # Generate inputs for PSU-WOPWOP
                              )
 
-
-    if wake_coupled==false
+    if wake_coupled==false && raisewarnings
         @warn("Running wake-decoupled simulation")
     end
 
-    if shed_unsteady==false
+    if shed_unsteady==false && raisewarnings
         @warn("Unsteady wake shedding is disabled!")
     end
 
@@ -136,7 +136,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
     staticpfield = vpm.ParticleField(max_staticp; Uinf=t->Vinf(Xdummy, t),
                                                                   vpm_solver...)
 
-    if vpm_surface && max_static_particles==nothing && vlm_vortexsheet
+    if vpm_surface && max_static_particles==nothing && vlm_vortexsheet && raisewarnings
         @warn("Vortex sheet representation of VLM has been requested, but "*
               "no `max_static_particles` has been provided. It will be set to "*
               "$(max_staticp) which may lead to particle overflow. Please "*
