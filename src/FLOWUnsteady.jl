@@ -17,10 +17,10 @@ import DataFrames
 import JLD
 import Dates
 using PyPlot
-using LinearAlgebra: cross, I
+using LinearAlgebra: I
 
 # ------------ FLOW CODES ------------------------------------------------------
-import GeometricTools as gt
+import GeometricTools
 
 # NOTE: Unregistered packages available at https://github.com/byuflowlab
 import FLOWVPM
