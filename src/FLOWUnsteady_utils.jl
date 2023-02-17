@@ -79,7 +79,7 @@ function plot_maneuver(maneuver::KinematicManeuver;
 
     # -------------------- Vehicle velocity history ----------------------------
     formatpyplot()
-    fig1 = figure(figname*"-kinematics", figsize=[7*3, 5*1]*size_factor;
+    fig1 = plt.figure(figname*"-kinematics", figsize=[7*3, 5*1]*size_factor;
                                                         constrained_layout=true)
     axs1 = fig1.subplots(1, 3)
 
@@ -167,7 +167,7 @@ function plot_maneuver(maneuver::KinematicManeuver;
     ploti = 1
 
     if length(angle_syss)!=0 || length(RPM_syss)!=0
-        fig2 = figure(figname*"-controls",
+        fig2 = plt.figure(figname*"-controls",
                         figsize=[7, 5].*gdims * size_factor * (nplots==1 ? 2/3 : 1);
                                                         constrained_layout=true)
         axs2 = fig2.subplots(gdims[1], gdims[2])
@@ -262,7 +262,7 @@ function visualize_kinematics(sim::Simulation{V, KinematicManeuver{N, M}, R},
 
         formatpyplot()
 
-        fig = figure(run_name, figsize=[7*2, 5*1]; constrained_layout=true)
+        fig = plt.figure(run_name, figsize=[7*2, 5*1]; constrained_layout=true)
         axs = fig.subplots(1, 3)
         ax = axs[1]
         ax.set_xlabel("Simulation time")

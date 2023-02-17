@@ -16,10 +16,10 @@ import CSV
 import DataFrames
 import JLD
 import Dates
-using PyPlot
-using LinearAlgebra: I
+import PyPlot as plt
 
-const plt = PyPlot
+using PyPlot: @L_str
+using LinearAlgebra: I
 
 # ------------ FLOW CODES ------------------------------------------------------
 import GeometricTools

@@ -148,7 +148,8 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
                     rediscretize=rediscretize_airfoils)
 
     if plot_disc
-        fig = figure("flowunsteady-discr", figsize=[7*2,5*1]*figsize_factor)
+        formatpyplot()
+        fig = plt.figure("flowunsteady-discr", figsize=[7*2,5*1]*figsize_factor)
         fig.suptitle("FLOWUnsteady Discretization Verification")
         axs = fig.subplots(1, 2)
 
@@ -174,7 +175,7 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
 
         fig.tight_layout(rect=[0, 0.03, 1, 0.95])
 
-        fig = vlm.ap.figure("polars", figsize=[7*3, 5*1]*7/9)
+        fig = plt.figure("polars", figsize=[7*3, 5*1]*7/9)
         axs = fig.subplots(1, 3)
         for (i,(pos, polar)) in enumerate(airfoils)
             vlm.ap.plot(polar; geometry=true, label="pos=$(round(pos, digits=3)), Re=$(ceil(Int, vlm.ap.get_Re(polar)))"*
@@ -185,7 +186,7 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
         axs[3].legend(loc="best", frameon=true, fontsize=7)
         fig.tight_layout(rect=[0, 0.03, 1, 0.95])
 
-        # fig = figure("prelim_curves_rfl")
+        # fig = plt.figure("prelim_curves_rfl")
         # fig.tight_layout(rect=[0, 0.03, 1, 0.95])
     end
 

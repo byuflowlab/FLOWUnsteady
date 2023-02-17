@@ -47,7 +47,7 @@ function generate_monitor_rotors( rotors::Array{vlm.Rotor, 1},
     # Call figure
     if disp_conv
         formatpyplot()
-        fig = figure(figname, figsize=(7*3,5*2))
+        fig = plt.figure(figname, figsize=(7*3,5*2))
         axs = fig.subplots(2, 3)
         axs = [axs[1], axs[3], axs[5], axs[2], axs[4], axs[6]]
     end
@@ -108,8 +108,8 @@ function generate_monitor_rotors( rotors::Array{vlm.Rotor, 1},
 
             # Save initialization plots (including polars)
             if save_init_plots && save_path!=nothing
-                for fi in PyPlot.get_fignums()
-                    this_fig = PyPlot.figure(fi)
+                for fi in plt.get_fignums()
+                    this_fig = plt.figure(fi)
                     this_fig.savefig(joinpath(save_path, run_name*"_initplot$(fi).png"),
                                                             transparent=false, dpi=300)
                 end
@@ -243,7 +243,7 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
 
     if disp_plot
         formatpyplot()
-        fig1 = figure(figname, figsize=[7*2, 5*2]*figsize_factor)
+        fig1 = plt.figure(figname, figsize=[7*2, 5*2]*figsize_factor)
         fig1.suptitle(title_lbl)
         axs1 = fig1.subplots(2, 2)
         axs1 = [axs1[1], axs1[3], axs1[2], axs1[4]]
@@ -269,7 +269,7 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
 
         fig1.tight_layout()
 
-        fig2 = figure(figname*"_2", figsize=[7*2, 5*1]*figsize_factor)
+        fig2 = plt.figure(figname*"_2", figsize=[7*2, 5*1]*figsize_factor)
         axs2 = fig2.subplots(1, 2)
         ax = axs2[1]
         ax.set_xlabel(L"$\frac{2y}{b}$")
@@ -399,7 +399,7 @@ function generate_monitor_statevariables(; figname="monitor_statevariables",
                                            nsteps_savefig=10)
 
     formatpyplot()
-    fig = figure(figname, figsize=[7*2, 5*1])
+    fig = plt.figure(figname, figsize=[7*2, 5*1])
     axs = fig.subplots(1, 3)
     ax = axs[1]
     ax.set_xlabel("Simulation time")
@@ -455,7 +455,7 @@ function generate_monitor_enstrophy(; save_path=nothing, run_name="",
 
     if disp_plot
         formatpyplot()
-        fig = figure(figname, figsize=[7*1, 5*1])
+        fig = plt.figure(figname, figsize=[7*1, 5*1])
         ax = fig.gca()
         ax.set_xlabel("Simulation time (s)")
         ax.set_ylabel(L"Enstrophy ($\mathrm{m}^3/\mathrm{s}^2$)")
@@ -503,7 +503,7 @@ function generate_monitor_Cd(; save_path=nothing, run_name="",
 
     if disp_plot
         formatpyplot()
-        fig = figure(figname, figsize=[7*2, 5*1])
+        fig = plt.figure(figname, figsize=[7*2, 5*1])
         axs = fig.subplots(1, 2)
 
         ax = axs[1]
