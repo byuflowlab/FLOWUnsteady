@@ -19,6 +19,8 @@ import Dates
 using PyPlot
 using LinearAlgebra: I
 
+const plt = PyPlot
+
 # ------------ FLOW CODES ------------------------------------------------------
 import GeometricTools
 

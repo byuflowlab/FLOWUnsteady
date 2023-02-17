@@ -100,7 +100,7 @@ function run_sweptwing(testname;
     vlm_system = system         # System solved through VLM solver
     wake_system = system        # System that will shed a VPM wake
 
-    vehicle = uns.VLMVehicle(   system;
+    vehicle = VehicleType(   system;
                                 vlm_system=vlm_system,
                                 wake_system=wake_system
                              )
@@ -129,7 +129,7 @@ function run_sweptwing(testname;
     monitor_wing = uns.generate_monitor_wing(wing, Vinf, b, ar,
                                                 rho, qinf, nsteps;
                                                 L_dir=[0,0,1],      # Direction of lift component
-                                                D_dir=[1,0,0],      # Direction of drag component,
+                                                D_dir=[1,0,0],      # Direction of drag component
                                                 save_path=save_path,
                                                 run_name=run_name,
                                                 figname=testname,

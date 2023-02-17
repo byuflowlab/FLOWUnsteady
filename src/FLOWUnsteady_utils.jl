@@ -7,8 +7,11 @@
   * License   : MIT
 =###############################################################################
 
+
+
+# ------------- PLOTS FORMATTING -----------------------------------------------
 # Color pallete for plots
-clrs = [
+const clrs = [
             # [17, 20, 76]/255,
             [58, 150, 144]/255,
             [250, 188, 96]/255,
@@ -21,6 +24,10 @@ clrs = [
             [252, 127, 178]/255
         ]
 
+
+
+
+# ------------- LINEAR ALGEBRA -------------------------------------------------
 dot(A, B) = sum(a*b for (a,b) in zip(A, B))
 norm(A) = sqrt(mapreduce(x->x^2, +, A))
 
@@ -38,6 +45,10 @@ end
 
 mean(xs) = sum(xs)/length(xs)
 
+
+
+
+# ------------- MISCELLANEOUS --------------------------------------------------
 """
     `plot_maneuver(maneuver::KinematicManeuver; ti::Real=0, tf::Real=1,
 vis_nsteps=300, figname="maneuver", tstages=[])`
