@@ -16,9 +16,9 @@ function generate_calc_aerodynamicforce_default()
 
 
     # Aerodynamic force from Kutta-Joukowski's theorem
-    kuttajoukowski = generate_calc_aerodynamicforce_kuttajoukowski("regular",
+    kuttajoukowski = generate_aerodynamicforce_kuttajoukowski("regular",
                                                                     nothing, nothing,
-                                                                    nothing, nothing,
+                                                                    false, nothing,
                                                                     nothing, nothing)
 
     # Parasitic drag
@@ -41,11 +41,12 @@ function generate_calc_aerodynamicforce_default()
         # Calculate Kutta-Joukowski force
         Ftot = kuttajoukowski(vlm_system, args...; per_unit_span=per_unit_span, optargs...)
 
-        # Calculate and add parasatic-drag force
-        Ftot = parasitic(vlm_system, args...; per_unit_span=per_unit_span, optargs...)
-
         # Calculate unsteady force
         Ftot = unsteady(vlm_system, args...; per_unit_span=per_unit_span, optargs...)
+
+        # Calculate and add parasatic-drag force
+        Ftot = parasiticdrag(vlm_system, args...; per_unit_span=per_unit_span, optargs...)
+
 
         return Ftot
 
@@ -69,7 +70,7 @@ Force is calculated using the Kutta-Joukowski's theorem including only the force
 of freestream, kinematic, and induced velocities on bound vortices.
 """
 
-function generate_calc_aerodynamicforce_kuttajoukowski(KJforce_type::String,
+function generate_aerodynamicforce_kuttajoukowski(KJforce_type::String,
                                 sigma_vlm_surf, sigma_rotor_surf,
                                 vlm_vortexsheet, vlm_vortexsheet_overlap,
                                 vlm_vortexsheet_distribution,
@@ -440,7 +441,7 @@ function generate_aerodynamicforce_parasiticdrag(polar_file::String;
     else
 
         header = ["Alpha", "Cl", "Cd", "Cdp", "Cm", "Top_Xtr", "Bot_Xtr"]
-        data = CSV.read(joinpath(read_path, polar_file), DataFrames.DataFrame, datarow=12, header=header)
+        data = CSV.read(joinpath(read_path, polar_file), DataFrames.DataFrame, skipto=12, header=header)
 
         cd = data.Cdp
 
