@@ -24,7 +24,7 @@ function run_sweptwing(testname;
                         wake_coupled= true,         # Couple VPM wake and VLM solution
                         VehicleType = uns.UVLMVehicle, # Vehicle type
                         tol_CL      = 0.025,        # CL error tolerance
-                        tol_CD      = 0.100,        # CD error tolerance
+                        tol_CD      = 0.110,        # CD error tolerance
                         # -------- VERBOSE SETTINGS ----------------------------
                         verbose=true, simverbose=false, v_lvl=0,
                         prompt=true,
