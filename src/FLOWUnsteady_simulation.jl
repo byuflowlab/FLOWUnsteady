@@ -57,7 +57,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
                              # RESTART OPTIONS
                              restart_vpmfile=nothing,   # VPM particle field restart file
                              # OUTPUT OPTIONS
-                             save_path="temps/flowunsteadysimulation00",
+                             save_path=nothing,
                              run_name="FLOWUnsteady-sim",
                              create_savepath=true,      # Whether to create save_path
                              prompt=true,

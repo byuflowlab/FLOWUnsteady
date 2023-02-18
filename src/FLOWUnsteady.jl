@@ -38,7 +38,8 @@ const noise = FLOWNoise
 
 # ------------ GLOBAL VARIABLES ------------------------------------------------
 const module_path    = splitdir(@__FILE__)[1]              # Path to this module
-const def_data_path  = joinpath(module_path, "../data/")   # Default path to data folder
+const def_data_path  = joinpath(module_path, "..", "data") # Default path to database
+const examples_path  = joinpath(module_path, "..", "examples") # Path to examples
 
 
 # ------------ HEADERS ---------------------------------------------------------

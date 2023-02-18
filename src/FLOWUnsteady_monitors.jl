@@ -212,13 +212,15 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
                                 out_Dwing=nothing,
                                 out_CLwing=nothing,
                                 out_CDwing=nothing,
+                                out_figs=[],
+                                out_figaxs=[],
                                 save_path=nothing,
                                 run_name="wing",
                                 figname="monitor_wing",
                                 disp_plot=true,
                                 title_lbl="",
-                                CL_lbl=L"Lift Coefficient $C_L$",
-                                CD_lbl=L"Drag Coefficient $C_D$",
+                                CL_lbl=L"Lift coefficient $C_L$",
+                                CD_lbl=L"Drag coefficient $C_D$",
                                 y2b_i=2,
                                 conv_suff="_convergence.csv",
                                 figsize_factor=5/6,
@@ -246,39 +248,58 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
         fig1 = plt.figure(figname, figsize=[7*2, 5*2]*figsize_factor)
         fig1.suptitle(title_lbl)
         axs1 = fig1.subplots(2, 2)
-        axs1 = [axs1[1], axs1[3], axs1[2], axs1[4]]
+        axs1 = [axs1[2], axs1[4], axs1[1], axs1[3]]
         ax = axs1[1]
         # xlim([-1,1])
-        ax.set_xlabel(L"$\frac{2y}{b}$")
+        ax.set_xlabel(L"Span position $\frac{2y}{b}$")
         ax.set_ylabel(L"Sectional lift $c_\ell$")
-        ax.title.set_text("Spanwise lift distribution")
+        ax.set_title("Spanwise lift distribution", color="gray")
+        ax.spines["right"].set_visible(false)
+        ax.spines["top"].set_visible(false)
 
         ax = axs1[2]
         # xlim([-1,1])
-        ax.set_xlabel(L"$\frac{2y}{b}$")
+        ax.set_xlabel(L"Span position $\frac{2y}{b}$")
         ax.set_ylabel(L"Sectional drag $c_d$")
-        ax.title.set_text("Spanwise drag distribution")
+        ax.set_title("Spanwise drag distribution", color="gray")
+        ax.spines["right"].set_visible(false)
+        ax.spines["top"].set_visible(false)
 
         ax = axs1[3]
         ax.set_xlabel("Simulation time (s)")
         ax.set_ylabel(CL_lbl)
+        ax.spines["right"].set_visible(false)
+        ax.spines["top"].set_visible(false)
 
         ax = axs1[4]
         ax.set_xlabel("Simulation time (s)")
         ax.set_ylabel(CD_lbl)
+        ax.spines["right"].set_visible(false)
+        ax.spines["top"].set_visible(false)
 
         fig1.tight_layout()
 
         fig2 = plt.figure(figname*"_2", figsize=[7*2, 5*1]*figsize_factor)
         axs2 = fig2.subplots(1, 2)
+
         ax = axs2[1]
-        ax.set_xlabel(L"$\frac{2y}{b}$")
+        ax.set_xlabel(L"Span position $\frac{2y}{b}$")
         ax.set_ylabel(L"Circulation $\Gamma$")
+        ax.spines["right"].set_visible(false)
+        ax.spines["top"].set_visible(false)
+
         ax = axs2[2]
-        ax.set_xlabel(L"$\frac{2y}{b}$")
+        ax.set_xlabel(L"Span position $\frac{2y}{b}$")
         ax.set_ylabel(L"Effective velocity $V_\infty$")
+        ax.spines["right"].set_visible(false)
+        ax.spines["top"].set_visible(false)
 
         fig2.tight_layout()
+
+        push!(out_figs, fig1)
+        push!(out_figs, fig2)
+        push!(out_figaxs, axs1)
+        push!(out_figaxs, axs2)
     end
 
     function extra_runtime_function(sim, PFIELD, T, DT; optargs...)

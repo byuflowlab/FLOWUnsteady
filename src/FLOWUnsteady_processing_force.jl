@@ -88,7 +88,7 @@ function generate_aerodynamicforce_kuttajoukowski(KJforce_type::String,
     function calc_aerodynamicforce_kuttajoukowski(vlm_system::Union{vlm.Wing, vlm.WingSystem},
                                     prev_vlm_system, pfield, Vinf, dt, rho; t=0.0,
                                     per_unit_span=false, spandir=[0, 1, 0],
-                                    include_trailingboundvortex=true,
+                                    include_trailingboundvortex=false,
                                     Vout=nothing, lenout=nothing,
                                     lencrit=-1, debug=false)
 
@@ -324,7 +324,7 @@ VTK field called `Funs-vector` instead.
 function calc_aerodynamicforce_unsteady(vlm_system::Union{vlm.Wing, vlm.WingSystem},
                                 prev_vlm_system, pfield, Vinf, dt, rho; t=0.0,
                                 per_unit_span=false, spandir=[0, 1, 0],
-                                include_trailingboundvortex=true,
+                                include_trailingboundvortex=false,
                                 Vout=nothing, lenout=nothing,
                                 lencrit=-1, debug=false,
                                 add_to_Ftot=false # Use false to calculate unsteady force but not add it
@@ -494,7 +494,7 @@ function generate_aerodynamicforce_parasiticdrag(polar_file::String;
     function calc_aerodynamicforce_parasiticdrag(vlm_system::Union{vlm.Wing, vlm.WingSystem},
                                                     prev_vlm_system, pfield, Vinf, dt, rho; t=0.0,
                                                     per_unit_span=false, spandir=[0, 1, 0],
-                                                    include_trailingboundvortex=true,
+                                                    include_trailingboundvortex=false,
                                                     Vout=nothing, lenout=nothing,
                                                     lencrit=-1, debug=false)
 
@@ -675,7 +675,7 @@ function generate_calc_aerodynamicforce_freevortices(maxboundparticles::Int,
     function calc_aerodynamicforce_freevortices(vlm_system::Union{vlm.Wing, vlm.WingSystem},
                                     prev_vlm_system, pfield, Vinf, dt, rho; t=0.0,
                                     per_unit_span=false, spandir=[0, 1, 0],
-                                    include_trailingboundvortex=true,
+                                    include_trailingboundvortex=false,
                                     Vout=nothing, lenout=nothing,
                                     lencrit=-1, debug=false)
 
