@@ -206,7 +206,7 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
                                 L_dir=[0,0,1],      # Direction of lift component
                                 D_dir=[1,0,0],      # Direction of drag component
                                 include_trailingboundvortex=false,
-                                calc_aerodynamicforce_fun=generate_calc_aerodynamicforce_default(),
+                                calc_aerodynamicforce_fun=generate_calc_aerodynamicforce(),
                                 # OUTPUT OPTIONS
                                 out_Lwing=nothing,
                                 out_Dwing=nothing,

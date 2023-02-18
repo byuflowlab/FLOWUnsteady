@@ -12,19 +12,24 @@ Default method for calculating aerodynamic forces.
 Pass the output of this function to `generate_monitor_wing(...)`, or use this
 as an example of how to define your own costumized force calculations.
 """
-function generate_calc_aerodynamicforce_default()
+function generate_calc_aerodynamicforce(; add_parasiticdrag=false,
+                                          add_skinfriction=true,
+                                          airfoilpolar="xf-n0012-il-500000-n5.csv",
+                                          parasiticdrag_args=(),
+                                          )
 
 
     # Aerodynamic force from Kutta-Joukowski's theorem
     kuttajoukowski = generate_aerodynamicforce_kuttajoukowski("regular",
-                                                                    nothing, nothing,
-                                                                    false, nothing,
-                                                                    nothing, nothing)
-
+                                                                nothing, nothing,
+                                                                false, nothing,
+                                                                nothing, nothing)
     # Parasitic drag
-    parasiticdrag = generate_aerodynamicforce_parasiticdrag("xf-n0012-il-500000-n5.csv";
-                                                            calc_cd_from_cl=false,
-                                                            add_skinfriction=true)
+    if add_parasiticdrag
+        parasiticdrag = generate_aerodynamicforce_parasiticdrag(airfoilpolar;
+                                                                add_skinfriction=add_skinfriction,
+                                                                parasiticdrag_args...)
+    end
 
     # Force due to unsteady circulation
     unsteady(args...; optargs...) = calc_aerodynamicforce_unsteady(args...; add_to_Ftot=false, optargs...)
@@ -38,15 +43,17 @@ function generate_calc_aerodynamicforce_default()
             pop!(vlm_system.sol, fieldname)
         end
 
-        # Calculate Kutta-Joukowski force
-        Ftot = kuttajoukowski(vlm_system, args...; per_unit_span=per_unit_span, optargs...)
-
         # Calculate unsteady force
         Ftot = unsteady(vlm_system, args...; per_unit_span=per_unit_span, optargs...)
 
-        # Calculate and add parasatic-drag force
-        Ftot = parasiticdrag(vlm_system, args...; per_unit_span=per_unit_span, optargs...)
+        # Calculate Kutta-Joukowski force
+        Ftot = kuttajoukowski(vlm_system, args...; per_unit_span=per_unit_span, optargs...)
 
+        # Calculate and add parasatic-drag force
+        if add_parasiticdrag
+            Ftot = parasiticdrag(vlm_system, args...;
+                                    per_unit_span=per_unit_span, optargs...)
+        end
 
         return Ftot
 
@@ -452,7 +459,9 @@ function generate_aerodynamicforce_parasiticdrag(polar_file::String;
         polar = vlm.ap.Polar(vlm.ap.get_Re(org_polar), alpha, cl/sqrt(1-(Mach)^2),
                              cd, vlm.ap.get_cm(org_polar)[2]; vlm.ap._get_nonpypolar_args(org_polar)...)
      else
-         polar = org_polar
+         # polar = org_polar
+         polar = vlm.ap.Polar(vlm.ap.get_Re(org_polar), alpha, cl,
+                              cd, vlm.ap.get_cm(org_polar)[2]; vlm.ap._get_nonpypolar_args(org_polar)...)
      end
 
     # Extrapolate to -180 and 180 deg
@@ -508,7 +517,7 @@ function generate_aerodynamicforce_parasiticdrag(polar_file::String;
 
 
         # Evaluate VLM on each midpoint
-        Vvlm = vlm.Vind.(Ref(vlm_system), AB; t=t, ign_col=true, ign_infvortex=true)
+        # Vvlm = vlm.Vind.(Ref(vlm_system), AB; t=t, ign_col=true, ign_infvortex=true)
         # Vvlm = [zeros(3) for i in 1:m]
 
         # Evaluate Vinf on each midpoint
