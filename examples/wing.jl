@@ -64,7 +64,7 @@ sigma_vpm_overwrite = lambda_vpm * magVinf * (ttot/nsteps)/p_per_step # Smoothin
 sigma_vlm_solver= -1                        # VLM-on-VLM smoothing radius (deactivated with <0)
 sigma_vlm_surf  = 0.05*b                    # VLM-on-VPM smoothing radius
 
-# vlm_init        = true                      # Initialize with VLM rigid-wake solution
+shed_starting   = true                      # Whether to shed starting vortex
 
 
 # ----------------- GENERATE GEOMETRY ------------------------------------------
@@ -145,11 +145,22 @@ simulation = uns.Simulation(vehicle, maneuver, Vref, RPMref, ttot; Vinit=Vinit)
 #       into lift and drag. The monitor then plots these forces at every time
 #       step while also saving them under a CSV file in the simulation folder.
 
+# Generate function that calculates aerodynamic forces
+# NOTE: We exclude skin friction since we want to compare to the experimental
+#       data reported in Weber 1951 that was measured with pressure taps
+calc_aerodynamicforce_fun = uns.generate_calc_aerodynamicforce(;
+                                    add_parasiticdrag=true,
+                                    add_skinfriction=false,
+                                    airfoilpolar="xf-rae101-il-1000000.csv"
+                                    )
+
 D_dir = [cosd(AOA), 0.0, sind(AOA)]         # Direction of drag
 L_dir = uns.cross(D_dir, [0,1,0])           # Direction of lift
 
+# Generate wing monitor
 monitor_wing = uns.generate_monitor_wing(wing, Vinf, b, ar,
                                             rho, qinf, nsteps;
+                                            calc_aerodynamicforce_fun=calc_aerodynamicforce_fun,
                                             L_dir=L_dir,
                                             D_dir=D_dir,
                                             save_path=save_path,
@@ -157,7 +168,7 @@ monitor_wing = uns.generate_monitor_wing(wing, Vinf, b, ar,
                                             figname="wing monitor",
                                             disp_plot=true,
                                             figsize_factor=5/6,
-                                            nsteps_plot=4,
+                                            nsteps_plot=1,
                                             nsteps_savefig=10
                                             )
 
@@ -170,18 +181,16 @@ pfield = uns.run_simulation(simulation, nsteps;
                                 Vinf=Vinf,
                                 # SOLVERS OPTIONS
                                 p_per_step=p_per_step,
-                                # vlm_init=vlm_init,
+                                max_particles=max_particles,
+                                shed_starting=shed_starting,
                                 sigma_vlm_solver=sigma_vlm_solver,
                                 sigma_vlm_surf=sigma_vlm_surf,
                                 sigma_rotor_surf=sigma_vlm_surf,
                                 sigma_vpm_overwrite=sigma_vpm_overwrite,
-                                max_particles=max_particles,
                                 extra_runtime_function=monitor_wing,
                                 # OUTPUT OPTIONS
                                 save_path=save_path,
-                                run_name=run_name,
-                                prompt=true,
-                                verbose=true
+                                run_name=run_name
                                 )
 
 
@@ -207,7 +216,7 @@ CDerr = abs(CDexp-CD)/CDexp
 
 import Printf: @printf
 
-@printf "%0s%10s\t%-11s\t%-11s\t%7s\n"    "\t" "PARAMETER"   "Experimental"  "  Simulation"    "Error"
+@printf "%0s%10s\t%-11s\t%-11s\t%7s\n"    "\t" "PARAMETER"   "Experimental"  "  FLOWUnsteady"    "Error"
 @printf "%0s%10s\t%11.4f\t%11.5f\t%7.2f ﹪\n" "\t" "CL"          CLexp           CL              100*CLerr
 @printf "%0s%10s\t%11.4f\t%11.5f\t%7.2f ﹪\n" "\t" "CD"          CDexp           CD              100*CDerr
 

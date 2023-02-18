@@ -23,7 +23,8 @@ function run_sweptwing(testname;
                         fsgm_surf   = 0.05,         # VLM-on-VPM smoothing factor
                         wake_coupled= true,         # Couple VPM wake and VLM solution
                         VehicleType = uns.UVLMVehicle, # Vehicle type
-                        tol         = 0.025,        # Error tolerance
+                        tol_CL      = 0.025,        # CL error tolerance
+                        tol_CD      = 0.100,        # CD error tolerance
                         # -------- VERBOSE SETTINGS ----------------------------
                         verbose=true, simverbose=false, v_lvl=0,
                         prompt=true,
@@ -126,8 +127,19 @@ function run_sweptwing(testname;
 
 
     # ------------- DEFINE MONITORS --------------------------------------------
+
+    # Generate function that calculates aerodynamic forces
+    # NOTE: We exclude skin friction since we want to compare to the experimental
+    #       data reported in Weber 1951 that was measured with pressure taps
+    calc_aerodynamicforce_fun = uns.generate_calc_aerodynamicforce(;
+                                        add_parasiticdrag=true,
+                                        add_skinfriction=false,
+                                        airfoilpolar="xf-rae101-il-1000000.csv"
+                                        )
+
     monitor_wing = uns.generate_monitor_wing(wing, Vinf, b, ar,
                                                 rho, qinf, nsteps;
+                                                calc_aerodynamicforce_fun=calc_aerodynamicforce_fun,
                                                 L_dir=[0,0,1],      # Direction of lift component
                                                 D_dir=[1,0,0],      # Direction of drag component
                                                 save_path=save_path,
@@ -185,11 +197,11 @@ function run_sweptwing(testname;
     CLerr = abs(CLexp-CL)/CLexp
     CDerr = abs(CDexp-CD)/CDexp
 
-    res = CLerr<tol
+    res = CLerr<tol_CL && CDerr<tol_CD
 
     if verbose
         t = "\t"^(v_lvl+1)
-        @printf "%0s%10s\t%-11s\t%-11s\t%7s\n"    t "PARAMETER"   "Experimental"  "  Simulation"    "Error"
+        @printf "%0s%10s\t%-11s\t%-11s\t%7s\n"    t "PARAMETER"   "Experimental"  "  FLOWUnsteady"    "Error"
         @printf "%0s%10s\t%11.4f\t%11.5f\t%7.2f ﹪\n" t "CL"          CLexp           CL              100*CLerr
         @printf "%0s%10s\t%11.4f\t%11.5f\t%7.2f ﹪\n" t "CD"          CDexp           CD              100*CDerr
         println("\t"^(v_lvl+1)*"TEST RESULT:\t$res\n")
