@@ -65,6 +65,7 @@ sigma_vpm_overwrite = lambda_vpm * magVinf * (ttot/nsteps)/p_per_step # Smoothin
 sigma_vlm_solver= -1                        # VLM-on-VLM smoothing radius (deactivated with <0)
 sigma_vlm_surf  = 0.05*b                    # VLM-on-VPM smoothing radius
 
+shed_starting   = true                      # Whether to shed starting vortex
 
 # ----------------- GENERATE GEOMETRY ------------------------------------------
 println("Generating geometry...")
@@ -189,6 +190,7 @@ uns.run_simulation(simulation, nsteps;
                     sigma_vlm_surf=sigma_vlm_surf,
                     sigma_rotor_surf=sigma_vlm_surf,
                     sigma_vpm_overwrite=sigma_vpm_overwrite,
+                    shed_starting=shed_starting,
                     extra_runtime_function=monitor_wing,
                     # OUTPUT OPTIONS
                     save_path=save_path,

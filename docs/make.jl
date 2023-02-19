@@ -1,46 +1,64 @@
 using Documenter
-using Xfoil, AirfoilPrep, GeometricTools, CCBlade, FLOWVLM, FLOWUnsteady, FLOWVPM
-vlm = FLOWVLM
-gt = GeometricTools
-vpm = FLOWVPM
-# using FLOWUnsteady
+using FLOWUnsteady
+const uns = FLOWUnsteady
+
+# include("src/generate_examples.jl")
 
 makedocs(
     sitename = "FLOWUnsteady",
-    format = Documenter.HTML(),
-    modules = [Xfoil, AirfoilPrep, GeometricTools, CCBlade, FLOWVLM, FLOWUnsteady, FLOWVPM, vlm, vpm],
-    # modules = [FLOWUnsteady],
-    pages = ["Home" => "index.md",
-            "Tutorials" => Any[
-                "tutorials/installation-instructions.md",
-                "tutorials/getting-started.md",
-                "tutorials/aeroacoustics.md",
-                "tutorials/colab.md",
-                ],
-            "How to " => Any[
-                "how-to-guide/paraview-visualization.md",
-                "how-to-guide/define-complex-wings.md",
-                "how-to-guide/define-complex-systems.md",
-                "how-to-guide/define-a-rotor.md",
-                "how-to-guide/define-kinematic-maneuvers.md",
-                "how-to-guide/set-up-runtime-functions.md",
-                "how-to-guide/select-a-solver.md",
-                "how-to-guide/wake-stability.md",],
-            "Reference" => Any[
-                "reference/FLOWVLMfunctions.md",
-                "reference/VPMfunctions.md",
-                "reference/FLOWUnsteadyfunctions.md",],
-
-            "Theory" => Any[
-                "theory/FLOWVLMtheory.md",
-                "theory/VPMtheory.md",
-                "theory/FLOWUnsteadytheory.md",],
+    format = Documenter.HTML(;
+                                sidebar_sitename = false,
+                                assets = ["assets/favicon.ico"],
+                            ),
+    pages = [
+                "Home"              => "index.md",
+                "Examples"          => [
+                                        "Simple Wing" => [
+                                                            "Basics" => "examples/sweptwing-4p2aoa.md",
+                                                            "examples/sweptwing-aoasweep.md"
+                                                            ],
+                                       ],
+                # "Potential Flow"    => "potentialflow.md",
+                # "Elements"          => [
+                #                         "elements/paneldefinition.md",
+                #                         "Constant Source"  => "elements/constantsource.md",
+                #                         "Constant Doublet" => "elements/constantdoublet.md",
+                #                         "Semi-Infinite Doublet" => "elements/semiinfdoublet.md",
+                #                         "Non-Planar Semi-Infinite Doublet" => "elements/semiinfnonplanardoublet.md",
+                #                         "Constant Vortex Sheet" => "elements/constantvortexsheet.md",
+                #                        ],
+                # "Geometry Engine"   => [
+                #                         "Grid Generation" => [
+                #                                                 "geometry/gridgeneration.md",
+                #                                                 "geometry/gridgeneration-loft.md",
+                #                                                 "geometry/gridgeneration-rev.md",
+                #                                                 "geometry/gridgeneration-transf.md",
+                #                                                 "geometry/gridgeneration-triang.md",
+                #                                             ]
+                #                         "Advanced" => [
+                #                                                 "geometry/basics.md",
+                #                                                 "geometry/basics-grid.md",
+                #                                                 "geometry/basics-transformations.md",
+                #                                                 "geometry/basics-loopedgrid.md",
+                #                                                 "geometry/basics-surfacegrid.md",
+                #                                             ]
+                #                       ],
+                # "API Reference"     => ["api.md",
+                #                         "api-elements.md",
+                #                         "api-abstractbody.md"
+                #                        ]
             ]
 )
+
+
 
 # Documenter can also automatically deploy documentation to gh-pages.
 # See "Hosting Documentation" and deploydocs() in the Documenter manual
 # for more information.
 deploydocs(
-    repo   = "github.com/byuflowlab/FLOWUnsteady.git",
+    repo = "github.com/byuflowlab/FLOWUnsteady.git",
+    target = "build",
+    deps = nothing,
+    make = nothing,
+    # devbranch = "main"
 )

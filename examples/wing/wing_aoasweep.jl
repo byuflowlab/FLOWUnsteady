@@ -51,6 +51,7 @@ for AOA in AOAs
                                     sigma_vlm_surf=sigma_vlm_surf,
                                     sigma_rotor_surf=sigma_vlm_surf,
                                     sigma_vpm_overwrite=sigma_vpm_overwrite,
+                                    shed_starting=shed_starting,
                                     extra_runtime_function=monitor,
                                     # OUTPUT OPTIONS
                                     save_path=nothing,

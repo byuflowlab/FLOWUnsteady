@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="161.9129mm"
+   height="125.39143mm"
+   viewBox="0 0 161.9129 125.39144"
+   version="1.1"
+   id="svg59133"
+   inkscape:version="1.1.2 (0a00cf5339, 2022-02-04)"
+   sodipodi:docname="flowunsteady-logo-stacked00.svg"
+   inkscape:export-filename="/home/edoalvar/Dropbox/WhisperAero/FLOWCodes/FLOWPanel/docs/resources/images/logo/julianlogo-flowpanel06.png"
+   inkscape:export-xdpi="299.83362"
+   inkscape:export-ydpi="299.83362"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview59135"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="0.5499273"
+     inkscape:cx="279.1278"
+     inkscape:cy="207.30013"
+     inkscape:window-width="1600"
+     inkscape:window-height="873"
+     inkscape:window-x="0"
+     inkscape:window-y="27"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0" />
+  <defs
+     id="defs59130">
+    <linearGradient
+       id="linearGradient80862"
+       inkscape:swatch="solid">
+      <stop
+         style="stop-color:#e1e1e1;stop-opacity:1;"
+         offset="0"
+         id="stop80860" />
+    </linearGradient>
+    <rect
+       x="2193.3223"
+       y="2679.7756"
+       width="14423.962"
+       height="3984.3235"
+       id="rect4005-5-36" />
+    <filter
+       inkscape:label="Opacity"
+       style="color-interpolation-filters:sRGB"
+       id="filter57566"
+       x="0"
+       y="0"
+       width="1"
+       height="1">
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 5 -1 "
+         result="colormatrix"
+         id="feColorMatrix57562" />
+      <feComposite
+         in2="colormatrix"
+         operator="arithmetic"
+         k2="0.362658"
+         result="composite"
+         id="feComposite57564"
+         k1="0"
+         k3="0"
+         k4="0" />
+    </filter>
+    <filter
+       style="color-interpolation-filters:sRGB"
+       inkscape:label="Color Shift"
+       id="filter63229"
+       x="0"
+       y="0"
+       width="1"
+       height="1">
+      <feColorMatrix
+         values="1 -0.1 -0.1 0 0 -0.1 1 -0.1 0 0 -0.1 -0.1 1 0 0 0 0 0 1 0 "
+         id="feColorMatrix63227"
+         result="fbSourceGraphic" />
+      <feColorMatrix
+         result="fbSourceGraphicAlpha"
+         in="fbSourceGraphic"
+         values="0 0 0 -1 0 0 0 0 -1 0 0 0 0 -1 0 0 0 0 1 0"
+         id="feColorMatrix63963" />
+      <feColorMatrix
+         id="feColorMatrix63965"
+         type="hueRotate"
+         values="0"
+         result="color1"
+         in="fbSourceGraphic" />
+      <feColorMatrix
+         id="feColorMatrix63967"
+         type="saturate"
+         values="0.800887"
+         result="color2" />
+    </filter>
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-37.677491,91.070215)">
+    <text
+       xml:space="preserve"
+       transform="matrix(0.01588464,0,0,0.01588464,0.80412243,-56.840342)"
+       id="text4003-3-1"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1120px;line-height:1.25;font-family:'Gill Sans';-inkscape-font-specification:'Gill Sans';letter-spacing:0px;white-space:pre;shape-inside:url(#rect4005-5-36);fill:#625c67;fill-opacity:1;stroke:none"
+       x="4449.9976"
+       y="0"
+       inkscape:export-filename="/home/edoalvar/Dropbox/WhisperAero/FLOWCodes/FLOWPanel/docs/resources/images/logo/julianlogo-flowpanel05.png"
+       inkscape:export-xdpi="299.83362"
+       inkscape:export-ydpi="299.83362"><tspan
+         x="2193.3223"
+         y="3583.6154"
+         id="tspan877">
+</tspan><tspan
+         x="2193.3223"
+         y="5370.9754"
+         id="tspan885"><tspan
+           style="font-weight:300;font-size:1600px;-inkscape-font-specification:'Gill Sans Light';fill:#a2bac9"
+           id="tspan879">FLOW</tspan><tspan
+           dx="0.00024414062"
+           style="font-size:266.667px"
+           id="tspan881"> </tspan><tspan
+           dx="-0.00022125244 -0.00012207031 0.00036621094 0.00012207031 0.00024414062 -0.00024414062 0.00024414062 -0.00036621094"
+           style="font-size:1600px;fill:#2f6990"
+           id="tspan883">Unsteady</tspan></tspan></text>
+    <image
+       width="59.301598"
+       height="58.313244"
+       preserveAspectRatio="none"
+       xlink:href="circularpath00.png"
+       id="image28765-3"
+       x="73.886383"
+       y="-50.732716"
+       style="filter:url(#filter63229)"
+       transform="matrix(-1.5927265,0,0,1.5927265,282.74497,-3.0478247)" />
+  </g>
+</svg>
