@@ -96,7 +96,7 @@ UVLMVehicle(system::vlm.WingSystem;
                                 grid_O=[zeros(R, 3) for i in 1:length(grids)],
                                 optargs...)
 
-# Alias
+"Alias for UVLMVehicle"
 const VLMVehicle = UVLMVehicle
 
 ##### FUNCTIONS  ###############################################################

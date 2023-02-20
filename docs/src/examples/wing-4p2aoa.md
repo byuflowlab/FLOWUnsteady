@@ -1,3 +1,39 @@
+# Simple Wing
+
+```@raw html
+<center>
+  <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//weber-particles06.png" alt="Pic here" style="width: 49%;"/>
+  <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//weber-n100-00.png" alt="Pic here" style="width: 49%;"/>
+</center>
+```
+
+In this example we solve the flow around a $45^\circ$ swept-back wing at
+an angle of attack of $4.2^\circ$.
+In the process we exemplify the basic structure of a simulation, which is
+always the same, no matter how complex the simulation might be.
+The structure is the following:
+
+1. **Vehicle definition:** Generate the geometry of the vehicle and declare
+        each vehicle subsystem in a [`FLOWUnsteady.VLMVehicle`](@ref) object
+2. **Maneuver definition:** Generate functions that prescribe the kinematics
+        of the vehicle are generated and controls inputs for tilting and
+        rotor subsystems are specifiec in a
+        [`FLOWUnsteady.KinematicManeuver`](@ref) object
+3. **Simulation definition:** A [`FLOWUnsteady.Simulation`](@ref) object is
+        generated stating the vehicle, maneuver, and total time and speed at
+        which to perform the maneuver
+4. **Monitors definitions:** Functions are generated for calculating,
+        monitoring, and outputting different metrics throughout the
+        simulation
+5. **Run:** Call [`FLOWUnsteady.run_simulation`](@ref) to run the simulation
+6. **Visualization and postprocessing:** Simulation is visualized through
+        Paraview and results are postprocessed
+
+While in this example we show the basic structure without much explanation,
+in subsequent examples we will dive into the details and options of each
+step.
+
+```julia
 #=##############################################################################
 # DESCRIPTION
     45deg swept-back wing at an angle of attack of 4.2deg. This wing has an
@@ -228,41 +264,26 @@ if paraview
 end
 
 
-# ------------- 6) COMPARISON TO EXPERIMENTAL DATA -----------------------------
-save_outputs    = !true                    # Whether to save outputs or not
+```
 
-# Where to save figures
-fig_path = save_path
+As the simulation runs, you will see the monitor shown below with the
+lift and drag coefficients over time along with the loading distribution.
+For comparison, here we have also added the experimental measurements
+reported in the literature.
 
-# Where to save output data (default to re-generating files used in the docs)
-outdata_path = joinpath(uns.examples_path, "..", "docs", "resources", "data")
+```@raw html
+(<span style="color:red;">red</span> = beginning,
+<span style="color:blue;">blue</span> = end)
+```
 
-# Post-process monitor plots
-include(joinpath(uns.examples_path, "wing", "wing_postprocessing.jl"))
+```@raw html
+<center>
+    <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//wingexample-simmonitor.png" alt="Pic here" style="width: 100%;"/>
+</center>
+```
 
+|           | Experimental  | FLOWUnsteady              | Error |
+| --------: | :-----------: | :-----------------------: | :---- |
+| $C_L$   | 0.238         | 0.23506    | 1.234% |
+| $C_D$   | 0.005         | 0.00501    | 0.143% |
 
-# --------- Save simulation outputs
-if save_outputs
-    figs[1].savefig(joinpath(fig_path, run_name*"-simmonitor.png"),
-                                                dpi=300, transparent=true)
-
-    str = """
-    |           | Experimental  | FLOWUnsteady              | Error |
-    | --------: | :-----------: | :-----------------------: | :---- |
-    | \$C_L\$   | 0.238         | $(round(CL, digits=5))    | $(round(CLerr*100, digits=3))% |
-    | \$C_D\$   | 0.005         | $(round(CD, digits=5))    | $(round(CDerr*100, digits=3))% |
-    """
-
-    open(joinpath(outdata_path, run_name*"-CLCD.md"), "w") do f
-        println(f, str)
-    end
-end
-
-
-# ----------------- ANGLE OF ATTACK SWEEP --------------------------------------
-sweep_aoa = !true                       # Whether to run AOA sweep
-
-if sweep_aoa
-    println("Running AOA sweep...")
-    include(joinpath(uns.examples_path, "wing", "wing_aoasweep.jl"))
-end

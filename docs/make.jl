@@ -2,7 +2,7 @@ using Documenter
 using FLOWUnsteady
 const uns = FLOWUnsteady
 
-# include("src/generate_examples.jl")
+include("src/generate_examples.jl")
 
 makedocs(
     sitename = "FLOWUnsteady",
@@ -14,9 +14,29 @@ makedocs(
                 "Home"              => "index.md",
                 "Examples"          => [
                                         "Simple Wing" => [
-                                                            "Basics" => "examples/sweptwing-4p2aoa.md",
-                                                            "examples/sweptwing-aoasweep.md"
+                                                            "Basics" => "examples/wing-4p2aoa.md",
+                                                            "examples/wing-aoasweep.md"
                                                             ],
+                                       ],
+                "API Library"       => [
+                                        "FLOWUnsteady"  => [
+                                                                "api/flowunsteady-vehicle.md",
+                                                                "api/flowunsteady-maneuver.md",
+                                                                "api/flowunsteady-simulation.md",
+                                                                "api/flowunsteady-monitor.md",
+                                                                "api/flowunsteady-run.md",
+                                                            ],
+                                        "api/flowvlm.md",
+                                        "FLOWVPM"  => [
+                                                                "api/flowvpm-particle.md",
+                                                                "api/flowvpm-uj.md",
+                                                                "api/flowvpm-viscous.md",
+                                                                "api/flowvpm-relaxation.md",
+                                                                "api/flowvpm-sfs.md",
+                                                                "api/flowvpm-time.md",
+                                                                "api/flowvpm-utils.md",
+                                                            ],
+                                        "api/index.md"
                                        ],
                 # "Potential Flow"    => "potentialflow.md",
                 # "Elements"          => [
@@ -43,10 +63,6 @@ makedocs(
                 #                                                 "geometry/basics-surfacegrid.md",
                 #                                             ]
                 #                       ],
-                # "API Reference"     => ["api.md",
-                #                         "api-elements.md",
-                #                         "api-abstractbody.md"
-                #                        ]
             ]
 )
 
