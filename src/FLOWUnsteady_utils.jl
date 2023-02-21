@@ -63,8 +63,8 @@ mean(xs) = sum(xs)/length(xs)
 
 # ------------- MISCELLANEOUS --------------------------------------------------
 """
-    `plot_maneuver(maneuver::KinematicManeuver; ti::Real=0, tf::Real=1,
-vis_nsteps=300, figname="maneuver", tstages=[])`
+    plot_maneuver(maneuver::KinematicManeuver; ti::Real=0, tf::Real=1,
+                                vis_nsteps=300, figname="maneuver", tstages=[])
 
 Plots the kinematics and controls of a `KinematicManeuver`.
 """
@@ -235,9 +235,13 @@ function plot_maneuver(maneuver::KinematicManeuver;
 end
 
 """
-    `visualize_kinematics(sim::Simulation, nsteps::Int, save_path::String)`
+    visualize_kinematics(sim::Simulation, nsteps::Int, save_path::String)
 
-Generate VTKs of the kinematics of this simulation.
+Steps the vehicle through the prescribed kinematics, outputting VTK files of
+the vehicle at every time step. Use this to visualize and debug a maneuver.
+
+`nsteps` is the number of time steps in which to perform the maneuver.
+`save_path` is the path where to save the VTK files.
 """
 function visualize_kinematics(sim::Simulation{V, KinematicManeuver{N, M}, R},
                                 nsteps::Int, save_path::String;

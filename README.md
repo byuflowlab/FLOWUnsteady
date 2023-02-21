@@ -8,6 +8,7 @@ TODO
 * [ ] Installation instructions
 * [ ] Brief theory
 * [ ] Visualization Guidelines
+* [ ] Numerical recommendations notebook
 * [ ] Examples
   * [x] Simple wing
   * [ ] Heaving wing
@@ -17,10 +18,15 @@ TODO
   * [ ] Blown wing
   * [ ] Vahana
 * [ ] API
-  * [ ] Docstring for run_simulation
+  * [x] Docstring for run_simulation
   * [ ] Polish docstrings
+    * [ ] Vehicle: Rotor
+    * [ ] Vehicle: SimpleWing and ComplexWing
+    * [ ] Add database definition
+    * [ ] Postprocessing: noise functions
+    * [ ] Postprocessing: Fluid domain
 
-* [ ] Move large figure files to J Drive
+* [x] Move large figure files to J Drive
 
 <img src="docs/resources/images/blownwing00.png" alt="Pic here" style="width: 900px;"/>
 

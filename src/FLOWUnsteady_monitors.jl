@@ -12,14 +12,27 @@
 
 
 """
-    `generate_monitor_rotors( rotors::Array{vlm.Rotor, 1}, J_ref::Real,
-rho_ref::Real, RPM_ref::Real, nsteps_sim::Int)`
+    generate_monitor_rotors(rotors::Array{vlm.Rotor}, J_ref::Real,
+                                rho_ref::Real, RPM_ref::Real, nsteps_sim::Int;
+                                save_path=nothing)
 
-Generate monitor of load distribution and performance of a rotor system.
-`J_ref` and `rho_ref` are the reference advance ratio and air density used for
-calculating propulsive efficiency and coefficients. `RPM_ref` is the reference
-RPM used to estimate the age of the wake. `nsteps_sim` is the number of time
-steps by the end of the simulation (used for generating the color gradient).
+Generate a rotor monitor plotting the aerodynamic performance and blade loading
+at every time step.
+
+The aerodynamic performance consists of thrust coefficient
+\$C_T=\\frac{T}{\\rho n^2 d^4}\$, torque coefficient
+\$C_Q = \\frac{Q}{\\rho n^2 d^5}\$, and propulsive efficiency
+\$\\eta = \\frac{T u_\\infty}{2\\pi n Q}\$.
+
+* `J_ref` and `rho_ref` are the reference advance ratio and air density used \
+for calculating propulsive efficiency and coefficients. The advance ratio used \
+here is defined as \$J=\\frac{u_\\infty}{n d}\$ with \
+\$n = \\frac{\\mathrm{RPM}}{60}\$.
+* `RPM_ref` is the reference RPM used to estimate the age of the wake.
+* `nsteps_sim` is the number of time steps by the end of the simulation (used \
+for generating the color gradient).
+* Use `save_path` to indicate a directory where to save the plots. If so, it \
+will also generate a CSV file with \$C_T\$, \$C_Q\$, and \$\\eta\$.
 """
 function generate_monitor_rotors( rotors::Array{vlm.Rotor, 1},
                                     J_ref::Real, rho_ref::Real, RPM_ref::Real,
@@ -195,10 +208,40 @@ end
 
 
 """
-    `generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
-rho_ref::Real, qinf_ref::Real, nsteps_sim::Int)`
+    generate_monitor_wing(wing::Union{vlm.Wing, vlm.WingSystem},
+                            Vinf::Function, b_ref::Real, ar_ref::Real,
+                            rho_ref::Real, qinf_ref::Real, nsteps_sim::Int;
+                            L_dir=[0,0,1],      # Direction of lift component
+                            D_dir=[1,0,0],      # Direction of drag component
+                            calc_aerodynamicforce_fun=FLOWUnsteady.generate_calc_aerodynamicforce())
 
-Generate monitor of load distribution and performance of a wing.
+Generate a wing monitor computing and plotting the aerodynamic force and
+wing loading at every time step.
+
+The aerodynamic force is integrated, decomposed, and reported as overall lift
+coefficient \$C_L = \\frac{L}{\\frac{1}{2}\\rho u_\\infty^2 b c}\$ and drag
+coefficient \${C_D = \\frac{D}{\\frac{1}{2}\\rho u_\\infty^2 b c}}\$.
+The wing loading is reported as the sectional lift and drag coefficients defined
+as \$c_\\ell = \\frac{\\ell}{\\frac{1}{2}\\rho u_\\infty^2 c}\$ and
+\$c_d = \\frac{d}{\\frac{1}{2}\\rho u_\\infty^2 c}\$, respectively.
+
+The aerodynamic force is calculated through the function
+`calc_aerodynamicforce_fun`, which is a user-defined function. The function
+can also be automatically generated through,
+[`generate_calc_aerodynamicforce`](@ref) which defaults to incluiding the
+Kutta-Joukowski force, parasitic drag (calculated from a NACA 0012 airfoil
+polar), and unsteady-circulation force.
+
+* `b_ref`       : Reference span length.
+* `ar_ref`      : Reference aspect ratio, used to calculate the equivalent \
+                    chord \$c = \\frac{b}{\\mathrm{ar}}\$.
+* `rho_ref`     : Reference density.
+* `qinf_ref`    : Reference dynamic pressure \
+                    \$q_\\infty = \\frac{1}{2}\\rho u_\\infty^2\$.
+* `nsteps_sim`  : the number of time steps by the end of the simulation (used \
+                    for generating the color gradient).
+* Use `save_path` to indicate a directory where to save the plots. If so, it \
+will also generate a CSV file with \$C_L\$ and \$C_D\$.
 """
 function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
                                 rho_ref::Real, qinf_ref::Real, nsteps_sim::Int;
@@ -413,7 +456,15 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
     end
 end
 
+"""
+    generate_monitor_statevariables(; save_path=nothing)
 
+Generate a monitor plotting the state variables of the vehicle at every time
+step. The state variables are vehicle velocity, vehicle angular velocity, and
+vehicle position.
+
+Use `save_path` to indicate a directory where to save the plots.
+"""
 function generate_monitor_statevariables(; figname="monitor_statevariables",
                                            save_path=nothing,
                                            run_name="",
@@ -467,7 +518,19 @@ function generate_monitor_statevariables(; figname="monitor_statevariables",
     return extra_runtime_function
 end
 
+"""
+    generate_monitor_enstrophy(; save_path=nothing)
 
+Generate a monitor plotting the global enstrophy of the flow at every
+time step (computed through the particle field). This is calculated by
+integrating the local enstrophy defined as ξ = ω⋅ω / 2.
+
+Enstrophy is approximated as 0.5*Σ( Γ𝑝⋅ω(x𝑝) ). This is consistent with
+Winckelamns' 1995 CTR report, "Some Progress in LES using the 3-D VPM".
+
+Use `save_path` to indicate a directory where to save the plots. If so, it
+will also generate a CSV file with ξ.
+"""
 function generate_monitor_enstrophy(; save_path=nothing, run_name="",
                                      disp_plot=true,
                                      figname="monitor_enstrophy",
@@ -514,7 +577,17 @@ function generate_monitor_enstrophy(; save_path=nothing, run_name="",
     return extra_runtime_function
 end
 
+"""
+    generate_monitor_Cd(; save_path=nothing)
 
+Generate a monitor plotting the mean value of the SFS model coefficient \$C_d\$
+across the particle field at every time step. It also plots the ratio of \$C_d\$
+values that were clipped to zero (not included in the mean).
+
+Use `save_path` to indicate a directory where to save the plots. If so, it
+will also generate a CSV file with the statistics of \$C_d\$ (particles whose
+coefficients have been clipped are ignored).
+"""
 function generate_monitor_Cd(; save_path=nothing, run_name="",
                                      disp_plot=true,
                                      figname="monitor_Cd",

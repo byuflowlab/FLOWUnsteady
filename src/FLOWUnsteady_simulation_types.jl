@@ -13,10 +13,26 @@
 # SIMULATION TYPE
 ################################################################################
 """
-    `Simulation(vehicle, maneuver, Vref::Real, RPMref::R, ttot:R)`
+    Simulation{V<:AbstractVehicle, M<:AbstractManeuver, R<:Real}(vehicle::V,
+                            maneuver::M, Vref::R, RPMref::R, ttot::R, optargs...)
 
 Simulation interface. This type carries the simulation's options and connects
 vehicle and maneuver together.
+
+# ARGUMENTS
+* `vehicle`                 : Vehicle
+* `maneuver`                : Maneuver
+* `Vref`                    : Reference velocity for the maneuver
+* `RPMref`                  : Reference RPM for the maneuver
+* `ttot`                    : Total time in which to perform the maneuver
+
+# OPTIONAL ARGUMENTS
+* `Vinit = zeros(3)`        : Initial vehicle velocity
+* `Winit = zeros(3)`        : Initial vehicle angular velocity
+
+# State variables
+* `t::Real`                 : Time of current step
+* `nt::Int`                 : Current time step number
 """
 mutable struct Simulation{V<:AbstractVehicle, M<:AbstractManeuver, R<:Real}
     # USER INPUTS: Simulation setup
@@ -47,7 +63,11 @@ mutable struct Simulation{V<:AbstractVehicle, M<:AbstractManeuver, R<:Real}
 end
 
 
-# Implicit V and M constructor
+"""
+    Simulation(vehicle, maneuver, Vref, RPMref, ttot; optargs...)
+
+Constructor with implicit `V`, `M`, and `R` parameters.
+"""
 Simulation(v::AbstractVehicle, m::AbstractManeuver, n::Real, args...; optargs...
              ) = Simulation{typeof(v), typeof(m), typeof(n)}(v, m, n, args...;
                                                                      optargs...)
@@ -107,7 +127,14 @@ function nextstep_kinematic(self::Simulation, dt::Real)
     self.nt += 1
 end
 
+"""
+    save_vtk(sim::Simulation, prefix; path="", save_wopwopin=false, optargs...)
 
+Output VTK files with vehicle geometry and solution fields. The file names will
+have the prefix `prefix`, and will be saved in the directory `path`. If
+`save_wopwopin=true`, it will also generate PSU-WOPWOP input files that can be
+used to run the acoustic analysis (see [`run_noise_wopwop`](@ref)).
+"""
 function save_vtk(self::Simulation, filename; optargs...)
     return save_vtk(self.vehicle, filename; num=self.nt, optargs...)
 end

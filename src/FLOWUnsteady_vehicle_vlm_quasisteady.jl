@@ -17,38 +17,18 @@
 # QUASI-STEADY VLM VEHICLE TYPE
 ################################################################################
 """
-    `QVLMVehicle(system; optargs...)`
+    QVLMVehicle{N, M, R}(system; optargs...)
 
-Type handling all geometries and subsystems that define a flight vehicle made
-out of VLM (Wing, WingSystem, Rotor) components.
+Same than [`FLOWUnsteady.UVLMVehicle`](@ref) but replacing the VPM wake with
+a semi-infinite rigid VLM wake, making the simulation quasi-ssteady.
 
-NOTE: For the solver to work correctly, all components in `wake_system` (if any)
+**NOTE:** For the solver to work correctly, all components in `wake_system` (if any)
 need to be also components of `vlm_system`.
 
-NOTE: It is recommended that `wake_system` doesn't include any Rotor object.
+**NOTE 2:** It is recommended that `wake_system` doesn't include any Rotor object.
 Otherwise, blades will generate a wake going straight out of every blade
 trailing edge pointing oposite to the direction of rotation instead of
 generating a streamtube.
-
-# ARGUMENTS
-* `system::vlm.WingSystem`:        System of all FLOWVLM objects. This system
-                                    is considered as the entire vehicle. Not all
-                                    components in this system will be solved,
-                                    but they will all be rotated and translated
-                                    during maneuver.
-# OPTIONAL ARGUMENTS
-* `tilting_systems::Tuple(vlm.WingSystem, ...)`:   Tuple of all FLOWVLM
-                                    tilting objects, where `tilting_systems[i]`
-                                    contains the i-th FLOWVLM system of lifting
-                                    surfaces and rotors that tilt together.
-* `rotors_systems::Tuple(Array{vlm.Rotor,1}, ...)`:   Tuple of groups of Rotors
-                                    that share a common RPM.
-* `vlm_system::vlm.WingSystem`:    System of all FLOWVLM objects to be solved
-                                    through the VLM solver.
-* `wake_system::vlm.WingSystem`:   System of all FLOWVLM objects that will
-                                    have a rigid, semi-infinite VLM wake.
-* `grids::Array{gt.GridTypes, 1}`: Array of grids that will be translated and
-                                    rotated along with `system`.
 """
 struct QVLMVehicle{N, M, R} <: AbstractVLMVehicle{N, M, R}
 
@@ -93,7 +73,11 @@ struct QVLMVehicle{N, M, R} <: AbstractVLMVehicle{N, M, R}
                 )
 end
 
-# Implicit N and M constructor
+"""
+    QVLMVehicle(system; optargs...)
+
+Constructor with implicit `N`, `M`, and `R` parameters.
+"""
 QVLMVehicle(system::vlm.WingSystem;
         V::Array{R, 1}=zeros(3), W::Array{R, 1}=zeros(3),
         tilting_systems::NTuple{N, vlm.WingSystem}=NTuple{0, vlm.WingSystem}(),

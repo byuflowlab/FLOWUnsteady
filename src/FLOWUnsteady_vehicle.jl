@@ -134,8 +134,7 @@ function generate_static_particle_fun(self::AbstractVehicle,
 end
 
 """
-    `save_vtk(self::AbstractVehicle, filename; path=nothing, num=nothing,
-optargs...)`
+    save_vtk(self::AbstractVehicle, prefix; path="", optargs...)
 
 Output VTK files with vehicle geometry and solution fields.
 """

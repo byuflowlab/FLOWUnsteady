@@ -2,6 +2,8 @@ using Documenter
 using FLOWUnsteady
 const uns = FLOWUnsteady
 
+import FLOWUnsteady: FLOWVPM, FLOWVLM
+
 include("src/generate_examples.jl")
 
 makedocs(
@@ -25,6 +27,7 @@ makedocs(
                                                                 "api/flowunsteady-simulation.md",
                                                                 "api/flowunsteady-monitor.md",
                                                                 "api/flowunsteady-run.md",
+                                                                "api/flowunsteady-postprocessing.md",
                                                             ],
                                         "api/flowvlm.md",
                                         "FLOWVPM"  => [
@@ -36,7 +39,7 @@ makedocs(
                                                                 "api/flowvpm-time.md",
                                                                 "api/flowvpm-utils.md",
                                                             ],
-                                        "api/index.md"
+                                        # "api/index.md"
                                        ],
                 # "Potential Flow"    => "potentialflow.md",
                 # "Elements"          => [
