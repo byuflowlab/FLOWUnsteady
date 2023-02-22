@@ -29,7 +29,6 @@ makedocs(
                                                                 "api/flowunsteady-run.md",
                                                                 "api/flowunsteady-postprocessing.md",
                                                             ],
-                                        "api/flowvlm.md",
                                         "FLOWVPM"  => [
                                                                 "api/flowvpm-particle.md",
                                                                 "api/flowvpm-uj.md",

@@ -471,7 +471,7 @@ end
 # ------------ PARASITIC-DRAG FORCE --------------------------------------------
 """
     generate_aerodynamicforce_parasiticdrag(polar_file::String;
-                                                    read_path=def_data_path*"/airfoils",
+                                                    read_path=FLOWUnsteady.default_database*"/airfoils",
                                                     calc_cd_from_cl=false,
                                                     add_skinfriction=true,
                                                     Mach=nothing)
@@ -497,7 +497,7 @@ If `Mach != nothing`, it will use a Prandtl-Glauert correction to pre-correct
 the lookup cl. This will have no effects if `calc_cd_from_cl=false`.
 """
 function generate_aerodynamicforce_parasiticdrag(polar_file::String;
-                                                    read_path::String=joinpath(def_data_path, "airfoils"),
+                                                    read_path::String=joinpath(default_database, "airfoils"),
                                                     read_polar=vlm.ap.read_polar,
                                                     calc_cd_from_cl=false,
                                                     add_skinfriction=true,

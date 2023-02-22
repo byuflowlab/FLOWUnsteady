@@ -10,6 +10,10 @@
 """
 module FLOWUnsteady
 
+#= TODO
+    * [ ] Change name UVLMVehicle -> UVehicle
+=#
+
 # ------------ GENERIC MODULES -------------------------------------------------
 import Dierckx
 import CSV
@@ -27,6 +31,7 @@ import GeometricTools
 # NOTE: Unregistered packages available at https://github.com/byuflowlab
 import FLOWVPM
 import FLOWVLM
+import FLOWPanel
 import FLOWNoise
 import BPM
 
@@ -38,7 +43,8 @@ const noise = FLOWNoise
 
 # ------------ GLOBAL VARIABLES ------------------------------------------------
 const module_path    = splitdir(@__FILE__)[1]              # Path to this module
-const def_data_path  = joinpath(module_path, "..", "data") # Default path to database
+const default_database  = joinpath(module_path, "..", "database") # Default path to database
+const def_data_path  = default_database
 const examples_path  = joinpath(module_path, "..", "examples") # Path to examples
 
 

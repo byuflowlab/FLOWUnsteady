@@ -20,9 +20,9 @@ TODO
 * [ ] API
   * [x] Docstring for run_simulation
   * [ ] Polish docstrings
-    * [ ] Vehicle: Rotor
-    * [ ] Vehicle: SimpleWing and ComplexWing
-    * [ ] Add database definition
+    * [x] Vehicle: Rotor
+    * [x] Vehicle: SimpleWing and ComplexWing
+    * [x] Add database definition
     * [ ] Postprocessing: noise functions
     * [ ] Postprocessing: Fluid domain
 

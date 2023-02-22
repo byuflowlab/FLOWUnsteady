@@ -4,7 +4,7 @@ output_name = "wing"
 data_path = joinpath(module_path, "..", "resources", "data")
 example_path = joinpath(uns.examples_path, "wing")
 
-remote_url = "http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/"
+remote_url = "https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/"
 
 
 # -------- 4.2deg AOA ----------------------------------------------------------

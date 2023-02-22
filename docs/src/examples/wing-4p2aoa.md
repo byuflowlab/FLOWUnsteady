@@ -2,8 +2,8 @@
 
 ```@raw html
 <center>
-  <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//weber-particles06.png" alt="Pic here" style="width: 49%;"/>
-  <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//weber-n100-00.png" alt="Pic here" style="width: 49%;"/>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//weber-particles06.png" alt="Pic here" style="width: 49%;"/>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//weber-n100-00.png" alt="Pic here" style="width: 49%;"/>
 </center>
 ```
 
@@ -274,7 +274,7 @@ reported in the literature.
 
 ```@raw html
 <center>
-    <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//wingexample-simmonitor.png" alt="Pic here" style="width: 100%;"/>
+    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//wingexample-simmonitor.png" alt="Pic here" style="width: 100%;"/>
 </center>
 ```
 

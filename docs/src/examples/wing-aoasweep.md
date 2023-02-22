@@ -125,13 +125,13 @@ to see how to plot the results as shown here below)
 ```@raw html
 <center>
     <br><b>Spanwise loading distribution</b>
-    <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//wingexample-sweep-loading.png" alt="Pic here" style="width: 100%;"/>
+    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//wingexample-sweep-loading.png" alt="Pic here" style="width: 100%;"/>
 
     <br><br><b>Lift and induced drag</b>
-    <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//wingexample-sweep-CLCD.png" alt="Pic here" style="width: 100%;"/>
+    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//wingexample-sweep-CLCD.png" alt="Pic here" style="width: 100%;"/>
 
     <br><br><b>Pitching moment</b><br>
-    <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//wingexample-sweep-Cm.png" alt="Pic here" style="width: 50%;"/>
+    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//wingexample-sweep-Cm.png" alt="Pic here" style="width: 50%;"/>
 </center>
 ```
 
