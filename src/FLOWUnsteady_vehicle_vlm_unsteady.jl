@@ -153,14 +153,14 @@ end
 
 """
 Uniform vortex-sheet distribution for actuator surface model.
-See [Alvarez dissertation](https://scholarsarchive.byu.edu/etd/9589/), Sec. 6.3.2.
+See [Alvarez' dissertation](https://scholarsarchive.byu.edu/etd/9589/), Sec. 6.3.2.
 """
 g_uniform(x) = 0 <= x <= 1 ? 1 : 0   # Uniform distribution
 
 
 """
 Linear vortex-sheet distribution for actuator surface model.
-See [Alvarez dissertation](https://scholarsarchive.byu.edu/etd/9589/), Sec. 6.3.2.
+See [Alvarez' dissertation](https://scholarsarchive.byu.edu/etd/9589/), Sec. 6.3.2.
 """
 g_linear(x) = x < 0 ? 0 :                           # Piece-wise linear distribution centered at quarter-chord
            x < 0.25 ? 0.4 + 3.04 * x/0.25 :         # as given by Kim 2015, "Improved actuator surface method for wind turbine application."
@@ -171,7 +171,7 @@ g_linear(x) = x < 0 ? 0 :                           # Piece-wise linear distribu
 
 """
 Pressure-like vortex-sheet distribution for actuator surface model.
-See [Alvarez dissertation](https://scholarsarchive.byu.edu/etd/9589/), Sec. 6.3.2.
+See [Alvarez' dissertation](https://scholarsarchive.byu.edu/etd/9589/), Sec. 6.3.2.
 """
 g_pressure(x) = x <= 0 ? 0 :         # Pressure-like distribution: peaking by the LE with aerodynamic center at to quarter-chord.
                 x <= 1 ? (1-exp(-(x/0.02)^3))/(4*pi*x) / 0.3266200204514099 :

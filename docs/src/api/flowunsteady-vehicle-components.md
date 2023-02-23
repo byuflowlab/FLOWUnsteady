@@ -1,21 +1,6 @@
-# 1) Vehicle Definition
+# Generating components
 
-## Vehicle types
-```@docs
-FLOWUnsteady.UVLMVehicle
-FLOWUnsteady.VLMVehicle
-FLOWUnsteady.QVLMVehicle
-```
-
-## Generating components
-
-### VLM Wing
-```@docs
-FLOWUnsteady.vlm.simpleWing
-FLOWUnsteady.vlm.complexWing
-```
-
-### Rotor
+## Rotor
 
 FLOWunsteady uses a database of airfoil and rotor geometries
 to automate the generation of rotors. A
@@ -46,7 +31,13 @@ FLOWUnsteady.generate_rotor(::Real, ::Real, ::Int, ::Array{Float64,2},
 FLOWUnsteady.vlm.rotate
 ```
 
-### FLOWVLM Systems
+## VLM Wing
+```@docs
+FLOWUnsteady.vlm.simpleWing
+FLOWUnsteady.vlm.complexWing
+```
+
+## FLOWVLM Systems
 ```@docs
 FLOWUnsteady.vlm.WingSystem
 
@@ -55,13 +46,4 @@ FLOWUnsteady.vlm.get_wing
 FLOWUnsteady.vlm.setcoordsystem
 FLOWUnsteady.vlm.get_m
 FLOWUnsteady.vlm.get_mBlade
-```
-
-
-## Actuator surface model
-```@docs
-FLOWUnsteady.g_uniform
-FLOWUnsteady.g_linear
-FLOWUnsteady.g_piecewiselinear
-FLOWUnsteady.g_pressure
 ```

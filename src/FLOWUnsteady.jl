@@ -24,6 +24,7 @@ import PyPlot as plt
 
 using PyPlot: @L_str
 using LinearAlgebra: I
+using Printf: @printf
 
 # ------------ FLOW CODES ------------------------------------------------------
 import GeometricTools
@@ -31,7 +32,6 @@ import GeometricTools
 # NOTE: Unregistered packages available at https://github.com/byuflowlab
 import FLOWVPM
 import FLOWVLM
-import FLOWPanel
 import FLOWNoise
 import BPM
 
@@ -58,5 +58,8 @@ for header_name in ["vehicle", "vehicle_vlm",
     include("FLOWUnsteady_"*header_name*".jl")
 
 end
+
+# VPM utilities
+include(joinpath(vpm.utilities_path, "utilities_fluiddomain.jl"))
 
 end # END OF MODULE

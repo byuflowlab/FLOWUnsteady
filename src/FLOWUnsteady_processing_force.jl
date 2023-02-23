@@ -110,8 +110,8 @@ Sec. 6.3.3.
                                 representing the vortex sheet (if
                                 `vlm_vortexsheet=true`).
 * `vlm_vortexsheet_distribution::Function` : Vorticity distribution in vortex
-                                sheet (see [`g_uniform`](@ref),
-                                [`g_linear`](@ref), and [`g_pressure`](@ref)).
+                                sheet (see `g_uniform`, `g_linear`, and
+                                `g_pressure`).
 * `KJforce_type::String`    : If `vlm_vortexsheet=true`, it specifies how to
                                 weight the force of each particle in the vortex
                                 sheet. If `KJforce_type=="averaged"`, the KJ

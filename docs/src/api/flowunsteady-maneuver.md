@@ -1,4 +1,4 @@
-# 2) Maneuver Definition
+# (2) Maneuver Definition
 ```@docs
 FLOWUnsteady.KinematicManeuver
 FLOWUnsteady.DynamicManeuver

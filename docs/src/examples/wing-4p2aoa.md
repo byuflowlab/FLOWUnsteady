@@ -13,17 +13,17 @@ In the process we exemplify the basic structure of a simulation, which is
 always the same, no matter how complex the simulation might be.
 The structure consists of six steps:
 
->**[1) Vehicle Definition](@ref):** Generate the geometry of the vehicle and declare each vehicle subsystem in a [`FLOWUnsteady.VLMVehicle`](@ref) object
+>**[(1) Vehicle Definition](@ref vehicle_types):** Generate the geometry of the vehicle and declare each vehicle subsystem in a [`FLOWUnsteady.VLMVehicle`](@ref) object
 
-> **[2) Maneuver Definition](@ref):** Generate functions that prescribe the kinematics of the vehicle and specify the control inputs for tilting and rotor subsystems in a [`FLOWUnsteady.KinematicManeuver`](@ref) object
+> **[(2) Maneuver Definition](@ref):** Generate functions that prescribe the kinematics of the vehicle and specify the control inputs for tilting and rotor subsystems in a [`FLOWUnsteady.KinematicManeuver`](@ref) object
 
-> **[3) Simulation Definition](@ref):** A [`FLOWUnsteady.Simulation`](@ref) object is generated stating the vehicle, maneuver, and total time and speed at which to perform the maneuver
+> **[(3) Simulation Definition](@ref):** A [`FLOWUnsteady.Simulation`](@ref) object is generated stating the vehicle, maneuver, and total time and speed at which to perform the maneuver
 
->**[4) Monitors Definitions](@ref):** Functions are generated for calculating, monitoring, and outputting different metrics throughout the simulation
+>**[(4) Monitors Definitions](@ref):** Functions are generated for calculating, monitoring, and outputting different metrics throughout the simulation
 
-> **[5) Run Simulation](@ref):** Call [`FLOWUnsteady.run_simulation`](@ref) to run the simulation
+> **[(5) Run Simulation](@ref):** Call [`FLOWUnsteady.run_simulation`](@ref) to run the simulation
 
-> **[6) Visualization and Postprocessing](@ref):** The simulation is visualized in Paraview and results are postprocessed
+> **[(6) Viz and Postprocessing](@ref fluid_domain):** The simulation is visualized in Paraview and results are postprocessed
 
 While in this example we show the basic structure without much explanation,
 in subsequent examples we will dive into the details and options of each

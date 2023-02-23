@@ -242,6 +242,9 @@ polar), and unsteady-circulation force.
                     for generating the color gradient).
 * Use `save_path` to indicate a directory where to save the plots. If so, it \
 will also generate a CSV file with \$C_L\$ and \$C_D\$.
+
+Here is an example of this monitor:
+![image](http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/wingexample_convergence.png)
 """
 function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
                                 rho_ref::Real, qinf_ref::Real, nsteps_sim::Int;

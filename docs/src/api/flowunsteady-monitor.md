@@ -1,4 +1,4 @@
-# 4) Monitors Definitions
+# (4) Monitors Definitions
 
 A monitor is a function that is passed to [`FLOWUnsteady.run_simulation`](@ref) as an
 extra runtime function that is
@@ -21,40 +21,19 @@ Then pass the monitor to the simulation as
 uns.run_simulation(sim, nsteps; extra_runtime_function=monitors, ...)
 ```
 
-!!! compat "Extra Runtime Function"
-    `extra_runtime_function` is a function that is called at every time step
-    after the state variables are updated and before outputting VTK files.
-    The state variables of the simulation are passed to this function, giving
-    the user complete freedom to modify the states of the simulation (*e.g.*,
-    add/remove particles, clip vortex strengths, re-orient the vehicle) or
-    to do some extra computation (*e.g.*, compute aerodynamic forces, create
-    plots, write to files, etc).
-
-    It is expected to be a function of the form
-    `extra_runtime_function(sim, pfield, t, dt; vprintln) -> Bool`, where
-    `sim` is the [`FLOWUnsteady.Simulation`](@ref) object, `pfield`
-    is the [`FLOWVPM.ParticleField`](@ref), `t` is the current simulation time, `dt` is
-    the length of the current time step, and `vprintln(str, v_lvl)` is a function
-    for printing the verbose of the simulation (default to
-    `vprintln = (args...)->nothing` if you have no need to print any
-    verbose).
-
-    If `extra_runtime_function(sim, pfield, t, dt)` is also used to break the
-    simulation, such that if it ever returns `true`, the simulation will
-    immediately quit.
-
 ## Monitor Generators
 The following are functions for generating the monitors that serve most use
 cases. See the source code of these monitors to get an idea of how to write your
 own user-defined monitors.
 
 ```@docs
-FLOWUnsteady.generate_monitor_rotors
-FLOWUnsteady.generate_monitor_wing
 FLOWUnsteady.generate_monitor_statevariables
 FLOWUnsteady.generate_monitor_enstrophy
 FLOWUnsteady.generate_monitor_Cd
+FLOWUnsteady.generate_monitor_rotors
+FLOWUnsteady.generate_monitor_wing
 ```
+
 ## Force Calculators
 The following are some possible methods for calculating aerodynamic forces.
 Generator functions return a function that can be directly passed to

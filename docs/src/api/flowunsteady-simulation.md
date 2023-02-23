@@ -1,4 +1,4 @@
-# 3) Simulation Definition
+# (3) Simulation Definition
 ```@docs
 FLOWUnsteady.Simulation
 FLOWUnsteady.save_vtk
