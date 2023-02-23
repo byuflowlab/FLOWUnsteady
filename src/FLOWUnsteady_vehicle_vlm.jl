@@ -55,10 +55,6 @@ end
 
 
 ##### FUNCTIONS  ###############################################################
-get_ntltsys(self::AbstractVLMVehicle) = typeof(self).parameters[1]
-
-get_nrtrsys(self::AbstractVLMVehicle) = typeof(self).parameters[2]
-
 
 function add_dV(self::AbstractVLMVehicle, dV)
     self.V .+= dV
@@ -103,10 +99,8 @@ function nextstep_kinematic(self::AbstractVLMVehicle, dt::Real)
     M = gt.rotation_matrix2([-a for a in dA]...) # Rotation matrix
     Oaxis = M*self.system.Oaxis     # New axes of the system (rotation)
 
-    # Save state of current vehicle
-    _update_prev_vlm_system(self, deepcopy(self.vlm_system))
-    _update_prev_wake_system(self, deepcopy(self.wake_system))
-    _update_prev_rotor_systems(self, deepcopy(self.rotor_systems))
+    # Save current state of vehicle
+    _update_previousstep(self, deepcopy(self))
 
     # Translation and rotation
     vlm.setcoordsystem(self.system, O, Oaxis)
@@ -225,17 +219,19 @@ end
 
 ##### INTERNAL FUNCTIONS  ######################################################
 
-_get_prev_vlm_system(self::AbstractVLMVehicle) = self.prev_data[1]
-_get_prev_wake_system(self::AbstractVLMVehicle) = self.prev_data[2]
-_get_prev_rotor_systems(self::AbstractVLMVehicle) = self.prev_data[3]
-function _update_prev_vlm_system(self::AbstractVLMVehicle, system)
-    self.prev_data[1] = system
-end
-function _update_prev_wake_system(self::AbstractVLMVehicle, system)
-    self.prev_data[2] = system
-end
-function _update_prev_rotor_systems(self::AbstractVLMVehicle, rotor_systems)
-    self.prev_data[3] = rotor_systems
+_get_prev_rotor_systems(self::AbstractVLMVehicle) = self.previousstep.rotor_systems
+_get_prev_vlm_system(self::AbstractVLMVehicle) = self.previousstep.vlm_system
+_get_prev_panel_system(self::AbstractVLMVehicle) = self.previousstep.panel_system
+_get_prev_wake_system(self::AbstractVLMVehicle) = self.previousstep.wake_system
+
+function _update_previousstep(self::AbstractVLMVehicle, vehicle)
+
+    if length(self.previousstep)==0
+        push!(self.previousstep, vehicle)
+    else
+        self.previousstep[1] = vehicle
+    end
+
 end
 
 

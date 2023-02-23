@@ -13,78 +13,74 @@
 # UNSTEADY VLM VEHICLE TYPE
 ################################################################################
 """
-    UVLMVehicle{N, M, R}(system; tilting_systems, rotors_systems,
-                                            vlm_system, wake_system, grids)
+    UVehicle{N, M, R}(geometry; tilting_systems, rotors_systems,
+                                        vlm_system, panel_system wake_system)
 
-Type handling all geometries and subsystems that define a vehicle made
-out of FLOWVLM components (Wing, WingSystem, Rotor).
+Geometry and subsystems that define a vehicle made out of FLOWVLM (Wing,
+WingSystem, Rotor) and FLOWPanel components. These components are solved in
+an unsteady scheme. `N` is the number of tilting system and `M` is the number
+of rotor systems.
 
 # ARGUMENTS
-* `system::FLOWVLM.WingSystem`:        System of all FLOWVLM objects. This system
-                                    is considered as the entire vehicle. Not all
-                                    components in this system will be solved,
-                                    but they will all be rotated and translated
-                                    according to the maneuver.
+* `geometry::System`:               System of all components that make the
+                                        geometry of the vehicle. Not all
+                                        components in `geometry` will be solved,
+                                        but they will all be rotated and
+                                        translated according to the maneuver.
+
 # OPTIONAL ARGUMENTS
-* `tilting_systems::NTuple{N, FLOWVLM.WingSystem}`:   Tuple of all FLOWVLM
-                                    tilting objects, where `tilting_systems[i]`
-                                    contains the i-th FLOWVLM system of lifting
-                                    surfaces and rotors that tilt together.
-* `rotors_systems::NTuple{M, Array{vlm.Rotor}}`:   Tuple of groups of Rotors
-                                    that share a common RPM.
-* `vlm_system::FLOWVLM.WingSystem`:    System of all FLOWVLM objects to be solved
-                                    through the VLM solver.
-* `wake_system::FLOWVLM.WingSystem`:   System of all FLOWVLM objects that will
-                                    shed a VPM wake.
-* `grids::Array{gt.GridTypes}`:         Array of grids that will be translated and
-                                    rotated along with `system`.
+* `tilting_systems::System{<:Any, N}`: System of all tilting components, where
+                                        each component can be a subsystem of
+                                        lifting surfaces and rotors that tilted
+                                        together.
+* `rotors_systems::System{Union{System, Rotor}, M}`: Rotor systems with rotors
+                                        that share a common RPM.
+* `vlm_system::FLOWVLM.WingSystem`: System of all FLOWVLM objects to be solved
+                                        through the VLM solver.
+* `panel_system::FLOWPanel.MultiBody`: System of all FLOWPanel objects to be
+                                        solved through the panel solver.
+* `wake_system::System`:            System of all components that will shed a
+                                        VPM wake.
 
 # State variables
 * `V::Vector`                   : Current vehicle velocity
 * `W::Vector`                   : Current vehicle angular velocity
 * `prev_data::Array{Any}`       : Information about previous step
-* `grid_O::Vector{Vector}`       : Origin of every grid
 """
 struct UVLMVehicle{N, M, R} <: AbstractVLMVehicle{N, M, R}
 
     # Required inputs
-    system::vlm.WingSystem
+    geometry::System
 
     # Optional inputs
-    tilting_systems::NTuple{N, vlm.WingSystem}
-    rotor_systems::NTuple{M, Array{vlm.Rotor, 1}}
+    tilting_systems::System{<:Any, N}
+    rotor_systems::System{<:Union{System{vlm.Rotor}, vlm.Rotor}, M}
     vlm_system::vlm.WingSystem
-    wake_system::vlm.WingSystem
-    grids::Array{gt.GridTypes, 1}
+    panel_system::pnl.MultiBody
+    wake_system::System
 
     # Internal properties
-    V::Array{R, 1}                          # Current vehicle velocity
-    W::Array{R, 1}                          # Current vehicle angular velocity
-    prev_data::Array{Any, 1}                # Information about previous step
-    grid_O::Array{Array{R, 1}, 1}           # Origin of every grid
+    V::Vector{R}                            # Current vehicle velocity
+    W::Vector{R}                            # Current vehicle angular velocity
+    previousstep::Array{Any}                # Information about previous step
 
 
     UVLMVehicle{N, M, R}(
-                    system;
-                    tilting_systems=NTuple{0, vlm.WingSystem}(),
-                    rotor_systems=NTuple{0, Array{vlm.Rotor, 1}}(),
+                    geometry, tilting_systems, rotor_systems;
                     vlm_system=vlm.WingSystem(),
-                    wake_system=vlm.WingSystem(),
-                    grids=Array{gt.GridTypes, 1}(),
+                    panel_system=pnl.MultiBody(),
+                    wake_system=generate_wake_system(),
                     V=zeros(3), W=zeros(3),
-                    prev_data=[deepcopy(vlm_system), deepcopy(wake_system),
-                                                    deepcopy(rotor_systems)],
-                    grid_O=Array{Array{Float64, 1}, 1}(),
+                    previousstep=[],
                 ) where {N, M, R} = new(
-                    system,
+                    geometry,
                     tilting_systems,
                     rotor_systems,
                     vlm_system,
+                    panel_system,
                     wake_system,
-                    grids,
                     V, W,
                     prev_data,
-                    grid_O,
                 )
 end
 
@@ -93,25 +89,42 @@ end
 
 Constructor with implicit `N`, `M`, and `R` parameters.
 """
-UVLMVehicle(system::vlm.WingSystem;
-        V::Array{R, 1}=zeros(3), W::Array{R, 1}=zeros(3),
-        tilting_systems::NTuple{N, vlm.WingSystem}=NTuple{0, vlm.WingSystem}(),
-        rotor_systems::NTuple{M, Array{vlm.Rotor, 1}}=NTuple{0, Array{vlm.Rotor, 1}}(),
-        grids=Array{gt.GridTypes, 1}(),
-        optargs...
-        ) where {N, M, R} = UVLMVehicle{N, M, R}( system;
-                                V=V, W=W,
-                                tilting_systems=tilting_systems,
-                                rotor_systems=rotor_systems,
-                                grids=Array{gt.GridTypes, 1}(grids),
-                                grid_O=[zeros(R, 3) for i in 1:length(grids)],
-                                optargs...)
+function UVLMVehicle(system::System;
+                        tilting_systems::System{<:Any, N}=System(),
+                        rotor_systems::System{<:Any, M}=System(; C=vlm.Rotor),
+                        V::Vector{R}=zeros(3), W::Vector{R}=zeros(3),
+                        optargs...
+                        ) where {N, M, R}
+
+    return UVLMVehicle{N, M, R}(system, tilting_systems, rotor_systems;
+                                                        V=V, W=W, optargs...)
+end
 
 """Alias for [`FLOWUnsteady.UVLMVehicle`](@ref)"""
 VLMVehicle = UVLMVehicle
 
+function Base.deepcopy_internal(x::V, stackdict::IdDict) where V<:AbstractVLMVehicle
+    if haskey(stackdict, x)
+        return stackdict[x]
+    end
+
+    y = V(  Base.deepcopy_internal(x.geometry),
+            Base.deepcopy_internal(x.tilting_systems),
+            Base.deepcopy_internal(x.rotor_systems);
+            vlm_system = Base.deepcopy_internal(x.vlm_system),
+            panel_system = Base.deepcopy_internal(x.panel_system),
+            wake_system = Base.deepcopy_internal(x.wake_system),
+            V = Base.deepcopy_internal(x.V),
+            W = Base.deepcopy_internal(x.W),
+            previousstep=[]
+        )
+
+    stackdict[x] = y
+    return y
+end
+
 ##### FUNCTIONS  ###############################################################
-function shed_wake(self::VLMVehicle, Vinf::Function,
+function shed_wake(self::UVLMVehicle, Vinf::Function,
                             pfield::vpm.ParticleField, dt::Real, nt::Int; t=0.0,
                             unsteady_shedcrit=-1.0,
                             shed_starting=false,
@@ -123,13 +136,15 @@ function shed_wake(self::VLMVehicle, Vinf::Function,
                             )
     if nt!=0
 
+        flowvlm_wake_system = get_component(self.wake_system, "flowvlm")
+
         if shed_boundarylayer
             if dipole_d == 0
                 error("Boundary layer shedding requested but no `d` was provided!")
             end
 
             # Shed only boundary layer (dragging line) particles
-            VLM2VPM_draggingline(self.wake_system, _get_prev_wake_system(self),
+            VLM2VPM_draggingline(flowvlm_wake_system, _get_prev_wake_system(self),
                                     pfield, dt, Vinf,
                                     dipole_d;
                                     t=t,
@@ -140,7 +155,7 @@ function shed_wake(self::VLMVehicle, Vinf::Function,
                                 )
         else
             # Shed trailing-circulation particles
-            VLM2VPM(self.wake_system, pfield, dt, Vinf; t=t,
+            VLM2VPM(flowvlm_wake_system, pfield, dt, Vinf; t=t,
                         prev_system=_get_prev_wake_system(self),
                         unsteady_shedcrit=unsteady_shedcrit,
                         shed_starting=shed_starting && nt==1,
@@ -183,7 +198,7 @@ Alias for [`FLOWUnsteady.g_linear`](@ref).
 const g_piecewiselinear = g_linear
 
 function generate_static_particle_fun(pfield::vpm.ParticleField, pfield_static::vpm.ParticleField,
-                                        self::VLMVehicle,
+                                        self::UVLMVehicle,
                                         sigma_vlm::Real, sigma_rotor::Real;
                                         vlm_vortexsheet=false,
                                         vlm_vortexsheet_overlap=2.125,
@@ -217,12 +232,12 @@ function generate_static_particle_fun(pfield::vpm.ParticleField, pfield_static::
         end
 
         # Particles from rotor systems
-        for rotors in self.rotor_systems
-            for rotor in rotors
-                _static_particles(pfield, rotor, sigma_rotor)
-                if flag; _static_particles(pfield_static, rotor, sigma_rotor); end;
-            end
+        function addrotorparticles(rotor)
+            _static_particles(pfield, rotor, sigma_rotor)
+            if flag; _static_particles(pfield_static, rotor, sigma_rotor); end;
         end
+
+        applytobottom(addrotorparticles, self.rotor_systems)
 
         # Save vtk with static particles
         if flag
@@ -243,13 +258,12 @@ function generate_static_particle_fun(pfield::vpm.ParticleField, pfield_static::
     return static_particles_function
 end
 
-save_vtk(self::VLMVehicle, args...;
+save_vtk(self::UVLMVehicle, args...;
                         optargs...) = save_vtk_base(self, args...; optargs...)
 
 ##### INTERNAL FUNCTIONS  ######################################################
-
 function _static_particles(pfield::vpm.ParticleField,
-                            system::Union{vlm.Wing, vlm.WingSystem, vlm.Rotor},
+                            vlm_system::Union{vlm.Wing, vlm.WingSystem, vlm.Rotor},
                             sigma::Real;
                             sigma_vpm=nothing,
                             vortexsheet::Bool=false,
@@ -262,8 +276,8 @@ function _static_particles(pfield::vpm.ParticleField,
     X, Gamma, dl = (zeros(3) for i in 1:3)
 
     # Adds a particle for every bound vortex of the VLM
-    for i in 1:vlm.get_m(system)
-        (Ap, A, B, Bp, _, _, _, gamma) = vlm.getHorseshoe(system, i)
+    for i in 1:vlm.get_m(vlm_system)
+        (Ap, A, B, Bp, _, _, _, gamma) = vlm.getHorseshoe(vlm_system, i)
         for (j, (x1, x2)) in enumerate(((A,B), (Ap,A), (B,Bp)))
 
             # Mid-point along bound vortex
