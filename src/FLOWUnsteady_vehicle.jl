@@ -234,7 +234,7 @@ struct System{C<:ComponentTypes, N} <: AbstractSystem{C, N}
 end
 
 function System(components::Vector{C}, names::NTuple{N, String}
-                                                ) where {C, N}
+                                                ) where {C<:ComponentTypes, N}
 
     return System{C, N}(components, names)
 

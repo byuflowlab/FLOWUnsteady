@@ -45,7 +45,7 @@ of rotor systems.
 # State variables
 * `V::Vector`                   : Current vehicle velocity
 * `W::Vector`                   : Current vehicle angular velocity
-* `prev_data::Array{Any}`       : Information about previous step
+* `previousstep::Array{Any}`    : Information about previous step
 """
 struct UVLMVehicle{N, M, R} <: AbstractVLMVehicle{N, M, R}
 
@@ -80,7 +80,7 @@ struct UVLMVehicle{N, M, R} <: AbstractVLMVehicle{N, M, R}
                     panel_system,
                     wake_system,
                     V, W,
-                    prev_data,
+                    previousstep,
                 )
 end
 
