@@ -267,6 +267,11 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
                                 title_lbl="",
                                 CL_lbl=L"Lift coefficient $C_L$",
                                 CD_lbl=L"Drag coefficient $C_D$",
+                                cl_lbl=L"Sectional lift $c_\ell$",
+                                cd_lbl=L"Sectional drag $c_d$",
+                                y2b_lbl=L"Span position $\frac{2y}{b}$",
+                                cl_ttl="Spanwise lift distribution",
+                                cd_ttl="Spanwise drag distribution",
                                 X_offset=t->zeros(3),
                                 S_proj=t->[0, 1, 0],
                                 conv_suff="_convergence.csv",
@@ -295,17 +300,17 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
         axs1 = [axs1[2], axs1[4], axs1[1], axs1[3]]
         ax = axs1[1]
         # xlim([-1,1])
-        ax.set_xlabel(L"Span position $\frac{2y}{b}$")
-        ax.set_ylabel(L"Sectional lift $c_\ell$")
-        ax.set_title("Spanwise lift distribution", color="gray")
+        ax.set_xlabel(y2b_lbl)
+        ax.set_ylabel(cl_lbl)
+        ax.set_title(cl_ttl, color="gray")
         ax.spines["right"].set_visible(false)
         ax.spines["top"].set_visible(false)
 
         ax = axs1[2]
         # xlim([-1,1])
-        ax.set_xlabel(L"Span position $\frac{2y}{b}$")
-        ax.set_ylabel(L"Sectional drag $c_d$")
-        ax.set_title("Spanwise drag distribution", color="gray")
+        ax.set_xlabel(y2b_lbl)
+        ax.set_ylabel(cd_lbl)
+        ax.set_title(cd_ttl, color="gray")
         ax.spines["right"].set_visible(false)
         ax.spines["top"].set_visible(false)
 
@@ -327,13 +332,13 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
         axs2 = fig2.subplots(1, 2)
 
         ax = axs2[1]
-        ax.set_xlabel(L"Span position $\frac{2y}{b}$")
+        ax.set_xlabel(y2b_lbl)
         ax.set_ylabel(L"Circulation $\Gamma$")
         ax.spines["right"].set_visible(false)
         ax.spines["top"].set_visible(false)
 
         ax = axs2[2]
-        ax.set_xlabel(L"Span position $\frac{2y}{b}$")
+        ax.set_xlabel(y2b_lbl)
         ax.set_ylabel(L"Effective velocity $V_\infty$")
         ax.spines["right"].set_visible(false)
         ax.spines["top"].set_visible(false)
@@ -494,6 +499,12 @@ function generate_monitor_statevariables(; figname="monitor_statevariables",
     ax.set_ylabel(L"$O$ position")
     Olbls = [L"O_x", L"O_y", L"O_z"]
 
+    for ax in axs
+        ax.spines["right"].set_visible(false)
+        ax.spines["top"].set_visible(false)
+    end
+
+    fig.suptitle("VEHICLE STATE VARIABLES")
     fig.tight_layout()
 
 
@@ -507,8 +518,8 @@ function generate_monitor_statevariables(; figname="monitor_statevariables",
                                                             color=clrs[j])
         end
         if sim.nt==0
-            for j in 1:2
-                axs[j].legend(loc="best", frameon=false)
+            for ax in axs
+                ax.legend(loc="best", frameon=false)
             end
         end
 

@@ -3,6 +3,7 @@
 [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://flow.byu.edu/FLOWUnsteady/)
 
 TODO
+* [ ] Rewrite description
 * [ ] Add a validations section compiling all validation studies
 * [ ] List of publications
 * [ ] Installation instructions
@@ -11,24 +12,26 @@ TODO
 * [ ] Numerical recommendations notebook
 * [ ] Examples
   * [x] Simple wing
-  * [ ] Heaving wing
   * [ ] Circular path?
+  * [ ] Heaving wing
   * [ ] Single rotor aero
   * [ ] Single rotor noise
   * [ ] Blown wing
   * [ ] Vahana
 * [ ] API
+  * [ ] Add pics of each monitor
   * [x] Docstring for run_simulation
-  * [ ] Polish docstrings
+  * [x] Polish docstrings
     * [x] Vehicle: Rotor
     * [x] Vehicle: SimpleWing and ComplexWing
     * [x] Add database definition
-    * [ ] Postprocessing: noise functions
-    * [ ] Postprocessing: Fluid domain
-
+    * [x] Postprocessing: noise functions
+    * [x] Postprocessing: Fluid domain
 * [x] Move large figure files to J Drive
 
 <img src="docs/resources/images/blownwing00.png" alt="Pic here" style="width: 900px;"/>
+
+If you like this package please give it a star. We like stars =]
 
 Simulation engine of mixed-fidelity unsteady aerodynamics and aeroacoustics.
 This suite brings together mid and high-fidelity
