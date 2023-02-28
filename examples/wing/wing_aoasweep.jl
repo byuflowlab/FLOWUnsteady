@@ -1,6 +1,6 @@
 #=##############################################################################
 # DESCRIPTION
-    AOA sweep on 45deg swept-back wing
+    AOA sweep on 45° swept-back wing
 =###############################################################################
 import FLOWUnsteady: cross, dot, norm, plt, @L_str
 

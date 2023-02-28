@@ -267,7 +267,8 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
                                 title_lbl="",
                                 CL_lbl=L"Lift coefficient $C_L$",
                                 CD_lbl=L"Drag coefficient $C_D$",
-                                y2b_i=2,
+                                X_offset=t->zeros(3),
+                                S_proj=t->[0, 1, 0],
                                 conv_suff="_convergence.csv",
                                 figsize_factor=5/6,
                                 nsteps_plot=10,
@@ -275,9 +276,6 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
                                 debug=false)
 
     fcalls = 0                  # Number of function calls
-
-    # y2b = 2*wing._ym/b_ref          # Initial span position
-    y2b = 2*[vlm.getControlPoint(wing, i)[y2b_i] for i in 1:vlm.get_m(wing)]/b_ref
     prev_wing = nothing
 
     # Critical length to ignore horseshoe forces
@@ -364,14 +362,21 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
 
         if PFIELD.nt>2
 
+            t = PFIELD.t
+            y2b = 2*[dot(vlm.getControlPoint(wing, i) .- X_offset(t), S_proj(t))
+                                                for i in 1:vlm.get_m(wing)]/b_ref
+
+            Lhat = L_dir isa Function ? L_dir(PFIELD.t) : L_dir
+            Dhat = D_dir isa Function ? D_dir(PFIELD.t) : D_dir
+
             # Force at each VLM element
             Ftot = calc_aerodynamicforce_fun(wing, prev_wing, PFIELD, Vinf, DT,
-                                                            rho_ref; t=PFIELD.t,
-                                                            spandir=cross(L_dir, D_dir),
+                                                            rho_ref; t=t,
+                                                            spandir=cross(Lhat, Dhat),
                                                             lencrit=lencrit,
                                                             include_trailingboundvortex=include_trailingboundvortex,
                                                             debug=debug)
-            L, D, S = decompose(Ftot, L_dir, D_dir)
+            L, D, S = decompose(Ftot, Lhat, Dhat)
             vlm._addsolution(wing, "L", L)
             vlm._addsolution(wing, "D", D)
             vlm._addsolution(wing, "S", S)
@@ -379,23 +384,23 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
             # Force per unit span at each VLM element
             ftot = calc_aerodynamicforce_fun(wing, prev_wing, PFIELD, Vinf, DT,
                                         rho_ref; t=PFIELD.t, per_unit_span=true,
-                                        spandir=cross(L_dir, D_dir),
+                                        spandir=cross(Lhat, Dhat),
                                         lencrit=lencrit,
                                         include_trailingboundvortex=include_trailingboundvortex,
                                         debug=debug)
-            l, d, s = decompose(ftot, L_dir, D_dir)
+            l, d, s = decompose(ftot, Lhat, Dhat)
 
             # Lift of the wing
             Lwing = sum(L)
-            Lwing = sign(dot(Lwing, L_dir))*norm(Lwing)
+            Lwing = sign(dot(Lwing, Lhat))*norm(Lwing)
             CLwing = Lwing/(qinf_ref*b_ref^2/ar_ref)
-            cl = broadcast(x -> sign(dot(x, L_dir)), l) .* norm.(l) / (qinf_ref*b_ref/ar_ref)
+            cl = broadcast(x -> sign(dot(x, Lhat)), l) .* norm.(l) / (qinf_ref*b_ref/ar_ref)
 
             # Drag of the wing
             Dwing = sum(D)
-            Dwing = sign(dot(Dwing, D_dir))*norm(Dwing)
+            Dwing = sign(dot(Dwing, Dhat))*norm(Dwing)
             CDwing = Dwing/(qinf_ref*b_ref^2/ar_ref)
-            cd = broadcast(x -> sign(dot(x, D_dir)), d) .* norm.(d) / (qinf_ref*b_ref/ar_ref)
+            cd = broadcast(x -> sign(dot(x, Dhat)), d) .* norm.(d) / (qinf_ref*b_ref/ar_ref)
 
             # vlm._addsolution(wing, "cl", cl)
             # vlm._addsolution(wing, "cd", cd)
