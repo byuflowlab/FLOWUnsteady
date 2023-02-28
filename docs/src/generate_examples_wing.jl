@@ -11,7 +11,7 @@ remote_url = "https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/"
 open(joinpath(output_path, output_name*"-4p2aoa.md"), "w") do fout
 
     println(fout, """
-    # Simple Wing
+    # [Simple Wing](@id simple_wing)
 
     ```@raw html
     <center>
@@ -20,9 +20,13 @@ open(joinpath(output_path, output_name*"-4p2aoa.md"), "w") do fout
     </center>
     ```
 
-    In this example we solve the flow around a \$45^\\circ\$ swept-back wing at
+    ```@raw html
+    <br>
+    ```
+
+    In this example we simulate a \$45^\\circ\$ swept-back wing at
     an angle of attack of \$4.2^\\circ\$.
-    In the process we exemplify the basic structure of a simulation, which is
+    In the process we exemplify the basic structure of simulations, which is
     always the same, no matter how complex the simulation might be.
     The structure consists of six steps:
 
@@ -44,15 +48,24 @@ open(joinpath(output_path, output_name*"-4p2aoa.md"), "w") do fout
             calculating, monitoring, and outputting different metrics \
             throughout the simulation
 
-    > **[(5) Run Simulation](@ref):** Call \
-            [`FLOWUnsteady.run_simulation`](@ref) to run the simulation
+    > **[(5) Run Simulation](@ref):** Call to \
+            [`FLOWUnsteady.run_simulation`](@ref)
 
     > **[(6) Viz and Postprocessing](@ref fluid_domain):** The simulation is visualized in \
-            Paraview and results are postprocessed
+            [Paraview](https://www.paraview.org/) and results are postprocessed
+
+    ```@raw html
+    <br>
+    ```
 
     While in this example we show the basic structure without much explanation,
     in subsequent examples we will dive into the details and options of each
-    step (which are also listed in the API Library).
+    step (which are also listed in the [API Guide](@ref vehicle_types)).
+
+    ```@raw html
+    <br>
+    ```
+
     """)
 
     println(fout, "```julia")
@@ -71,10 +84,11 @@ open(joinpath(output_path, output_name*"-4p2aoa.md"), "w") do fout
 
     println(fout, """
 
-    As the simulation runs, you will see the monitor shown below with the
+    As the simulation runs, you will see the monitor (shown below) plotting the
     lift and drag coefficients over time along with the loading distribution.
     For comparison, here we have also added the experimental measurements
-    reported in the literature.
+    reported by
+    [Weber and Brebner, 1951](https://citeseerx.ist.psu.edu/document?repid=rep1&type=pdf&doi=001efd2bf915ad8282a0c5df5e9335624cbde811).
 
     ```@raw html
     (<span style="color:red;">red</span> = beginning,
@@ -105,8 +119,8 @@ open(joinpath(output_path, output_name*"-aoasweep.md"), "w") do fout
     println(fout, "# AOA Sweep")
 
     println(fout, """
-        \nUsing the vehicle, maneuver, and simulation defined in the previous
-        section, we now run a sweep of the angle of attack.
+        \nUsing the same vehicle, maneuver, and simulation defined in the
+        previous section, we now run a sweep of the angle of attack.
     """)
 
     println(fout, "```julia")
@@ -127,16 +141,15 @@ open(joinpath(output_path, output_name*"-aoasweep.md"), "w") do fout
     println(fout, "```")
 
     println(fout, """
-    (see the complete example under
-    [examples/wing_aoasweep.jl](https://github.com/byuflowlab/FLOWUnsteady/blob/master/examples/wing/wing_aoasweep.jl)
-    to see how to plot the results as shown here below)
+    (Check [examples/wing_aoasweep.jl](https://github.com/byuflowlab/FLOWUnsteady/blob/master/examples/wing/wing_aoasweep.jl)
+    to see how to postprocess and plot the results as shown below)
 
     ```@raw html
     <center>
         <br><b>Spanwise loading distribution</b>
         <img src="$(remote_url)/wingexample-sweep-loading.png" alt="Pic here" style="width: 100%;"/>
 
-        <br><br><b>Lift and induced drag</b>
+        <br><br><b>Vehicle lift and drag</b>
         <img src="$(remote_url)/wingexample-sweep-CLCD.png" alt="Pic here" style="width: 100%;"/>
 
         <br><br><b>Pitching moment</b><br>

@@ -1,4 +1,4 @@
-# [Simple Wing](@id simple_wing)
+# [Tethered Wing](@id tethered_wing)
 
 ```@raw html
 <center>
@@ -11,46 +11,35 @@
 <br>
 ```
 
-In this example we simulate a $45^\circ$ swept-back wing at
-an angle of attack of $4.2^\circ$.
-In the process we exemplify the basic structure of simulations, which is
-always the same, no matter how complex the simulation might be.
-The structure consists of six steps:
+In this example we extend the [simple wing case](@ref simple_wing) to fly
+a circular path.
+This simulates a kite tethered to the ground with a crosswind that causes it
+to fly in circles.
+The kite effectively acts as a turbine extracting energy from the wind to sustain
+flight, which is the basis for the field of
+[airborne wind energy](https://en.wikipedia.org/wiki/Airborne_wind_turbine).
 
->**[(1) Vehicle Definition](@ref vehicle_types):** Generate the geometry of the vehicle and declare each vehicle subsystem in a [`FLOWUnsteady.VLMVehicle`](@ref) object
+This simulation exemplify the following features:
 
-> **[(2) Maneuver Definition](@ref):** Generate functions that prescribe the kinematics of the vehicle and specify the control inputs for tilting and rotor subsystems in a [`FLOWUnsteady.KinematicManeuver`](@ref) object
-
-> **[(3) Simulation Definition](@ref):** A [`FLOWUnsteady.Simulation`](@ref) object is generated stating the vehicle, maneuver, and total time and speed at which to perform the maneuver
-
->**[(4) Monitors Definitions](@ref):** Functions are generated for calculating, monitoring, and outputting different metrics throughout the simulation
-
-> **[(5) Run Simulation](@ref):** Call to [`FLOWUnsteady.run_simulation`](@ref)
-
-> **[(6) Viz and Postprocessing](@ref fluid_domain):** The simulation is visualized in [Paraview](https://www.paraview.org/) and results are postprocessed
-
-```@raw html
-<br>
-```
-
-While in this example we show the basic structure without much explanation,
-in subsequent examples we will dive into the details and options of each
-step (which are also listed in the [API Guide](@ref vehicle_types)).
+* Translating and re-orienting the initial position of the vehicle using
+    [`FLOWVLM.setcoordsystem`](@ref)
+* Defining a [`uns.KinematicManeuver`](@ref) object that prescribes the
+    kinematics of a circular path
+* Customizing the wing monitor ([`uns.generate_monitor_wing`](@ref)) to
+    compute and plot forces decomposed in arbitrary directions (in this
+    case, following the orientation of the vehicle along the circular path)
+* Monitoring the vehicle state variables with
+    [`uns.generate_monitor_statevariables`](@ref)
 
 ```@raw html
 <br>
 ```
-
 
 ```julia
 #=##############################################################################
 # DESCRIPTION
-    45° swept-back wing at an angle of attack of 4.2°. This wing has an aspect
-    ratio of 5.0, a RAE 101 airfoil section with 12% thickness, and no dihedral,
-    twist, nor taper. This test case matches the experimental setup of Weber,
-    J., and Brebner, G., “Low-Speed Tests on 45-deg Swept-Back Wings, Part I,”
-    Tech. rep., 1951. The same case is used in a VLM calculation in Bertin's
-    Aerodynamics for Engineers, Example 7.2, pp. 343.
+    Kite flying in a circular path with crosswind while tethered to the ground.
+    The kite is the same 45° swept-back wing from the previous example.
 
 # AUTHORSHIP
   * Author          : Eduardo J. Alvarez (edoalvarez.com)
@@ -63,22 +52,14 @@ step (which are also listed in the [API Guide](@ref vehicle_types)).
 import FLOWUnsteady as uns
 import FLOWVLM as vlm
 
-run_name        = "wing-example"            # Name of this simulation
+run_name        = "tetheredwing-example"    # Name of this simulation
 
 save_path       = run_name                  # Where to save this simulation
 paraview        = true                      # Whether to visualize with Paraview
 
 
-# ----------------- SIMULATION PARAMETERS --------------------------------------
-AOA             = 4.2                       # (deg) angle of attack
-magVinf         = 49.7                      # (m/s) freestream velocity
-rho             = 0.93                      # (kg/m^3) air density
-qinf            = 0.5*rho*magVinf^2         # (Pa) static pressure
-
-Vinf(X, t)      = magVinf*[cosd(AOA), 0.0, sind(AOA)]  # Freestream function
-
-
 # ----------------- GEOMETRY PARAMETERS ----------------------------------------
+# Wing description
 b               = 2.489                     # (m) span length
 ar              = 5.0                       # Aspect ratio b/c_tip
 tr              = 1.0                       # Taper ratio c_tip/c_root
@@ -92,27 +73,46 @@ n               = 50                        # Number of spanwise elements per si
 r               = 10.0                      # Geometric expansion of elements
 central         = false                     # Whether expansion is central
 
-# NOTE: A geometric expansion of 10 that is not central means that the last
-#       element is 10 times wider than the first element. If central, the
-#       middle element is 10 times wider than the peripheral elements.
+# ----------------- SIMULATION PARAMETERS --------------------------------------
+# Freestream
+magVinf         = 5.0                       # (m/s) freestream velocity
+magVeff         = 49.7                      # (m/s) vehicle effective velocity
+AOAeff          = 4.2                       # (deg) vehicle effective AOA
+rho             = 0.93                      # (kg/m^3) air density
+qinf            = 0.5*rho*magVeff^2         # (Pa) static pressure
+
+Vinf(X, t)      = magVinf*[1, 0, 0]         # Freestream function
+
+# Circular path
+R               = 3.0*b                     # (m) radius of circular path
+magVvehicle     = sqrt(magVeff^2 - magVinf^2) # (m/s) vehicle velocity
+omega           = magVvehicle/R             # (rad/s) angular velocity
+alpha           = AOAeff - atand(magVinf, magVvehicle) # (deg) vehicle pitch angle
 
 # ----------------- SOLVER PARAMETERS ------------------------------------------
 # Time parameters
-wakelength      = 2.75*b                    # (m) length of wake to be resolved
-ttot            = wakelength/magVinf        # (s) total simulation time
-nsteps          = 200                       # Number of time steps
+nrevs           = 2.50                      # Revolutions to resolve
+nsteps_per_rev  = 144                       # Number of time steps per revolution
+
+ttot            = nrevs / (omega/(2*pi))    # (s) total simulation time
+nsteps          = ceil(Int, nrevs * nsteps_per_rev) # Number of time steps
 
 # VLM and VPM parameters
-p_per_step      = 1                         # Number of particle sheds per time step
+p_per_step      = 4                         # Number of particle sheds per time step
 
-lambda_vpm      = 2.0                       # VPM core overlap
-sigma_vpm_overwrite = lambda_vpm * magVinf * (ttot/nsteps)/p_per_step # Smoothing core size
 sigma_vlm_solver= -1                        # VLM-on-VLM smoothing radius (deactivated with <0)
 sigma_vlm_surf  = 0.05*b                    # VLM-on-VPM smoothing radius
+lambda_vpm      = 2.125                     # VPM core overlap
+                                            # VPM smoothing radius
+sigma_vpm_overwrite = lambda_vpm * magVeff * (ttot/nsteps)/p_per_step
 
 shed_starting   = true                      # Whether to shed starting vortex
+vlm_rlx         = 0.7                       # VLM relaxation
 
-
+# NOTE: In some cases the starting vortex can cause numerical instabilities at
+#       the beginning of the simulation. If so, consider omitting shedding of
+#       the starting vortex with `shed_starting=false`, or relax the VLM solver
+#       with `0.2 < vlm_rlx < 0.9`
 
 
 # ----------------- 1) VEHICLE DEFINITION --------------------------------------
@@ -122,9 +122,11 @@ println("Generating geometry...")
 wing = vlm.simpleWing(b, ar, tr, twist_root, lambda, gamma;
                         twist_tip=twist_tip, n=n, r=r, central=central);
 
-# NOTE: `FLOWVLM.simpleWing` is an auxiliary function in FLOWVLM for creating a
-#       VLM wing with constant sweep, dihedral, and taper ratio, and a linear
-#       twist between the root and the wing tips
+# Rotate wing to pitch
+O = [0.0, 0.0, 0.0]                                 # New position
+Oaxis = uns.gt.rotation_matrix2(0.0, -alpha, 0.0)   # New orientation
+vlm.setcoordsystem(wing, O, Oaxis)
+
 
 println("Generating vehicle...")
 
@@ -140,21 +142,40 @@ vehicle = uns.VLMVehicle(   system;
                             wake_system=wake_system
                          );
 
-# NOTE: `FLOWUnsteady.VLMVehicle` creates a vehicle made out of multiple VLM and
-#       rotor subsystems. The argument `system` represents the vehicle as a
-#       whole which will be translated and rotated with the kinematics
-#       prescribed by the maneuver. The subsystem `vlm_system` will be solved
-#       with the VLM solver. The subsystems `rotor_systems` are solved with
-#       blade elements (none in this case). The subsystem `wake_system` will
-#       shed the VPM wake.
+ # Rotate vehicle to be perpendicular to crosswind
+ # and translate it to start at (x, y, z) = (0, R, 0)
+ O = [0, R, 0]                                      # New position
+ Oaxis = uns.gt.rotation_matrix2(0.0, -90, 0.0)     # New orientation
 
-
+ vlm.setcoordsystem(system, O, Oaxis)
 
 
 # ------------- 2) MANEUVER DEFINITION -----------------------------------------
 
-Vvehicle(t) = zeros(3)                      # Translational velocity of vehicle over time
-anglevehicle(t) = zeros(3)                  # Angle of the vehicle over time
+# Translational velocity of vehicle over time
+function Vvehicle(t)
+
+    # NOTE: This function receives a non-dimensional time `t` (with t=0 being
+    #       the start of simulation and t=1 the end), and returns a
+    #       non-dimensional velocity vector. This vector will later be scaled
+    #       by `Vref`.
+
+    Vx = 0
+    Vy = -sin(2*pi*nrevs*t)
+    Vz = cos(2*pi*nrevs*t)
+
+    return [0, Vy, Vz]
+end
+
+# Angle of the vehicle over time
+function anglevehicle(t)
+
+    # NOTE: This function receives the non-dimensional time `t` and returns the
+    #       attitude of the vehicle (a vector with inclination angles with
+    #       respect to each axis of the global coordinate system)
+
+    return [0, 0, 360*nrevs*t]
+end
 
 angle = ()                                  # Angle of each tilting system (none)
 RPM = ()                                    # RPM of each rotor system (none)
@@ -163,15 +184,14 @@ maneuver = uns.KinematicManeuver(angle, RPM, Vvehicle, anglevehicle)
 
 # NOTE: `FLOWUnsteady.KinematicManeuver` defines a maneuver with prescribed
 #       kinematics. `Vvehicle` defines the velocity of the vehicle (a vector)
-#       over time. `anglevehicle` defines the attitude of the vehicle over time
-#       (a vector with inclination angles with respect to each axis of the
-#       global coordinate system). `angle` defines the tilting angle of each
-#       tilting system over time (none in this case). `RPM` defines the RPM of
-#       each rotor system over time (none in this case).
+#       over time. `anglevehicle` defines the attitude of the vehicle over time.
+#       `angle` defines the tilting angle of each tilting system over time (none
+#       in this case). `RPM` defines the RPM of each rotor system over time
+#       (none in this case).
 #       Each of these functions receives a nondimensional time `t`, which is the
 #       simulation time normalized by the total time `ttot`, from 0 to
 #       1, beginning to end of simulation. They all return a nondimensional
-#       output that is then scaled up by either a reference velocity (`Vref`) or
+#       output that is then scaled by either a reference velocity (`Vref`) or
 #       a reference RPM (`RPMref`). Defining the kinematics and controls of the
 #       maneuver in this way allows the user to have more control over how fast
 #       to perform the maneuver, since the total time, reference velocity and
@@ -182,7 +202,7 @@ maneuver = uns.KinematicManeuver(angle, RPM, Vvehicle, anglevehicle)
 
 # ------------- 3) SIMULATION DEFINITION ---------------------------------------
 
-Vref = 0.0                                  # Reference velocity to scale maneuver by
+Vref = magVvehicle                          # Reference velocity to scale maneuver by
 RPMref = 0.0                                # Reference RPM to scale maneuver by
 Vinit = Vref*Vvehicle(0)                    # Initial vehicle velocity
 Winit = pi/180*(anglevehicle(1e-6) - anglevehicle(0))/(1e-6*ttot)  # Initial angular velocity
@@ -198,24 +218,20 @@ simulation = uns.Simulation(vehicle, maneuver, Vref, RPMref, ttot;
 
 # ------------- 4) MONITORS DEFINITIONS ----------------------------------------
 
-# NOTE: Monitors are functions that are called at every time step to perform
-#       some secondary computation after the solution of that time step has been
-#       obtained. In this case, the wing monitor uses the circulation and
-#       induced velocities to compute aerodynamic forces and decompose them
-#       into lift and drag. The monitor then plots these forces at every time
-#       step while also saving them under a CSV file in the simulation folder.
-
-# Generate function that calculates aerodynamic forces
-# NOTE: We exclude skin friction since we want to compare to the experimental
-#       data reported in Weber 1951 that was measured with pressure taps
+# Generate function that computes aerodynamic forces
 calc_aerodynamicforce_fun = uns.generate_calc_aerodynamicforce(;
                                     add_parasiticdrag=true,
-                                    add_skinfriction=false,
+                                    add_skinfriction=true,
                                     airfoilpolar="xf-rae101-il-1000000.csv"
                                     )
 
-D_dir = [cosd(AOA), 0.0, sind(AOA)]         # Direction of drag
-L_dir = uns.cross(D_dir, [0,1,0])           # Direction of lift
+# Time-varying directions used to decompose the aerodynamic force
+N_dir(t) = [1, 0, 0]                        # Direction of normal force
+T_dir(t) = [0, sin(omega*t), -cos(omega*t)] # Direction of tangent force
+S_dir(t) = uns.cross(N_dir(t), T_dir(t))    # Spanwise direction
+
+X_offset(t) = system.O                      # Reference wing origin (for calculating spanwise position)
+S_proj(t)   = S_dir(t)                      # Reference span direction (for calculating spanwise position)
 
 figs, figaxs = [], []                       # Figures generated by monitor
 
@@ -223,8 +239,16 @@ figs, figaxs = [], []                       # Figures generated by monitor
 monitor_wing = uns.generate_monitor_wing(wing, Vinf, b, ar,
                                             rho, qinf, nsteps;
                                             calc_aerodynamicforce_fun=calc_aerodynamicforce_fun,
-                                            L_dir=L_dir,
-                                            D_dir=D_dir,
+                                            L_dir=N_dir,
+                                            D_dir=T_dir,
+                                            X_offset=X_offset,
+                                            S_proj=S_proj,
+                                            CL_lbl=L"Normal force $C_n$",
+                                            CD_lbl=L"Tangent force $C_t$",
+                                            cl_lbl=L"Sectional normal force $c_n$",
+                                            cd_lbl=L"Sectional tangent force $c_t$",
+                                            cl_ttl="Normal force distribution",
+                                            cd_ttl="tangent force distribution",
                                             out_figs=figs,
                                             out_figaxs=figaxs,
                                             save_path=save_path,
@@ -233,10 +257,15 @@ monitor_wing = uns.generate_monitor_wing(wing, Vinf, b, ar,
                                             disp_plot=true,
                                             figsize_factor=5/6,
                                             nsteps_plot=1,
-                                            nsteps_savefig=10
+                                            nsteps_savefig=10,
                                             );
 
+# Generate monitor of state variables
+monitor_states = uns.generate_monitor_statevariables(; save_path=save_path,
+                                                       run_name=run_name,
+                                                       nsteps_savefig=10)
 
+monitor(args...; optargs...) = monitor_wing(args...; optargs...) || monitor_states(args...; optargs...)
 
 
 # ------------- 5) RUN SIMULATION ----------------------------------------------
@@ -252,11 +281,12 @@ uns.run_simulation(simulation, nsteps;
                     sigma_vlm_surf=sigma_vlm_surf,
                     sigma_rotor_surf=sigma_vlm_surf,
                     sigma_vpm_overwrite=sigma_vpm_overwrite,
+                    vlm_rlx=vlm_rlx,
                     shed_starting=shed_starting,
-                    extra_runtime_function=monitor_wing,
+                    extra_runtime_function=monitor,
                     # ----- OUTPUT OPTIONS ------------------
                     save_path=save_path,
-                    run_name=run_name
+                    run_name=run_name,
                     );
 
 
@@ -277,26 +307,3 @@ end
 
 
 ```
-
-As the simulation runs, you will see the monitor (shown below) plotting the
-lift and drag coefficients over time along with the loading distribution.
-For comparison, here we have also added the experimental measurements
-reported by
-[Weber and Brebner, 1951](https://citeseerx.ist.psu.edu/document?repid=rep1&type=pdf&doi=001efd2bf915ad8282a0c5df5e9335624cbde811).
-
-```@raw html
-(<span style="color:red;">red</span> = beginning,
-<span style="color:blue;">blue</span> = end)
-```
-
-```@raw html
-<center>
-    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//wingexample-simmonitor.png" alt="Pic here" style="width: 100%;"/>
-</center>
-```
-
-|           | Experimental  | FLOWUnsteady              | Error |
-| --------: | :-----------: | :-----------------------: | :---- |
-| $C_L$   | 0.238         | 0.23506    | 1.234% |
-| $C_D$   | 0.005         | 0.00501    | 0.143% |
-

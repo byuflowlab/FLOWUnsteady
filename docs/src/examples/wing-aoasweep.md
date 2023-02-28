@@ -1,12 +1,12 @@
 # AOA Sweep
     
-Using the vehicle, maneuver, and simulation defined in the previous
-    section, we now run a sweep of the angle of attack.
+Using the same vehicle, maneuver, and simulation defined in the
+    previous section, we now run a sweep of the angle of attack.
 
 ```julia
 #=##############################################################################
 # DESCRIPTION
-    AOA sweep on 45deg swept-back wing
+    AOA sweep on 45° swept-back wing
 =###############################################################################
 import FLOWUnsteady: cross, dot, norm, plt, @L_str
 
@@ -118,16 +118,15 @@ end
 
 
 ```
-(see the complete example under
-[examples/wing_aoasweep.jl](https://github.com/byuflowlab/FLOWUnsteady/blob/master/examples/wing/wing_aoasweep.jl)
-to see how to plot the results as shown here below)
+(Check [examples/wing_aoasweep.jl](https://github.com/byuflowlab/FLOWUnsteady/blob/master/examples/wing/wing_aoasweep.jl)
+to see how to postprocess and plot the results as shown below)
 
 ```@raw html
 <center>
     <br><b>Spanwise loading distribution</b>
     <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//wingexample-sweep-loading.png" alt="Pic here" style="width: 100%;"/>
 
-    <br><br><b>Lift and induced drag</b>
+    <br><br><b>Vehicle lift and drag</b>
     <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//wingexample-sweep-CLCD.png" alt="Pic here" style="width: 100%;"/>
 
     <br><br><b>Pitching moment</b><br>

@@ -19,7 +19,11 @@ makedocs(
                                     "Simple Wing" => [
                                                         "Basics" => "examples/wing-4p2aoa.md",
                                                         "examples/wing-aoasweep.md"
-                                                     ],
+                                                      ],
+                                    "Tethered Wing" => [
+                                                        "Circular path" => "examples/tetheredwing-R3b.md",
+                                                        # "examples/wing-aoasweep.md"
+                                                      ],
                                    ],
                 "API Guide"     => [
                                     "(1) Vehicle Definition" => [
@@ -35,7 +39,7 @@ makedocs(
                                                                 "api/flowunsteady-postprocessing-fdom.md",
                                                                 "api/flowunsteady-postprocessing-noise.md",
                                                                 ],
-                                    "Extra" => [
+                                    "Extras" => [
                                                 "FLOWVPM"  => [
                                                                 "api/flowvpm-particle.md",
                                                                 "api/flowvpm-uj.md",
