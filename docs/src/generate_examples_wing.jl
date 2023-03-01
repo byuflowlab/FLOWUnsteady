@@ -97,12 +97,12 @@ open(joinpath(output_path, output_name*"-4p2aoa.md"), "w") do fout
 
     ```@raw html
     <center>
-        <img src="$(remote_url)/wingexample-simmonitor.png" alt="Pic here" style="width: 100%;"/>
+        <img src="$(remote_url)/wing-example-simmonitor.png" alt="Pic here" style="width: 100%;"/>
     </center>
     ```
     """)
 
-    open(joinpath(data_path, "wingexample-CLCD.md"), "r") do fin
+    open(joinpath(data_path, "wing-example-CLCD.md"), "r") do fin
         for l in eachline(fin)
             println(fout, l)
         end
@@ -147,13 +147,13 @@ open(joinpath(output_path, output_name*"-aoasweep.md"), "w") do fout
     ```@raw html
     <center>
         <br><b>Spanwise loading distribution</b>
-        <img src="$(remote_url)/wingexample-sweep-loading.png" alt="Pic here" style="width: 100%;"/>
+        <img src="$(remote_url)/wing-example-sweep-loading.png" alt="Pic here" style="width: 100%;"/>
 
         <br><br><b>Vehicle lift and drag</b>
-        <img src="$(remote_url)/wingexample-sweep-CLCD.png" alt="Pic here" style="width: 100%;"/>
+        <img src="$(remote_url)/wing-example-sweep-CLCD.png" alt="Pic here" style="width: 100%;"/>
 
         <br><br><b>Pitching moment</b><br>
-        <img src="$(remote_url)/wingexample-sweep-Cm.png" alt="Pic here" style="width: 50%;"/>
+        <img src="$(remote_url)/wing-example-sweep-Cm.png" alt="Pic here" style="width: 50%;"/>
     </center>
     ```
     """)

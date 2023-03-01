@@ -1,22 +1,21 @@
-# ------------- SWEPT WING EXAMPLE ---------------------------------------------
+# ------------- TETHERED WING EXAMPLE ------------------------------------------
 
 output_name = "tetheredwing"
 data_path = joinpath(module_path, "..", "resources", "data")
-example_path = joinpath(uns.examples_path, "tetheredwing")
+# example_path = joinpath(uns.examples_path, "tetheredwing")
+example_path = uns.examples_path
 
 remote_url = "https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/"
 
 
-# -------- R = 3b --------------------------------------------------------------
-open(joinpath(output_path, output_name*"-R3b.md"), "w") do fout
+open(joinpath(output_path, output_name*".md"), "w") do fout
 
     println(fout, """
-    # [Tethered Wing](@id tethered_wing)
+    # Tethered Wing
 
     ```@raw html
     <center>
-      <img src="$(remote_url)/weber-particles06.png" alt="Pic here" style="width: 49%;"/>
-      <img src="$(remote_url)/weber-n100-00.png" alt="Pic here" style="width: 49%;"/>
+      <img src="$(remote_url)/tetheredwing-example-00small.gif" alt="Vid here" style="width: 80%;"/>
     </center>
     ```
 
@@ -53,7 +52,7 @@ open(joinpath(output_path, output_name*"-R3b.md"), "w") do fout
 
     open(joinpath(example_path, "tetheredwing.jl"), "r") do fin
         for l in eachline(fin)
-            if contains(l, "COMPARISON TO EXPERIMENTAL DATA")
+            if contains(l, "6) POSTPROCESSING")
                 break
             end
 
@@ -63,79 +62,53 @@ open(joinpath(output_path, output_name*"-R3b.md"), "w") do fout
 
     println(fout, "```")
 
-    # println(fout, """
-    #
-    # As the simulation runs, you will see the monitor (shown below) plotting the
-    # lift and drag coefficients over time along with the loading distribution.
-    # For comparison, here we have also added the experimental measurements
-    # reported by
-    # [Weber and Brebner, 1951](https://citeseerx.ist.psu.edu/document?repid=rep1&type=pdf&doi=001efd2bf915ad8282a0c5df5e9335624cbde811).
-    #
-    # ```@raw html
-    # (<span style="color:red;">red</span> = beginning,
-    # <span style="color:blue;">blue</span> = end)
-    # ```
-    #
-    # ```@raw html
-    # <center>
-    #     <img src="$(remote_url)/wingexample-simmonitor.png" alt="Pic here" style="width: 100%;"/>
-    # </center>
-    # ```
-    # """)
-    #
-    # open(joinpath(data_path, "wingexample-CLCD.md"), "r") do fin
-    #     for l in eachline(fin)
-    #         println(fout, l)
-    #     end
-    # end
+    println(fout, """
+
+    As the simulation runs, you will see the monitor shown below plotting the
+    state variables of the vehicle. The components of both velocity
+    and position follow a sinusoidal function, which is consistent with the
+    circular path, while the angular velocity is constant.
+
+
+    ```@raw html
+    <center>
+        <img src="$(remote_url)/tetheredwing-example-statemonitor.png" alt="Pic here" style="width: 100%;"/>
+    </center>
+    <br>
+    ```
+
+    The force monitor (shown below) plots the
+    force components that are normal and tangential to the plane of rotation.
+    Notice that the tangential force is negative, which is equivalent to
+    having a negative drag, meaning that the vehicle is actually being propelled
+    by the crosswind.
+    Also notice that the forces are perturbed every time it completes a
+    revolution.
+    This is due to encountering the starting point of the wake that is slowly
+    traveling downstream.
+    It takes a couple revolutions for the forces to converge once the wake
+    has been fully deployed.
+
+    ```@raw html
+    (<span style="color:red;">red</span> = beginning,
+    <span style="color:blue;">blue</span> = end)
+    ```
+
+    ```@raw html
+    <center>
+        <img src="$(remote_url)/tetheredwing-example-wingmonitor.png" alt="Pic here" style="width: 100%;"/>
+    </center>
+    ```
+
+    !!! tip "Disable monitors to speed up simulation"
+        For unknown reasons, the simulation oftentimes halts in between time
+        steps while plotting the monitors.
+        This slows down the overall simulation time, sometimes taking up to 2x
+        longer.
+        If you are not particularly interested in the plots of the monitors,
+        you can disable the plots passing the keyword `disp_plot=false` to each
+        monitor generator.
+
+    """)
 
 end
-
-
-
-
-# # -------- AOA Sweep -----------------------------------------------------------
-# open(joinpath(output_path, output_name*"-aoasweep.md"), "w") do fout
-#
-#     println(fout, "# AOA Sweep")
-#
-#     println(fout, """
-#         \nUsing the same vehicle, maneuver, and simulation defined in the
-#         previous section, we now run a sweep of the angle of attack.
-#     """)
-#
-#     println(fout, "```julia")
-#
-#     input_name = "wing_aoasweep.jl"
-#
-#     open(joinpath(example_path, input_name), "r") do fin
-#         for (li, l) in enumerate(eachline(fin))
-#             if contains(l, "COMPARISON TO EXPERIMENTAL DATA")
-#                 break
-#             end
-#
-#             println(fout, l)
-#
-#         end
-#     end
-#
-#     println(fout, "```")
-#
-#     println(fout, """
-#     (Check [examples/wing_aoasweep.jl](https://github.com/byuflowlab/FLOWUnsteady/blob/master/examples/wing/wing_aoasweep.jl)
-#     to see how to postprocess and plot the results as shown below)
-#
-#     ```@raw html
-#     <center>
-#         <br><b>Spanwise loading distribution</b>
-#         <img src="$(remote_url)/wingexample-sweep-loading.png" alt="Pic here" style="width: 100%;"/>
-#
-#         <br><br><b>Vehicle lift and drag</b>
-#         <img src="$(remote_url)/wingexample-sweep-CLCD.png" alt="Pic here" style="width: 100%;"/>
-#
-#         <br><br><b>Pitching moment</b><br>
-#         <img src="$(remote_url)/wingexample-sweep-Cm.png" alt="Pic here" style="width: 50%;"/>
-#     </center>
-#     ```
-#     """)
-# end

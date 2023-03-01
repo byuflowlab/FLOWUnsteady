@@ -479,9 +479,11 @@ vehicle position.
 Use `save_path` to indicate a directory where to save the plots.
 """
 function generate_monitor_statevariables(; figname="monitor_statevariables",
-                                           save_path=nothing,
-                                           run_name="",
-                                           nsteps_savefig=10)
+                                            out_figs=[],
+                                            out_figaxs=[],
+                                            save_path=nothing,
+                                            run_name="",
+                                            nsteps_savefig=10)
 
     formatpyplot()
     fig = plt.figure(figname, figsize=[7*2, 5*1])
@@ -504,8 +506,11 @@ function generate_monitor_statevariables(; figname="monitor_statevariables",
         ax.spines["top"].set_visible(false)
     end
 
-    fig.suptitle("VEHICLE STATE VARIABLES")
+    fig.suptitle("Vehicle state variables", color="gray")
     fig.tight_layout()
+
+    push!(out_figs, fig)
+    push!(out_figaxs, axs)
 
 
     function extra_runtime_function(sim, PFIELD, T, DT; optargs...)

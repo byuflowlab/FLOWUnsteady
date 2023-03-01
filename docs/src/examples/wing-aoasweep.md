@@ -124,13 +124,13 @@ to see how to postprocess and plot the results as shown below)
 ```@raw html
 <center>
     <br><b>Spanwise loading distribution</b>
-    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//wingexample-sweep-loading.png" alt="Pic here" style="width: 100%;"/>
+    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//wing-example-sweep-loading.png" alt="Pic here" style="width: 100%;"/>
 
     <br><br><b>Vehicle lift and drag</b>
-    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//wingexample-sweep-CLCD.png" alt="Pic here" style="width: 100%;"/>
+    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//wing-example-sweep-CLCD.png" alt="Pic here" style="width: 100%;"/>
 
     <br><br><b>Pitching moment</b><br>
-    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//wingexample-sweep-Cm.png" alt="Pic here" style="width: 50%;"/>
+    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//wing-example-sweep-Cm.png" alt="Pic here" style="width: 50%;"/>
 </center>
 ```
 

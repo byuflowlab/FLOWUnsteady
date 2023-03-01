@@ -20,10 +20,7 @@ makedocs(
                                                         "Basics" => "examples/wing-4p2aoa.md",
                                                         "examples/wing-aoasweep.md"
                                                       ],
-                                    "Tethered Wing" => [
-                                                        "Circular path" => "examples/tetheredwing-R3b.md",
-                                                        # "examples/wing-aoasweep.md"
-                                                      ],
+                                    "examples/tetheredwing.md",
                                    ],
                 "API Guide"     => [
                                     "(1) Vehicle Definition" => [

@@ -291,7 +291,7 @@ reported by
 
 ```@raw html
 <center>
-    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//wingexample-simmonitor.png" alt="Pic here" style="width: 100%;"/>
+    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//wing-example-simmonitor.png" alt="Pic here" style="width: 100%;"/>
 </center>
 ```
 
