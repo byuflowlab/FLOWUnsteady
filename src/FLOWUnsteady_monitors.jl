@@ -329,6 +329,7 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
         fig1.tight_layout()
 
         fig2 = plt.figure(figname*"_2", figsize=[7*2, 5*1]*figsize_factor)
+        fig2.suptitle(title_lbl)
         axs2 = fig2.subplots(1, 2)
 
         ax = axs2[1]

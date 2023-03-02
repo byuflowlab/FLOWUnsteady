@@ -59,6 +59,49 @@ end
 mean(xs) = sum(xs)/length(xs)
 
 
+# ------------- PROCESSING VTKS ------------------------------------------------
+"""
+    Return an array with the requested field sliced along a dimension if dim!=0
+"""
+function generate_calcwingfun(datatype, fieldname; dim=-1)
+    function calcfun(points, cells, data)
+
+        nmax = Int(size(data[datatype][fieldname], 2^(dim!=0))/2)
+
+        if dim==-1
+            return reshape(mapslices(norm, view(data[datatype][fieldname], dim, 1:nmax); dims=1), :)
+        elseif dim==0
+            return view(data[datatype][fieldname], 1:nmax)
+        # elseif dim<-1
+        #    error("Invalid dimension $dim")
+        else
+            return view(data[datatype][fieldname], dim, 1:nmax)
+        end
+    end
+    return calcfun
+end
+gen_calcfun = generate_calcwingfun
+
+
+calc_wingLdist = generate_calcwingfun("CELL_DATA", "ftot"; dim=3)
+calc_wingDdist = generate_calcwingfun("CELL_DATA", "ftot"; dim=1)
+# calc_wingGamma = generate_calcwingfun("CELL_DATA", "Gamma"; dim=0)
+
+calc_Xspan(args...) = (centroids=calc_centroid(args...); return view(centroids, 2, :))
+
+function calc_centroid(points, cells, args...)
+    ncells = Int(length(cells)/2)
+    centroids = zeros(3, ncells)
+
+    for (celli, cell) in enumerate(cells[1:ncells])
+        for pi in cell
+            centroids[:, celli] .+= view(points, 1:3, pi+1)
+        end
+        centroids[:, celli] ./= length(cell)
+    end
+
+    return centroids
+end
 
 
 # ------------- MISCELLANEOUS --------------------------------------------------
@@ -102,7 +145,7 @@ function plot_maneuver(maneuver::KinematicManeuver;
 
     ax.set_xlabel("Non-dimensional time")
     ax.set_ylabel("Non-dimensional velocity")
-    ax.legend(loc="best", frameon=false)
+    ax.legend(loc="upper right", frameon=true, fontsize=12)
 
     # -------------------- Mission profile -------------------------------------
     Xinit = zeros(3)        # Initial position
@@ -118,9 +161,9 @@ function plot_maneuver(maneuver::KinematicManeuver;
     Xmax = max([maximum([X[i] for X in Xs]) for i in 1:3]...)
     Xmin = min([minimum([X[i] for X in Xs]) for i in 1:3]...)
 
-    ax.plot(ts, [X[1] for X in Xs], "-g", label=L"x", alpha=0.8, color=clrs[1])
-    ax.plot(ts, [X[2] for X in Xs], "-b", label=L"y", alpha=0.8, color=clrs[2])
-    ax.plot(ts, [X[3] for X in Xs], "-r", label=L"z", alpha=0.8, color=clrs[3])
+    ax.plot(ts, [X[1] for X in Xs], "-", label=L"x", alpha=0.8, color=clrs[1])
+    ax.plot(ts, [X[2] for X in Xs], "-", label=L"y", alpha=0.8, color=clrs[2])
+    ax.plot(ts, [X[3] for X in Xs], "-", label=L"z", alpha=0.8, color=clrs[3])
 
     for tstage in tstages
         ax.plot(tstage*ones(2), [Xmin, Xmax], ":k", alpha=0.5)
@@ -128,7 +171,7 @@ function plot_maneuver(maneuver::KinematicManeuver;
 
     ax.set_xlabel("Non-dimensional time")
     ax.set_ylabel("Non-dimensional position")
-    ax.legend(loc="best", frameon=false)
+    ax.legend(loc="upper right", frameon=true, fontsize=12)
 
     # -------------------- Vehicle angle history -------------------------------
     ax = axs1[3]
@@ -137,9 +180,9 @@ function plot_maneuver(maneuver::KinematicManeuver;
     amax = max([maximum([a[i] for a in as]) for i in 1:3]...)
     amin = min([minimum([a[i] for a in as]) for i in 1:3]...)
 
-    ax.plot(ts, [a[1] for a in as], "-g", label=L"\theta_x", alpha=0.8, color=clrs[1])
-    ax.plot(ts, [a[2] for a in as], "-b", label=L"\theta_y", alpha=0.8, color=clrs[2])
-    ax.plot(ts, [a[3] for a in as], "-r", label=L"\theta_z", alpha=0.8, color=clrs[3])
+    ax.plot(ts, [a[1] for a in as], "-", label=L"\theta_x", alpha=0.8, color=clrs[1])
+    ax.plot(ts, [a[2] for a in as], "-", label=L"\theta_y", alpha=0.8, color=clrs[2])
+    ax.plot(ts, [a[3] for a in as], "-", label=L"\theta_z", alpha=0.8, color=clrs[3])
 
     for tstage in tstages
         ax.plot(tstage*ones(2), [amin, amax], ":k", alpha=0.5)
@@ -147,7 +190,12 @@ function plot_maneuver(maneuver::KinematicManeuver;
 
     ax.set_xlabel("Non-dimensional time")
     ax.set_ylabel(L"Angle ($^\circ$)")
-    ax.legend(loc="best", frameon=false)
+    ax.legend(loc="upper right", frameon=true, fontsize=12)
+
+    for ax in axs1
+        ax.spines["right"].set_visible(false)
+        ax.spines["top"].set_visible(false)
+    end
 
     if save_path!=nothing
         # Save figure
@@ -197,7 +245,7 @@ function plot_maneuver(maneuver::KinematicManeuver;
 
             ax.set_xlabel("Non-dimensional time")
             ax.set_ylabel("Angle "*(i==1 ? L"\theta_x" : i==2 ? L"\theta_y" : L"\theta_z") * L" ($^\circ$)")
-            ax.legend(loc="best", frameon=false)
+            ax.legend(loc="upper right", frameon=true, fontsize=10, markerscale=0.5)
         end
     end
 
@@ -221,10 +269,16 @@ function plot_maneuver(maneuver::KinematicManeuver;
 
         ax.set_xlabel("Non-dimensional time")
         ax.set_ylabel("Non-dimensional RPM\n(RPM/RPMh)")
-        ax.legend(loc="best", frameon=false)
+        ax.legend(loc="upper right", frameon=true, fontsize=10, markerscale=0.5)
     end
 
     if length(angle_syss)!=0 || length(RPM_syss)!=0
+
+        for ax in axs2
+            ax.spines["right"].set_visible(false)
+            ax.spines["top"].set_visible(false)
+        end
+
         if save_path!=nothing
             # Save figure
             fig2.savefig(joinpath(save_path, figname*"-controls.png"),
