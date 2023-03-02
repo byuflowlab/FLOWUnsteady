@@ -134,10 +134,7 @@ open(joinpath(output_path, output_name*".md"), "w") do fout
     monitor.
 
     To more clearly see what the loading distribution is doing, it is insightful
-    to plot the loading as an animation as shown below (check the full
-    example under
-    [examples/heavingwing/](https://github.com/byuflowlab/FLOWUnsteady/blob/master/examples/heavingwing)
-    to see how to postprocess the simulation and generate this animation).
+    to plot the loading as an animation as shown below.
 
     ```@raw html
     <center>
@@ -146,6 +143,13 @@ open(joinpath(output_path, output_name*".md"), "w") do fout
     </center>
     <br>
     ```
+
+
+    !!! info "Animations"
+        Check the full
+        example under
+        [examples/heavingwing/](https://github.com/byuflowlab/FLOWUnsteady/blob/master/examples/heavingwing)
+        to see how to postprocess the simulation and generate this animation.
 
     """)
 
