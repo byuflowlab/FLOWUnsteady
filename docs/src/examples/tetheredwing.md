@@ -346,7 +346,7 @@ has been fully deployed.
 </center>
 ```
 
-!!! tip "Disable monitors to speed up simulation"
+!!! info "Disable monitors to speed up simulation"
     For unknown reasons, the simulation oftentimes halts in between time
     steps while plotting the monitors.
     This slows down the overall simulation time, sometimes taking up to 2x
@@ -355,4 +355,13 @@ has been fully deployed.
     you can disable the plots passing the keyword `disp_plot=false` to each
     monitor generator.
 
+
+!!! info "Paraview visualization"
+    The `.pvsm` file visualizing the simulation as shown at the
+    top of this page is available here:
+    [LINK](https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/tetheredwing00.pvsm)
+    (`right click → save as...`).
+    To open in Paraview: `File → Load State → (select .pvsm file)` then
+    select "Search files under specified directory" and point it to the
+    folder where the simulation was saved.
 

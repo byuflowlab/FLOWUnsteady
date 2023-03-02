@@ -21,6 +21,7 @@ makedocs(
                                                         "examples/wing-aoasweep.md"
                                                       ],
                                     "examples/tetheredwing.md",
+                                    "examples/heavingwing.md",
                                    ],
                 "API Guide"     => [
                                     "(1) Vehicle Definition" => [
