@@ -40,12 +40,16 @@ function generate_monitor_rotors( rotors::Array{vlm.Rotor, 1},
                                     t_scale=1.0,                    # Time scaling factor
                                     t_lbl="Simulation time (s)",    # Time-axis label
                                     # OUTPUT OPTIONS
+                                    out_figs=[],
+                                    out_figaxs=[],
                                     save_path=nothing,
                                     run_name="rotor",
                                     figname="monitor_rotor",
                                     disp_conv=true,
                                     conv_suff="_convergence.csv",
                                     save_init_plots=true,
+                                    figsize_factor=5/6,
+                                    nsteps_plot=1,
                                     nsteps_savefig=10,
                                     colors="rgbcmy"^100,
                                     stls="o^*.px"^100, )
@@ -60,9 +64,12 @@ function generate_monitor_rotors( rotors::Array{vlm.Rotor, 1},
     # Call figure
     if disp_conv
         formatpyplot()
-        fig = plt.figure(figname, figsize=(7*3,5*2))
+        fig = plt.figure(figname, figsize=[7*3, 5*2]*figsize_factor)
         axs = fig.subplots(2, 3)
         axs = [axs[1], axs[3], axs[5], axs[2], axs[4], axs[6]]
+
+        push!(out_figs, fig)
+        push!(out_figaxs, axs)
     end
 
     # Function for run_vpm! to call on each iteration
@@ -79,32 +86,42 @@ function generate_monitor_rotors( rotors::Array{vlm.Rotor, 1},
             # Format subplots
             if disp_conv
                 ax = axs[1]
-                ax.title.set_text("Circulation Distribution")
+                ax.set_title("Circulation distribution", color="gray")
                 ax.set_xlabel("Element index")
                 ax.set_ylabel(L"Circulation $\Gamma$ (m$^2$/s)")
-                ax.grid(true, color="0.8", linestyle="--")
+
                 ax = axs[2]
-                ax.title.set_text("Plane-of-rotation Normal Force")
+                ax.set_title("Normal force distribution", color="gray")
                 ax.set_xlabel("Element index")
-                ax.set_ylabel(L"Normal Force $N_p$ (N/m)")
-                ax.grid(true, color="0.8", linestyle="--")
+                ax.set_ylabel(L"Normal load $N_p$ (N/m)")
+
                 ax = axs[3]
-                ax.title.set_text("Plane-of-rotation Tangential Force")
+                ax.set_title("Tangential force distribution", color="gray")
                 ax.set_xlabel("Element index")
-                ax.set_ylabel(L"Tangential Force $T_p$ (N/m)")
-                ax.grid(true, color="0.8", linestyle="--")
+                ax.set_ylabel(L"Tangential load $T_p$ (N/m)")
+
                 ax = axs[4]
+                ax.set_title(L"$C_T = \frac{T}{\rho n^2 d^4}$", color="gray")
                 ax.set_xlabel(t_lbl)
                 ax.set_ylabel(L"Thrust $C_T$")
-                ax.grid(true, color="0.8", linestyle="--")
+
                 ax = axs[5]
+                ax.set_title(L"$C_Q = \frac{Q}{\rho n^2 d^5}$", color="gray")
                 ax.set_xlabel(t_lbl)
                 ax.set_ylabel(L"Torque $C_Q$")
-                ax.grid(true, color="0.8", linestyle="--")
+
                 ax = axs[6]
+                ax.set_title(L"$\eta = \frac{T u_\infty}{2\pi n Q}$", color="gray")
                 ax.set_xlabel(t_lbl)
                 ax.set_ylabel(L"Propulsive efficiency $\eta$")
-                ax.grid(true, color="0.8", linestyle="--")
+
+
+                for ax in axs
+                    ax.spines["right"].set_visible(false)
+                    ax.spines["top"].set_visible(false)
+                    # ax.grid(true, color="0.8", linestyle="--")
+                end
+
                 fig.tight_layout()
             end
 
@@ -137,7 +154,7 @@ function generate_monitor_rotors( rotors::Array{vlm.Rotor, 1},
 
 
         # Plot circulation and loads distributions
-        if disp_conv
+        if  PFIELD.nt%nsteps_plot==0 && disp_conv
 
             cratio = PFIELD.nt/nsteps_sim
             cratio = cratio > 1 ? 1 : cratio
@@ -168,11 +185,11 @@ function generate_monitor_rotors( rotors::Array{vlm.Rotor, 1},
         end
 
         # Plot performance parameters
-        for (i,rotor) in enumerate(rotors)
+        for (i, rotor) in enumerate(rotors)
             CT, CQ = vlm.calc_thrust_torque_coeffs(rotor, rho_ref)
             eta = J_ref*CT/(2*pi*CQ)
 
-            if disp_conv
+            if PFIELD.nt%nsteps_plot==0 && disp_conv
                 axs[4].plot([t_scaled], [CT], "$(stls[i])", alpha=alpha, color=clr)
                 axs[5].plot([t_scaled], [CQ], "$(stls[i])", alpha=alpha, color=clr)
                 axs[6].plot([t_scaled], [eta], "$(stls[i])", alpha=alpha, color=clr)
@@ -185,7 +202,7 @@ function generate_monitor_rotors( rotors::Array{vlm.Rotor, 1},
 
         if disp_conv
             # Save figure
-            if fcalls%nsteps_savefig==0 && fcalls!=0 && save_path!=nothing
+            if PFIELD.nt%nsteps_savefig==0 && fcalls!=0 && save_path!=nothing
                 fig.savefig(joinpath(save_path, run_name*"_convergence.png"),
                                                     transparent=false, dpi=300)
             end
@@ -244,7 +261,7 @@ polar), and unsteady-circulation force.
 will also generate a CSV file with \$C_L\$ and \$C_D\$.
 
 Here is an example of this monitor:
-![image](http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/wingexample_convergence.png)
+![image](http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/wing-example_convergence.png)
 """
 function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
                                 rho_ref::Real, qinf_ref::Real, nsteps_sim::Int;
@@ -276,8 +293,8 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
                                 S_proj=t->[0, 1, 0],
                                 conv_suff="_convergence.csv",
                                 figsize_factor=5/6,
-                                nsteps_plot=10,
-                                nsteps_savefig=1,
+                                nsteps_plot=1,
+                                nsteps_savefig=10,
                                 debug=false)
 
     fcalls = 0                  # Number of function calls
@@ -478,6 +495,9 @@ step. The state variables are vehicle velocity, vehicle angular velocity, and
 vehicle position.
 
 Use `save_path` to indicate a directory where to save the plots.
+
+Here is an example of this monitor on a vehicle flying a circular path:
+![image](http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/tetheredwing-example-statemonitor.png)
 """
 function generate_monitor_statevariables(; figname="monitor_statevariables",
                                             out_figs=[],
@@ -557,17 +577,27 @@ Use `save_path` to indicate a directory where to save the plots. If so, it
 will also generate a CSV file with ξ.
 """
 function generate_monitor_enstrophy(; save_path=nothing, run_name="",
-                                     disp_plot=true,
-                                     figname="monitor_enstrophy",
-                                     nsteps_savefig=10,
-                                     nsteps_plot=10)
+                                        out_figs=[],
+                                        out_figaxs=[],
+                                        disp_plot=true,
+                                        figname="monitor_enstrophy",
+                                        figsize_factor=5/6,
+                                        nsteps_savefig=10,
+                                        nsteps_plot=1)
 
     if disp_plot
         formatpyplot()
-        fig = plt.figure(figname, figsize=[7*1, 5*1])
+        fig = plt.figure(figname, figsize=[7*1, 5*1]*figsize_factor)
         ax = fig.gca()
+
         ax.set_xlabel("Simulation time (s)")
         ax.set_ylabel(L"Enstrophy ($\mathrm{m}^3/\mathrm{s}^2$)")
+
+        ax.spines["right"].set_visible(false)
+        ax.spines["top"].set_visible(false)
+
+        push!(out_figs, fig)
+        push!(out_figaxs, ax)
     end
 
     enstrophy = []
@@ -614,15 +644,18 @@ will also generate a CSV file with the statistics of \$C_d\$ (particles whose
 coefficients have been clipped are ignored).
 """
 function generate_monitor_Cd(; save_path=nothing, run_name="",
-                                     disp_plot=true,
-                                     figname="monitor_Cd",
-                                     nsteps_savefig=10,
-                                     nsteps_plot=10,
-                                     ylims=[1e-5, 1e0])
+                                        out_figs=[],
+                                        out_figaxs=[],
+                                        disp_plot=true,
+                                        figname="monitor_Cd",
+                                        figsize_factor=5/6,
+                                        nsteps_plot=1,
+                                        nsteps_savefig=10,
+                                        ylims=[1e-5, 1e0])
 
     if disp_plot
         formatpyplot()
-        fig = plt.figure(figname, figsize=[7*2, 5*1])
+        fig = plt.figure(figname, figsize=[7*2, 5*1]*figsize_factor)
         axs = fig.subplots(1, 2)
 
         ax = axs[1]
@@ -630,10 +663,19 @@ function generate_monitor_Cd(; save_path=nothing, run_name="",
         ax.set_yscale("log")
         ax.set_xlabel("Simulation time (s)")
         ax.set_ylabel(L"Mean $\Vert C_d \Vert$")
+
         ax = axs[2]
         ax.set_xlabel("Simulation time")
         ax.set_ylabel(L"Ratio of $C_d$-zeroes"*
-                      L" $\frac{n_\mathrm{zeroes}}{n_\mathrm{particles}}$")
+                        L" $\frac{n_\mathrm{zeroes}}{n_\mathrm{particles}}$")
+
+        for ax in axs
+            ax.spines["right"].set_visible(false)
+            ax.spines["top"].set_visible(false)
+        end
+
+        push!(out_figs, fig)
+        push!(out_figaxs, axs)
     end
 
     meanCds, stdCds, zeroCds, ts, out  = [], [], [], [], []
@@ -686,3 +728,24 @@ function generate_monitor_Cd(; save_path=nothing, run_name="",
 
     return extra_runtime_function
 end
+
+"""
+    concatenate(monitors::Array{Function})
+    concatenate(monitors::NTuple{N, Function})
+    concatenate(monitor1, monitor2, ...)
+
+Concatenates a collection of monitors into a pipeline, returning one monitor of
+the form
+```julia
+monitor(args...; optargs...) =
+    monitors[1](args...; optargs...) || monitors[2](args...; optargs...) || ...
+```
+"""
+function concatenate(monitors...)
+
+    monitor(args...; optargs...) = !prod(!f(args...; optargs...) for f in monitors)
+
+    return monitor
+end
+
+concatenate(monitors) = concatenate(monitors...)
