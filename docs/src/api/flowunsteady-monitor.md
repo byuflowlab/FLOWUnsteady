@@ -21,6 +21,21 @@ Then pass the monitor to the simulation as
 uns.run_simulation(sim, nsteps; extra_runtime_function=monitors, ...)
 ```
 
+!!! compat "Monitor concatenation"
+    FLOWUnsteady facilitates the concatenation of monitors through the function
+    [`FLOWUnsteady.concatenate`](@ref). Using this function, the example above
+    looks like this:
+    ```julia
+    monitor_states = uns.generate_monitor_statevariables()
+    monitor_enstrophy = uns.generate_monitor_enstrophy()
+
+    allmonitors = [monitor_states, monitor_enstrophy]
+
+    monitors = uns.concatenate(monitors)
+
+    uns.run_simulation(sim, nsteps; extra_runtime_function=monitors, ...)
+    ```
+
 ## Monitor Generators
 The following are functions for generating the monitors that serve most use
 cases. See the source code of these monitors to get an idea of how to write your
@@ -32,6 +47,7 @@ FLOWUnsteady.generate_monitor_enstrophy
 FLOWUnsteady.generate_monitor_Cd
 FLOWUnsteady.generate_monitor_rotors
 FLOWUnsteady.generate_monitor_wing
+FLOWUnsteady.concatenate
 ```
 
 ## Force Calculators

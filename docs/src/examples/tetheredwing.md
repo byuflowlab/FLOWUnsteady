@@ -254,10 +254,6 @@ monitor_wing = uns.generate_monitor_wing(wing, Vinf, b, ar,
                                             save_path=save_path,
                                             run_name=run_name,
                                             figname="wing monitor",
-                                            disp_plot=true,
-                                            figsize_factor=5/6,
-                                            nsteps_plot=1,
-                                            nsteps_savefig=10,
                                             );
 
 # Generate monitor of state variables

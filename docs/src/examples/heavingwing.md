@@ -268,10 +268,6 @@ monitor_backwing = uns.generate_monitor_wing(backwing, Vinf, b_back, ar_back,
                                             run_name=run_name*"-backwing",
                                             title_lbl="Back Wing",
                                             figname="back-wing monitor",
-                                            disp_plot=true,
-                                            figsize_factor=5/6,
-                                            nsteps_plot=1,
-                                            nsteps_savefig=10,
                                             )
 
 # Generate front wing monitor
@@ -286,10 +282,6 @@ monitor_frontwing = uns.generate_monitor_wing(frontwing, Vinf, b_front, ar_front
                                             run_name=run_name*"-frontwing",
                                             title_lbl="Front Wing",
                                             figname="front-wing monitor",
-                                            disp_plot=true,
-                                            figsize_factor=5/6,
-                                            nsteps_plot=1,
-                                            nsteps_savefig=10,
                                             )
 
 monitor(args...; optargs...) = monitor_backwing(args...; optargs...) || monitor_frontwing(args...; optargs...)

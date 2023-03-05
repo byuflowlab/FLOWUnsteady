@@ -217,10 +217,6 @@ monitor_wing = uns.generate_monitor_wing(wing, Vinf, b, ar,
                                             save_path=save_path,
                                             run_name=run_name,
                                             figname="wing monitor",
-                                            disp_plot=true,
-                                            figsize_factor=5/6,
-                                            nsteps_plot=1,
-                                            nsteps_savefig=10,
                                             );
 
 # Generate monitor of state variables
@@ -230,7 +226,7 @@ monitor_states = uns.generate_monitor_statevariables(; save_path=save_path,
                                                        out_figaxs=figaxs,
                                                        nsteps_savefig=10)
 
-monitor(args...; optargs...) = monitor_wing(args...; optargs...) || monitor_states(args...; optargs...)
+monitors = uns.concatenate(monitor_wing, monitor_states)
 
 
 # ------------- 5) RUN SIMULATION ----------------------------------------------
@@ -248,7 +244,7 @@ uns.run_simulation(simulation, nsteps;
                     sigma_vpm_overwrite=sigma_vpm_overwrite,
                     vlm_rlx=vlm_rlx,
                     shed_starting=shed_starting,
-                    extra_runtime_function=monitor,
+                    extra_runtime_function=monitors,
                     # ----- OUTPUT OPTIONS ------------------
                     save_path=save_path,
                     run_name=run_name,
