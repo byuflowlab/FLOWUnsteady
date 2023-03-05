@@ -99,16 +99,17 @@ where `contourfile` is a CSV file with columns `x/c` and `y/c`.
 
 `ReD` is the diameter Reynolds number based on rotational speed calculated
 as `ReD = (omega*R)*(2*R)/nu`, and `Matip` is the rotational+freestream Mach
-number at the tip. This values are used to calculate airfoil properties
-through XFOIL (chord Reynolds), so ignore them if airfoil properties are
-prescribed.
+number at the tip. These number will be used for running XFOIL to compute
+airfoil polars, and will be ignored if airfoil polars are prescribed.
 
 Give it `altReD = (RPM, J, nu)`, and it will calculate the chord-based Reynolds
-accounting for the effective velocity at every station ignoring `ReD` (this is
+accounting for the effective velocity at every station, ignoring `ReD` (this is
 more accurate, but not needed).
 
-**NOTE:** If `Matip` is different than zero while running XFOIL, remember to deactive
-compressibility corrections by using `sound_spd=nothing` in `run_simulation`.
+**NOTE:** If `Matip` is different than zero while running XFOIL, you must
+deactive compressibility corrections in `run_simulation` by using
+`sound_spd=nothing`. Otherwise, compressibility effects will be double accounted
+for.
 
 ## **Outputs**
 * `verbose::Bool`       :   Whether to verbose while generating the rotor
@@ -228,7 +229,7 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
 
         else # Reads polars from files
             if verbose; println("\t"^(v_lvl+1)*"$file_name"); end;
-            polar = read_polar(file_name; path=data_path*"airfoils/", x=x, y=y)
+            polar = read_polar(file_name; path=joinpath(data_path, "airfoils"), x=x, y=y)
         end
 
         push!(airfoils, (pos, polar))
@@ -246,7 +247,7 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
     if plot_disc
         formatpyplot()
         fig = plt.figure("flowunsteady-discr", figsize=[7*2,5*1]*figsize_factor)
-        fig.suptitle("FLOWUnsteady Discretization Verification")
+        fig.suptitle("FLOWUnsteady rediscretization verification")
         axs = fig.subplots(1, 2)
 
         ax = axs[1]
@@ -276,7 +277,7 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
         for (i,(pos, polar)) in enumerate(airfoils)
             vlm.ap.plot(polar; geometry=true, label="pos=$(round(pos, digits=3)), Re=$(ceil(Int, vlm.ap.get_Re(polar)))"*
                                         (Mas!=nothing ? ", Ma=$(round(Mas[i], digits=2))" : ""),
-                    cdpolar=false, fig_id="prelim_curves", title_str="Re sweep",
+                    cdpolar=false, fig_id="prelim_curves", title_str="",
                     rfl_figfactor=figsize_factor, fig=fig, axs=axs)
         end
         axs[3].legend(loc="best", frameon=true, fontsize=7)
@@ -364,7 +365,7 @@ function read_rotor(rotor_file::String; data_path=def_data_path)
     Rtip = Meta.parse(data[1, 2])
     Rhub = Meta.parse(data[2, 2])
     B = Meta.parse(data[3, 2])
-    blade_file = data[4, 2]
+    blade_file = String(data[4, 2])
 
     return Rtip, Rhub, B, blade_file
 end
