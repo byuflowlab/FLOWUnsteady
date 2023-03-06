@@ -66,7 +66,7 @@ function generate_monitor_rotors( rotors::Array{vlm.Rotor, 1},
         formatpyplot()
         fig = plt.figure(figname, figsize=[7*3, 5*2]*figsize_factor)
         axs = fig.subplots(2, 3)
-        axs = [axs[1], axs[3], axs[5], axs[2], axs[4], axs[6]]
+        axs = [axs[6], axs[2], axs[4], axs[1], axs[3], axs[5]]
 
         push!(out_figs, fig)
         push!(out_figaxs, axs)

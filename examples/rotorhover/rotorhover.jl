@@ -16,6 +16,12 @@
 =###############################################################################
 
 #= TODO
+    * [ ] Show a simplified example with a propeller case sweeping on J and validation
+        * [ ] Start with one case, J=0.3, APC 10x7
+        * [ ] Convert to J sweep, no plots, threaded. Compare to experimental.
+                J = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.775]
+        * [ ] Repeat with quasi-steady solver.
+    * [ ] Bring down the number of elements in the DJI example to speed things up?
     * [ ] Visualization guide
     * [ ] Rotor noise
     * [ ] Some words on generating your own rotor geometry
@@ -37,17 +43,17 @@ paraview        = true                      # Whether to visualize with Paraview
 # ----------------- GEOMETRY PARAMETERS ----------------------------------------
 
 # Rotor geometry
-rotor_file      = "DJI9443.csv"             # Rotor geometry
-# rotor_file      = "DJI9443-smoothpolars.csv"# Rotor geometry
+# rotor_file      = "DJI9443.csv"             # Rotor geometry
+rotor_file      = "DJI9443-smoothpolars.csv"# Rotor geometry
 data_path       = uns.def_data_path         # Path to rotor database
 pitch           = 0.0                       # (deg) collective pitch of blades
-CW              = true                      # Clock-wise rotation
+CW              = false                     # Clock-wise rotation
 xfoil           = false                     # Whether to run XFOIL
 # xfoil           = true
 
 # TODO: Hide this?
-read_polar      = vlm.ap.read_polar         # What polar reader to use
-# read_polar      = vlm.ap.read_polar2
+# read_polar      = vlm.ap.read_polar         # What polar reader to use
+read_polar      = vlm.ap.read_polar2
 
 # NOTE: If `xfoil=true`, XFOIL will be run to generate the airfoil polars used
 #       by blade elements before starting the simulation. XFOIL is run
@@ -108,7 +114,8 @@ VehicleType     = uns.UVLMVehicle           # Unsteady solver
 const_solution  = VehicleType==uns.QVLMVehicle  # Whether to assume that the
                                                 # solution is constant or not
 # Time parameters
-nrevs           = 4                         # Number of revolutions in simulation
+# nrevs           = 4                         # Number of revolutions in simulation
+nrevs           = 6
 # nrevs           = 10
 nsteps_per_rev  = 72                        # Time steps per revolution
 # nsteps_per_rev  = 72*5
@@ -343,6 +350,7 @@ if paraview
     # Files to open in Paraview
     files = joinpath(save_path, run_name*"_pfield...xmf;")
     for bi in 1:B
+        global files
         files *= run_name*"_Rotor_Blade$(bi)_loft...vtk;"
         files *= run_name*"_Rotor_Blade$(bi)_vlm...vtk;"
     end

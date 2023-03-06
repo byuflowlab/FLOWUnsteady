@@ -118,8 +118,18 @@ end
 
 
 ```
-(Check [examples/wing_aoasweep.jl](https://github.com/byuflowlab/FLOWUnsteady/blob/master/examples/wing/wing_aoasweep.jl)
-to see how to postprocess and plot the results as shown below)
+
+```@raw html
+<span style="font-size: 0.9em; color:gray;"><i>
+    Run time: ~15 minutes on a Dell Precision 7760 laptop.
+    <br>
+    Much more speed can be gained by reducing the resolution of the simulation (n and nsteps) without loss of accuracy.
+</i></span>
+<br><br>
+```
+
+Check [examples/wing_aoasweep.jl](https://github.com/byuflowlab/FLOWUnsteady/blob/master/examples/wing/wing_aoasweep.jl)
+to see how to postprocess and plot the results as shown below.
 
 ```@raw html
 <center>

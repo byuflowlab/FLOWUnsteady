@@ -84,6 +84,15 @@ open(joinpath(output_path, output_name*"-4p2aoa.md"), "w") do fout
 
     println(fout, """
 
+    ```@raw html
+    <span style="font-size: 0.9em; color:gray;"><i>
+        Run time: ~3 minutes on a Dell Precision 7760 laptop.
+        <br>
+        Reduce resolution (n and steps) to speed up simulation without loss of accuracy.
+    </i></span>
+    <br><br>
+    ```
+
     As the simulation runs, you will see the monitor (shown below) plotting the
     lift and drag coefficients over time along with the loading distribution.
     For comparison, here we have also added the experimental measurements
@@ -153,8 +162,18 @@ open(joinpath(output_path, output_name*"-aoasweep.md"), "w") do fout
     println(fout, "```")
 
     println(fout, """
-    (Check [examples/wing_aoasweep.jl](https://github.com/byuflowlab/FLOWUnsteady/blob/master/examples/wing/wing_aoasweep.jl)
-    to see how to postprocess and plot the results as shown below)
+
+    ```@raw html
+    <span style="font-size: 0.9em; color:gray;"><i>
+        Run time: ~15 minutes on a Dell Precision 7760 laptop.
+        <br>
+        Reduce resolution (n and steps) to speed up simulation without loss of accuracy.
+    </i></span>
+    <br><br>
+    ```
+
+    Check [examples/wing_aoasweep.jl](https://github.com/byuflowlab/FLOWUnsteady/blob/master/examples/wing/wing_aoasweep.jl)
+    to see how to postprocess and plot the results as shown below.
 
     ```@raw html
     <center>

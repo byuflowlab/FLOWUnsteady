@@ -263,7 +263,7 @@ monitor_states = uns.generate_monitor_statevariables(; save_path=save_path,
                                                        out_figaxs=figaxs,
                                                        nsteps_savefig=10)
 
-monitor(args...; optargs...) = monitor_wing(args...; optargs...) || monitor_states(args...; optargs...)
+monitors = uns.concatenate(monitor_wing, monitor_states)
 
 
 # ------------- 5) RUN SIMULATION ----------------------------------------------
@@ -281,7 +281,7 @@ uns.run_simulation(simulation, nsteps;
                     sigma_vpm_overwrite=sigma_vpm_overwrite,
                     vlm_rlx=vlm_rlx,
                     shed_starting=shed_starting,
-                    extra_runtime_function=monitor,
+                    extra_runtime_function=monitors,
                     # ----- OUTPUT OPTIONS ------------------
                     save_path=save_path,
                     run_name=run_name,
@@ -304,6 +304,14 @@ if paraview
 end
 
 
+```
+```@raw html
+<span style="font-size: 0.9em; color:gray;"><i>
+    Run time: ~20 minutes on a Dell Precision 7760 laptop.
+    <br>
+    Much more speed can be gained by reducing the resolution of the simulation (n and nsteps) without loss of accuracy.
+</i></span>
+<br><br>
 ```
 
 As the simulation runs, you will see the monitor shown below plotting the

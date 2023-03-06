@@ -274,6 +274,15 @@ end
 
 ```
 
+```@raw html
+<span style="font-size: 0.9em; color:gray;"><i>
+    Run time: ~3 minutes on a Dell Precision 7760 laptop.
+    <br>
+    Much more speed can be gained by reducing the resolution of the simulation (n and nsteps) without loss of accuracy.
+</i></span>
+<br><br>
+```
+
 As the simulation runs, you will see the monitor (shown below) plotting the
 lift and drag coefficients over time along with the loading distribution.
 For comparison, here we have also added the experimental measurements

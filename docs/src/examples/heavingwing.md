@@ -284,7 +284,7 @@ monitor_frontwing = uns.generate_monitor_wing(frontwing, Vinf, b_front, ar_front
                                             figname="front-wing monitor",
                                             )
 
-monitor(args...; optargs...) = monitor_backwing(args...; optargs...) || monitor_frontwing(args...; optargs...)
+monitors = uns.concatenate(monitor_backwing, monitor_frontwing)
 
 
 # ------------- 5) RUN SIMULATION ----------------------------------------------
@@ -302,7 +302,7 @@ uns.run_simulation(simulation, nsteps;
                     sigma_vpm_overwrite=sigma_vpm_overwrite,
                     vlm_rlx=vlm_rlx,
                     shed_starting=shed_starting,
-                    extra_runtime_function=monitor,
+                    extra_runtime_function=monitors,
                     # ----- OUTPUT OPTIONS ------------------
                     save_path=save_path,
                     run_name=run_name,
@@ -326,6 +326,14 @@ if paraview
 end
 
 
+```
+```@raw html
+<span style="font-size: 0.9em; color:gray;"><i>
+    Run time: ~10 minutes on a Dell Precision 7760 laptop.
+    <br>
+    Much more speed can be gained by reducing the resolution of the simulation (n and nsteps) without loss of accuracy.
+</i></span>
+<br><br>
 ```
 
 As the simulation runs, you will see the monitors (shown below) plotting the

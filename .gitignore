@@ -4,5 +4,6 @@ docs/build/
 docs/site/
 .DS_Store
 *Manifest.toml
+*-example/
 
 examples/rotornoise/singlerotor-*

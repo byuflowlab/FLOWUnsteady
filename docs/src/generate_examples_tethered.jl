@@ -63,6 +63,14 @@ open(joinpath(output_path, output_name*".md"), "w") do fout
     println(fout, "```")
 
     println(fout, """
+    ```@raw html
+    <span style="font-size: 0.9em; color:gray;"><i>
+        Run time: ~20 minutes on a Dell Precision 7760 laptop.
+        <br>
+        Reduce resolution (n and steps) to speed up simulation without loss of accuracy.
+    </i></span>
+    <br><br>
+    ```
 
     As the simulation runs, you will see the monitor shown below plotting the
     state variables of the vehicle. The components of both velocity
