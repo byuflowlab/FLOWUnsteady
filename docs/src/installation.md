@@ -85,7 +85,7 @@ v"3.8"
 
 ## PyPlot
 Since PyCall now relies on a custom install of Python3, make sure that:
-1. matplotlib is installed for that Python
+1. matplotlib, mpmath, and scipy are installed in that Python
 2. for optimal experience, verify that matplotlib uses the Qt5Agg backend. Useful instructions can be found [here](https://github.com/JuliaPy/PyPlot.jl#os-x) and [here](https://stackoverflow.com/questions/58627696/warning-pyplot-is-using-tkagg-backend-which-is-known-to-cause-crashes-on-macos).
 
 If you run into errors with PyPlot while running FLOWUnsteady, they are likely related to one of those two items.
@@ -102,7 +102,13 @@ ExaFMM is written in c++ and we have developed a Julia wrapper for it,
 Before installing [FLOWVPM](https://github.com/byuflowlab/FLOWVPM.jl),
 first you will have to install FLOWExaFMM and compile ExaFMM, as follows.
 
-* Clone FLOWExaFMM:
+* [Julia REPL] Install CxxWrap:
+  ```julia
+  import Pkg
+  Pkg.add(name="CxxWrap", version="0.11.2")
+  ```
+
+* [Terminal] Clone FLOWExaFMM:
   ```bash
   git clone https://github.com/byuflowlab/FLOWExaFMM path/to/FLOWExaFMM
   ```
@@ -110,7 +116,7 @@ first you will have to install FLOWExaFMM and compile ExaFMM, as follows.
 
 
 
-* Compile ExaFMM running the script `build.sh`:
+* Compile ExaFMM running the script [`build.sh`](https://github.com/byuflowlab/FLOWExaFMM.jl/blob/master/build.sh):
   ```bash
   cd path/to/FLOWExaFMM
   sh build.sh
@@ -153,7 +159,7 @@ add FLOWVPM:
   ```
 
 
-Try the following if you run into any issues:
+If you run into any issues, please try the following:
 * Test that you can correctly compile C++ code wrapped for Julia following these instructions: [LINK](https://nbviewer.org/github/byuflowlab/FLOWVPM.jl/blob/master/docs/installation-linux.ipynb)
 * Mac user may also need to take a look at these instructions: [LINK](https://github.com/byuflowlab/FLOWUnsteady/issues/26)
 * Instructions for BYU Fulton supercomputer: [LINK](https://nbviewer.jupyter.org/url/edoalvar2.groups.et.byu.net/LabNotebook/202108/FLOWVPMSuperComputer.ipynb)
@@ -176,7 +182,7 @@ and feel free to open a new issue.
 
 The following dependencies are Julia packages that are not registered in the officially Julia registry.
 For this reason, they need to be added manually through the following command in the Julia REPL:
-```
+```julia
 ] add github-url-to-the-package
 ```
 
@@ -187,7 +193,15 @@ For this reason, they need to be added manually through the following command in
 | BPM             | [https://github.com/byuflowlab/BPM.jl](https://github.com/byuflowlab/BPM.jl)                  |
 | FLOWNoise       | [https://github.com/byuflowlab/FLOWNoise](https://github.com/byuflowlab/FLOWNoise)            |
 
+You can install all packages at once as follows:
+```julia
+import Pkg
 
+url = "https://github.com/byuflowlab/"
+packages = ("AirfoilPrep.jl", "FLOWVLM", "BPM.jl", "FLOWNoise")
+
+Pkg.add([ Pkg.PackageSpec(; url=url*name) for name in packages ])
+```
 
 !!! info "Troubleshooting"
     Some things you might need to look out for:
@@ -244,7 +258,26 @@ This will pull up Paraview visualizing the simulation. Kick off your shoes, sit 
 enjoy the simulation that you have just run.
 
 ```@raw html
+<br><br>
+
 <center>
   <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/tetheredwing-example-00small.gif" alt="Vid here" style="width: 80%;"/>
 </center>
+
+<br><br><br><br>
+<br><br><br><br>
 ```
+
+
+!!! info "CPU Parallelization"
+    If any of the examples is taking longer than 10 to 20 minutes to run, it is
+    possible that ExaFMM was compiled without OpenMPI, thus running in only one
+    core as opposed to parallelizing the computation across all your CPU cores.
+
+    To confirm that ExaFMM is successfully parallelized, pull up whatever CPU
+    monitor is available in your operative system and confirm that Julia is
+    using all your cores. For instance, the Gnome system monitor in Ubuntu
+    should look like this:
+    ![pic](https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/cpus00.png)
+    and `htop` in the terminal should look like this
+    ![pic](https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/cpus01.png)
