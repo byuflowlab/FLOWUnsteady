@@ -123,7 +123,7 @@ end
 <span style="font-size: 0.9em; color:gray;"><i>
     Run time: ~15 minutes on a Dell Precision 7760 laptop.
     <br>
-    Much more speed can be gained by reducing the resolution of the simulation (n and nsteps) without loss of accuracy.
+    Reduce resolution (n and steps) to speed up simulation without loss of accuracy.
 </i></span>
 <br><br>
 ```

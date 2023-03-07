@@ -23,6 +23,7 @@
         * [ ] Repeat with quasi-steady solver.
     * [ ] Bring down the number of elements in the DJI example to speed things up?
     * [ ] Visualization guide
+        * [ ] Changing ParaView ugly default color
     * [ ] Rotor noise
     * [ ] Some words on generating your own rotor geometry
     * [ ] Cd monitor: Typically you can run one simulation with the dynamic

@@ -331,7 +331,7 @@ end
 <span style="font-size: 0.9em; color:gray;"><i>
     Run time: ~10 minutes on a Dell Precision 7760 laptop.
     <br>
-    Much more speed can be gained by reducing the resolution of the simulation (n and nsteps) without loss of accuracy.
+    Reduce resolution (n and steps) to speed up simulation without loss of accuracy.
 </i></span>
 <br><br>
 ```
@@ -381,4 +381,28 @@ to plot the loading as an animation as shown below.
     [examples/heavingwing/](https://github.com/byuflowlab/FLOWUnsteady/blob/master/examples/heavingwing)
     to see how to postprocess the simulation and generate this animation.
 
+
+!!! info "Quasi-steady solver"
+    FLOWUnsteady also provides a quasi-steady solver for low-fidelity
+    simulations that replaces the particle field with rigid semi-infinite
+    wakes.
+    The quasi-steady solver is invoked by simply changing the line
+    that defines the vehicle from
+    ```julia
+    vehicle = uns.VLMVehicle(...)
+    ```
+    to
+    ```julia
+    vehicle = uns.QVLMVehicle(...)
+    ```
+    (yes, it is only one character of a difference)
+
+    Use the keyword argument `save_horseshoes = false` in [`uns.run_simulation`](@ref)
+    to visualize the semi-infinite rigid wake. The quasi-steady simulation looks like this:
+
+```@raw html
+<p align="center">
+    <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/tandemheaving142_1.gif" alt="Vid" width="75%"/>
+</p>
+```
 

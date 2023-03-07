@@ -1,10 +1,17 @@
 using Documenter
+using DocumenterTools: Themes
+
 using FLOWUnsteady
 const uns = FLOWUnsteady
 
 import FLOWUnsteady: FLOWVPM, FLOWVLM
 
 include("src/generate_examples.jl")
+
+
+# Themes.compile(joinpath(@__DIR__,"src/assets/light.scss"), joinpath(@__DIR__,"src/assets/themes/documenter-light.css"))
+# Themes.compile(joinpath(@__DIR__,"src/assets/dark.scss"), joinpath(@__DIR__,"src/assets/themes/documenter-dark.css"))
+
 
 makedocs(
     sitename = "FLOWUnsteady",
@@ -15,6 +22,7 @@ makedocs(
                             ),
     pages = [
                 "Home"          => "index.md",
+                "Installation"  => "installation.md",
                 "Tutorials"     => [
                                     "Simple Wing" => [
                                                         "Basics" => "examples/wing-4p2aoa.md",

@@ -159,6 +159,30 @@ open(joinpath(output_path, output_name*".md"), "w") do fout
         [examples/heavingwing/](https://github.com/byuflowlab/FLOWUnsteady/blob/master/examples/heavingwing)
         to see how to postprocess the simulation and generate this animation.
 
+
+    !!! info "Quasi-steady solver"
+        FLOWUnsteady also provides a quasi-steady solver for low-fidelity
+        simulations that replaces the particle field with rigid semi-infinite
+        wakes.
+        The quasi-steady solver is invoked by simply changing the line
+        that defines the vehicle from
+        ```julia
+        vehicle = uns.VLMVehicle(...)
+        ```
+        to
+        ```julia
+        vehicle = uns.QVLMVehicle(...)
+        ```
+        (yes, it is only one character of a difference)
+
+        Use the keyword argument `save_horseshoes = false` in [`uns.run_simulation`](@ref)
+        to visualize the semi-infinite rigid wake. The quasi-steady simulation looks like this:
+
+    ```@raw html
+    <p align="center">
+        <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/tandemheaving142_1.gif" alt="Vid" width="75%"/>
+    </p>
+    ```
     """)
 
 end
