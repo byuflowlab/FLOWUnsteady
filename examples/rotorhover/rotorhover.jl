@@ -35,10 +35,12 @@ import FLOWUnsteady as uns
 import FLOWVLM as vlm
 import FLOWVPM as vpm
 
-run_name        = "rotorhover-example01"      # Name of this simulation
+run_name        = "rotorhover-example02"      # Name of this simulation
 
 save_path       = run_name                  # Where to save this simulation
-paraview        = true                      # Whether to visualize with Paraview
+# paraview        = true                      # Whether to visualize with Paraview
+
+paraview        = false
 
 
 # ----------------- GEOMETRY PARAMETERS ----------------------------------------
@@ -110,13 +112,13 @@ println("""
 # ----------------- SOLVER PARAMETERS ------------------------------------------
 
 # Aerodynamic solver
-VehicleType     = uns.UVLMVehicle           # Unsteady solver
-# VehicleType     = uns.QVLMVehicle         # Quasi-steady solver
+# VehicleType     = uns.UVLMVehicle           # Unsteady solver
+VehicleType     = uns.QVLMVehicle         # Quasi-steady solver
 const_solution  = VehicleType==uns.QVLMVehicle  # Whether to assume that the
                                                 # solution is constant or not
 # Time parameters
 # nrevs           = 4                         # Number of revolutions in simulation
-nrevs           = 6
+nrevs           = 7
 # nrevs           = 10
 nsteps_per_rev  = 72                        # Time steps per revolution
 # nsteps_per_rev  = 72*5
@@ -221,7 +223,7 @@ if VehicleType != uns.QVLMVehicle
     vlm.addwing(wake_system, "Rotor", rotor)
 end
 
-vehicle = uns.VLMVehicle(   system;
+vehicle = VehicleType(   system;
                             rotor_systems=rotor_systems,
                             wake_system=wake_system
                          );
