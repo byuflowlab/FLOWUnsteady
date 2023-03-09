@@ -56,162 +56,162 @@ end
 
 ##### FUNCTIONS  ###############################################################
 
-function add_dV(self::AbstractVLMVehicle, dV)
-    self.V .+= dV
-    return nothing
-end
+# function add_dV(self::AbstractVLMVehicle, dV)
+#     self.V .+= dV
+#     return nothing
+# end
+#
+# function add_dW(self::AbstractVLMVehicle, dW)
+#     self.W .+= dW
+#     return nothing
+# end
+#
+# function set_V(self::AbstractVLMVehicle, V)
+#     self.V .= V
+#     return nothing
+# end
+#
+# function set_W(self::AbstractVLMVehicle, W)
+#     self.W .= W
+#     return nothing
+# end
 
-function add_dW(self::AbstractVLMVehicle, dW)
-    self.W .+= dW
-    return nothing
-end
-
-function set_V(self::AbstractVLMVehicle, V)
-    self.V .= V
-    return nothing
-end
-
-function set_W(self::AbstractVLMVehicle, W)
-    self.W .= W
-    return nothing
-end
-
-function tilt_systems(self::AbstractVLMVehicle{N,M,R}, angles::NTuple{N, Array{R2, 1}}
-                                                    ) where{N, M, R, R2<:Real}
-    # Iterate over tilting system
-    for i in 1:get_ntltsys(self)
-        sys = self.tilting_systems[i]
-        Oaxis = gt.rotation_matrix2([-a for a in angles[i]]...)
-        vlm.setcoordsystem(sys, sys.O, Oaxis)
-    end
-    return nothing
-end
-function tilt_systems(self::AbstractVLMVehicle{0,M,R}, angles::Tuple{})  where{M, R}
-    return nothing
-end
+# function tilt_systems(self::AbstractVLMVehicle{N,M,R}, angles::NTuple{N, Array{R2, 1}}
+#                                                     ) where{N, M, R, R2<:Real}
+#     # Iterate over tilting system
+#     for i in 1:get_ntltsys(self)
+#         sys = self.tilting_systems[i]
+#         Oaxis = gt.rotation_matrix2([-a for a in angles[i]]...)
+#         vlm.setcoordsystem(sys, sys.O, Oaxis)
+#     end
+#     return nothing
+# end
+# function tilt_systems(self::AbstractVLMVehicle{0,M,R}, angles::Tuple{})  where{M, R}
+#     return nothing
+# end
 
 
-function nextstep_kinematic(self::AbstractVLMVehicle, dt::Real)
-    dX = dt*self.V                  # Translation
-    dA = 180/pi * dt*self.W         # Angular rotation (degrees)
+# function nextstep_kinematic(self::AbstractVLMVehicle, dt::Real)
+#     dX = dt*self.V                  # Translation
+#     dA = 180/pi * dt*self.W         # Angular rotation (degrees)
+#
+#     O = self.system.O + dX          # New origin of the system (translation)
+#     M = gt.rotation_matrix2([-a for a in dA]...) # Rotation matrix
+#     Oaxis = M*self.system.Oaxis     # New axes of the system (rotation)
+#
+#     # Save current state of vehicle
+#     _update_previousstep(self, deepcopy(self))
+#
+#     # Translation and rotation
+#     vlm.setcoordsystem(self.system, O, Oaxis)
+#
+#     # Translation and rotation of every grid
+#     for i in 1:length(self.grids)
+#         self.grid_O[i] .+= dX
+#
+#         # Translation
+#         gt.lintransform!(self.grids[i], Array(1.0I, 3, 3) , dX)
+#
+#         # Brings the grid back to the global origin
+#         gt.lintransform!(self.grids[i], Array(1.0I, 3, 3) , -self.grid_O[i])
+#
+#         # Rotation and brings the grid back to its position
+#         gt.lintransform!(self.grids[i], M, self.grid_O[i])
+#     end
+#
+#     return nothing
+# end
 
-    O = self.system.O + dX          # New origin of the system (translation)
-    M = gt.rotation_matrix2([-a for a in dA]...) # Rotation matrix
-    Oaxis = M*self.system.Oaxis     # New axes of the system (rotation)
+# """
+# Precalculations before calling the solver.
+#
+# Calculates kinematic velocity on VLM an adds them as a solution field
+# """
+# function precalculations(self::AbstractVLMVehicle, Vinf::Function,
+#                                 pfield::vpm.ParticleField, t::Real, dt::Real,
+#                                 nt::Int)
+#
+#     if nt!=0
+#         # ---------- 1) Recalculate wake horseshoes with kinematic velocity -
+#         # Calculate kinematic velocity at every control point
+#         Vkin = _Vkinematic_wake(self, dt; t=t, targetX="CP")
+#         vlm._addsolution(self.wake_system, "Vkin", Vkin; t=t)
+#
+#         Vkin = _Vkinematic_vlm(self, dt; t=t, targetX="CP")
+#         vlm._addsolution(self.vlm_system, "Vkin", Vkin; t=t)
+#
+#         # Recalculate horseshoes
+#         vlm.getHorseshoes(self.vlm_system; t=t, extraVinf=_extraVinf1)
+#         vlm.getHorseshoes(self.wake_system; t=t, extraVinf=_extraVinf1)
+#
+#         # ---------- 2) Paste previous Gamma solution ----------------------
+#         for i in 1:length(self.wake_system.wings)
+#             wing = vlm.get_wing(self.wake_system, i)
+#             prev_wing = vlm.get_wing(_get_prev_wake_system(self), i)
+#
+#             if typeof(prev_wing) != vlm.Rotor
+#                 sol = deepcopy(prev_wing.sol["Gamma"])
+#             else
+#                 sol = deepcopy(prev_wing._wingsystem.sol["Gamma"])
+#             end
+#
+#             vlm._addsolution(wing, "Gamma", sol; t=t)
+#         end
+#         for i in 1:length(self.vlm_system.wings)
+#             wing = vlm.get_wing(self.vlm_system, i)
+#             prev_wing = vlm.get_wing(_get_prev_vlm_system(self), i)
+#
+#             if typeof(prev_wing) != vlm.Rotor
+#                 sol = deepcopy(prev_wing.sol["Gamma"])
+#             else
+#                 sol = deepcopy(prev_wing._wingsystem.sol["Gamma"])
+#             end
+#
+#             vlm._addsolution(wing, "Gamma", sol; t=t)
+#         end
+#     end
+#
+#     return nothing
+# end
 
-    # Save current state of vehicle
-    _update_previousstep(self, deepcopy(self))
-
-    # Translation and rotation
-    vlm.setcoordsystem(self.system, O, Oaxis)
-
-    # Translation and rotation of every grid
-    for i in 1:length(self.grids)
-        self.grid_O[i] .+= dX
-
-        # Translation
-        gt.lintransform!(self.grids[i], Array(1.0I, 3, 3) , dX)
-
-        # Brings the grid back to the global origin
-        gt.lintransform!(self.grids[i], Array(1.0I, 3, 3) , -self.grid_O[i])
-
-        # Rotation and brings the grid back to its position
-        gt.lintransform!(self.grids[i], M, self.grid_O[i])
-    end
-
-    return nothing
-end
-
-"""
-Precalculations before calling the solver.
-
-Calculates kinematic velocity on VLM an adds them as a solution field
-"""
-function precalculations(self::AbstractVLMVehicle, Vinf::Function,
-                                pfield::vpm.ParticleField, t::Real, dt::Real,
-                                nt::Int)
-
-    if nt!=0
-        # ---------- 1) Recalculate wake horseshoes with kinematic velocity -
-        # Calculate kinematic velocity at every control point
-        Vkin = _Vkinematic_wake(self, dt; t=t, targetX="CP")
-        vlm._addsolution(self.wake_system, "Vkin", Vkin; t=t)
-
-        Vkin = _Vkinematic_vlm(self, dt; t=t, targetX="CP")
-        vlm._addsolution(self.vlm_system, "Vkin", Vkin; t=t)
-
-        # Recalculate horseshoes
-        vlm.getHorseshoes(self.vlm_system; t=t, extraVinf=_extraVinf1)
-        vlm.getHorseshoes(self.wake_system; t=t, extraVinf=_extraVinf1)
-
-        # ---------- 2) Paste previous Gamma solution ----------------------
-        for i in 1:length(self.wake_system.wings)
-            wing = vlm.get_wing(self.wake_system, i)
-            prev_wing = vlm.get_wing(_get_prev_wake_system(self), i)
-
-            if typeof(prev_wing) != vlm.Rotor
-                sol = deepcopy(prev_wing.sol["Gamma"])
-            else
-                sol = deepcopy(prev_wing._wingsystem.sol["Gamma"])
-            end
-
-            vlm._addsolution(wing, "Gamma", sol; t=t)
-        end
-        for i in 1:length(self.vlm_system.wings)
-            wing = vlm.get_wing(self.vlm_system, i)
-            prev_wing = vlm.get_wing(_get_prev_vlm_system(self), i)
-
-            if typeof(prev_wing) != vlm.Rotor
-                sol = deepcopy(prev_wing.sol["Gamma"])
-            else
-                sol = deepcopy(prev_wing._wingsystem.sol["Gamma"])
-            end
-
-            vlm._addsolution(wing, "Gamma", sol; t=t)
-        end
-    end
-
-    return nothing
-end
-
-function save_vtk_base(self::AbstractVLMVehicle, filename; path=nothing,
-                                   num=nothing, save_wopwopin=false,
-                                   infinite_vortex=false, optargs...)
-    strn = vlm.save(self.system, filename; path=path, num=num,
-                                    infinite_vortex=infinite_vortex, optargs...)
-
-    for (i, grid) in enumerate(self.grids)
-        strn *= gt.save(grid, filename*"_Grid$i"; format="vtk", path=path, num=num)
-    end
-
-    # Generate inputs for PSU-WOPWOP
-    if save_wopwopin
-        for (si, rotors) in enumerate(self.rotor_systems)
-            # Compact patch for loading
-            generate_vtkliftinglines(rotors, filename*"_Sys$(si)", path; num=num,
-                                                                suf="_compact")
-            # Loft for thickness
-            # NOTE: this is not needed since FLOWNoise can read the lofted VTK
-            # straight up
-            # for (ri, rotors) enumerate(rotors)
-            #     vlm.save(rotor, filename*"_Sys$(si)_Rotor$(ri)"; path=path, addtiproot=true,
-            #                             wopwop=true, wopbin=true, wopv=1.0, num=num)
-            # end
-
-            # Loading file
-            save_gammas = [[vlm.get_blade(rotor, i).sol["Gamma"]
-                                      for i in 1:rotor.B] for rotor in rotors]
-            # NOTE TO SELF: Ftot is a force per unit length
-            save_Ftot = [[vlm.get_blade(rotor, i).sol["Ftot"]
-                                      for i in 1:rotor.B] for rotor in rotors]
-            loadfname = "loading_Sys$(si)"*(num!=nothing ? ".$num" : "")*".jld"
-            JLD.save(joinpath(path, loadfname), "rotorgammas", save_gammas,
-                                                        "Ftot", save_Ftot)
-        end
-    end
-
-    return strn
-end
+# function save_vtk_base(self::AbstractVLMVehicle, filename; path=nothing,
+#                                    num=nothing, save_wopwopin=false,
+#                                    infinite_vortex=false, optargs...)
+#     strn = vlm.save(self.system, filename; path=path, num=num,
+#                                     infinite_vortex=infinite_vortex, optargs...)
+#
+#     for (i, grid) in enumerate(self.grids)
+#         strn *= gt.save(grid, filename*"_Grid$i"; format="vtk", path=path, num=num)
+#     end
+#
+#     # Generate inputs for PSU-WOPWOP
+#     if save_wopwopin
+#         for (si, rotors) in enumerate(self.rotor_systems)
+#             # Compact patch for loading
+#             generate_vtkliftinglines(rotors, filename*"_Sys$(si)", path; num=num,
+#                                                                 suf="_compact")
+#             # Loft for thickness
+#             # NOTE: this is not needed since FLOWNoise can read the lofted VTK
+#             # straight up
+#             # for (ri, rotors) enumerate(rotors)
+#             #     vlm.save(rotor, filename*"_Sys$(si)_Rotor$(ri)"; path=path, addtiproot=true,
+#             #                             wopwop=true, wopbin=true, wopv=1.0, num=num)
+#             # end
+#
+#             # Loading file
+#             save_gammas = [[vlm.get_blade(rotor, i).sol["Gamma"]
+#                                       for i in 1:rotor.B] for rotor in rotors]
+#             # NOTE TO SELF: Ftot is a force per unit length
+#             save_Ftot = [[vlm.get_blade(rotor, i).sol["Ftot"]
+#                                       for i in 1:rotor.B] for rotor in rotors]
+#             loadfname = "loading_Sys$(si)"*(num!=nothing ? ".$num" : "")*".jld"
+#             JLD.save(joinpath(path, loadfname), "rotorgammas", save_gammas,
+#                                                         "Ftot", save_Ftot)
+#         end
+#     end
+#
+#     return strn
+# end
 
 
 

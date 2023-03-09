@@ -65,23 +65,34 @@ struct UVLMVehicle{N, M, R} <: AbstractVLMVehicle{N, M, R}
     previousstep::Array{Any}                # Information about previous step
 
 
-    UVLMVehicle{N, M, R}(
-                    geometry, tilting_systems, rotor_systems;
-                    vlm_system=vlm.WingSystem(),
-                    panel_system=pnl.MultiBody(),
-                    wake_system=generate_wake_system(),
-                    V=zeros(3), W=zeros(3),
-                    previousstep=[],
-                ) where {N, M, R} = new(
-                    geometry,
-                    tilting_systems,
-                    rotor_systems,
-                    vlm_system,
-                    panel_system,
-                    wake_system,
+    function UVLMVehicle{N, M, R}( geometry, tilting_systems, rotor_systems;
+                                    vlm_system=vlm.WingSystem(),
+                                    panel_system=pnl.MultiBody(),
+                                    wake_system=nothing,
+                                    V=zeros(3), W=zeros(3),
+                                    previousstep=[],
+                                    ) where {N, M, R}
+
+        # Create wake system
+        if wake_system==nothing
+
+            flowvlm = System([vlm_system, rotor_systems])
+            flowpanel = System([panel_system])
+
+            _wake_system = generate_wake_system(; flowvlm_subsystem=flowvlm,
+                                                  flowpanel_subsystem=flowpanel)
+        else
+            _wake_system = wake_system
+        end
+
+        return new(
+                    geometry, tilting_systems, rotor_systems,
+                    vlm_system, panel_system,
+                    _wake_system,
                     V, W,
                     previousstep,
                 )
+    end
 end
 
 """

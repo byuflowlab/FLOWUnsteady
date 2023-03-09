@@ -132,7 +132,7 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
 
         else # Reads polars from files
             if verbose; println("\t"^(v_lvl+1)*"$file_name"); end;
-            polar = read_polar(file_name; path=data_path*"airfoils/", x=x, y=y)
+            polar = read_polar(file_name; path=joinpath(data_path, "airfoils"), x=x, y=y)
         end
 
         push!(airfoils, (pos, polar))
