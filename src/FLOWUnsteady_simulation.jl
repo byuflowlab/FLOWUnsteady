@@ -51,7 +51,7 @@ run_simulation(
     vlm_vortexsheet_sigma_tbv   = nothing, # Size of particles in trailing bound vortices (defaults to `sigma_vlm_surf` if not given)
     vlm_rlx         = -1,               # VLM relaxation (>0.9 can cause divergence, <0.2 slows simulation too much, deactivated with <0)
     vlm_init        = false,            # Initialize the first step with the VLM semi-infinite wake solution
-    hubtiploss_correction = vlm.hubtiploss_correction_prandtl, # Hub and tip loss correction of rotors (ignored in quasi-steady solver)
+    hubtiploss_correction = vlm.hubtiploss_nocorrection, # Hub and tip loss correction of rotors (ignored in quasi-steady solver)
 
     # Wake shedding
     wake_coupled        = true,         # Couple VPM wake -> VLM solution
@@ -142,7 +142,7 @@ function run_simulation(
             vlm_vortexsheet_sigma_tbv   = nothing, # Size of particles in trailing bound vortices (defaults to `sigma_vlm_surf` if not given)
             vlm_rlx         = -1,               # VLM relaxation (>0.9 can cause divergence, <0.2 slows simulation too much, deactivated with <0)
             vlm_init        = false,            # Initialize the first step with the VLM semi-infinite wake solution
-            hubtiploss_correction = vlm.hubtiploss_correction_prandtl, # Hub and tip loss correction of rotors (ignored in quasi-steady solver)
+            hubtiploss_correction = vlm.hubtiploss_nocorrection, # Hub and tip loss correction of rotors (ignored in quasi-steady solver)
 
             # Wake shedding
             wake_coupled        = true,         # Couple VPM wake -> VLM solution
