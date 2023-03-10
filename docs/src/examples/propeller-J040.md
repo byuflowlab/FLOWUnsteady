@@ -1,11 +1,62 @@
+# Basics
+
+```@raw html
+<center>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//apc10x7ccblongwake_J035_00cont03_img1_00.gif" alt="Vid here" style="width: 100%;"/>
+</center>
+```
+
+```@raw html
+<br>
+```
+
+In this example we simulate an
+[APC Thin-Electric 10x7 propeller](https://www.apcprop.com/product/10x7e/)
+operating in cruise conditions.
+Along the way, we demonstrate the basics of how to set up and run a rotor
+simulation.
+
+Rotors are generated through the function
+[`FLOWUnsteady.generate_rotor`](@ref), which can receive either
+a set of parameters that define the rotor geometry (like twist/chord/sweep
+distributions, etc), or it can read the rotor geometry from a file.
+FLOWunsteady provides a prepopulated database of airfoil and rotor geometries
+to automate the generation of rotors, which is found under
+[`database/`](https://github.com/byuflowlab/FLOWUnsteady/tree/master/database).
+This database can be accessed through the variable
+`FLOWUnsteady.default_database`.
+Alternatively, users can define their own database with custom rotors and
+airfoils.
+
+The following slides describe the structure of the database, using a DJI
+rotor as an example:
+
+```@raw html
+    <div style="position:relative;padding-top:50%;">
+        <iframe style="position:absolute;left:0;top:0;height:100%;width:80%;" src="https://docs.google.com/presentation/d/e/2PACX-1vRsYbuuMFQdc05NRrQ3Db0RT4XKKoxEYDiUi0MpW58W6A-pp0sDHQI9mVqNFagPtQ/embed?start=true&loop=true&delayms=3000" frameborder="0" width="100%" height="100%" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
+    </div>
+    <br><br>
+```
+
+In this simulation we exemplify the following:
+
+* How to generate a rotor with [`uns.generate_rotor`](@ref)
+* How to generate a rotor monitor with [`uns.generate_monitor_rotors`](@ref)
+* How to set up and run a rotor simulation.
+
+```@raw html
+<br>
+```
+
+```julia
 #=##############################################################################
 # DESCRIPTION
-    Simulation of a DJI 9443 rotor in hover (two-bladed rotor, 9.4 inches
+    Simulation of an APC Thin-Electric 10x7 propeller (two-bladed rotor, 10-inch
     diameter).
 
-    This example replicates the experiment described in Zawodny & Boyd (2016),
-    "Acoustic Characterization and Prediction of Representative,
-    Small-scale Rotary-wing Unmanned Aircraft System Components."
+    This example replicates the experiment and simulation described in McCrink &
+    Gregory (2017), "Blade Element Momentum Modeling of Low-Reynolds Electric
+    Propulsion Systems."
 
 # AUTHORSHIP
   * Author          : Eduardo J. Alvarez (edoalvarez.com)
@@ -15,66 +66,39 @@
   * License         : MIT
 =###############################################################################
 
-#= TODO
-    * [ ] Show a simplified example with a propeller case sweeping on J and validation
-        * [ ] Start with one case, J=0.3, APC 10x7
-        * [ ] Convert to J sweep, no plots, threaded. Compare to experimental.
-                J = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.775]
-        * [ ] Repeat with quasi-steady solver.
-    * [ ] Bring down the number of elements in the DJI example to speed things up?
-    * [ ] Visualization guide
-        * [ ] Changing ParaView ugly default color
-    * [ ] Rotor noise
-    * [ ] Some words on generating your own rotor geometry
-    * [ ] Cd monitor: Typically you can run one simulation with the dynamic
-            coeff, write down the mean Cd, then switch to the static model coeff
-            fixed to that value. It'll make the simulation 1.5x faster.
-=#
-
 import FLOWUnsteady as uns
 import FLOWVLM as vlm
 import FLOWVPM as vpm
 
-run_name        = "rotorhover-example03"      # Name of this simulation
+run_name        = "propeller-example"       # Name of this simulation
 
 save_path       = run_name                  # Where to save this simulation
-# paraview        = true                      # Whether to visualize with Paraview
-
-paraview        = false
+paraview        = true                      # Whether to visualize with Paraview
 
 
 # ----------------- GEOMETRY PARAMETERS ----------------------------------------
 
 # Rotor geometry
-# rotor_file      = "DJI9443.csv"             # Rotor geometry
-rotor_file      = "DJI9443-smoothpolars.csv"# Rotor geometry
+rotor_file      = "apc10x7.csv"             # Rotor geometry
 data_path       = uns.def_data_path         # Path to rotor database
 pitch           = 0.0                       # (deg) collective pitch of blades
 CW              = false                     # Clock-wise rotation
-xfoil           = false                     # Whether to run XFOIL
-# xfoil           = true
-
-# TODO: Hide this?
-# read_polar      = vlm.ap.read_polar         # What polar reader to use
-read_polar      = vlm.ap.read_polar2
+xfoil           = true                      # Whether to run XFOIL
+ncrit           = 9                         # Turbulence criterion for XFOIL
 
 # NOTE: If `xfoil=true`, XFOIL will be run to generate the airfoil polars used
 #       by blade elements before starting the simulation. XFOIL is run
 #       on the airfoil contours found in `rotor_file` at the corresponding
 #       local Reynolds and Mach numbers along the blade.
 #       Alternatively, the user can provide pre-computer airfoil polars using
-#       `xfoil=false` and providing the polar files through `rotor_file`.
-#       `read_polar` is the function that will be used to parse polar files. Use
-#       `vlm.ap.read_polar` for files that are direct outputs of XFOIL (e.g., as
-#       downloaded from www.airfoiltools.com). Use `vlm.ap.read_polar2` for CSV
-#       files.
+#       `xfoil=false` and pointing to polar files through `rotor_file`.
 
 # Discretization
-n               = 50                        # Number of blade elements per blade
-r               = 1/10                      # Geometric expansion of elements
+n               = 20                        # Number of blade elements per blade
+r               = 1/5                       # Geometric expansion of elements
 
-# NOTE: Here a geometric expansion of 1/10 means that the spacing between the
-#       tip elements is 1/10 of the spacing between the hub elements. Refine the
+# NOTE: Here a geometric expansion of 1/5 means that the spacing between the
+#       tip elements is 1/5 of the spacing between the hub elements. Refine the
 #       discretization towards the blade tip like this in order to better
 #       resolve the tip vortex.
 
@@ -84,17 +108,13 @@ R, B            = uns.read_rotor(rotor_file; data_path=data_path)[[1,3]]
 # ----------------- SIMULATION PARAMETERS --------------------------------------
 
 # Operating conditions
-RPM             = 5400                      # RPM
-J               = 0.0001                    # Advance ratio Vinf/(nD)
+RPM             = 9200                      # RPM
+J               = 0.4                       # Advance ratio Vinf/(nD)
 AOA             = 0                         # (deg) Angle of attack (incidence angle)
 
-rho             = 1.071778                  # (kg/m^3) air density
-mu              = 1.85508e-5                # (kg/ms) air dynamic viscosity
+rho             = 1.225                     # (kg/m^3) air density
+mu              = 1.81e-5                   # (kg/ms) air dynamic viscosity
 speedofsound    = 342.35                    # (m/s) speed of sound
-
-# NOTE: For cases with zero freestream velocity, in order to avoid numerical
-#       instabilities, it is recommended that a negligible small velocity is
-#       used instead of zero (hence, J here is negligible small instead of zero)
 
 magVinf         = J*RPM/60*(2*R)
 Vinf(X, t)      = magVinf*[cosd(AOA), sind(AOA), 0] # (m/s) freestream velocity vector
@@ -117,73 +137,34 @@ VehicleType     = uns.UVLMVehicle           # Unsteady solver
 const_solution  = VehicleType==uns.QVLMVehicle  # Whether to assume that the
                                                 # solution is constant or not
 # Time parameters
-# nrevs           = 4                         # Number of revolutions in simulation
-# nrevs           = 7
-nrevs           = 10
-# nsteps_per_rev  = 72                        # Time steps per revolution
-nsteps_per_rev  = 72*5
+nrevs           = 4                         # Number of revolutions in simulation
+nsteps_per_rev  = 36                        # Time steps per revolution
 nsteps          = const_solution ? 2 : nrevs*nsteps_per_rev # Number of time steps
 ttot            = nsteps/nsteps_per_rev / (RPM/60)       # (s) total simulation time
 
 # VPM particle shedding
 p_per_step      = 2                         # Sheds per time step
 shed_starting   = true                      # Whether to shed starting vortex
-# shed_unsteady   = true                      # Whether to shed vorticity from unsteady loading
-shed_unsteady   = false
+shed_unsteady   = true                      # Whether to shed vorticity from unsteady loading
 max_particles   = ((2*n+1)*B)*nsteps*p_per_step + 1 # Maximum number of particles
 
 # Regularization
-# sigma_rotor_surf= R/10                      # Rotor-on-VPM smoothing radius
-# sigma_rotor_surf= R/40
-sigma_rotor_surf= R/80
+sigma_rotor_surf= R/40                      # Rotor-on-VPM smoothing radius
 lambda_vpm      = 2.125                     # VPM core overlap
                                             # VPM smoothing radius
 sigma_vpm_overwrite = lambda_vpm * 2*pi*R/(nsteps_per_rev*p_per_step)
 
 # Rotor solver
-# vlm_rlx         = 0.7                       # VLM relaxation <-- This also applied to Rotor
-# vlm_rlx         = 0.5
-vlm_rlx         = 0.1
-
-# hubtiploss_correction = vlm.hubtiploss_correction_prandtl   # Hub and tip correction
-# hubtiploss_correction = vlm.hubtiploss_correction_modprandtl
-hubtiploss_correction = ((0.4, 5, 0.1, 0.05), vlm.hubtiploss_correction_modprandtl[2])
-
-# no_shedding_Rthreshold = 0.35           # Supress wake shedding on elements inboard of this radial station
-# no_shedding_Rthreshold = shed_unsteady ? 0.0 : 0.35
-# no_shedding_nstepsthreshold = 3*nsteps_per_rev # Supress wake shedding before this many time steps
-# no_shedding_nstepsthreshold = 1*nsteps_per_rev # Supress wake shedding before this many time steps
-# no_shedding_nstepsthreshold = nsteps
+vlm_rlx         = 0.7                       # VLM relaxation <-- this also applied to rotors
+hubtiploss_correction = vlm.hubtiploss_nocorrection # Hub and tip loss correction
 
 # VPM solver
 vpm_viscous     = vpm.Inviscid()            # VPM viscous diffusion scheme
-# vpm_viscous     = vpm.CoreSpreading(-1, -1, vpm.zeta_fmm; beta=100.0, itmax=20, tol=1e-1)
-# vpm_SFS         = vpm.SFS_none            # VPM LES subfilter-scale model
-# vpm_SFS         = vpm.SFS_Cd_twolevel_nobackscatter
-# vpm_SFS         = vpm.SFS_Cd_threelevel_nobackscatter
-vpm_SFS         = vpm.DynamicSFS(vpm.Estr_fmm, vpm.pseudo3level_positive; alpha=0.999, clippings=[vpm.clipping_backscatter], maxC=1.0)
-# vpm_SFS         = vpm.DynamicSFS(vpm.Estr_fmm, vpm.pseudo3level_positive; clippings=[vpm.clipping_backscatter],
-                                                        # controls=[control_sigmasensor],
-                                                        # alpha=0.999, rlxf=0.005, minC=0, maxC=1)
 
 # NOTE: In most practical situations, open rotors operate at a Reynolds number
 #       high enough that viscous diffusion in the wake is negligible.
 #       Hence, it does not make much of a difference whether we run the
-#       simulation with viscous diffusion enabled or not. On the other hand,
-#       such high Reynolds numbers mean that the wake quickly becomes turbulent
-#       and it is crucial to use a subfilter-scale (SFS) model to accurately
-#       capture the turbulent decay of the wake.
-
-
-
-
-# TODO: Hide this
-# sigmafactor_vpmonvlm   = 1                  # Shrinks the particles by this factor when calculated VPM-on-VLM/Rotor induced velocities
-sigmafactor_vpmonvlm   = 5.50
-unsteady_shedcrit = 0.001                   # Shed unsteady loading whenever circulation fluctuates more than this ratio
-
-!xfoil ? @warn("XFOIL deactivated!") : nothing
-!shed_unsteady ? @warn("Unsteady loading wake deactivated!") : nothing
+#       simulation with viscous diffusion enabled or not.
 
 
 if VehicleType == uns.QVLMVehicle
@@ -194,40 +175,6 @@ if VehicleType == uns.QVLMVehicle
     uns.vlm.VLMSolver._mute_warning(true)
 end
 
-
-
-
-no_shedding_Rthreshold = shed_unsteady ? 0.0 : 0.35
-no_shedding_nstepsthreshold = 3*nsteps_per_rev # Supress wake shedding before this many time steps
-
-# Determine horseshoes to supress wake shedding
-omit_shedding = []
-
-# Function to stop supressing wake shedding
-function wake_treatment_supress(sim, args...; optargs...)
-
-    # Identify horseshoes to supress
-    if sim.nt == 1
-        for i in 1:vlm.get_m(rotor)
-            HS = vlm.getHorseshoe(rotor, i)
-            CP = HS[5]
-
-            if uns.vlm.norm(CP - vlm._get_O(rotor)) <= no_shedding_Rthreshold*R
-                push!(omit_shedding, i)
-            end
-        end
-    end
-
-    # Flag to stop supressing
-    if sim.nt == no_shedding_nstepsthreshold
-        omit_shedding .= -1
-    end
-
-    return false
-end
-
-
-
 # ----------------- 1) VEHICLE DEFINITION --------------------------------------
 println("Generating geometry...")
 
@@ -236,10 +183,10 @@ rotor = uns.generate_rotor(rotor_file; pitch=pitch,
                                         n=n, CW=CW, blade_r=r,
                                         altReD=[RPM, J, mu/rho],
                                         xfoil=xfoil,
-                                        read_polar=read_polar,
+                                        ncrit=ncrit,
                                         data_path=data_path,
                                         verbose=true,
-                                        verbose_xfoil=true,
+                                        verbose_xfoil=false,
                                         plot_disc=true
                                         );
 
@@ -310,46 +257,20 @@ Winit = pi/180*(anglevehicle(1e-6) - anglevehicle(0))/(1e-6*ttot)  # Initial ang
 simulation = uns.Simulation(vehicle, maneuver, Vref, RPMref, ttot;
                                                     Vinit=Vinit, Winit=Winit);
 
-# Restart simulation
-restart_file = nothing
-
-# NOTE: Uncomment the following line to restart a previous simulation.
-#       Point it to a particle field file (with its full path) at a specific
-#       time step, and `run_simulation` will start this simulation with the
-#       particle field found in the restart simulation.
-
-# restart_file = "/path/to/a/previous/simulation/rotorhover-example_Rotor_pfield.360"
-
 
 # ------------- 4) MONITORS DEFINITIONS ----------------------------------------
+figs, figaxs = [], []                       # Figures generated by monitor
 
 # Generate rotor monitor
 monitor_rotor = uns.generate_monitor_rotors(rotors, J, rho, RPM, nsteps;
                                             t_scale=RPM/60,        # Scaling factor for time in plots
                                             t_lbl="Revolutions",   # Label for time axis
+                                            out_figs=figs,
+                                            out_figaxs=figaxs,
                                             save_path=save_path,
                                             run_name=run_name,
                                             figname="rotor monitor",
                                             )
-
-# Generate monitor of flow enstrophy (numerical stability)
-monitor_enstrophy = uns.generate_monitor_enstrophy(;
-                                            save_path=save_path,
-                                            run_name=run_name,
-                                            figname="enstrophy monitor"
-                                            )
-
-# Generate monitor of SFS model coefficient Cd
-monitor_Cd = uns.generate_monitor_Cd(;
-                                            save_path=save_path,
-                                            run_name=run_name,
-                                            figname="Cd monitor"
-                                            )
-
-monitors = uns.concatenate(monitor_rotor, monitor_enstrophy, monitor_Cd)
-
-
-runtime_function = uns.concatenate(monitors, wake_treatment_supress)
 
 
 # ------------- 5) RUN SIMULATION ----------------------------------------------
@@ -362,7 +283,6 @@ uns.run_simulation(simulation, nsteps;
                     p_per_step=p_per_step,
                     max_particles=max_particles,
                     vpm_viscous=vpm_viscous,
-                    vpm_SFS=vpm_SFS,
                     sigma_vlm_surf=sigma_rotor_surf,
                     sigma_rotor_surf=sigma_rotor_surf,
                     sigma_vpm_overwrite=sigma_vpm_overwrite,
@@ -370,18 +290,10 @@ uns.run_simulation(simulation, nsteps;
                     hubtiploss_correction=hubtiploss_correction,
                     shed_unsteady=shed_unsteady,
                     shed_starting=shed_starting,
-                    # extra_runtime_function=monitors,
-                    omit_shedding=omit_shedding,
-                    extra_runtime_function=runtime_function,
+                    extra_runtime_function=monitor_rotor,
                     # ----- OUTPUT OPTIONS ------------------
                     save_path=save_path,
                     run_name=run_name,
-                    save_wopwopin=true,  # <--- Generate input files for PSU-WOPWOP noise analysis
-
-
-                    sigmafactor_vpmonvlm=sigmafactor_vpmonvlm,
-                    unsteady_shedcrit=unsteady_shedcrit,
-                    save_code=@__FILE__
                     );
 
 
@@ -405,7 +317,26 @@ if paraview
 end
 
 
-# ------------- 6) POSTPROCESSING ----------------------------------------------
+```
+```@raw html
+<span style="font-size: 0.9em; color:gray;"><i>
+    Run time: ~2 minutes on a Dell Precision 7760 laptop.
+</i></span>
+<br><br>
+```
 
-# # Post-process monitor plots
-# include(joinpath(uns.examples_path, "heavingwing", "heavingwing_postprocessing.jl"))
+As the simulation runs, you will see the monitor shown below plotting the
+blade loading along with thrust and torque coefficients and propulsive
+efficiency.
+
+```@raw html
+<center>
+    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//propeller-example-simmonitor.png" alt="Pic here" style="width: 100%;"/>
+</center>
+```
+
+```@raw html
+(<span style="color:red;">red</span> = beginning,
+<span style="color:blue;">blue</span> = end)
+```
+

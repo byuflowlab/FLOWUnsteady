@@ -128,7 +128,7 @@ end
 <br><br>
 ```
 
-Check [examples/wing_aoasweep.jl](https://github.com/byuflowlab/FLOWUnsteady/blob/master/examples/wing/wing_aoasweep.jl)
+Check [examples/wing/wing_aoasweep.jl](https://github.com/byuflowlab/FLOWUnsteady/blob/master/examples/wing/wing_aoasweep.jl)
 to see how to postprocess and plot the results as shown below.
 
 ```@raw html

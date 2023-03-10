@@ -30,6 +30,12 @@ makedocs(
                                                       ],
                                     "examples/tetheredwing.md",
                                     "examples/heavingwing.md",
+                                    "Propeller" => [
+                                                        "examples/propeller-J040.md",
+                                                        "examples/propeller-jsweep.md",
+                                                        "examples/propeller-quasisteady.md",
+                                                        "examples/propeller-incidence.md"
+                                                      ],
                                    ],
                 "API Guide"     => [
                                     "(1) Vehicle Definition" => [
