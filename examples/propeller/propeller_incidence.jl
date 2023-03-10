@@ -1,29 +1,3 @@
-# Incidence Sweep
-```@raw html
-<center>
-    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//prowim_isoprop_J100-AOA200-00_3.gif" alt="Vid here" style="width: 100%;"/>
-</center>
-```
-
-In simple cases like a propeller in cruise, steady and quasi-steady methods
-like blade element momentum theory can be as accurate as a fully unsteady
-simulation, and even faster.
-However, in more complex cases, quasi-steady solvers are far from accurate
-and a fully unsteady solver is needed.
-We now highlight one of such cases: the case of a propeller at an incidence
-angle.
-
-A rotor operating at an incidence angle relative to the freestream
-experiences an unsteady loading due to the
-blade seeing a larger local velocity in the advancing side of the rotor and
-a smaller local velocity in the retreating side.
-This also causes a wake that is skewed.
-For this example we will run a sweep of simulations on a 4-bladed propeller
-operating at multiple incidence angles $\alpha$ (where
-$\alpha=0^\circ$ is fully axial inflow, and $\alpha=90^\circ$
-is fully edgewise inflow).
-
-```julia
 #=##############################################################################
 # DESCRIPTION
     Simulation of Beaver propeller (four-bladed rotor, 9.34-inch diameter) at
@@ -235,29 +209,83 @@ for AOA in AOAs
                         );
 end
 
-```
-```@raw html
-<span style="font-size: 0.9em; color:gray;"><i>
-    Run time: ~15 minutes on a Dell Precision 7760 laptop.
-</i></span>
-<br><br>
-```
+# ------------- 6) POSTPROCESSING ----------------------------------------------
+import FLOWUnsteady: mean, plt, @L_str
+import CSV
+import DataFrames: DataFrame
 
-Check [examples/propeller/propeller_incidence.jl](https://github.com/byuflowlab/FLOWUnsteady/blob/master/examples/propeller/propeller_incidence.jl)
-to postprocess and plot the results as shown below.
+fig = plt.figure(figsize=[7*1, 5*1*0.9]*2/3)
+ax  = fig.gca()
 
-```@raw html
-<center>
-    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//propeller-incidencesweep-example.png" alt="Pic here" style="width: 50%;"/>
-</center>
-```
+# Experimental thrust vs AOA at J=0.9 (Sinnige et al., Fig.10)
+CTexp = [ # AOA, CT[
+           -0.2   0.0541;
+            0.8   0.0543;
+            1.8   0.0546;
+            2.8   0.0551;
+            3.79  0.0559;
+            4.8   0.0569;
+            5.8   0.0579;
+            6.79  0.0587;
+            7.8   0.0595;
+            8.79  0.0602;
+            9.81  0.061;
+            10.79 0.0615;
+            11.8  0.062;
+            12.8  0.0624;
+            13.8  0.0634;
+            14.8  0.0647;
+            15.8  0.0661;
+            16.8  0.0672;
+            17.8  0.0674;
+            18.8  0.0694;
+            19.8  0.0731
+        ]
 
-!!! info "Paraview visualization"
-    The `.pvsm` file visualizing the simulation as shown at the
-    top of this page is available here:
-    [LINK](https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/prowim-singlerotor-monitors01.pvsm)
-    (`right click → save as...`).
-    To open in Paraview: `File → Load State → (select .pvsm file)` then
-    select "Search files under specified directory" and point it to the
-    folder where the simulation was saved.
+nrevs_to_average = 1.0                  # Number of revolutions to average
+nsteps_to_average = ceil(Int, nrevs_to_average*nsteps_per_rev)
 
+CTs = []
+
+# Process monitor's CSV ouput
+for AOA in AOAs
+
+    # Read CSV
+    filename = "AOA$(ceil(Int, AOA*100))_convergence.csv"
+    data = CSV.read(joinpath(save_path, filename), DataFrame)
+
+    # Average the last few revolutions
+    ave = mean(data.CT_1[end-nsteps_to_average:end])
+
+    push!(CTs, ave)
+end
+
+# Plot experimental
+ax.plot(CTexp[:, 1], CTexp[:, 2], "ok", label="Experimental",
+            linewidth=1, markersize=6, clip_on=false)
+
+# Plot FLOWUnsteady
+ax.plot(AOAs, CTs, "-^", label="FLOWUnsteady", alpha=1.0,
+            color="steelblue", markersize=8, clip_on=false)
+
+xlims = [minimum(AOAs), maximum(AOAs)]
+ylims = [0.03, 0.09]
+xticks = xlims[1]:4:xlims[end]
+
+ax.set_xlim(xlims)
+ax.set_xticks(xticks)
+ax.set_xticklabels(["$val"*L"^\circ" for val in xticks])
+ax.set_xlabel(L"Incidence angle $\alpha$")
+
+ax.set_ylim(ylims)
+ax.set_yticks(ylims[1]:0.02:ylims[end])
+ax.set_ylabel(L"Thrust $C_T$")
+
+ax.spines["right"].set_visible(false)
+ax.spines["top"].set_visible(false)
+
+ax.legend(loc="best", frameon=false, fontsize=8)
+
+fig.tight_layout()
+
+fig.savefig(joinpath(save_path, case_name*".png"), dpi=300, transparent=true)

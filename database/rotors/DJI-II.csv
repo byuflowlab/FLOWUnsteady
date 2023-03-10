@@ -1,5 +1,0 @@
-property,file,description
-Rtip,0.12, (m) Radius of blade tip
-Rhub,0.00823, (m) Radius of hub
-B,2, Number of blades
-blade,DJI-II_blade.csv, Blade file

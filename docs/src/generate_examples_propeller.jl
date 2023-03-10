@@ -110,7 +110,8 @@ open(joinpath(output_path, output_name*"-jsweep.md"), "w") do fout
 
     println(fout, """
         \nUsing the same rotor from the previous section, we now run a sweep of
-        the advance ratio \$J = \\frac{u_\\infty}{n d}\$ to determine the performance of the propeller.
+        the advance ratio \$J = \\frac{u_\\infty}{n d}\$ to characterize the
+        performance of the propeller.
     """)
 
     println(fout, "```julia")
@@ -140,7 +141,7 @@ open(joinpath(output_path, output_name*"-jsweep.md"), "w") do fout
     ```
 
     Check [examples/propeller/propeller_jsweep.jl](https://github.com/byuflowlab/FLOWUnsteady/blob/master/examples/propeller/propeller_jsweep.jl)
-    to see how to postprocess and plot the results as shown below.
+    to postprocess and plot the results as shown below.
 
     ```@raw html
     <center>
@@ -196,11 +197,73 @@ open(joinpath(output_path, output_name*"-incidence.md"), "w") do fout
     println(fout, "# Incidence Sweep")
 
     println(fout, """
-
     ```@raw html
     <center>
         <img src="$(remote_url)/prowim_isoprop_J100-AOA200-00_3.gif" alt="Vid here" style="width: 100%;"/>
     </center>
     ```
+
+    In simple cases like a propeller in cruise, steady and quasi-steady methods
+    like blade element momentum theory can be as accurate as a fully unsteady
+    simulation, and even faster.
+    However, in more complex cases, quasi-steady solvers are far from accurate
+    and a fully unsteady solver is needed.
+    We now highlight one of such cases: the case of a propeller at an incidence
+    angle.
+
+    A rotor operating at an incidence angle relative to the freestream
+    experiences an unsteady loading due to the
+    blade seeing a larger local velocity in the advancing side of the rotor and
+    a smaller local velocity in the retreating side.
+    This also causes a wake that is skewed.
+    For this example we will run a sweep of simulations on a 4-bladed propeller
+    operating at multiple incidence angles \$\\alpha\$ (where
+    \$\\alpha=0^\\circ\$ is fully axial inflow, and \$\\alpha=90^\\circ\$
+    is fully edgewise inflow).
+    """)
+
+
+    println(fout, "```julia")
+
+    input_name = "propeller_incidence.jl"
+
+    open(joinpath(example_path, input_name), "r") do fin
+        for (li, l) in enumerate(eachline(fin))
+            if contains(l, "POSTPROCESSING")
+                break
+            end
+
+            println(fout, l)
+
+        end
+    end
+
+    println(fout, "```")
+
+    println(fout, """
+    ```@raw html
+    <span style="font-size: 0.9em; color:gray;"><i>
+        Run time: ~15 minutes on a Dell Precision 7760 laptop.
+    </i></span>
+    <br><br>
+    ```
+
+    Check [examples/propeller/propeller_incidence.jl](https://github.com/byuflowlab/FLOWUnsteady/blob/master/examples/propeller/propeller_incidence.jl)
+    to postprocess and plot the results as shown below.
+
+    ```@raw html
+    <center>
+        <img src="$(remote_url)/propeller-incidencesweep-example.png" alt="Pic here" style="width: 50%;"/>
+    </center>
+    ```
+    
+    !!! info "Paraview visualization"
+        The `.pvsm` file visualizing the simulation as shown at the
+        top of this page is available here:
+        [LINK](https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/prowim-singlerotor-monitors01.pvsm)
+        (`right click → save as...`).
+        To open in Paraview: `File → Load State → (select .pvsm file)` then
+        select "Search files under specified directory" and point it to the
+        folder where the simulation was saved.
     """)
 end

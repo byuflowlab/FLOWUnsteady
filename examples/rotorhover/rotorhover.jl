@@ -16,16 +16,10 @@
 =###############################################################################
 
 #= TODO
-    * [ ] Show a simplified example with a propeller case sweeping on J and validation
-        * [ ] Start with one case, J=0.3, APC 10x7
-        * [ ] Convert to J sweep, no plots, threaded. Compare to experimental.
-                J = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.775]
-        * [ ] Repeat with quasi-steady solver.
     * [ ] Bring down the number of elements in the DJI example to speed things up?
     * [ ] Visualization guide
         * [ ] Changing ParaView ugly default color
     * [ ] Rotor noise
-    * [ ] Some words on generating your own rotor geometry
     * [ ] Cd monitor: Typically you can run one simulation with the dynamic
             coeff, write down the mean Cd, then switch to the static model coeff
             fixed to that value. It'll make the simulation 1.5x faster.

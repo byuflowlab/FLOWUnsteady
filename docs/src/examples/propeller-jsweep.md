@@ -1,7 +1,8 @@
 # $J$ Sweep
     
 Using the same rotor from the previous section, we now run a sweep of
-    the advance ratio $J = \frac{u_\infty}{n d}$ to determine the performance of the propeller.
+    the advance ratio $J = \frac{u_\infty}{n d}$ to characterize the
+    performance of the propeller.
 
 ```julia
 #=##############################################################################
@@ -109,7 +110,7 @@ end
 ```
 
 Check [examples/propeller/propeller_jsweep.jl](https://github.com/byuflowlab/FLOWUnsteady/blob/master/examples/propeller/propeller_jsweep.jl)
-to see how to postprocess and plot the results as shown below.
+to postprocess and plot the results as shown below.
 
 ```@raw html
 <center>
