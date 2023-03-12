@@ -6,6 +6,7 @@ const uns = FLOWUnsteady
 
 import FLOWUnsteady: FLOWVPM, FLOWVLM
 
+include("src/generate_index.jl")
 include("src/generate_examples.jl")
 
 

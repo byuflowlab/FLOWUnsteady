@@ -1,20 +1,35 @@
-![FLOWUnsteady logo](http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/flowunsteady-logo-wide03.png)
+<img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/flowunsteady-logo-wide03.png" alt="FLOWUnsteady logo" style="width:100%">
 
-[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://flow.byu.edu/FLOWUnsteady/)
+<p align="right">
+  <span style="color:#2f6990;">
+    <i>Interactional aerodynamics solver for multirotor aircraft and wind energy</i>
+  </span>
+</p>
+
+<p align="right">
+  <a href="https://github.com/byuflowlab/FLOWUnsteady">
+    <img src="https://img.shields.io/badge/code-open%20source-brightgreen.svg">
+  </a>
+  <a href="https://flow.byu.edu/FLOWUnsteady/">
+    <img src="https://img.shields.io/badge/docs-stable-blue.svg">
+  </a>
+</p>
+
+---
 
 TODO
 * [ ] Rewrite description
 * [ ] Add a validations section compiling all validation studies
 * [ ] List of publications
-* [ ] Installation instructions
+* [x] Installation instructions
 * [ ] Brief theory
 * [ ] Visualization Guidelines
 * [ ] Numerical recommendations notebook
 * [ ] Examples
   * [x] Simple wing
-  * [ ] Circular path?
-  * [ ] Heaving wing
-  * [ ] Single rotor aero
+  * [x] Circular path?
+  * [x] Heaving wing
+  * [x] Single rotor aero
   * [ ] Single rotor noise
   * [ ] Blown wing
   * [ ] Vahana
@@ -28,6 +43,7 @@ TODO
     * [x] Postprocessing: noise functions
     * [x] Postprocessing: Fluid domain
 * [x] Move large figure files to J Drive
+* [ ] Citing guide
 
 <img src="docs/resources/images/blownwing00.png" alt="Pic here" style="width: 900px;"/>
 
