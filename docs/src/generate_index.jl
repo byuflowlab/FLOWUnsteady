@@ -8,6 +8,7 @@ readmefile = joinpath(uns.examples_path, "..", "README.md")
 htmlflags = [ # Trigger on, trigger off, on/off status
                 "<p" "</p" false;
                 "<img" ">" false;
+                "<div" "</div>" false;
             ]
 
 

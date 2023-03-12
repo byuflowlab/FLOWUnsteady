@@ -22,7 +22,7 @@ makedocs(
                                 collapselevel = 1
                             ),
     pages = [
-                "Home"          => "index.md",
+                "Introduction"          => "index.md",
                 "Installation"  => "installation.md",
                 "Tutorials"     => [
                                     "Simple Wing" => [
@@ -37,6 +37,9 @@ makedocs(
                                                         "examples/propeller-quasisteady.md",
                                                         "examples/propeller-incidence.md"
                                                       ],
+                                   ],
+                "Theory"        => [
+                                    "theory/publications.md"
                                    ],
                 "API Guide"     => [
                                     "(1) Vehicle Definition" => [
