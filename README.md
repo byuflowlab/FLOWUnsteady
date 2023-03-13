@@ -150,6 +150,8 @@ More details on the solvers inside FLOWUnsteady:
   </a>
 </p>
 
+<p><br></p>
+
 ### Selected Publications
 See the following publications for an in-depth dive into theory and validation:
 
@@ -157,6 +159,7 @@ See the following publications for an in-depth dive into theory and validation:
 * E. J. Alvarez & A. Ning (2022). "Reviving the Vortex Particle Method: A Stable Formulation for Meshless Large Eddy Simulation." *(in review)* [**[PDF]**](https://arxiv.org/pdf/2206.03658.pdf)
 * E. J. Alvarez (2022). "Reformulated Vortex Particle Method and Meshless Large Eddy Simulation of Multirotor Aircraft". *Doctoral Dissertation, Brigham Young University*. [**[VIDEO]**](https://www.nas.nasa.gov/pubs/ams/2022/08-09-22.html) [**[PDF]**](https://scholarsarchive.byu.edu/etd/9589/)
 
+<p><br></p>
 
 ### Examples
 
@@ -186,6 +189,7 @@ See the following publications for an in-depth dive into theory and validation:
   <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/prowimhtp-wvol34-cropped00.jpg" alt="img" style="width:100%">
 </p>
 
+<p><br></p>
 
 **Airborne-Wind-Energy Aircraft:** [Validation] [[Video](https://www.youtube.com/watch?v=iFM3B4_N2Ls)]
 
@@ -267,12 +271,14 @@ If the issue still persists, please
 
 
   TODO
-  * [x] Rewrite description
-  * [ ] Add links to examples in README
-  * [ ] Add a validations section compiling all validation studies
-  * [ ] List of publications
+  * [ ] README
+    * [x] Rewrite description
+    * [ ] Add links to examples in README
+  * [ ] Theory
+    * [ ] Add a validations section compiling all validation studies
+    * [ ] List of publications
+    * [ ] Brief theory
   * [x] Installation instructions
-  * [ ] Brief theory
   * [ ] Visualization Guidelines
   * [ ] Numerical recommendations notebook
   * [ ] Examples
