@@ -406,7 +406,8 @@ end
 """
 Returns the velocity induced by particle field on every position `Xs`
 """
-function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs::Array{T, 1}; static_particles_fun=(args...)->nothing, dt=0, fsgm=1) where {T}
+# function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs::AbstractArray; static_particles_fun=(args...)->nothing, dt=0, fsgm=1)
+function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs; static_particles_fun=(args...)->nothing, dt=0, fsgm=1)
 
     if length(Xs)!=0 && vpm.get_np(pfield)!=0
         # Omit freestream

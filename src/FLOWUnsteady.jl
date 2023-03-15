@@ -32,6 +32,7 @@ import GeometricTools
 # NOTE: Unregistered packages available at https://github.com/byuflowlab
 import FLOWVPM
 import FLOWVLM
+import FLOWPanel
 import FLOWNoise
 import BPM
 
@@ -39,6 +40,7 @@ import BPM
 const gt    = GeometricTools
 const vpm   = FLOWVPM
 const vlm   = FLOWVLM
+const pnl   = FLOWPanel
 const noise = FLOWNoise
 
 # ------------ GLOBAL VARIABLES ------------------------------------------------
