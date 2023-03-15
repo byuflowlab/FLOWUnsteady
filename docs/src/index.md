@@ -88,6 +88,7 @@ vorticity back into the LES domain.
 <p><br></p>
 ```
 
+
 ```@raw html
 <div style="position:relative;padding-top:50%;">
     <iframe style="position:absolute;left:0;top:0;height:80%;width:71%;"
@@ -97,6 +98,8 @@ vorticity back into the LES domain.
         allowfullscreen></iframe>
 </div>
 ```
+
+
 
 ### Variable Fidelity for Preliminary-to-Detailed Design
 
@@ -185,24 +188,28 @@ See the following publications for an in-depth dive into the theory and validati
 ```@raw html
 <div style="position:relative;padding-top:50%;">
     <iframe style="position:absolute;left:0;top:0;height:80%;width:71%;"
-        src="https://www.youtube.com/embed/lUIytQybCpQ?hd=1&rel=0"
+        src="https://www.youtube.com/embed/lUIytQybCpQ?hd=1"
         title="YouTube video player" frameborder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         allowfullscreen></iframe>
 </div>
 ```
+
+
 
 **Rotor in Hover:** [Tutorial] [Validation] [[Video](https://www.youtube.com/watch?v=u9SgYbYhPpU)]
 
 ```@raw html
 <div style="position:relative;padding-top:50%;">
     <iframe style="position:absolute;left:0;top:0;height:80%;width:71%;"
-        src="https://www.youtube.com/embed/u9SgYbYhPpU?hd=1&rel=0"
+        src="https://www.youtube.com/embed/u9SgYbYhPpU?hd=1"
         title="YouTube video player" frameborder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         allowfullscreen></iframe>
 </div>
 ```
+
+
 
 **Blown Wing:** [Tutorial] [Validation]
 
@@ -231,28 +238,31 @@ Mid-fidelity
 ```@raw html
 <div style="position:relative;padding-top:50%;">
     <iframe style="position:absolute;left:0;top:0;height:80%;width:71%;"
-        src="https://www.youtube.com/embed/d__wNtRIBY8?hd=1&rel=0"
+        src="https://www.youtube.com/embed/d__wNtRIBY8?hd=1"
         title="YouTube video player" frameborder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         allowfullscreen></iframe>
 </div>
 ```
+
+
 High-fidelity
 ```@raw html
 <div style="position:relative;padding-top:50%;">
     <iframe style="position:absolute;left:0;top:0;height:80%;width:71%;"
-        src="https://www.youtube.com/embed/-6aR37Z6hig?hd=1&rel=0"
+        src="https://www.youtube.com/embed/-6aR37Z6hig?hd=1"
         title="YouTube video player" frameborder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         allowfullscreen></iframe>
 </div>
 ```
+
 
 
 **Aeroacoustic Noise:** [Tutorial] [Validation]
 
 ```@raw html
-<p align="left">
+<p align="center">
   <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/cfdnoise_ningdji_multi_005D_03_20.gif" alt="Vid" width="60%"/>
 </p>
 ```
@@ -260,12 +270,13 @@ High-fidelity
 ```@raw html
 <div style="position:relative;padding-top:50%;">
     <iframe style="position:absolute;left:0;top:0;height:80%;width:71%;"
-        src="https://www.youtube.com/embed/ntQjP6KbZDk?hd=1&rel=0"
+        src="https://www.youtube.com/embed/ntQjP6KbZDk?hd=1"
         title="YouTube video player" frameborder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         allowfullscreen></iframe>
 </div>
 ```
+
 
 
 

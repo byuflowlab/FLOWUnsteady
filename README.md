@@ -78,13 +78,9 @@ vorticity back into the LES domain.
 
 <p><br></p>
 
-<div style="position:relative;padding-top:50%;">
-    <iframe style="position:absolute;left:0;top:0;height:80%;width:71%;"
-        src="https://www.youtube.com/embed/-6aR37Z6hig?hd=1"
-        title="YouTube video player" frameborder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        allowfullscreen></iframe>
-</div>
+
+<p align="center"> <a href="https://www.youtube.com/watch?v=-6aR37Z6hig&hd=1"> <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/youtube-vahanahi.png" alt="youtube.com/watch?v=-6aR37Z6hig" style="width:70%"> </a> </p>
+
 
 ### Variable Fidelity for Preliminary-to-Detailed Design
 
@@ -162,23 +158,13 @@ See the following publications for an in-depth dive into the theory and validati
 
 **Propeller:** [Tutorial] [Validation] [[Video](https://www.youtube.com/watch?v=lUIytQybCpQ)]
 
-<div style="position:relative;padding-top:50%;">
-    <iframe style="position:absolute;left:0;top:0;height:80%;width:71%;"
-        src="https://www.youtube.com/embed/lUIytQybCpQ?hd=1&rel=0"
-        title="YouTube video player" frameborder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        allowfullscreen></iframe>
-</div>
+<p align="center"> <a href="https://www.youtube.com/watch?v=lUIytQybCpQ&hd=1"> <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/youtube-prop.png" alt="youtube.com/watch?v=lUIytQybCpQ" style="width:70%"> </a> </p>
+
 
 **Rotor in Hover:** [Tutorial] [Validation] [[Video](https://www.youtube.com/watch?v=u9SgYbYhPpU)]
 
-<div style="position:relative;padding-top:50%;">
-    <iframe style="position:absolute;left:0;top:0;height:80%;width:71%;"
-        src="https://www.youtube.com/embed/u9SgYbYhPpU?hd=1&rel=0"
-        title="YouTube video player" frameborder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        allowfullscreen></iframe>
-</div>
+<p align="center"> <a href="https://www.youtube.com/watch?v=u9SgYbYhPpU&hd=1"> <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/youtube-hover.png" alt="youtube.com/watch?v=u9SgYbYhPpU" style="width:70%"> </a> </p>
+
 
 **Blown Wing:** [Tutorial] [Validation]
 
@@ -198,36 +184,19 @@ See the following publications for an in-depth dive into the theory and validati
 **eVTOL Transition:** [Tutorial] [[Video 1](https://www.youtube.com/watch?v=-6aR37Z6hig)] [[Video 2](https://www.youtube.com/watch?v=d__wNtRIBY8)]
 
 Mid-fidelity
-<div style="position:relative;padding-top:50%;">
-    <iframe style="position:absolute;left:0;top:0;height:80%;width:71%;"
-        src="https://www.youtube.com/embed/d__wNtRIBY8?hd=1&rel=0"
-        title="YouTube video player" frameborder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        allowfullscreen></iframe>
-</div>
+<p align="center"> <a href="https://www.youtube.com/watch?v=d__wNtRIBY8&hd=1"> <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/youtube-vahanamid.png" alt="youtube.com/watch?v=d__wNtRIBY8" style="width:70%"> </a> </p>
+
 High-fidelity
-<div style="position:relative;padding-top:50%;">
-    <iframe style="position:absolute;left:0;top:0;height:80%;width:71%;"
-        src="https://www.youtube.com/embed/-6aR37Z6hig?hd=1&rel=0"
-        title="YouTube video player" frameborder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        allowfullscreen></iframe>
-</div>
+<p align="center"> <a href="https://www.youtube.com/watch?v=-6aR37Z6hig&hd=1"> <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/youtube-vahanahi.png" alt="youtube.com/watch?v=-6aR37Z6hig" style="width:70%"> </a> </p>
 
 
 **Aeroacoustic Noise:** [Tutorial] [Validation]
 
-<p align="left">
+<p align="center">
   <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/cfdnoise_ningdji_multi_005D_03_20.gif" alt="Vid" width="60%"/>
 </p>
 
-<div style="position:relative;padding-top:50%;">
-    <iframe style="position:absolute;left:0;top:0;height:80%;width:71%;"
-        src="https://www.youtube.com/embed/ntQjP6KbZDk?hd=1&rel=0"
-        title="YouTube video player" frameborder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        allowfullscreen></iframe>
-</div>
+<p align="center"> <a href="https://www.youtube.com/watch?v=ntQjP6KbZDk&hd=1"> <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/youtube-vahananoise.png" alt="youtube.com/watch?v=ntQjP6KbZDk" style="width:70%"> </a> </p>
 
 
 
