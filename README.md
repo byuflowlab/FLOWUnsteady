@@ -24,7 +24,7 @@ aeroacoustics based on the
 This suite brings together various tools developed by the
 [FLOW Lab](http://flow.byu.edu/) at Brigham Young University: Vortex lattice
 method, strip theory, blade-element momentum, 3D panel method, and rVPM.
-The suite also integrates an FW-H solver (PSU-WOPWOP) and a BPM code for tonal
+The suite also integrates an FW-H solver and a BPM code for tonal
 and broadband prediction of aeroacoustic noise.
 
 
@@ -49,7 +49,8 @@ vorticity/velocity field. The basis functions become the LES filter, providing a
 variable filter width and spatial adaption as the particles are convected and
 stretched by the velocity field. The local evolution of the filter width
 provides an extra degree of freedom to reinforce conservations laws, which makes
-the reformulated VPM numerically stable.
+the reformulated VPM numerically stable (overcoming the numerical issues that
+plague the classic VPM).
 
 This meshless LES has several advantages over conventional mesh-based CFD.
 In the absence of a mesh,   
@@ -58,7 +59,7 @@ In the absence of a mesh,
 3. derivatives are calculated analytically rather than approximated through a stencil
 
 Furthermore, rVPM is highly efficient since it uses computational elements only
-where there is vorticity rather than meshing the entire space, making it 100x
+where there is vorticity (rather than meshing the entire space), making it 100x
 faster than conventional mesh-based LES with comparable accuracy.
 
 
@@ -101,49 +102,45 @@ true variable-fidelity tool for the different stages of design.
 
 ### Capabilities
 
-  **Simulation:**
-  Tilting wings and rotors
-  • Rotors with variable RPM and variable pitch
-  • Maneuvering vehicle with prescribed kinematics
-
-  **rVPM Solver:**
-  Fast-multipole acceleration through [ExaFMM](https://github.com/byuflowlab/FLOWExaFMM)
-  • Threaded CPU parallelization through OpenMPI
-  • Second-order spatial accuracy and third-order RK time integration
-  • Numerically stable by reshaping particles subject to vortex stretching
-  • Subfilter-scale (SFS) model of turbulence associated to vortex stretching
-  • SFS model coefficient computed dynamically or prescribed
-  • Viscous diffusion through core spreading
-
-  **Wing Models:**
-  Actuator line model through lifting line + VLM
-  • Actuator surface model through vortex sheet + VLM
-  • Parasitic drag through airfoil lookup tables
-
-  **Rotor Model:**
-  Actuator line model through blade elements
-  • Airfoil lookup tables automatically generated through XFOIL
-  • Aeroacoustic noise through FW-H (PSU-WOPWOP) and BPM
-
-  **Under development *(*🤞*coming soon)*:**
-  Advanced actuator surface models through 3D panel method (for ducts, wings,
-    and fuselage)
-  • Bluff bodies through vortex sheet method
-
-  **Limitations:**
-  Viscous drag and separation is only captured through airfoil lookup tables,
-    without attempting to shed separation wakes
-  • Incompressible flow only (though wave drag can be captured through airfoil
-    lookup tables)
-  • CPU parallelization through OpenMPI without support for distributed memory
-    (no MPI, *i.e.*, only single-node runs)
-  • Limited support for Windows
+  > **Simulation:**
+  > *Tilting wings and rotors*
+  > *• Rotors with variable RPM and variable pitch*
+  > *• Maneuvering vehicle with prescribed kinematics*
+  >
+  > **rVPM Solver:**
+  > *Fast-multipole acceleration through [ExaFMM](https://joss.theoj.org/papers/10.21105/joss.03145)*
+  > *• CPU parallelization through OpenMPI*
+  > *• Second-order spatial accuracy and third-order RK time integration*
+  > *• Numerically stable by reshaping particles subject to vortex stretching*
+  > *• Subfilter-scale (SFS) model of turbulence associated to vortex stretching*
+  > *• SFS model coefficient computed dynamically or prescribed*
+  > *• Viscous diffusion through core spreading*
+  >
+  > **Wing Models:**
+  > *Actuator line model through lifting line + VLM*
+  > *• Actuator surface model through vortex sheet + VLM*
+  > *• Parasitic drag through airfoil lookup tables*
+  >
+  > **Rotor Model:**
+  > *Actuator line model through blade elements*
+  > *• Airfoil lookup tables automatically generated through XFOIL*
+  > *• Aeroacoustic noise through FW-H (PSU-WOPWOP) and BPM*
+  >
+  > **Under development *(*🤞*coming soon)*:**
+  > *Advanced actuator surface models through 3D panel method (for ducts, wings, and fuselage)*
+  > *• Bluff bodies through vortex sheet method*
+  >
+  > **Limitations:**
+  > *Viscous drag and separation is only captured through airfoil lookup tables, without attempting to shed separation wakes*
+  > *• Incompressible flow only (though wave drag can be captured through airfoil lookup tables)*
+  > *• CPU parallelization through OpenMPI without support for distributed memory (no MPI, i.e., only single-node* runs)
+  > *• Limited support for Windows*
 
 
 
 
 
-More details on the solvers inside FLOWUnsteady:
+More about the models inside FLOWUnsteady:
 <p align="center">
   <a href="https://www.nas.nasa.gov/pubs/ams/2022/08-09-22.html">
     <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/nasaamsseminar2.png" alt="https://www.nas.nasa.gov/pubs/ams/2022/08-09-22.html" style="width:70%">
@@ -153,7 +150,7 @@ More details on the solvers inside FLOWUnsteady:
 <p><br></p>
 
 ### Selected Publications
-See the following publications for an in-depth dive into theory and validation:
+See the following publications for an in-depth dive into the theory and validation:
 
 * E. J. Alvarez, J. Mehr, & A. Ning (2022). "FLOWUnsteady: An Interactional Aerodynamics Solver for Multirotor Aircraft and Wind Energy." *AIAA AVIATION Forum*. [**[VIDEO]**](https://youtu.be/SFW2X8Lbsdw) [**[PDF]**](https://scholarsarchive.byu.edu/facpub/5830/)
 * E. J. Alvarez & A. Ning (2022). "Reviving the Vortex Particle Method: A Stable Formulation for Meshless Large Eddy Simulation." *(in review)* [**[PDF]**](https://arxiv.org/pdf/2206.03658.pdf)
@@ -193,8 +190,8 @@ See the following publications for an in-depth dive into theory and validation:
 
 **Airborne-Wind-Energy Aircraft:** [Validation] [[Video](https://www.youtube.com/watch?v=iFM3B4_N2Ls)]
 
-<p align="center">
-  <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/circular-fdom-top02.jpg" alt="img" style="width:100%">
+<p align="left">
+  <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/circular-fdom-top02.jpg" alt="img" style="width:75%">
 </p>
 
 
@@ -218,7 +215,7 @@ High-fidelity
 </div>
 
 
-**Aeroacoustic Noise:** [Tutorial] [Validation] [[Video](https://www.youtube.com/watch?v=u9SgYbYhPpU)]
+**Aeroacoustic Noise:** [Tutorial] [Validation]
 
 <p align="left">
   <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/cfdnoise_ningdji_multi_005D_03_20.gif" alt="Vid" width="60%"/>
@@ -256,8 +253,8 @@ If you find FLOWUnsteady useful in your work, we kindly request that you cite th
 >Alvarez, E. J., Mehr, J., and Ning, A., “FLOWUnsteady: An Interactional Aerodynamics Solver for Multirotor Aircraft and Wind Energy,” AIAA AVIATION 2022 Forum, Chicago, IL, 2022. DOI:[10.2514/6.2022-3218](https://doi.org/10.2514/6.2022-3218).
 
 If you were to encounter any issues, please first read through
-[the documentation](https://github.com/byuflowlab/FLOWUnsteady) and [open/closed
-issues](https://github.com/byuflowlab/FLOWUnsteady/issues).
+[the documentation](https://flow.byu.edu/FLOWUnsteady/) and [open/closed
+issues](https://github.com/byuflowlab/FLOWUnsteady/issues?q=is%3Aissue+is%3Aclosed).
 If the issue still persists, please
 [open a new issue](https://github.com/byuflowlab/FLOWUnsteady/issues).
 
