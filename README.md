@@ -193,7 +193,7 @@ High-fidelity
 **Aeroacoustic Noise:** [Tutorial] [Validation]
 
 <p align="center">
-  <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/cfdnoise_ningdji_multi_005D_03_20.gif" alt="Vid" width="60%"/>
+  <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/cfdnoise_ningdji_multi_005D_03_20.gif" alt="Vid" style="width:60%"/>
 </p>
 
 <p align="center"> <a href="https://www.youtube.com/watch?v=ntQjP6KbZDk&hd=1"> <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/youtube-vahananoise.png" alt="youtube.com/watch?v=ntQjP6KbZDk" style="width:70%"> </a> </p>
@@ -243,7 +243,7 @@ If the issue still persists, please
   * [ ] Theory
     * [ ] Add a validations section compiling all validation studies
     * [ ] List of publications
-    * [ ] Brief theory
+    * [x] Brief theory
   * [x] Installation instructions
   * [ ] Visualization Guidelines
   * [ ] Numerical recommendations notebook

@@ -263,7 +263,7 @@ High-fidelity
 
 ```@raw html
 <p align="center">
-  <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/cfdnoise_ningdji_multi_005D_03_20.gif" alt="Vid" width="60%"/>
+  <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/cfdnoise_ningdji_multi_005D_03_20.gif" alt="Vid" style="width:60%"/>
 </p>
 ```
 
@@ -325,7 +325,7 @@ If the issue still persists, please
   * [ ] Theory
     * [ ] Add a validations section compiling all validation studies
     * [ ] List of publications
-    * [ ] Brief theory
+    * [x] Brief theory
   * [x] Installation instructions
   * [ ] Visualization Guidelines
   * [ ] Numerical recommendations notebook

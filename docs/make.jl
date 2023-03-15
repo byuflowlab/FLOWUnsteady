@@ -35,10 +35,17 @@ makedocs(
                                                         "examples/propeller-J040.md",
                                                         "examples/propeller-jsweep.md",
                                                         "examples/propeller-quasisteady.md",
-                                                        "examples/propeller-incidence.md"
+                                                        "examples/propeller-incidence.md",
+                                                        "examples/rotorhover.md",
                                                       ],
+                                    "examples/blownwing.md",
+                                    "examples/vahana.md",
+                                    "Visualization" => "visualization.md",
                                    ],
                 "Theory"        => [
+                                    "theory/rvpm.md"
+                                    "theory/convergence.md"
+                                    "theory/validation.md"
                                     "theory/publications.md"
                                    ],
                 "API Guide"     => [
