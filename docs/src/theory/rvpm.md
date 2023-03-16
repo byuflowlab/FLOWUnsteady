@@ -373,9 +373,9 @@ The FMM computation of vortex stretching is performed through an efficient compl
 !!! compat "Recommended"
     For an in-depth discussion of the numerical schemes implemented in FLOWUnsteady, see Chapter 4 in [Alvarez' Dissertation](https://scholarsarchive.byu.edu/etd/9589).[^2]
 
-[^1]: E. J. Alvarez & A. Ning (2022). "Reviving the Vortex Particle Method: A Stable Formulation for Meshless Large Eddy Simulation." *(in review)* [**[PDF]**](https://arxiv.org/pdf/2206.03658.pdf)
+[^1]: E. J. Alvarez & A. Ning (2022), "Reviving the Vortex Particle Method: A Stable Formulation for Meshless Large Eddy Simulation," *(in review)*. [**[PDF]**](https://arxiv.org/pdf/2206.03658.pdf)
 
-[^2]: E. J. Alvarez (2022). "Reformulated Vortex Particle Method and Meshless Large Eddy Simulation of Multirotor Aircraft". *Doctoral Dissertation, Brigham Young University*. [**[VIDEO]**](https://www.nas.nasa.gov/pubs/ams/2022/08-09-22.html) [**[PDF]**](https://scholarsarchive.byu.edu/etd/9589/)
+[^2]: E. J. Alvarez (2022), "Reformulated Vortex Particle Method and Meshless Large Eddy Simulation of Multirotor Aircraft," *Doctoral Dissertation, Brigham Young University*. [**[VIDEO]**](https://www.nas.nasa.gov/pubs/ams/2022/08-09-22.html) [**[PDF]**](https://scholarsarchive.byu.edu/etd/9589/)
 
 [^3]: Winckelmans, G., and Leonard, A., “Contributions to Vortex Particle Methods for the Computation of Three-Dimensional Incompressible Unsteady Flows,” Journal of Computational Physics, Vol. 109, No. 2, 1993.
 
