@@ -9,6 +9,11 @@ scientific and HPC visualization.
 The following instructions will walk you from installing Julia through running
 your first FLOWUnsteady simulation.
 
+
+!!! info "Windows Users"
+    If using Windows, please follow [these instructions](@ref windows) to set up
+    Windows Subsystem for Linux before continuing.
+
 ## Julia
 
 Download and install Julia: [julialang.org](https://julialang.org/downloads)
@@ -16,7 +21,7 @@ Download and install Julia: [julialang.org](https://julialang.org/downloads)
 We recommend using v1.6.7 (long-term support) or the latest stable release.
 
 
-## ParaView
+## [ParaView](@id paraview)
 
 Download and install ParaView: [paraview.org](https://www.paraview.org/download/)
 
@@ -58,7 +63,7 @@ ParaView will then pull up with a rendering of a cube (click the `Apply` button 
 ```
 
 
-## PyCall
+## [PyCall](@id pycall)
 
 One of the dependencies, [AirfoilPrep.jl](https://github.com/byuflowlab/AirfoilPrep.jl), is a wrapper of Python code that is written in Python 3.8.
 For this reason, make sure that your Python version linked to PyCall is 3.8.

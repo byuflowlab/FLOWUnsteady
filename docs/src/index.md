@@ -64,17 +64,17 @@ This meshless LES has several advantages over conventional mesh-based CFD.
 In the absence of a mesh,   
 1. the rVPM does not suffer from the numerical dissipation introduced by a mesh
 2. integrates over coarser discretizations without losing physical accuracy
-3. derivatives are calculated analytically rather than approximated through a stencil
+3. derivatives are calculated analytically rather than approximated through a stencil.
 
 Furthermore, rVPM is highly efficient since it uses computational elements only
 where there is vorticity (rather than meshing the entire space), making it 100x
 faster than conventional mesh-based LES with comparable accuracy.
 
 
-While rVPM is well suited for resolving unbounded flows (wakes), it is
-difficult to introduce solid boundaries in its computational domain.
+While rVPM is well suited for resolving unbounded flows (wakes), complications
+arise when attempting to impose boundary conditions (solid boundaries) on the flow.
 This is because (1) the method is meshless, and (2) boundary conditions must
-be imposed in the Navier-Stokes equations in the form of vorticity.
+be imposed on the Navier-Stokes equations in the form of vorticity.
 FLOWUnsteady is a framework designed to introduce solid boundaries into the rVPM
 using actuator models.
 Wings and rotors are introduced in the computational domain through actuator
@@ -108,8 +108,8 @@ generation. Furthermore, since it is not limited by the time-step and stability
 constraints of conventional mesh-based CFD, rVPM can be used across all levels
 of fidelity, all in the same framework by simply coarsening or refining the
 simulation. Thus, FLOWUnsteady can be used as a high-fidelity tool that is orders of
-magnitude faster than mesh-based CFD, while also providing designers with a
-true variable-fidelity tool for the different stages of design.
+magnitude faster than mesh-based CFD, or as a variable-fidelity tool for
+the different stages of design.
 
 ```@raw html
 <p align="left">
@@ -151,7 +151,8 @@ true variable-fidelity tool for the different stages of design.
   > *Viscous drag and separation is only captured through airfoil lookup tables, without attempting to shed separation wakes*
   > *• Incompressible flow only (though wave drag can be captured through airfoil lookup tables)*
   > *• CPU parallelization through OpenMPI without support for distributed memory (no MPI, i.e., only single-node* runs)
-  > *• Limited support for Windows*
+  >
+  > *Coded in [the Julia language](https://www.infoworld.com/article/3284380/what-is-julia-a-fresh-approach-to-numerical-computing.html) for Linux, MacOS, and Windows WSL.*
 
 
 
@@ -352,3 +353,9 @@ If the issue still persists, please
 ```@raw html
 <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/light/vorticitytake01-smallreducedslower02-2.gif" alt="Vid here" style="width: 400px;"/>
 ```
+
+
+
+* Python v3.8 or higher
+* Add CPU monitor pic from windows
+* Fix times new roman warning

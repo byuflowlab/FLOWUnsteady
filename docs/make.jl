@@ -23,7 +23,10 @@ makedocs(
                             ),
     pages = [
                 "Introduction"          => "index.md",
-                "Installation"  => "installation.md",
+                
+                "Installation"  => "installation/general.md",
+                hide("installation/windows.md"),
+
                 "Tutorials"     => [
                                     "Simple Wing" => [
                                                         "Basics" => "examples/wing-4p2aoa.md",
