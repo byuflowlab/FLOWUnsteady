@@ -162,6 +162,8 @@ function run_simulation(
             sigmafactor_vpmonvlm = 1,           # (experimental) shrinks the particles by this factor when calculating VPM-on-VLM/Rotor induced velocities
             sigma_vpm_overwrite = nothing,      # Overwrite core size of wake to this value (ignoring `sigmafactor_vpm`)
 
+            extra_static_particles_fun = (args...; optargs...) -> nothing,
+
             # -------- RESTART OPTIONS -----------------------------------------
             restart_vpmfile     = nothing,      # VPM restart file to restart simulation
 
@@ -288,6 +290,7 @@ function run_simulation(
                 sigma_vlm_surf, sigma_rotor_surf, rho, sound_spd,
                 staticpfield, hubtiploss_correction;
                 init_sol=vlm_init, sigmafactor_vpmonvlm=sigmafactor_vpmonvlm,
+                extra_static_particles_fun=extra_static_particles_fun,
                 debug=debug)
 
         # Shed unsteady-loading wake with new solution
