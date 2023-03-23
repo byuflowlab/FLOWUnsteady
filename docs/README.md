@@ -4,7 +4,8 @@ Build docs:
   and push/deploy the documentation to GitHub Pages)
 
 > You can also manually deploy documentation into the gh-pages branch for
-Github Pages: `mkdocs gh-deploy`
+Github Pages: `mkdocs gh-deploy`. You will need to roll jinja2 back to v3.0.3 
+for mkdocs to work: `pip install --force-reinstall -v "jinja2==3.0.3"`.
 
 Launching docs page (`build/`) locally:
 * Install LiveServer in Julia: `] add LiveServer`
