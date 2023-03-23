@@ -122,11 +122,12 @@ the different stages of design.
   > **Simulation:**
   > *Tilting wings and rotors*
   > *• Rotors with variable RPM and variable pitch*
+  > *• Asymmetric and stacked rotors*
   > *• Maneuvering vehicle with prescribed kinematics*
   >
   > **rVPM Solver:**
   > *Fast-multipole acceleration through [ExaFMM](https://joss.theoj.org/papers/10.21105/joss.03145)*
-  > *• CPU parallelization through OpenMPI*
+  > *• CPU parallelization through OpenMP*
   > *• Second-order spatial accuracy and third-order RK time integration*
   > *• Numerically stable by reshaping particles subject to vortex stretching*
   > *• Subfilter-scale (SFS) model of turbulence associated to vortex stretching*
@@ -150,7 +151,7 @@ the different stages of design.
   > **Limitations:**
   > *Viscous drag and separation is only captured through airfoil lookup tables, without attempting to shed separation wakes*
   > *• Incompressible flow only (though wave drag can be captured through airfoil lookup tables)*
-  > *• CPU parallelization through OpenMPI without support for distributed memory (no MPI, i.e., only single-node* runs)
+  > *• CPU parallelization through OpenMP without support for distributed memory (no MPI, i.e., only single-node* runs)
   >
   > *Coded in [the Julia language](https://www.infoworld.com/article/3284380/what-is-julia-a-fresh-approach-to-numerical-computing.html) for Linux, MacOS, and Windows WSL.*
 

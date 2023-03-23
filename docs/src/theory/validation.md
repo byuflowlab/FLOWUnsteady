@@ -3,9 +3,9 @@
 The following is a compilation of validation studies found in the literature
 using FLOWUnsteady.
 
-## Wing Performance
+## Wing
 
-*References: E. J. Alvarez, 2022,*[^1] *and E. J. Alvarez and A. Ning, 2022*[^2]
+*Sources: E. J. Alvarez, 2022,*[^1] *and E. J. Alvarez and A. Ning, 2022*[^2]
 
 
 
@@ -45,6 +45,57 @@ using FLOWUnsteady.
 </center>
 ```
 
+## Rotor
+
+#### Hover Case
+DJI aero from rVPM paper. DJI acoustics from VFS paper.
+
+#### Forward Flight Case
+Rachael's AVIATION paper.
+
+## Wind Turbine
+Judd's validation
+
+## Propeller
+
+#### APC 10x7 Case
+*Source: E. J. Alvarez and A. Ning, 2020*[^3]
+
+```@raw html
+<center>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/apc10x7geom.png" alt="Pic here" style="width: 55%;"/>
+</center>
+```
+
+> **Case:** APC 10x7E propeller (2 blades, 10'' diameter, solidity 0.1) at a tip
+> Mach number of 0.36, $\mathrm{Re}_c = 6.2 \times 10^4$, and
+> $\mathrm{Re}_D = 6.5 \times 10^5$.
+
+> **Results:** (Excerpt from E. J. Alvarez and A. Ning, 2020[^3])
+> *"... it is confirmed that the VPM propeller model is valid... across low and
+> moderately high advance ratios."*
+
+```@raw html
+
+<center>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/apc10x7val00.png"
+      alt="Pic here" style="width: 100%;"/>
+</center>
+
+<br>
+```
+
+
+#### Beaver Case
+Beaver J sweep. Beaver incidence angle sweep. Propeller wake.
+
+## Rotor-Rotor Interactions
+
+## Rotor-Wing Interactions
+
+#### Horizontal-Stabilizer w/ Tip-Mounted Propellers
+
+#### Blown Wing
 
 [^1]: E. J. Alvarez (2022), "Reformulated Vortex Particle Method and Meshless
     Large Eddy Simulation of Multirotor Aircraft," *Doctoral Dissertation, Brigham
@@ -53,3 +104,8 @@ using FLOWUnsteady.
 [^2]: E. J. Alvarez & A. Ning (2022), "Meshless Large Eddy Simulation of
     Rotor-Wing Interactions Through the Reformulated Vortex Particle Method," (in
     review).
+
+[^3]: E. J. Alvarez & A. Ning (2020), "High-Fidelity Modeling of Multirotor
+    Aerodynamic Interactions for Aircraft Design," *AIAA Journal*.
+    [**[DOI]**](https://doi.org/10.2514/1.J059178)
+    [**[PDF]**](https://scholarsarchive.byu.edu/facpub/4179/)

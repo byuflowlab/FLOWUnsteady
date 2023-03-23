@@ -22,8 +22,8 @@ makedocs(
                                 collapselevel = 1
                             ),
     pages = [
-                "Introduction"          => "index.md",
-                
+                "Intro"         => "index.md",
+
                 "Installation"  => "installation/general.md",
                 hide("installation/windows.md"),
 

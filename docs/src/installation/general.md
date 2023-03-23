@@ -1,4 +1,4 @@
-# Installation Instructions
+# [Installation Instructions](@id installation)
 
 FLOWUnsteady is developed in the [Julia](https://julialang.org) programming
 language, which is a modern, high-level, dynamic programming language for
@@ -11,8 +11,8 @@ your first FLOWUnsteady simulation.
 
 
 !!! info "Windows Users"
-    If using Windows, please follow [these instructions](@ref windows) to set up
-    Windows Subsystem for Linux before continuing.
+    If using Windows, please follow [these instructions](@ref windows) first to
+    set up Windows Subsystem for Linux.
 
 ## Julia
 
@@ -25,7 +25,7 @@ We recommend using v1.6.7 (long-term support) or the latest stable release.
 
 Download and install ParaView: [paraview.org](https://www.paraview.org/download/)
 
-Some of the examples call ParaView through the Julia command `run('paraview')`, which is equivalent to calling ParaView from the terminal by typing `paraview`. If you are using a Linux distribution, in order to be able to call ParaView with the command `paraview`, add the ParaView binary to the user-level `bin` folder through a symbolic link:
+Some of the examples call ParaView through the Julia command ```run(`paraview`)```, which is equivalent to calling ParaView from the terminal by typing `paraview`. If you are using a Linux distribution, in order to be able to call ParaView with the command `paraview`, add the ParaView binary to the user-level `bin` folder through a symbolic link:
 ```bash
 sudo ln -s /path/to/your/paraview /usr/local/bin/paraview
 ```
@@ -101,7 +101,7 @@ FLOWVPM uses a
 [fast multipole code](https://en.wikipedia.org/wiki/Fast_multipole_method)
 called [ExaFMM](https://www.bu.edu/exafmm/)
 that accelerates the computation of particle interactions.
-ExaFMM is written in c++ and we have developed a Julia wrapper for it,
+ExaFMM is written in C++ and we have developed a Julia wrapper for it,
 [FLOWExaFMM](https://github.com/byuflowlab/FLOWExaFMM.jl).
 
 Before installing [FLOWVPM](https://github.com/byuflowlab/FLOWVPM.jl),
@@ -126,12 +126,12 @@ first you will have to install FLOWExaFMM and compile ExaFMM, as follows.
   cd path/to/FLOWExaFMM
   sh build.sh
   ```
-  or in MacOs:
+  or in MacOS:
   ```bash
   cd path/to/FLOWExaFMM
   sh build_macos.sh
   ```
-  This should have generated the file `fmm.so` under `src/`, which is a binary
+  This should have generated the file `fmm.so` (or `fmm.dylib` in MacOS) under `src/`, which is a binary
   library containing ExaFMM.
 
 Now that ExaFMM is compiled, you can add FLOWExaFMM to your Julia environment as
@@ -173,16 +173,6 @@ If issues persist, please check the resolved issues in [the FLOWExaFMM repo](htt
 and feel free to open a new issue.
 
 
-!!! info "Windows"
-    FLOWExaFMM currently supports Linux-based operative systems and MacOS.
-    Windows users typically set up
-    [a virtual machine with Linux](https://ubuntu.com/tutorials/how-to-run-ubuntu-desktop-on-a-virtual-machine-using-virtualbox#1-overview)
-    to run scientific codes like FLOWUnsteady, and we recommend doing so.
-
-    We currently provide limited support for Windows machines, and we would graciously
-    accept pull requests automating the compilation of FLOWExaFMM on Windows.
-
-
 ## Unregistered Packages
 
 The following dependencies are Julia packages that are not registered in the officially Julia registry.
@@ -198,7 +188,7 @@ For this reason, they need to be added manually through the following command in
 | BPM             | [https://github.com/byuflowlab/BPM.jl](https://github.com/byuflowlab/BPM.jl)                  |
 | FLOWNoise       | [https://github.com/byuflowlab/FLOWNoise](https://github.com/byuflowlab/FLOWNoise)            |
 
-You can install all packages at once as follows:
+Alternatively, you can install all packages at once as follows:
 ```julia
 import Pkg
 
@@ -210,30 +200,13 @@ Pkg.add([ Pkg.PackageSpec(; url=url*name) for name in packages ])
 
 !!! info "Troubleshooting"
     Some things you might need to look out for:
-    * Make sure your Homebrew (in Julia) is up to date. You may need to run the following in order to update your Homebrew:
-      ```julia
-        using Homebrew
-        Homebrew.brew(`update-reset`)
-      ```
-
+    * *(MacOS users)* Make sure your Homebrew (in Julia) is up to date. You may need to run the following in order to update your Homebrew: ```using Homebrew; Homebrew.brew(`update-reset`)```
     * Make sure that things are in place in your Julia settings. Having things like Conda, HDF5, etc. on your machine doesn't necessarily mean that the Julia implementation has them as well.
-
-    * If you don't have a fortran compiler, Xfoil (one of the dependencies of AirfoilPrep) won't compile.  On MacOS, try `brew install gcc`
-
-    * The `AirfoilPrep.jl` compiler creates symbolic links. Symbolic links do not work if you're trying to create them in [Box](http://box.byu.edu/). You'll get the following error:
-      ```bash
-        Linux - Gfortran
-        rm -f common.mk
-        ln -s ./config/config.LINUX_GFORTRAN.mk common.mk
-        ln: common.mk: Function not implemented
-        make: *** [gfortran] Error 1
-      ```
-      So don't put `AirfoilPrep.jl` in Box.
 
 
 ## Add FLOWUnsteady
 
-You are now ready to install the FLOWUnsteady package through the following command in the Julia REPL:
+You are now ready to install the FLOWUnsteady package through typing the following in the Julia REPL:
 
 ```
 ] add https://github.com/byuflowlab/FLOWUnsteady
@@ -276,13 +249,13 @@ enjoy the simulation that you have just run.
 
 !!! info "CPU Parallelization"
     If any of the examples is taking longer than 10 to 20 minutes to run, it is
-    possible that ExaFMM was compiled without OpenMPI, thus running in only one
+    possible that ExaFMM was compiled without OpenMP, thus running in only one
     core as opposed to parallelizing the computation across all your CPU cores.
 
     To confirm that ExaFMM is successfully parallelized, pull up whatever CPU
     monitor is available in your operative system and confirm that Julia is
-    using all your cores. For instance, the Gnome system monitor in Ubuntu
-    should look like this:
-    ![pic](https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/cpus00.png)
-    and `htop` in the terminal should look like this
+    using all your cores as the simulation is running. For instance, the monitor
+    task manager in Windows should look like this:
+    ![pic](https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/cpus02.png)
+    and `htop` in the terminal (Linux and MacOS) should look like this:
     ![pic](https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/cpus01.png)
