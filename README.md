@@ -243,7 +243,7 @@ If the issue still persists, please
 
 
 
-  TODO
+  **TODO**
   * [ ] README
     * [x] Rewrite description
     * [ ] Add links to examples in README
