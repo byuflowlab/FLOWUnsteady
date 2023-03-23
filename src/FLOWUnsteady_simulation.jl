@@ -2,83 +2,193 @@
 # DESCRIPTION
     Simulation driver.
 
-# AUTHORSHIP
-  * Author    : Eduardo J. Alvarez
-  * Email     : Edo.AlvarezR@gmail.com
+# ABOUT
   * Created   : Oct 2019
   * License   : MIT
 =###############################################################################
 
 
+"""
 
-function run_simulation(sim::Simulation, nsteps::Int;
-                             # SIMULATION OPTIONS
-                             rand_RPM=false,            # Randomize RPM fluctuations
-                             Vinf=(X,t)->zeros(3),      # Freestream velocity
-                             sound_spd=343,             # (m/s) speed of sound
-                             rho=1.225,                 # (kg/m^3) air density
-                             mu=1.81e-5,                # Air dynamic viscosity
-                             tquit=Inf,                 # (s) time at which to quit the simulation
-                             # SOLVERS OPTIONS
-                             max_particles=Int(1e5),    # Maximum number of particles
-                             max_static_particles=nothing, # Maximum number of static particles (nothing to automatically estimate it)
-                             p_per_step=1,              # Particle sheds per time step
-                             vpm_formulation=vpm.formulation_rVPM, # VPM formulation
-                             vpm_kernel=vpm.gaussianerf,# VPM kernel
-                             vpm_UJ=vpm.UJ_fmm,         # VPM particle-to-particle interaction calculation
-                             vpm_SFS=vpm.SFS_none,      # VPM LES subfilter-scale model
-                             vpm_integration=vpm.rungekutta3, # VPM time integration scheme
-                             vpm_transposed=true,       # VPM transposed stretching scheme
-                             vpm_viscous=vpm.Inviscid(),# VPM viscous diffusion scheme
-                             vpm_fmm=vpm.FMM(; p=4, ncrit=50, theta=0.4, phi=0.5), # VPM's FMM options
-                             vpm_relaxation=vpm.pedrizzetti, # VPM relaxation scheme
-                             vpm_surface=true,          # Whether to include surfaces in the VPM
-                             vlm_vortexsheet=false,     # Whether to spread the surface circulation of the VLM as a vortex sheet in the VPM
-                             vlm_vortexsheet_overlap=2.125, # Overlap of particles that make the vortex sheet
-                             vlm_vortexsheet_distribution=g_uniform, # Circulation distribution of vortex sheet
-                             vlm_vortexsheet_sigma_tbv=nothing, # Size of particles in trailing bound vortices (defaults to sigma_vlm_surf if not given)
-                             vlm_rlx=-1,                # VLM relaxation
-                             vlm_init=false,            # Initialize the first step with the VLM semi-infinite wake solution
-                             hubtiploss_correction=vlm.hubtiploss_nocorrection, # Hub and tip loss correction of rotors (ignored by quasi-steady solver)
-                             wake_coupled=true,         # Couple VPM wake on VLM solution
-                             shed_unsteady=true,        # Whether to shed unsteady-loading wake
-                             unsteady_shedcrit=0.01,    # Criterion for unsteady-loading shedding
-                             shed_starting=false,       # Whether to shed starting vortex (only with shed_unsteady==true)
-                             shed_boundarylayer=false,  # Whether to shed vorticity from boundary layer of surfaces
-                             boundarylayer_prescribedCd=0.1, # Prescribed Cd for boundary layer shedding used for wings
-                             boundarylayer_d=0.0,       # Dipole width for boundary layer shedding
-                             omit_shedding=[],          # Indices of elements in `sim.vehicle.wake_system` on which omit shedding VPM particles
-                             extra_runtime_function=(sim, PFIELD,T,DT)->false,
-                             # REGULARIZATION OPTIONS
-                             sigma_vlm_solver=-1,       # Regularization of VLM solver (internal)
-                             sigma_vlm_surf=-1,         # Size of embedded particles representing VLM surfaces (for VLM-on-VPM and VLM-on-Rotor)
-                             sigma_rotor_surf=-1,       # Size of embedded particles representing rotor blade surfaces (for Rotor-on-VPM, Rotor-on-VLM, and Rotor-on-Rotor)
-                             sigmafactor_vpm=1.0,       # Core overlap of wake particles
-                             sigmafactor_vpmonvlm=1,    # Shrinks the particles by this factor when calculating VPM-on-VLM/Rotor induced velocities
-                             sigma_vpm_overwrite=nothing,   # Overwrite cores of wake to this value (ignoring sigmafactor_vpm)
-                             # RESTART OPTIONS
-                             restart_vpmfile=nothing,   # VPM particle field restart file
-                             # OUTPUT OPTIONS
-                             save_path="temps/flowunsteadysimulation00",
-                             run_name="FLOWUnsteady-sim",
-                             create_savepath=true,      # Whether to create save_path
-                             prompt=true,
-                             verbose=true, v_lvl=0, verbose_nsteps=10,
-                             debug=false,               # Output extra states for debugging
-                             nsteps_save=1,             # Save vtks every this many steps
-                             nsteps_restart=-1,         # Save jlds every this many steps
-                             save_code="",              # Saves the source code in this path
-                             save_horseshoes=false,     # Save VLM horseshoes
-                             save_static_particles=true,# Whether to save particles to represent the VLM
-                             save_wopwopin=true,        # Generate inputs for PSU-WOPWOP
-                             )
+Run the FLOWUnsteady simulation `sim` in `nsteps` number of time steps.
+
+```julia
+run_simulation(
+
+    sim::Simulation,                    # Simulation object
+    nsteps::Int;                        # Total time steps in simulation
+
+    # -------- SIMULATION OPTIONS -----------------------------------------
+    Vinf            = (X, t)->zeros(3), # Freestream velocity
+    sound_spd       = 343,              # (m/s) speed of sound
+    rho             = 1.225,            # (kg/m^3) air density
+    mu              = 1.81e-5,          # (Pa*s) air dynamic viscosity
+    tquit           = Inf,              # (s) force quit the simulation at this time
+    rand_RPM        = false,            # (experimental) randomize RPM fluctuations
+
+    extra_runtime_function = (sim, PFIELD, T, DT; optargs...)->false,
+
+    # -------- SOLVERS OPTIONS --------------------------------------------
+    # Vortex particle method
+    max_particles   = Int(1e5),         # Maximum number of particles
+    max_static_particles = nothing,     # Maximum number of static particles (use `nothing` to automatically estimate it)
+    p_per_step      = 1,                # Particle sheds per time step
+    vpm_formulation = vpm.rVPM,         # VPM formulation (`vpm.rVPM` or `vpm.cVPM`)
+    vpm_kernel      = vpm.gaussianerf,  # VPM kernel (`vpm.gaussianerf` or `vpm.winckelmans`)
+    vpm_UJ          = vpm.UJ_fmm,       # VPM particle-to-particle interaction scheme (`vpm.UJ_fmm` or `vpm.UJ_direct`)
+    vpm_SFS         = vpm.SFS_none,     # VPM LES subfilter-scale model (`SFS_none`, `SFS_Cd_threelevel_nobackscatter`, `SFS_Cd_twolevel_nobackscatter`, or `SFS_Cs_nobackscatter`)
+    vpm_integration = vpm.rungekutta3,  # VPM time integration scheme (`vpm.euler` or `vpm.rungekutta3`)
+    vpm_transposed  = true,             # VPM transposed stretching scheme
+    vpm_viscous     = vpm.Inviscid(),   # VPM viscous diffusion scheme (`vpm.Inviscid()`, `vpm.CoreSpreading(nu, sgm0, zeta)`, or `vpm.ParticleStrengthExchange(nu)`)
+    vpm_fmm         = vpm.FMM(; p=4, ncrit=50, theta=0.4, phi=0.5), # VPM's FMM settings
+    vpm_relaxation  = vpm.pedrizzetti,  # VPM relaxation scheme (`vpm.norelaxation`, `vpm.correctedpedrizzetti`, or `vpm.pedrizzetti`)
+    vpm_surface     = true,             # Whether to include surfaces in the VPM through ASM/ALM
+
+    # Actuator surface/line model (ASM/ALM): VLM and blade elements
+    vlm_vortexsheet = false,            # Whether to spread surface circulation as a vortex sheet in the VPM (turns ASM on; ALM if false)
+    vlm_vortexsheet_overlap     = 2.125,# Overlap of particles that make the vortex sheet
+    vlm_vortexsheet_distribution= g_pressure, # Vorticity distribution of vortex sheet (`g_uniform`, `g_linear`, or `g_pressure`)
+    vlm_vortexsheet_sigma_tbv   = nothing, # Size of particles in trailing bound vortices (defaults to `sigma_vlm_surf` if not given)
+    vlm_rlx         = -1,               # VLM relaxation (>0.9 can cause divergence, <0.2 slows simulation too much, deactivated with <0)
+    vlm_init        = false,            # Initialize the first step with the VLM semi-infinite wake solution
+    hubtiploss_correction = vlm.hubtiploss_nocorrection, # Hub and tip loss correction of rotors (ignored in quasi-steady solver)
+
+    # Wake shedding
+    wake_coupled        = true,         # Couple VPM wake -> VLM solution
+    shed_unsteady       = true,         # Whether to shed vorticity from unsteady loading
+    unsteady_shedcrit   = 0.01,         # Criterion for unsteady-loading shedding
+    shed_starting       = false,        # Whether to shed starting vortex (only when `shed_unsteady=true`)
+    shed_boundarylayer  = false,        # (experimental) whether to shed vorticity from boundary layer of surfaces
+    boundarylayer_prescribedCd = 0.1,   # (experimental) prescribed Cd for boundary layer shedding used for wings
+    boundarylayer_d     = 0.0,          # (experimental) dipole width for boundary layer shedding
+    omit_shedding       = [],           # Indices of elements in `sim.vehicle.wake_system` on which omit shedding VPM particles
+
+    # Regularization of solvers
+    sigma_vlm_solver    = -1,           # Regularization of VLM solver (internal VLM-on-VLM)
+    sigma_vlm_surf      = -1,           # (REQUIRED!) Size of embedded particles in ASM/ALM wing surfaces (for VLM-on-VPM and VLM-on-Rotor)
+    sigma_rotor_surf    = -1,           # (REQUIRED!) Size of embedded particles in ALM blade surfaces (for Rotor-on-VPM, Rotor-on-VLM, and Rotor-on-Rotor)
+    sigmafactor_vpm     = 1.0,          # Core overlap of wake particles
+    sigmafactor_vpmonvlm = 1,           # (experimental) shrinks the particles by this factor when calculating VPM-on-VLM/Rotor induced velocities
+    sigma_vpm_overwrite = nothing,      # Overwrite core size of wake to this value (ignoring `sigmafactor_vpm`)
+
+    # -------- RESTART OPTIONS --------------------------------------------
+    restart_vpmfile     = nothing,      # VPM restart file to restart simulation
+
+    # -------- OUTPUT OPTIONS ---------------------------------------------
+    save_path       = nothing,          # Where to save simulation
+    run_name        = "flowunsteadysim",# Suffix of output files
+    create_savepath = true,             # Whether to create `save_path`
+    prompt          = true,             # Whether to prompt the user
+    verbose         = true,             # Enable verbose
+    v_lvl           = 0,                # Indentation level of verbose
+    verbose_nsteps  = 10,               # Verbose every this many steps
+    raisewarnings   = true,             # Whether to raise warnings
+    debug           = false,            # Output extra states for debugging
+    nsteps_save     = 1,                # Save vtks every this many steps
+    nsteps_restart  = -1,               # Save jlds every this many steps (restart files)
+    save_code       = "",               # Copy the source code in this path to `save_path`
+    save_horseshoes = false,            # Whether to output VLM horseshoes in VTKs
+    save_static_particles = true,       # Whether to save ASM/ALM embedded particles
+    save_wopwopin   = false,            # Generate input files for PSU-WOPWOP
+
+)
+```
 
 
-    if wake_coupled==false
+Even though a bast number of settings are exposed to the user, the only required
+keyword arguments are `sigma_vlm_surf` and `sigma_rotor_surf`. Thus,
+running the simulation can be as simple as
+
+```julia
+run_simulation(sim::Simulation, nsteps::Int;
+                    sigma_vlm_surf = ..., sigma_rotor_surf = ...)
+```
+"""
+function run_simulation(
+
+            sim::Simulation,                    # Simulation object
+            nsteps::Int;                        # Total time steps in simulation
+
+            # -------- SIMULATION OPTIONS --------------------------------------
+            Vinf            = (X, t)->zeros(3), # Freestream velocity
+            sound_spd       = 343,              # (m/s) speed of sound
+            rho             = 1.225,            # (kg/m^3) air density
+            mu              = 1.81e-5,          # (Pa*s) air dynamic viscosity
+            tquit           = Inf,              # (s) force quit the simulation at this time
+            rand_RPM        = false,            # (experimental) randomize RPM fluctuations
+
+            extra_runtime_function = (sim, PFIELD, T, DT; optargs...)->false, # See [`4)-Monitors-Definitions`](@ref)
+
+            # -------- SOLVERS OPTIONS -----------------------------------------
+            # Vortex particle method
+            max_particles   = Int(1e5),         # Maximum number of particles
+            max_static_particles = nothing,     # Maximum number of static particles (use `nothing` to automatically estimate it)
+            p_per_step      = 1,                # Particle sheds per time step
+            vpm_formulation = vpm.rVPM,         # VPM formulation (`vpm.rVPM` or `vpm.cVPM`)
+            vpm_kernel      = vpm.gaussianerf,  # VPM kernel (`vpm.gaussianerf` or `vpm.winckelmans`)
+            vpm_UJ          = vpm.UJ_fmm,       # VPM particle-to-particle interaction scheme (`vpm.UJ_fmm` or `vpm.UJ_direct`)
+            vpm_SFS         = vpm.SFS_none,     # VPM LES subfilter-scale model (`SFS_none`, `SFS_Cd_threelevel_nobackscatter`, `SFS_Cd_twolevel_nobackscatter`, or `SFS_Cs_nobackscatter`)
+            vpm_integration = vpm.rungekutta3,  # VPM time integration scheme (`vpm.euler` or `vpm.rungekutta3`)
+            vpm_transposed  = true,             # VPM transposed stretching scheme
+            vpm_viscous     = vpm.Inviscid(),   # VPM viscous diffusion scheme (`vpm.Inviscid()`, `vpm.CoreSpreading(nu, sgm0, zeta)`, or `vpm.ParticleStrengthExchange(nu)`)
+            vpm_fmm         = vpm.FMM(; p=4, ncrit=50, theta=0.4, phi=0.5), # VPM's FMM settings
+            vpm_relaxation  = vpm.pedrizzetti,  # VPM relaxation scheme (`vpm.norelaxation`, `vpm.correctedpedrizzetti`, or `vpm.pedrizzetti`)
+            vpm_surface     = true,             # Whether to include surfaces in the VPM through ASM/ALM
+
+            # Actuator surface/line model (ASM/ALM): VLM and blade elements
+            vlm_vortexsheet = false,            # Whether to spread surface circulation as a vortex sheet in the VPM (turns ASM on; ALM if false)
+            vlm_vortexsheet_overlap     = 2.125,# Overlap of particles that make the vortex sheet
+            vlm_vortexsheet_distribution= g_pressure, # Vorticity distribution of vortex sheet (`g_uniform`, `g_linear`, or `g_pressure`)
+            vlm_vortexsheet_sigma_tbv   = nothing, # Size of particles in trailing bound vortices (defaults to `sigma_vlm_surf` if not given)
+            vlm_rlx         = -1,               # VLM relaxation (>0.9 can cause divergence, <0.2 slows simulation too much, deactivated with <0)
+            vlm_init        = false,            # Initialize the first step with the VLM semi-infinite wake solution
+            hubtiploss_correction = vlm.hubtiploss_nocorrection, # Hub and tip loss correction of rotors (ignored in quasi-steady solver)
+
+            # Wake shedding
+            wake_coupled        = true,         # Couple VPM wake -> VLM solution
+            shed_unsteady       = true,         # Whether to shed vorticity from unsteady loading
+            unsteady_shedcrit   = 0.01,         # Criterion for unsteady-loading shedding
+            shed_starting       = false,        # Whether to shed starting vortex (only when `shed_unsteady=true`)
+            shed_boundarylayer  = false,        # (experimental) whether to shed vorticity from boundary layer of surfaces
+            boundarylayer_prescribedCd = 0.1,   # (experimental) prescribed Cd for boundary layer shedding used for wings
+            boundarylayer_d     = 0.0,          # (experimental) dipole width for boundary layer shedding
+            omit_shedding       = [],           # Indices of elements in `sim.vehicle.wake_system` on which omit shedding VPM particles
+
+            # Regularization of solvers
+            sigma_vlm_solver    = -1,           # Regularization of VLM solver (internal VLM-on-VLM)
+            sigma_vlm_surf      = -1,           # (REQUIRED!) Size of embedded particles in ASM/ALM wing surfaces (for VLM-on-VPM and VLM-on-Rotor)
+            sigma_rotor_surf    = -1,           # (REQUIRED!) Size of embedded particles in ALM blade surfaces (for Rotor-on-VPM, Rotor-on-VLM, and Rotor-on-Rotor)
+            sigmafactor_vpm     = 1.0,          # Core overlap of wake particles
+            sigmafactor_vpmonvlm = 1,           # (experimental) shrinks the particles by this factor when calculating VPM-on-VLM/Rotor induced velocities
+            sigma_vpm_overwrite = nothing,      # Overwrite core size of wake to this value (ignoring `sigmafactor_vpm`)
+
+            # -------- RESTART OPTIONS -----------------------------------------
+            restart_vpmfile     = nothing,      # VPM restart file to restart simulation
+
+            # -------- OUTPUT OPTIONS ------------------------------------------
+            save_path       = nothing,          # Where to save simulation
+            run_name        = "flowunsteadysim",# Suffix of output files
+            create_savepath = true,             # Whether to create `save_path`
+            prompt          = true,             # Whether to prompt the user
+            verbose         = true,             # Enable verbose
+            v_lvl           = 0,                # Indentation level of verbose
+            verbose_nsteps  = 10,               # Verbose every this many steps
+            raisewarnings   = true,             # Whether to raise warnings
+            debug           = false,            # Output extra states for debugging
+            nsteps_save     = 1,                # Save vtks every this many steps
+            nsteps_restart  = -1,               # Save jlds every this many steps (restart files)
+            save_code       = "",               # Copy the source code in this path to `save_path`
+            save_horseshoes = false,            # Whether to output VLM horseshoes in VTKs
+            save_static_particles = true,       # Whether to save ASM/ALM embedded particles
+            save_wopwopin   = false,            # Generate input files for PSU-WOPWOP
+
+        )
+
+    if wake_coupled==false && raisewarnings
         @warn("Running wake-decoupled simulation")
     end
 
-    if shed_unsteady==false
+    if shed_unsteady==false && raisewarnings
         @warn("Unsteady wake shedding is disabled!")
     end
 
@@ -138,7 +248,7 @@ function run_simulation(sim::Simulation, nsteps::Int;
     staticpfield = vpm.ParticleField(max_staticp; Uinf=t->Vinf(Xdummy, t),
                                                                   vpm_solver...)
 
-    if vpm_surface && max_static_particles==nothing && vlm_vortexsheet
+    if vpm_surface && max_static_particles==nothing && vlm_vortexsheet && raisewarnings
         @warn("Vortex sheet representation of VLM has been requested, but "*
               "no `max_static_particles` has been provided. It will be set to "*
               "$(max_staticp) which may lead to particle overflow. Please "*

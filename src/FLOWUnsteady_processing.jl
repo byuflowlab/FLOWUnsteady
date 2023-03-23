@@ -2,9 +2,7 @@
 # DESCRIPTION
     Tools for processing the aerodynamic solutions.
 
-# AUTHORSHIP
-  * Author    : Eduardo J. Alvarez
-  * Email     : Edo.AlvarezR@gmail.com
+# ABOUT
   * Created   : Oct 2019
   * License   : MIT
 =###############################################################################
@@ -41,11 +39,12 @@ end
 
 
 """
-    `remove_particles_strength(minGamma2, maxGamma2; every_nsteps=1)`
+    remove_particles_strength(minGamma2, maxGamma2; every_nsteps=1)
 
-Returns an extra_runtime_function that removes all particles with a vortex
+Returns an `extra_runtime_function` that removes all particles with a vortex
 strength magnitude that is larger than `sqrt(maxGamma2)` or smaller than
-`sqrt(minGamma2)`.
+`sqrt(minGamma2)`. Use `every_nsteps` to indicate every how many steps to
+remove particles.
 """
 function remove_particles_strength(minGamma2::Real, maxGamma2::Real; every_nsteps::Int=1)
 
@@ -70,20 +69,25 @@ end
 
 
 """
-    `remove_particles_lowstrength(crit_Gamma2, every_nsteps)`
+    remove_particles_lowstrength(critGamma2, step)
 
-Returns an extra_runtime_function that every `step` steps removes all
-particles that have a squared-magnitude Gamma smaller than `crit_Gamma2`.
+Returns an `extra_runtime_function` that removes all particles with a vortex
+strength magnitude that is smaller than `sqrt(critGamma2)`.
+Use this wake treatment to avoid unnecesary computation by removing particles
+that have negligibly-low strength.
+
+`step` indicates every how many steps to remove particles.
 """
 remove_particles_lowstrength(crit_Gamma2, step) = remove_particles_strength(crit_Gamma2, Inf; every_nsteps=step)
 
 
 
 """
-    `remove_particles_sigma(minsigma, maxsigma; every_nsteps=1)`
+    remove_particles_sigma(minsigma, maxsigma; every_nsteps=1)
 
-Returns an extra_runtime_function that removes all particles with a smoothing
+Returns an `extra_runtime_function` that removes all particles with a smoothing
 radius that is larger than `maxsigma` or smaller than `minsigma`.
+Use `every_nsteps` to indicate every how many steps to remove particles.
 """
 function remove_particles_sigma(minsigma::Real, maxsigma::Real; every_nsteps::Int=1)
 
@@ -108,11 +112,14 @@ end
 
 
 """
-    `remove_particles_box(Pmin, Pmax, step::Int)`
+    remove_particles_box(Pmin::Vector, Pmax::Vector, step::Int)
 
-Returns an extra_runtime_function that every `step` steps removes all
+Returns an `extra_runtime_function` that every `step` steps removes all
 particles that are outside of a box of minimum and maximum vertices `Pmin`
 and `Pmax`.
+
+Use this wake treatment to avoid unnecesary computation by removing particles
+that have gone beyond the region of interest.
 """
 function remove_particles_box(Pmin, Pmax, step::Int)
 
@@ -142,11 +149,14 @@ end
 
 
 """
-    `remove_particles_sphere(Rsphere2, step::Int; Xoff=zeros(3))`
+    remove_particles_sphere(Rsphere2, step::Int; Xoff::Vector=zeros(3))
 
-Returns an extra_runtime_function that every `step` steps removes all
+Returns an `extra_runtime_function` that every `step` steps removes all
 particles that are outside of a sphere of radius `sqrt(Rsphere2)` centered
-around the vehicle or with and offset `Xoff` from the center of the vehicle.
+around the vehicle or with an offset `Xoff` from the center of the vehicle.
+
+Use this wake treatment to avoid unnecesary computation by removing particles
+that have gone beyond the region of interest.
 """
 function remove_particles_sphere(Rsphere2, step::Int; Xoff=zeros(3))
 

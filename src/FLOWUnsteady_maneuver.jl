@@ -2,9 +2,7 @@
 # DESCRIPTION
     Types defining maneuvers of flight vehicles.
 
-# AUTHORSHIP
-  * Author    : Eduardo J. Alvarez
-  * Email     : Edo.AlvarezR@gmail.com
+# ABOUT
   * Created   : Oct 2019
   * License   : MIT
 =###############################################################################
@@ -135,20 +133,23 @@ get_RPMs(self::AbstractManeuver, t::Real) = Tuple(rpm(t) for rpm in self.RPM)
 # KINEMATIC MANEUVER TYPE
 ################################################################################
 """
-    `KinematicManeuver(angle, RPM, Vvehicle, anglevehicle)`
+    KinematicManeuver{N, M}(angle, RPM, Vvehicle, anglevehicle)
 
-A vehicle maneuver where the kinematic are prescribed.
+A vehicle maneuver that prescribes the kinematics of the vehicle through the
+functions `Vvehicle` and `anglevehicle`. Control inputs to each tilting and
+rotor systems are given by the collection of functions `angle` and `RPM`,
+respectively.
 
 # ARGUMENTS
 * `angle::NTuple{N, Function}` where `angle[i](t)` returns the angles
-        `[Ax, Ay, Az]` (in degrees)of the i-th tilting system at time `t` (t is
+        `[Ax, Ay, Az]` (in degrees) of the i-th tilting system at time `t` (t is
         nondimensionalized by the total time of the maneuver, from 0 to 1,
         beginning to end).
 * `RPM::NTuple{M, Function}` where `RPM[i](t)` returns the normalized RPM of
-        the i-th rotor system at time `t`. This RPM values are normalized by the
+        the i-th rotor system at time `t`. These RPM values are normalized by
         an arbitrary RPM value (usually RPM in hover or cruise).
 * `Vvehicle::Function` where `Vvehicle(t)` returns the normalized vehicle
-        velocity `[Vx, Vy, Vz]` at the normalized time `t`. Velocity is
+        velocity `[Vx, Vy, Vz]` at the normalized time `t`. The velocity is
         normalized by a reference velocity (typically, cruise velocity).
 * `anglevehicle::Function` where `anglevehicle(t)` returns the angles
         `[Ax, Ay, Az]` (in degrees) of the vehicle relative to the global
@@ -197,6 +198,16 @@ end
 ################################################################################
 # KINEMATIC MANEUVER TYPE
 ################################################################################
+"""
+    DynamicManeuver{N, M}(angle, RPM)
+
+A vehicle maneuver that automatically couples the kinematics of the vehicle
+with the forces and moments, resulting in a fully dynamic simulation. Control
+inputs to each tilting and rotor systems are given by the collection of
+functions `angle` and `RPM`, respectively.
+
+> **NOTE:** This methods has not been implemented yet, but it may be developed in future versions of FLOWunsteady.
+"""
 struct DynamicManeuver{N, M} <: AbstractManeuver{N, M}
     angle::NTuple{N, Function}
     RPM::NTuple{M, Function}

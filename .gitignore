@@ -4,5 +4,8 @@ docs/build/
 docs/site/
 .DS_Store
 *Manifest.toml
+*-example/
 
 examples/rotornoise/singlerotor-*
+docs/resources/images/sponsors/*.png
+docs/src/assets/images/sponsors/*.png

@@ -2,41 +2,79 @@
 # DESCRIPTION
     Coupling of FLOWUnsteady with BPM code aeroacoustic broadband noise.
 
-# AUTHORSHIP
-  * Author    : Tyler Critchfield and Eduardo J. Alvarez
-  * Email     : Edo.AlvarezR@gmail.com
+# ABOUT
   * Created   : Jul 2020
   * License   : MIT
 =###############################################################################
 
 
 """
-Calculates broadband noise from the Brooks, Pope and Marcolini method using
-the BPM.jl package.
+Calculates broadband rotor noise through the Brooks, Pope, and Marcolini method
+using the [BPM.jl package](https://github.com/byuflowlab/BPM.jl).
 
-The function writes the data to a file that can be read in postprocessing
-    with FLOWNoise.readwopwopoutput(). It writes three files: SPL
-    (non-weighted), A-weighted SPL, and OASPL.
+This writes the results to a file in the same format than PSU-WOPWOP,
+which can be read afterwards with `FLOWNoise.readwopwopoutput()`. It writes
+three files: SPL (non-weighted), A-weighted SPL, and OASPL.
+
+This method assumes steady conditions and that all rotors have the same RPM.
+
+```julia
+function run_noise_bpm(
+    rotors::Array{vlm.Rotor, 1},    # Rotors
+    RPM::Real,                      # RPM of rotors
+    Vinf::Function,                 # Freestream
+    rho::Real, mu::Real, speedofsound::Real, # Air density, dynamic viscosity, and speed of sound
+    save_path::String;              # Where to save results
+
+    # ---------- OBSERVERS --------------------------------------
+    sph_R       = 1.5*6.5,          # (m) sphere radius
+    sph_nR      = 0,                # Number of cells in radial direction
+    sph_ntht = 24, sph_nphi = 24,   # Number of cells in polar and azimuthal directions
+    sph_thtmin = 5, sph_thtmax = 175,   # (deg) Bounds of polar direction
+    sph_phimax  = 180,              # (deg) maximum azimuthal angle (use 180 to make a hemisphere)
+    sph_rotation= [0, 90, 0],       # (degs) rotate the sphere by these angles
+    sph_C       = zeros(3),         # (m) center of sphere
+    microphoneX = nothing,          # If given, replaces sphere with one observer at this position
+
+    # ---------- BPM OPTIONS ------------------------------------
+    noise_correction = 0.5,         # Broadband calibration correction
+    TE_thickness::Union{Float64, Array{Float64, 1}}=16.15,  # Trailing edge thickness (in degrees)
+    freq_bins   = BPM.default_f,    # Frequency bins
+    db_offset   = BPM.default_AdB,  # dB offset of every frequency for A-weighting
+
+    # ---------- OUTPUT OPTIONS ---------------------------------
+    prompt      = true,             # Whether to prompt the user
+    verbose     = true,             # Whether to verbose
+    v_lvl       = 0,                # Indentation level when printing verbose
+)
+```
 """
-function run_noise_bpm(rotors::Array{vlm.Rotor, 1},
-                                RPM::Real, Vinf::Function,
-                                rho::Real, mu::Real, speedofsound::Real,
-                                save_path::String;
-                                # ---------- OBSERVERS -------------------------
-                                sph_R=1.5*6.5, sph_nR=0, sph_ntht=24, # Sphere definition
-                                sph_nphi=24, sph_phimax=180,
-                                sph_rotation=[0, 90, 0],
-                                sph_thtmin=5, sph_thtmax=175,
-                                sph_C=zeros(3),
-                                microphoneX=nothing,            # If given, replaces sphere with one observer at this position
-                                # ---------- BPM OPTIONS -----------------------
-                                noise_correction=0.5,           # broadband calibration
-                                TE_thickness::Union{Float64, Array{Float64, 1}}=16.15,  # TE thickness (in degrees)
-                                freq_bins=BPM.default_f,        # Frequency bins
-                                db_offset=BPM.default_AdB,      # dB offset of every frequency for A-weighting
-                                # ---------- OUTPUT OPTIONS --------------------
-                                prompt=true,
-                                verbose=true, v_lvl=0,
+function run_noise_bpm(         rotors::Array{vlm.Rotor, 1},             # Rotors
+                                RPM::Real,                      # RPM of rotors
+                                Vinf::Function,                 # Freestream
+                                rho::Real, mu::Real, speedofsound::Real, # Air density, dynamic viscosity, and speed of sound
+                                save_path::String;              # Where to save results
+
+                                # ---------- OBSERVERS --------------------------------------
+                                sph_R       = 1.5*6.5,          # (m) sphere radius
+                                sph_nR      = 0,                # Number of cells in radial direction
+                                sph_ntht = 24, sph_nphi = 24,   # Number of cells in polar and azimuthal directions
+                                sph_thtmin = 5, sph_thtmax = 175,   # (deg) Bounds of polar direction
+                                sph_phimax  = 180,              # (deg) maximum azimuthal angle (use 180 to make a hemisphere)
+                                sph_rotation= [0, 90, 0],       # (degs) rotate the sphere by these angles
+                                sph_C       = zeros(3),         # (m) center of sphere
+                                microphoneX = nothing,          # If given, replaces sphere with one observer at this position
+
+                                # ---------- BPM OPTIONS ------------------------------------
+                                noise_correction = 0.5,         # Broadband calibration correction
+                                TE_thickness::Union{Float64, Array{Float64, 1}}=16.15,  # Trailing edge thickness (in degrees)
+                                freq_bins   = BPM.default_f,    # Frequency bins
+                                db_offset   = BPM.default_AdB,  # dB offset of every frequency for A-weighting
+
+                                # ---------- OUTPUT OPTIONS ---------------------------------
+                                prompt      = true,             # Whether to prompt the user
+                                verbose     = true,             # Whether to verbose
+                                v_lvl       = 0,                # Indentation level when printing verbose
                                 )
 
 
@@ -96,7 +134,7 @@ function run_noise_bpm(rotors::Array{vlm.Rotor, 1},
     # RUN BPM CODE
     ############################################################################
     if verbose; println("\t"^v_lvl*"Calculating BPM noise..."); end;
-    if typeof(observer) == GeometricTools.Grid
+    if typeof(observer) == gt.Grid
 
         OASPL = zeros(grid.nnodes, 1)
         OASPLA = zeros(grid.nnodes, 1)

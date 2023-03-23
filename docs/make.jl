@@ -1,46 +1,94 @@
 using Documenter
-using Xfoil, AirfoilPrep, GeometricTools, CCBlade, FLOWVLM, FLOWUnsteady, FLOWVPM
-vlm = FLOWVLM
-gt = GeometricTools
-vpm = FLOWVPM
-# using FLOWUnsteady
+using DocumenterTools: Themes
+
+using FLOWUnsteady
+const uns = FLOWUnsteady
+
+import FLOWUnsteady: FLOWVPM, FLOWVLM
+
+include("src/generate_index.jl")
+include("src/generate_examples.jl")
+
+
+# Themes.compile(joinpath(@__DIR__,"src/assets/light.scss"), joinpath(@__DIR__,"src/assets/themes/documenter-light.css"))
+# Themes.compile(joinpath(@__DIR__,"src/assets/dark.scss"), joinpath(@__DIR__,"src/assets/themes/documenter-dark.css"))
+
 
 makedocs(
     sitename = "FLOWUnsteady",
-    format = Documenter.HTML(),
-    modules = [Xfoil, AirfoilPrep, GeometricTools, CCBlade, FLOWVLM, FLOWUnsteady, FLOWVPM, vlm, vpm],
-    # modules = [FLOWUnsteady],
-    pages = ["Home" => "index.md",
-            "Tutorials" => Any[
-                "tutorials/installation-instructions.md",
-                "tutorials/getting-started.md",
-                "tutorials/aeroacoustics.md",
-                "tutorials/colab.md",
-                ],
-            "How to " => Any[
-                "how-to-guide/paraview-visualization.md",
-                "how-to-guide/define-complex-wings.md",
-                "how-to-guide/define-complex-systems.md",
-                "how-to-guide/define-a-rotor.md",
-                "how-to-guide/define-kinematic-maneuvers.md",
-                "how-to-guide/set-up-runtime-functions.md",
-                "how-to-guide/select-a-solver.md",
-                "how-to-guide/wake-stability.md",],
-            "Reference" => Any[
-                "reference/FLOWVLMfunctions.md",
-                "reference/VPMfunctions.md",
-                "reference/FLOWUnsteadyfunctions.md",],
+    format = Documenter.HTML(;
+                                sidebar_sitename = false,
+                                assets = ["assets/favicon.ico"],
+                                collapselevel = 1
+                            ),
+    pages = [
+                "Intro"         => "index.md",
 
-            "Theory" => Any[
-                "theory/FLOWVLMtheory.md",
-                "theory/VPMtheory.md",
-                "theory/FLOWUnsteadytheory.md",],
+                "Installation"  => "installation/general.md",
+                hide("installation/windows.md"),
+
+                "Tutorials"     => [
+                                    "Simple Wing" => [
+                                                        "Basics" => "examples/wing-4p2aoa.md",
+                                                        "examples/wing-aoasweep.md"
+                                                      ],
+                                    "examples/tetheredwing.md",
+                                    "examples/heavingwing.md",
+                                    "Propeller" => [
+                                                        "examples/propeller-J040.md",
+                                                        "examples/propeller-jsweep.md",
+                                                        "examples/propeller-quasisteady.md",
+                                                        "examples/propeller-incidence.md",
+                                                        "examples/rotorhover.md",
+                                                      ],
+                                    "examples/blownwing.md",
+                                    "examples/vahana.md",
+                                    "Visualization" => "visualization.md",
+                                   ],
+                "Theory"        => [
+                                    "theory/rvpm.md"
+                                    "theory/convergence.md"
+                                    "theory/validation.md"
+                                    "theory/publications.md"
+                                   ],
+                "API Guide"     => [
+                                    "(1) Vehicle Definition" => [
+                                                                "api/flowunsteady-vehicle-types.md",
+                                                                "api/flowunsteady-vehicle-components.md",
+                                                                "api/flowunsteady-vehicle-asm.md"
+                                                                ],
+                                    "api/flowunsteady-maneuver.md",
+                                    "api/flowunsteady-simulation.md",
+                                    "api/flowunsteady-monitor.md",
+                                    "api/flowunsteady-run.md",
+                                    "(6) Viz and Postprocessing" => [
+                                                                "api/flowunsteady-postprocessing-fdom.md",
+                                                                "api/flowunsteady-postprocessing-noise.md",
+                                                                ],
+                                    "Extras" => [
+                                                "FLOWVPM"  => [
+                                                                "api/flowvpm-particle.md",
+                                                                "api/flowvpm-uj.md",
+                                                                "api/flowvpm-viscous.md",
+                                                                "api/flowvpm-relaxation.md",
+                                                                "api/flowvpm-sfs.md",
+                                                                "api/flowvpm-time.md",
+                                                                "api/flowvpm-utils.md",
+                                                               ]
+                                                ]
+                                   ],
             ]
 )
+
+
 
 # Documenter can also automatically deploy documentation to gh-pages.
 # See "Hosting Documentation" and deploydocs() in the Documenter manual
 # for more information.
 deploydocs(
-    repo   = "github.com/byuflowlab/FLOWUnsteady.git",
+    repo = "github.com/byuflowlab/FLOWUnsteady.git",
+    target = "build",
+    deps = nothing,
+    make = nothing,
+    # devbranch = "main"
 )

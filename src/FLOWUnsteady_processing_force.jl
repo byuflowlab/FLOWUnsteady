@@ -2,31 +2,48 @@
 # DESCRIPTION
     Tools for processing the aerodynamic solution to calculate forces.
 
-# AUTHORSHIP
-  * Author    : Eduardo J. Alvarez
-  * Email     : Edo.AlvarezR@gmail.com
+# ABOUT
   * Created   : Apr 2022
   * License   : MIT
 =###############################################################################
 
 """
+    generate_calc_aerodynamicforce(; add_parasiticdrag=false,
+                                          add_skinfriction=true,
+                                          airfoilpolar="xf-n0012-il-500000-n5.csv",
+                                          parasiticdrag_args=(),
+                                          )
+
 Default method for calculating aerodynamic forces.
-Pass the output of this function to `generate_monitor_wing(...)`, or use this
-as an example of how to define your own costumized force calculations.
+
+Pass the output of this function to [`generate_monitor_wing`](@ref), or use this
+as an example on how to define your own costumized force calculations.
+
+This function stitches together the outputs of
+[`generate_aerodynamicforce_kuttajoukowski`](@ref) and
+[`generate_aerodynamicforce_parasiticdrag`](@ref), and
+[`calc_aerodynamicforce_unsteady`](@ref).
+See [Alvarez' dissertation](https://scholarsarchive.byu.edu/etd/9589/),
+Sec. 6.3.3.
 """
-function generate_calc_aerodynamicforce_default()
+function generate_calc_aerodynamicforce(; add_parasiticdrag=false,
+                                          add_skinfriction=true,
+                                          airfoilpolar="xf-n0012-il-500000-n5.csv",
+                                          parasiticdrag_args=(),
+                                          )
 
 
     # Aerodynamic force from Kutta-Joukowski's theorem
-    kuttajoukowski = generate_calc_aerodynamicforce_kuttajoukowski("regular",
-                                                                    nothing, nothing,
-                                                                    nothing, nothing,
-                                                                    nothing, nothing)
-
+    kuttajoukowski = generate_aerodynamicforce_kuttajoukowski("regular",
+                                                                nothing, nothing,
+                                                                false, nothing,
+                                                                nothing, nothing)
     # Parasitic drag
-    parasiticdrag = generate_aerodynamicforce_parasiticdrag("xf-n0012-il-500000-n5.csv";
-                                                            calc_cd_from_cl=false,
-                                                            add_skinfriction=true)
+    if add_parasiticdrag
+        parasiticdrag = generate_aerodynamicforce_parasiticdrag(airfoilpolar;
+                                                                add_skinfriction=add_skinfriction,
+                                                                parasiticdrag_args...)
+    end
 
     # Force due to unsteady circulation
     unsteady(args...; optargs...) = calc_aerodynamicforce_unsteady(args...; add_to_Ftot=false, optargs...)
@@ -40,14 +57,17 @@ function generate_calc_aerodynamicforce_default()
             pop!(vlm_system.sol, fieldname)
         end
 
+        # Calculate unsteady force
+        Ftot = unsteady(vlm_system, args...; per_unit_span=per_unit_span, optargs...)
+
         # Calculate Kutta-Joukowski force
         Ftot = kuttajoukowski(vlm_system, args...; per_unit_span=per_unit_span, optargs...)
 
         # Calculate and add parasatic-drag force
-        Ftot = parasitic(vlm_system, args...; per_unit_span=per_unit_span, optargs...)
-
-        # Calculate unsteady force
-        Ftot = unsteady(vlm_system, args...; per_unit_span=per_unit_span, optargs...)
+        if add_parasiticdrag
+            Ftot = parasiticdrag(vlm_system, args...;
+                                    per_unit_span=per_unit_span, optargs...)
+        end
 
         return Ftot
 
@@ -62,16 +82,51 @@ end
 
 # ------------ KUTTA-JOUKOWSKI FORCE -------------------------------------------
 """
-    Calculates the aerodynamic force at each element of a VLM system using it's
-current `Gamma` solution, the velocity induced by the particle field `pfield`,
-and the kinematic velocity calculated from `prev_vlm_system`. It saves the force
+    generate_aerodynamicforce_kuttajoukowski(KJforce_type::String,
+                                sigma_vlm_surf, sigma_rotor_surf,
+                                vlm_vortexsheet,
+                                vlm_vortexsheet_overlap,
+                                vlm_vortexsheet_distribution,
+                                vlm_vortexsheet_sigma_tbv;
+                                vehicle=nothing
+                                )
+
+Calculates the aerodynamic force at each element of a VLM system using its
+current `Gamma` solution and the Kutta-Joukowski theorem. It saves the force
 as the field `vlm_system.sol["Ftot"]`
 
-Force is calculated using the Kutta-Joukowski's theorem including only the force
-of freestream, kinematic, and induced velocities on bound vortices.
-"""
+This force calculated through the Kutta-Joukowski theorem uses the
+freestream velocity, kinematic velocity, and wake-induced velocity on each bound
+vortex. See [Alvarez' dissertation](https://scholarsarchive.byu.edu/etd/9589/),
+Sec. 6.3.3.
 
-function generate_calc_aerodynamicforce_kuttajoukowski(KJforce_type::String,
+# ARGUMENTS
+* `vlm_vortexsheet::Bool`   : If true, the bound vorticity is approximated with
+                                and actuator surface model through a vortex
+                                sheet. If false, it is approximated with an
+                                actuator line model with horseshoe vortex
+                                filaments.
+* `vlm_vortexsheet_overlap::Bool`       : Target core overlap between particles
+                                representing the vortex sheet (if
+                                `vlm_vortexsheet=true`).
+* `vlm_vortexsheet_distribution::Function` : Vorticity distribution in vortex
+                                sheet (see `g_uniform`, `g_linear`, and
+                                `g_pressure`).
+* `KJforce_type::String`    : If `vlm_vortexsheet=true`, it specifies how to
+                                weight the force of each particle in the vortex
+                                sheet. If `KJforce_type=="averaged"`, the KJ
+                                force is a chordwise average of the force
+                                experienced by the particles. If
+                                `KJforce_type=="weighted"`, the KJ force
+                                is chordwise weighted by the strength of each
+                                particle. If `KJforce_type=="regular"`, the
+                                vortex sheet is ignored, and the KJ force
+                                is calculated from the velocity induced
+                                at midpoint between the horseshoe filaments.
+* `vehicle::VLMVehicle`     : If `vlm_vortexsheet=true`, it is expected that the
+                                vehicle object is passed through this argument.
+"""
+function generate_aerodynamicforce_kuttajoukowski(KJforce_type::String,
                                 sigma_vlm_surf, sigma_rotor_surf,
                                 vlm_vortexsheet, vlm_vortexsheet_overlap,
                                 vlm_vortexsheet_distribution,
@@ -82,7 +137,7 @@ function generate_calc_aerodynamicforce_kuttajoukowski(KJforce_type::String,
     function calc_aerodynamicforce_kuttajoukowski(vlm_system::Union{vlm.Wing, vlm.WingSystem},
                                     prev_vlm_system, pfield, Vinf, dt, rho; t=0.0,
                                     per_unit_span=false, spandir=[0, 1, 0],
-                                    include_trailingboundvortex=true,
+                                    include_trailingboundvortex=false,
                                     Vout=nothing, lenout=nothing,
                                     lencrit=-1, debug=false)
 
@@ -306,19 +361,25 @@ end
 
 # ------------ UNSTEADY-CIRCULATION FORCE --------------------------------------
 """
+    calc_aerodynamicforce_unsteady(vlm_system::Union{vlm.Wing, vlm.WingSystem},
+                                prev_vlm_system, pfield, Vinf, dt, rho; t=0.0,
+                                per_unit_span=false, spandir=[0, 1, 0],
+                                include_trailingboundvortex=false,
+                                add_to_Ftot=false
+                                )
+
 Force from unsteady circulation.
 
-These tends to add a lot of numerical noise
-that at, in most cases, ends up cancelling out when the loading is
-time-averaged. Hence, `add_to_Ftot=false` will calculate the unsteady loading
-but it will not be added to the Ftot vector that is outputted in the VTK and
-used to calculate the wing's overall aerodynamic force, saving it as an extra
-VTK field called `Funs-vector` instead.
+This force tends to add a lot of numerical noise, which in most cases ends up
+cancelling out when the loading is time-averaged. Hence, `add_to_Ftot=false`
+will calculate the unsteady loading and save it under the field `Funs-vector`,
+but it will not be added to the Ftot vector that is used to calculate the
+wing's overall aerodynamic force.
 """
 function calc_aerodynamicforce_unsteady(vlm_system::Union{vlm.Wing, vlm.WingSystem},
                                 prev_vlm_system, pfield, Vinf, dt, rho; t=0.0,
                                 per_unit_span=false, spandir=[0, 1, 0],
-                                include_trailingboundvortex=true,
+                                include_trailingboundvortex=false,
                                 Vout=nothing, lenout=nothing,
                                 lencrit=-1, debug=false,
                                 add_to_Ftot=false # Use false to calculate unsteady force but not add it
@@ -409,22 +470,34 @@ end
 
 # ------------ PARASITIC-DRAG FORCE --------------------------------------------
 """
-Parasitic drag from polar file. This includes form drag, skin friction drag, and
-wave drag, assuming that each of these components are included in the polar.
+    generate_aerodynamicforce_parasiticdrag(polar_file::String;
+                                                    read_path=FLOWUnsteady.default_database*"/airfoils",
+                                                    calc_cd_from_cl=false,
+                                                    add_skinfriction=true,
+                                                    Mach=nothing)
+
+Calculates the parasitic drag along the wing using a lookup airfoil table. It
+adds this force to the field `vlm_system.sol["Ftot"]`.
+
+The lookup table is read from the file `polar_file` under the directory
+`read_path`. The parasitic drag includes form drag, skin friction, and
+wave drag, assuming that each of these components are included in the lookup
+polar. `polar_file` can be any polar file downloaded from
+[airfoiltools.com](http://airfoiltools.com/).
 
 To ignore skin friction drag, use `add_skinfriction=false`.
 
 The drag will be calculated from the local effective angle of attack, unless
 `calc_cd_from_cl=true` is used, which then will be calculated from the local
 lift coefficient given by the circulation distribution. cd from cl tends to be
-more accurate than from AOA, but it may fail to invert correlate cd and cl
-depending on how wiggly the polar is.
+more accurate than from AOA, but the method might fail to correlate cd and cl
+depending on how noise the polar data is.
 
 If `Mach != nothing`, it will use a Prandtl-Glauert correction to pre-correct
 the lookup cl. This will have no effects if `calc_cd_from_cl=false`.
 """
 function generate_aerodynamicforce_parasiticdrag(polar_file::String;
-                                                    read_path::String=joinpath(def_data_path, "airfoils"),
+                                                    read_path::String=joinpath(default_database, "airfoils"),
                                                     read_polar=vlm.ap.read_polar,
                                                     calc_cd_from_cl=false,
                                                     add_skinfriction=true,
@@ -442,7 +515,7 @@ function generate_aerodynamicforce_parasiticdrag(polar_file::String;
     else
 
         header = ["Alpha", "Cl", "Cd", "Cdp", "Cm", "Top_Xtr", "Bot_Xtr"]
-        data = CSV.read(joinpath(read_path, polar_file), DataFrames.DataFrame, datarow=12, header=header)
+        data = CSV.read(joinpath(read_path, polar_file), DataFrames.DataFrame, skipto=12, header=header)
 
         cd = data.Cdp
 
@@ -453,7 +526,9 @@ function generate_aerodynamicforce_parasiticdrag(polar_file::String;
         polar = vlm.ap.Polar(vlm.ap.get_Re(org_polar), alpha, cl/sqrt(1-(Mach)^2),
                              cd, vlm.ap.get_cm(org_polar)[2]; vlm.ap._get_nonpypolar_args(org_polar)...)
      else
-         polar = org_polar
+         # polar = org_polar
+         polar = vlm.ap.Polar(vlm.ap.get_Re(org_polar), alpha, cl,
+                              cd, vlm.ap.get_cm(org_polar)[2]; vlm.ap._get_nonpypolar_args(org_polar)...)
      end
 
     # Extrapolate to -180 and 180 deg
@@ -486,7 +561,7 @@ function generate_aerodynamicforce_parasiticdrag(polar_file::String;
     function calc_aerodynamicforce_parasiticdrag(vlm_system::Union{vlm.Wing, vlm.WingSystem},
                                                     prev_vlm_system, pfield, Vinf, dt, rho; t=0.0,
                                                     per_unit_span=false, spandir=[0, 1, 0],
-                                                    include_trailingboundvortex=true,
+                                                    include_trailingboundvortex=false,
                                                     Vout=nothing, lenout=nothing,
                                                     lencrit=-1, debug=false)
 
@@ -509,7 +584,7 @@ function generate_aerodynamicforce_parasiticdrag(polar_file::String;
 
 
         # Evaluate VLM on each midpoint
-        Vvlm = vlm.Vind.(Ref(vlm_system), AB; t=t, ign_col=true, ign_infvortex=true)
+        # Vvlm = vlm.Vind.(Ref(vlm_system), AB; t=t, ign_col=true, ign_infvortex=true)
         # Vvlm = [zeros(3) for i in 1:m]
 
         # Evaluate Vinf on each midpoint
@@ -667,7 +742,7 @@ function generate_calc_aerodynamicforce_freevortices(maxboundparticles::Int,
     function calc_aerodynamicforce_freevortices(vlm_system::Union{vlm.Wing, vlm.WingSystem},
                                     prev_vlm_system, pfield, Vinf, dt, rho; t=0.0,
                                     per_unit_span=false, spandir=[0, 1, 0],
-                                    include_trailingboundvortex=true,
+                                    include_trailingboundvortex=false,
                                     Vout=nothing, lenout=nothing,
                                     lencrit=-1, debug=false)
 

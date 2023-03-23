@@ -1,8 +1,0 @@
-property,file,description
-chorddist,DJI-II_chorddist.csv, Chord distribution
-pitchdist,DJI-II_pitchdist.csv, Pitch distribution
-sweepdist,DJI-II_sweepdist.csv, LE sweep distribution
-heightdist,DJI-II_heightdist.csv, LE height distribution
-airfoil_files,DJI-II_airfoils.csv, Airfoil distribution
-spl_k,1,  Spline order
-spl_s,2.0e-7, Spline smoothing

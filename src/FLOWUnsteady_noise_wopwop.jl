@@ -3,64 +3,117 @@
     Coupling of FLOWUnsteady with PSU-WOPWOP v3.4.2 for aeroacoustic tonal
     noise.
 
-# AUTHORSHIP
-  * Author    : Eduardo J. Alvarez
-  * Email     : Edo.AlvarezR@gmail.com
+# ABOUT
   * Created   : Jan 2020
   * License   : MIT
 =###############################################################################
 
 """
-Given the path of a FLOWUnsteady simulation, it runs the noise analysis on the
-rotors of the simulation. It uses PSU-WOPWOP to calculate the tonal noise from
-thickness and loading sources on the geometry and aerodynamic loading generated
-by FLOWUnsteady.
+Given the path of a FLOWUnsteady simulation `read_path`, it runs the noise
+analysis on the rotors of the simulation. It uses PSU-WOPWOP to calculate the
+tonal noise from thickness and loading sources on the geometry and aerodynamic
+loading.
 
-NOTE: This function will call the PSU-WOPWOP binary indicated through
+```julia
+run_noise_wopwop(
+    read_path::String,              # Path from where to read aerodynamic solution (FLOWUnsteady simulation)
+    run_name,                       # Run name (prefix of rotor files to read)
+    RPM::Real,                      # Reference RPM to convert `nrevs` to simulation time
+    rho::Real, speedofsound::Real,  # Air density and speed of sound
+    rotorsystems,                   # `rotorsystems[i][j]` is the number of blades of the j-th rotor in the i-th system
+    ww_nrevs,                       # Run PSU-WOPWOP for this many revolutions
+    ww_nsteps_per_rev,              # Number of steps per revolution to use in WW
+    save_path::String,              # Where to save PSU-WOPWOP results
+    wopwopbin;                      # Path to PSU-WOPWOP binary
+    nrevs           = nothing,      # Number of revolutions to read (defaults to `ww_nrevs`)
+    nsteps_per_rev  = nothing,      # Number of steps per revolution to read (default to `ww_nsteps_per_rev`)
+
+    # ---------- OBSERVERS ---------------------------------------
+    Vobserver   = nothing,          # (m/s) velocity of observer (vector)
+    sph_R       = 1.5*6.5,          # (m) sphere radius
+    sph_nR      = 0,                # Number of cells in radial direction
+    sph_ntht = 24, sph_nphi = 24,   # Number of cells in polar and azimuthal directions
+    sph_thtmin = 5, sph_thtmax = 175,   # (deg) Bounds of polar direction
+    sph_phimax  = 180,              # (deg) maximum azimuthal angle (use 180 to make a hemisphere)
+    sph_rotation= [0, 90, 0],       # (degs) rotate the sphere by these angles
+    sph_C       = zeros(3),         # (m) center of sphere
+    microphoneX = nothing,          # If given, replaces sphere with one observer at this position
+    highpass = nothing, lowpass = nothing, # Low and high pass filters
+    windowing   = nothing,          # Windowing method
+    output_octaves = true,          # Whether to output octave bands
+    Noctave     = 3,                # Number of octave bands
+
+    # ---------- SIMULATION OPTIONS -----------------------------
+    periodic    = true,             # Whether rotor loading and translation in aerodynamic solution is periodic
+
+    # ---------- INPUT OPTIONS ----------------------------------
+    num_min     = 0,                # Start reading loading files from this number
+    const_geometry = false,         # Whether to run PSW on a constant geometry, obtained from num_min
+    axisrot     = "automatic",      # Axis of rotation to use for constant geometry (defaults to [1,0,0])
+    CW          = true,             # Clockwise or counter-clockwise rotation of constant geometry
+
+    # ---------- OUTPUT OPTIONS ---------------------------------
+    prompt      = true,             # Whether to prompt the user
+    verbose     = true,             # Whether to verbose
+    v_lvl       = 0,                # Indentation level when printing verbose
+    debug_paraview = false,         # Whether to visualize the grid of observers in Paraview before running
+    debuglvl    = 1,                # PSU-WOPWOP debug level
+    observerf_name = "observergrid",# .xyz file with observer grid
+    case_name   = "runcase",        # Name of case to create and run
+)
+```
+
+**NOTE:** This function will call the PSU-WOPWOP binary indicated through
 `wopwopbin`. This binary is not included with FLOWUnsteady and must be provided
-by the user. This function has been tested on PSU-WOPWOP v3.4.2.
+by the user. This method has been tested on PSU-WOPWOP v3.4.2.
 
-NOTE2: Make sure that the simulation was run with `nsteps_save=1`, otherwise the
-time in PSU-WOPWOP will get messed up.
-
+**NOTE 2:** Make sure that the simulation was run with `nsteps_save=1`,
+otherwise the time in PSU-WOPWOP will get messed up.
 """
-function run_noise_wopwop(read_path::String,                        # Path from where to read aerodynamic data (FLOWUnsteady simulation)
+function run_noise_wopwop(read_path::String,                        # Path from where to read aerodynamic solution (FLOWUnsteady simulation)
                                     run_name,                       # Run name (prefix of rotor files to read)
-                                    RPM::Real,                      # RPM is just a reference value to go from nrevs to simulation time
-                                    rho::Real, speedofsound::Real,
-                                    rotorsystems,# =[[2, 2]],       # rotorsystems[si][ri] is the number of blades of the ri-th rotor in the si-th system
-                                    ww_nrevs,                       # Number of revolutions in WW
-                                    ww_nsteps_per_rev,              # Number of steps per revolution in WW
-                                    save_path::String,              # Where to save WW results
+                                    RPM::Real,                      # Reference RPM to convert `nrevs` to simulation time
+                                    rho::Real, speedofsound::Real,  # Air density and speed of sound
+                                    rotorsystems,                   # `rotorsystems[i][j]` is the number of blades of the j-th rotor in the i-th system
+                                    ww_nrevs,                       # Run PSU-WOPWOP for this many revolutions
+                                    ww_nsteps_per_rev,              # Number of steps per revolution to use in WW
+                                    save_path::String,              # Where to save PSU-WOPWOP results
                                     wopwopbin;                      # Path to PSU-WOPWOP binary
-                                    nrevs=nothing,                  # Number of revolutions to read (defaults to ww_nrevs)
-                                    nsteps_per_rev=nothing,         # Number of steps per revolution to read (default to ww's)
-                                    # ---------- OBSERVERS -------------------------
-                                    Vobserver=nothing, # =23.384*[-1, 0, 0],    # Velocity of observer
-                                    sph_R=1.5*6.5, sph_nR=0, sph_ntht=24, # Sphere definition
-                                    sph_nphi=24, sph_phimax=180,
-                                    sph_rotation=[0, 90, 0],
-                                    sph_thtmin=5, sph_thtmax=175,
-                                    sph_C=zeros(3),
-                                    microphoneX=nothing,            # If given, replaces sphere with one observer at this position
-                                    highpass=nothing, lowpass=nothing, # Low and high pass filters
-                                    windowing=nothing,
-                                    output_octaves=true,
-                                    Noctave=3,
-                                    # ---------- SIMULATION OPTIONS ----------------
-                                    periodic=true,                  # Periodic loading and translation
-                                    # ---------- INPUT OPTIONS ---------------------
-                                    num_min=0,                      # Start reading loading files from this number
-                                    const_geometry=false,           # Whether to run PSW on constant geometry from num_min
-                                    axisrot="automatic",            # Axis of rotation to use for constant geometry (defaults to [1,0,0])
-                                    CW=true,                        # Clockwise or counter-clockwise rotation of constant geometry
-                                    # wopwopbin=joinpath(module_path, "wopwop3_serial"), # WW binary
-                                    # ---------- OUTPUT OPTIONS --------------------
-                                    verbose=true, v_lvl=0,
-                                    prompt=true, debug_paraview=false,
-                                    debuglvl=1,                     # WW debug level
-                                    observerf_name="observergrid",  # .xyz file with observer grid
-                                    case_name="runcase",            # Name of case to create and run
+                                    nrevs           = nothing,      # Number of revolutions to read (defaults to `ww_nrevs`)
+                                    nsteps_per_rev  = nothing,      # Number of steps per revolution to read (default to `ww_nsteps_per_rev`)
+
+                                    # ---------- OBSERVERS --------------------------------------
+                                    Vobserver   = nothing,          # (m/s) velocity of observer (vector)
+                                    sph_R       = 1.5*6.5,          # (m) sphere radius (for a spherical grid of observers)
+                                    sph_nR      = 0,                # Number of cells in radial direction
+                                    sph_ntht = 24, sph_nphi = 24,   # Number of cells in polar and azimuthal directions
+                                    sph_thtmin = 5, sph_thtmax = 175,   # (deg) Bounds of polar direction
+                                    sph_phimax  = 180,              # (deg) maximum azimuthal angle (use 180 to make a hemisphere)
+                                    sph_rotation= [0, 90, 0],       # (degs) rotate the sphere by these angles
+                                    sph_C       = zeros(3),         # (m) center of sphere
+                                    microphoneX = nothing,          # If given, replaces sphere with one observer at this position
+                                    highpass = nothing, lowpass = nothing, # Low and high pass filters
+                                    windowing   = nothing,          # Windowing method
+                                    output_octaves = true,          # Whether to output octave bands
+                                    Noctave     = 3,                # Number of octave bands
+
+                                    # ---------- SIMULATION OPTIONS -----------------------------
+                                    periodic    = true,             # Whether rotor loading and translation in aerodynamic solution is periodic
+
+                                    # ---------- INPUT OPTIONS ----------------------------------
+                                    num_min     = 0,                # Start reading loading files from this number
+                                    const_geometry = false,         # Whether to run PSW on a constant geometry, obtained from num_min
+                                    axisrot     = "automatic",      # Axis of rotation to use for constant geometry (defaults to [1,0,0])
+                                    CW          = true,             # Clockwise or counter-clockwise rotation of constant geometry
+
+                                    # ---------- OUTPUT OPTIONS ---------------------------------
+                                    prompt      = true,             # Whether to prompt the user
+                                    verbose     = true,             # Whether to verbose
+                                    v_lvl       = 0,                # Indentation level when printing verbose
+                                    debug_paraview = false,         # Whether to visualize the grid of observers in Paraview before running
+                                    debuglvl    = 1,                # PSU-WOPWOP debug level
+                                    observerf_name = "observergrid",# .xyz file with observer grid
+                                    case_name   = "runcase",        # Name of case to create and run
                                     )
 
     if num_min==0

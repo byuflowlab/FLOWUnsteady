@@ -2,31 +2,126 @@
 # DESCRIPTION
     Auxiliary functions for rotor geometry generation and calculations.
 
-# AUTHORSHIP
-  * Author    : Eduardo J. Alvarez
-  * Email     : Edo.AlvarezR@gmail.com
+# ABOUT
   * Created   : Oct 2019
   * License   : MIT
 =###############################################################################
 
-# """
-# Generates the Rotor object. `pitch` is the pitch of the blades in degrees,
-# `n` is the number of lattices in the VLM.
-#
-# `ReD` is the diameter Reynolds number based on rotational speed calculated
-# as ReD = (omega*R)*(2*R)/nu, and `Matip` is the rotational+freestream Mach
-# number at the tip. This values are used for calculate airfoil properties
-# through XFOIL (chord Reynolds), so ignore them if airfoil properties are
-# prescribed.
-#
-# Give it `altReD = [RPM, J, nu]`, and it'll calculate the chord-based Reynolds
-# accounting for the effective velocity at every station ignoring ReD (this is
-# more accurate, but not needed).
-#
-# NOTE: If Matip is different than zero while running XFOIL, remember to deactive
-# compressibility corrections when running `vlm.solvefromCCBlade()` by giving it
-# `sound_spd=nothing`
-# """
+"""
+    generate_rotor(Rtip, Rhub, B,
+                        chorddist, twistdist, sweepdist, heightdist,
+                        airfoil_contours;
+
+                        # MORE ROTOR PARAMETERS
+                        pitch=0.0,
+                        CW=true,
+
+                        # DISCRETIZATION SETTINGS
+                        n=10, blade_r=1.0,
+                        rediscretize_airfoils=true,
+                        rfl_n_lower=15, rfl_n_upper=15,
+                        spline_k=5, spline_s=0.001, spline_bc="extrapolate",
+
+                        # AIRFOIL PROCESSING
+                        data_path=FLOWUnsteady.default_database,
+                        read_polar=vlm.ap.read_polar,
+                        xfoil=false,
+                        alphas=[i for i in -20:1.0:20], ncrit=9,
+                        ReD=5e5, altReD=nothing, Matip=0.0,
+
+                        # OUTPUT OPTIONS
+                        verbose=false, verbose_xfoil=false, v_lvl=1,
+                        plot_disc=true, save_polars=nothing)
+
+Generates a `FLOWVLM.Rotor` from direct inputs.
+
+# ARGUMENTS
+* `Rtip::Real`      :   (m) rotor radius (from centerline to blade tip)
+* `Rhub::Real`      :   (m) hub radius (from centerline to blade root)
+* `B::Int`          :   Number of blades
+* `chorddist::Matrix`   : Chord distribution (`chorddist[:, 1] = r/R`, `chorddist[:, 2] = c/R`
+* `twistdist::Matrix`   : Twist distribution (`twistdist[:, 1] = r/R`, `twistdist[:, 2] = degs`
+* `sweepdist::Matrix`   : LE sweep distribution (`sweepdist[:, 1] = r/R`, `sweepdist[:, 2] = x/R`
+* `heightdist::Matrix`  : LE height distribution (`heightdist[:, 1] = r/R`, `heightdist[:, 2] = z/R`
+* `airfoil_contours::Array{ Tuple{Float64, Array{Float64, 2}, String} }`    :
+                            Airfoil contours along the span. It must follow the
+                            pattern `(pos, contour, polarfile) = airfoil_contours[i]`,
+                            where `pos = (r-Rhub)/(Rtip-Rhub)` is the spanwise
+                            position (with root=0, tip=1), `contour` is the
+                            airfoil profile (`contour[:, 1] = x/c`, `contour[:, 2] = y/c`),
+                            and `polarfile` is any file from
+                            [airfoiltools.com](http://airfoiltools.com/) with
+                            the airfoil lookup table (airfoil polar).
+
+The function allows `airfoil_contours::Array{ Tuple{Float64, String, String} }`,
+following the pattern `(pos, contourfile, polarfile) = airfoil_contours[i]`
+where `contourfile` is a CSV file with columns `x/c` and `y/c`.
+
+# KEYWORD ARGUMENTS
+
+## **Extra rotor parameters**
+* `pitch::Real`         :   (deg) rotor collective pitch
+* `CW::Bool`            :   Whether the rotor rotates in the clockwise (`true`)
+                            or counter-clockwise (`false`)
+
+## **Discretization**
+* `n::Int`              :   Number of blade elements per blade.
+* `r::Real`             :   Spacing between elements at the tip, divided by
+                            the spacing between elements at the root.
+* `spline_k::Int`, `spline_s::Real`, `spline_bc::String` : To discretize the
+                            blade, the blade distributions are splined and
+                            re-discretize into `n` elements. These splines
+                            are done through the [Dierckx package](https://github.com/kbarbary/Dierckx.jl),
+                            with `spline_k` the order of the spline, `spline_s`
+                            the smoothing parameter, and `spline_bc` the
+                            boundary condition.
+* `rediscretize_airfoils`   : If true, it will spline the airfoil contours and
+                                re-discretize them. It will discretize the lower
+                                side of the contour into `rfl_n_lower` panels,
+                                and the upper side into `rfl_n_upper` panels.
+                                This is necessary unless all the airfoil
+                                contours already have the same number of points.
+
+## **Airfoil processing**
+* `data_path::String`   :   Path to database where to read the airfoil polars
+                            from.
+* `read_polar::Function` :  Function used for parsing the airfoil files. Use
+                            `vlm.ap.read_polar` for files that are direct
+                            outputs from XFOIL. Use `vlm.ap.read_polar2` for CSV
+                            files.
+* `xfoil::Bool`         :   If true, the polar files will be ignored and XFOIL
+                            will be used to generate the polars instead. This
+                            will be done sweeping AOA as in `alphas`
+                            (in degrees) and `ncrit` for inflow turbulence
+                            parameter.
+* `ReD::Real`, `Matip::Real`, `altReD::Tuple{Real, Real, Real}`
+
+
+`ReD` is the diameter Reynolds number based on rotational speed calculated
+as `ReD = (omega*R)*(2*R)/nu`, and `Matip` is the rotational+freestream Mach
+number at the tip. These number will be used for running XFOIL to compute
+airfoil polars, and will be ignored if airfoil polars are prescribed.
+
+Give it `altReD = (RPM, J, nu)`, and it will calculate the chord-based Reynolds
+accounting for the effective velocity at every station, ignoring `ReD` (this is
+more accurate, but not needed).
+
+**NOTE:** If `Matip` is different than zero while running XFOIL, you must
+deactive compressibility corrections in `run_simulation` by using
+`sound_spd=nothing`. Otherwise, compressibility effects will be double accounted
+for.
+
+## **Outputs**
+* `verbose::Bool`       :   Whether to verbose while generating the rotor
+* `verbose_xfoil::Bool` :   Whether to verbose while running XFOIL
+* `v_lvl::Int`          :   Indentation level for printing the verbose
+* `plot_disc`           :   If true, it will plot the discretization process
+                            of the blade, which is useful for verification and
+                            debugging. It will also plot the airfoil polars.
+* `save_polars::String` :   Give it a path to a directory and it will save the
+                            polars plot in that directory
+
+"""
 function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
                         chorddist::Array{Float64,2},
                         pitchdist::Array{Float64,2},
@@ -34,7 +129,7 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
                         heightdist::Array{Float64,2},
                         airfoil_contours::Array{Tuple{Float64,Array{Float64, 2},String},1};
                         # INPUT OPTIONS
-                        data_path=def_data_path,
+                        data_path=default_database,
                         read_polar=vlm.ap.read_polar,
                         # PROCESSING OPTIONS
                         pitch=0.0,
@@ -50,9 +145,9 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
                         verbose=false, verbose_xfoil=false, v_lvl=1,
                         save_polars=nothing, save_polar_pref="airfoilpolar",
                         plot_disc=true, figsize_factor=2/3)
+
     if verbose; println("\t"^v_lvl*"Generating geometry..."); end;
     n_bem = n
-
 
     # Splines
     _spl_chord = Dierckx.Spline1D(chorddist[:, 1]*Rtip, chorddist[:, 2]*Rtip;
@@ -134,7 +229,7 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
 
         else # Reads polars from files
             if verbose; println("\t"^(v_lvl+1)*"$file_name"); end;
-            polar = read_polar(file_name; path=data_path*"airfoils/", x=x, y=y)
+            polar = read_polar(file_name; path=joinpath(data_path, "airfoils"), x=x, y=y)
         end
 
         push!(airfoils, (pos, polar))
@@ -150,8 +245,9 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
                     rediscretize=rediscretize_airfoils)
 
     if plot_disc
-        fig = figure("flowunsteady-discr", figsize=[7*2,5*1]*figsize_factor)
-        fig.suptitle("FLOWUnsteady Discretization Verification")
+        formatpyplot()
+        fig = plt.figure("flowunsteady-discr", figsize=[7*2,5*1]*figsize_factor)
+        fig.suptitle("FLOWUnsteady rediscretization verification")
         axs = fig.subplots(1, 2)
 
         ax = axs[1]
@@ -176,23 +272,24 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
 
         fig.tight_layout(rect=[0, 0.03, 1, 0.95])
 
-        fig = vlm.ap.figure("polars", figsize=[7*3, 5*1]*7/9)
+        fig = plt.figure("polars", figsize=[7*3, 5*1]*7/9)
         axs = fig.subplots(1, 3)
         for (i,(pos, polar)) in enumerate(airfoils)
             vlm.ap.plot(polar; geometry=true, label="pos=$(round(pos, digits=3)), Re=$(ceil(Int, vlm.ap.get_Re(polar)))"*
                                         (Mas!=nothing ? ", Ma=$(round(Mas[i], digits=2))" : ""),
-                    cdpolar=false, fig_id="prelim_curves", title_str="Re sweep",
+                    cdpolar=false, fig_id="prelim_curves", title_str="",
                     rfl_figfactor=figsize_factor, fig=fig, axs=axs)
         end
         axs[3].legend(loc="best", frameon=true, fontsize=7)
         fig.tight_layout(rect=[0, 0.03, 1, 0.95])
 
-        # fig = figure("prelim_curves_rfl")
+        # fig = plt.figure("prelim_curves_rfl")
         # fig.tight_layout(rect=[0, 0.03, 1, 0.95])
     end
 
     return propeller
 end
+
 
 function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
                         chorddist::Array{Float64,2},
@@ -222,6 +319,13 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
                             airfoil_contours; data_path=data_path, optargs...)
 end
 
+"""
+    generate_rotor(Rtip, Rhub, B, blade_file::String;
+                        data_path=FLOWUnsteady.default_database, optargs...)
+
+Generates a `FLOWVLM.Rotor` reading the blade geometry from the blade file
+`blade_file` found in the database `data_path`.
+"""
 function generate_rotor(Rtip::Real, Rhub::Real, B::Int, blade_file::String;
                         data_path=def_data_path, optargs...)
 
@@ -236,7 +340,13 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int, blade_file::String;
                             spline_k=spl_k, spline_s=spl_s, optargs...)
 end
 
+"""
+    generate_rotor(rotor_file::String;
+                        data_path=FLOWUnsteady.default_database, optargs...)
 
+Generates a `FLOWVLM.Rotor` reading the full rotor geometry from the rotor file
+`rotor_file` found in the database `data_path`.
+"""
 function generate_rotor(rotor_file::String;
                         data_path=def_data_path, optargs...)
 
@@ -255,7 +365,7 @@ function read_rotor(rotor_file::String; data_path=def_data_path)
     Rtip = Meta.parse(data[1, 2])
     Rhub = Meta.parse(data[2, 2])
     B = Meta.parse(data[3, 2])
-    blade_file = data[4, 2]
+    blade_file = String(data[4, 2])
 
     return Rtip, Rhub, B, blade_file
 end

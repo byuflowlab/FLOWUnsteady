@@ -1,42 +1,41 @@
 using Test
 
-# ------------ GENERIC MODULES -------------------------------------------------
 using PyPlot
 using Printf
-using JLD
 
-# ------------ FLOW MODULES ----------------------------------------------------
-# Load simulation engine
 import FLOWUnsteady
-uns = FLOWUnsteady
-vlm = uns.vlm
-gt = uns.gt
 
-# ------------ HEADERS ---------------------------------------------------------
-# Load modules
-for module_name in ["bertinswing"]
-    include("test_"*module_name*".jl")
+# Alises
+const uns = FLOWUnsteady
+const vlm = uns.vlm
+const gt  = uns.gt
+
+# Headers
+for header_name in ["sweptwing"]
+    include("test_"*header_name*".jl")
 end
 
+
 # ------------ TESTS -----------------------------------------------------------
+@testset verbose=true "Isolated wing" begin
 
-# Test VLM solver: Isolated wing
-@test bertin_VLM(; wake_coupled=false, nsteps=0, verbose=true, disp_plot=true)
+    name = "Test VLM solver — Isolated wing"
+    @test run_sweptwing(name; wake_coupled=false, nsteps=3)
 
-# Test VLM regularization: Isolated wing
-@test bertin_VLM(; wake_coupled=false, vlm_fsgm=0.00125, nsteps=0, verbose=true, disp_plot=true)
+    name = "Test VLM regularization — Isolated wing"
+    @test run_sweptwing(name; wake_coupled=false, fsgm_vlm=0.00125, nsteps=3)
 
-# Test VPM+VLM coupling: Isolated wing
-@test bertin_VLM(; wake_coupled=true, nsteps=150, verbose=true, disp_plot=true)
+    name = "Test VPM+VLM coupling — Isolated wing"
+    @test run_sweptwing(name)
 
-# Test VPM+VLM solver on kinematic velocity: Isolated wing
-@test bertin_kinematic(; nsteps=150, verbose=true, disp_plot=true)
+    name = "Test kinematic velocity — Isolated wing"
+    @test run_sweptwing(name; kinematic=true)
 
-# # Test simulation stability: Isolated wing with a very fine time stepping and shedding
-# @test bertin_kinematic(; nsteps=300, p_per_step=4, vlm_rlx=0.75, verbose=true, disp_plot=true)
+    # name = "Test simulation stability — Isolated wing with fine time stepping and shedding"
+    # @test run_sweptwing(name; nsteps=300, p_per_step=4, vlm_rlx=0.75,
+    #                     simverbose=true, disp_plot=true, save_path="sweptwing00")
 
-# Test quasisteady solver: No VPM wake shedding
-@test bertin_kinematic(; nsteps=10, VehicleType=uns.QVLMVehicle, verbose=true, disp_plot=true)
+    name = "Test quasi-steady solver — Isolated wing"
+    @test run_sweptwing(name; VehicleType=uns.QVLMVehicle, nsteps=10)
 
-
-# @test bertin_kinematic(; nsteps=150, p_per_step=4, vlm_rlx=0.75, save_path="temps/bertinswing11/", verbose=true, disp_plot=true)
+end

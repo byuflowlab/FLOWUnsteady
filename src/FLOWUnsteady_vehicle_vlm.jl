@@ -2,9 +2,7 @@
 # DESCRIPTION
     Vehicles based on FLOWVLM (VLM and blade-element) models.
 
-# AUTHORSHIP
-  * Author    : Eduardo J. Alvarez
-  * Email     : Edo.AlvarezR@gmail.com
+# ABOUT
   * Created   : Apr 2020
   * License   : MIT
 =###############################################################################

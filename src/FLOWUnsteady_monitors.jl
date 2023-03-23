@@ -5,23 +5,34 @@
     monitor-functions that can be passed to the simulation engine through the
     optional arguments `extra_runtime_function`.
 
-# AUTHORSHIP
-  * Author    : Eduardo J. Alvarez
-  * Email     : Edo.AlvarezR@gmail.com
+# ABOUT
   * Created   : Apr 2020
   * License   : MIT
 =###############################################################################
 
 
 """
-    `generate_monitor_rotors( rotors::Array{vlm.Rotor, 1}, J_ref::Real,
-rho_ref::Real, RPM_ref::Real, nsteps_sim::Int)`
+    generate_monitor_rotors(rotors::Array{vlm.Rotor}, J_ref::Real,
+                                rho_ref::Real, RPM_ref::Real, nsteps_sim::Int;
+                                save_path=nothing)
 
-Generate monitor of load distribution and performance of a rotor system.
-`J_ref` and `rho_ref` are the reference advance ratio and air density used for
-calculating propulsive efficiency and coefficients. `RPM_ref` is the reference
-RPM used to estimate the age of the wake. `nsteps_sim` is the number of time
-steps by the end of the simulation (used for generating the color gradient).
+Generate a rotor monitor plotting the aerodynamic performance and blade loading
+at every time step.
+
+The aerodynamic performance consists of thrust coefficient
+\$C_T=\\frac{T}{\\rho n^2 d^4}\$, torque coefficient
+\$C_Q = \\frac{Q}{\\rho n^2 d^5}\$, and propulsive efficiency
+\$\\eta = \\frac{T u_\\infty}{2\\pi n Q}\$.
+
+* `J_ref` and `rho_ref` are the reference advance ratio and air density used \
+for calculating propulsive efficiency and coefficients. The advance ratio used \
+here is defined as \$J=\\frac{u_\\infty}{n d}\$ with \
+\$n = \\frac{\\mathrm{RPM}}{60}\$.
+* `RPM_ref` is the reference RPM used to estimate the age of the wake.
+* `nsteps_sim` is the number of time steps by the end of the simulation (used \
+for generating the color gradient).
+* Use `save_path` to indicate a directory where to save the plots. If so, it \
+will also generate a CSV file with \$C_T\$, \$C_Q\$, and \$\\eta\$.
 """
 function generate_monitor_rotors( rotors::Array{vlm.Rotor, 1},
                                     J_ref::Real, rho_ref::Real, RPM_ref::Real,
@@ -29,12 +40,16 @@ function generate_monitor_rotors( rotors::Array{vlm.Rotor, 1},
                                     t_scale=1.0,                    # Time scaling factor
                                     t_lbl="Simulation time (s)",    # Time-axis label
                                     # OUTPUT OPTIONS
+                                    out_figs=[],
+                                    out_figaxs=[],
                                     save_path=nothing,
                                     run_name="rotor",
                                     figname="monitor_rotor",
                                     disp_conv=true,
                                     conv_suff="_convergence.csv",
                                     save_init_plots=true,
+                                    figsize_factor=5/6,
+                                    nsteps_plot=1,
                                     nsteps_savefig=10,
                                     colors="rgbcmy"^100,
                                     stls="o^*.px"^100, )
@@ -48,9 +63,13 @@ function generate_monitor_rotors( rotors::Array{vlm.Rotor, 1},
 
     # Call figure
     if disp_conv
-        fig = figure(figname, figsize=(7*3,5*2))
+        formatpyplot()
+        fig = plt.figure(figname, figsize=[7*3, 5*2]*figsize_factor)
         axs = fig.subplots(2, 3)
-        axs = [axs[1], axs[3], axs[5], axs[2], axs[4], axs[6]]
+        axs = [axs[6], axs[2], axs[4], axs[1], axs[3], axs[5]]
+
+        push!(out_figs, fig)
+        push!(out_figaxs, axs)
     end
 
     # Function for run_vpm! to call on each iteration
@@ -67,32 +86,42 @@ function generate_monitor_rotors( rotors::Array{vlm.Rotor, 1},
             # Format subplots
             if disp_conv
                 ax = axs[1]
-                ax.title.set_text("Circulation Distribution")
+                ax.set_title("Circulation distribution", color="gray")
                 ax.set_xlabel("Element index")
                 ax.set_ylabel(L"Circulation $\Gamma$ (m$^2$/s)")
-                ax.grid(true, color="0.8", linestyle="--")
+
                 ax = axs[2]
-                ax.title.set_text("Plane-of-rotation Normal Force")
+                ax.set_title("Normal force distribution", color="gray")
                 ax.set_xlabel("Element index")
-                ax.set_ylabel(L"Normal Force $N_p$ (N/m)")
-                ax.grid(true, color="0.8", linestyle="--")
+                ax.set_ylabel(L"Normal load $N_p$ (N/m)")
+
                 ax = axs[3]
-                ax.title.set_text("Plane-of-rotation Tangential Force")
+                ax.set_title("Tangential force distribution", color="gray")
                 ax.set_xlabel("Element index")
-                ax.set_ylabel(L"Tangential Force $T_p$ (N/m)")
-                ax.grid(true, color="0.8", linestyle="--")
+                ax.set_ylabel(L"Tangential load $T_p$ (N/m)")
+
                 ax = axs[4]
+                ax.set_title(L"$C_T = \frac{T}{\rho n^2 d^4}$", color="gray")
                 ax.set_xlabel(t_lbl)
                 ax.set_ylabel(L"Thrust $C_T$")
-                ax.grid(true, color="0.8", linestyle="--")
+
                 ax = axs[5]
+                ax.set_title(L"$C_Q = \frac{Q}{\rho n^2 d^5}$", color="gray")
                 ax.set_xlabel(t_lbl)
                 ax.set_ylabel(L"Torque $C_Q$")
-                ax.grid(true, color="0.8", linestyle="--")
+
                 ax = axs[6]
+                ax.set_title(L"$\eta = \frac{T u_\infty}{2\pi n Q}$", color="gray")
                 ax.set_xlabel(t_lbl)
                 ax.set_ylabel(L"Propulsive efficiency $\eta$")
-                ax.grid(true, color="0.8", linestyle="--")
+
+
+                for ax in axs
+                    ax.spines["right"].set_visible(false)
+                    ax.spines["top"].set_visible(false)
+                    # ax.grid(true, color="0.8", linestyle="--")
+                end
+
                 fig.tight_layout()
             end
 
@@ -109,8 +138,8 @@ function generate_monitor_rotors( rotors::Array{vlm.Rotor, 1},
 
             # Save initialization plots (including polars)
             if save_init_plots && save_path!=nothing
-                for fi in PyPlot.get_fignums()
-                    this_fig = PyPlot.figure(fi)
+                for fi in plt.get_fignums()
+                    this_fig = plt.figure(fi)
                     this_fig.savefig(joinpath(save_path, run_name*"_initplot$(fi).png"),
                                                             transparent=false, dpi=300)
                 end
@@ -125,7 +154,7 @@ function generate_monitor_rotors( rotors::Array{vlm.Rotor, 1},
 
 
         # Plot circulation and loads distributions
-        if disp_conv
+        if  PFIELD.nt%nsteps_plot==0 && disp_conv
 
             cratio = PFIELD.nt/nsteps_sim
             cratio = cratio > 1 ? 1 : cratio
@@ -156,11 +185,11 @@ function generate_monitor_rotors( rotors::Array{vlm.Rotor, 1},
         end
 
         # Plot performance parameters
-        for (i,rotor) in enumerate(rotors)
+        for (i, rotor) in enumerate(rotors)
             CT, CQ = vlm.calc_thrust_torque_coeffs(rotor, rho_ref)
             eta = J_ref*CT/(2*pi*CQ)
 
-            if disp_conv
+            if PFIELD.nt%nsteps_plot==0 && disp_conv
                 axs[4].plot([t_scaled], [CT], "$(stls[i])", alpha=alpha, color=clr)
                 axs[5].plot([t_scaled], [CQ], "$(stls[i])", alpha=alpha, color=clr)
                 axs[6].plot([t_scaled], [eta], "$(stls[i])", alpha=alpha, color=clr)
@@ -173,7 +202,7 @@ function generate_monitor_rotors( rotors::Array{vlm.Rotor, 1},
 
         if disp_conv
             # Save figure
-            if fcalls%nsteps_savefig==0 && fcalls!=0 && save_path!=nothing
+            if PFIELD.nt%nsteps_savefig==0 && fcalls!=0 && save_path!=nothing
                 fig.savefig(joinpath(save_path, run_name*"_convergence.png"),
                                                     transparent=false, dpi=300)
             end
@@ -196,10 +225,43 @@ end
 
 
 """
-    `generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
-rho_ref::Real, qinf_ref::Real, nsteps_sim::Int)`
+    generate_monitor_wing(wing::Union{vlm.Wing, vlm.WingSystem},
+                            Vinf::Function, b_ref::Real, ar_ref::Real,
+                            rho_ref::Real, qinf_ref::Real, nsteps_sim::Int;
+                            L_dir=[0,0,1],      # Direction of lift component
+                            D_dir=[1,0,0],      # Direction of drag component
+                            calc_aerodynamicforce_fun=FLOWUnsteady.generate_calc_aerodynamicforce())
 
-Generate monitor of load distribution and performance of a wing.
+Generate a wing monitor computing and plotting the aerodynamic force and
+wing loading at every time step.
+
+The aerodynamic force is integrated, decomposed, and reported as overall lift
+coefficient \$C_L = \\frac{L}{\\frac{1}{2}\\rho u_\\infty^2 b c}\$ and drag
+coefficient \${C_D = \\frac{D}{\\frac{1}{2}\\rho u_\\infty^2 b c}}\$.
+The wing loading is reported as the sectional lift and drag coefficients defined
+as \$c_\\ell = \\frac{\\ell}{\\frac{1}{2}\\rho u_\\infty^2 c}\$ and
+\$c_d = \\frac{d}{\\frac{1}{2}\\rho u_\\infty^2 c}\$, respectively.
+
+The aerodynamic force is calculated through the function
+`calc_aerodynamicforce_fun`, which is a user-defined function. The function
+can also be automatically generated through,
+[`generate_calc_aerodynamicforce`](@ref) which defaults to incluiding the
+Kutta-Joukowski force, parasitic drag (calculated from a NACA 0012 airfoil
+polar), and unsteady-circulation force.
+
+* `b_ref`       : Reference span length.
+* `ar_ref`      : Reference aspect ratio, used to calculate the equivalent \
+                    chord \$c = \\frac{b}{\\mathrm{ar}}\$.
+* `rho_ref`     : Reference density.
+* `qinf_ref`    : Reference dynamic pressure \
+                    \$q_\\infty = \\frac{1}{2}\\rho u_\\infty^2\$.
+* `nsteps_sim`  : the number of time steps by the end of the simulation (used \
+                    for generating the color gradient).
+* Use `save_path` to indicate a directory where to save the plots. If so, it \
+will also generate a CSV file with \$C_L\$ and \$C_D\$.
+
+Here is an example of this monitor:
+![image](http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/wing-example_convergence.png)
 """
 function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
                                 rho_ref::Real, qinf_ref::Real, nsteps_sim::Int;
@@ -207,30 +269,35 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
                                 L_dir=[0,0,1],      # Direction of lift component
                                 D_dir=[1,0,0],      # Direction of drag component
                                 include_trailingboundvortex=false,
-                                calc_aerodynamicforce_fun=generate_calc_aerodynamicforce_default(),
+                                calc_aerodynamicforce_fun=generate_calc_aerodynamicforce(),
                                 # OUTPUT OPTIONS
                                 out_Lwing=nothing,
                                 out_Dwing=nothing,
                                 out_CLwing=nothing,
                                 out_CDwing=nothing,
+                                out_figs=[],
+                                out_figaxs=[],
                                 save_path=nothing,
                                 run_name="wing",
                                 figname="monitor_wing",
                                 disp_plot=true,
                                 title_lbl="",
-                                CL_lbl=L"Lift Coefficient $C_L$",
-                                CD_lbl=L"Drag Coefficient $C_D$",
-                                y2b_i=2,
+                                CL_lbl=L"Lift coefficient $C_L$",
+                                CD_lbl=L"Drag coefficient $C_D$",
+                                cl_lbl=L"Sectional lift $c_\ell$",
+                                cd_lbl=L"Sectional drag $c_d$",
+                                y2b_lbl=L"Span position $\frac{2y}{b}$",
+                                cl_ttl="Spanwise lift distribution",
+                                cd_ttl="Spanwise drag distribution",
+                                X_offset=t->zeros(3),
+                                S_proj=t->[0, 1, 0],
                                 conv_suff="_convergence.csv",
                                 figsize_factor=5/6,
-                                nsteps_plot=10,
-                                nsteps_savefig=1,
+                                nsteps_plot=1,
+                                nsteps_savefig=10,
                                 debug=false)
 
     fcalls = 0                  # Number of function calls
-
-    # y2b = 2*wing._ym/b_ref          # Initial span position
-    y2b = 2*[vlm.getControlPoint(wing, i)[y2b_i] for i in 1:vlm.get_m(wing)]/b_ref
     prev_wing = nothing
 
     # Critical length to ignore horseshoe forces
@@ -243,42 +310,63 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
     end
 
     if disp_plot
-        fig1 = figure(figname, figsize=[7*2, 5*2]*figsize_factor)
+        formatpyplot()
+        fig1 = plt.figure(figname, figsize=[7*2, 5*2]*figsize_factor)
         fig1.suptitle(title_lbl)
         axs1 = fig1.subplots(2, 2)
-        axs1 = [axs1[1], axs1[3], axs1[2], axs1[4]]
+        axs1 = [axs1[2], axs1[4], axs1[1], axs1[3]]
         ax = axs1[1]
         # xlim([-1,1])
-        ax.set_xlabel(L"$\frac{2y}{b}$")
-        ax.set_ylabel(L"Sectional lift $c_\ell$")
-        ax.title.set_text("Spanwise lift distribution")
+        ax.set_xlabel(y2b_lbl)
+        ax.set_ylabel(cl_lbl)
+        ax.set_title(cl_ttl, color="gray")
+        ax.spines["right"].set_visible(false)
+        ax.spines["top"].set_visible(false)
 
         ax = axs1[2]
         # xlim([-1,1])
-        ax.set_xlabel(L"$\frac{2y}{b}$")
-        ax.set_ylabel(L"Sectional drag $c_d$")
-        ax.title.set_text("Spanwise drag distribution")
+        ax.set_xlabel(y2b_lbl)
+        ax.set_ylabel(cd_lbl)
+        ax.set_title(cd_ttl, color="gray")
+        ax.spines["right"].set_visible(false)
+        ax.spines["top"].set_visible(false)
 
         ax = axs1[3]
         ax.set_xlabel("Simulation time (s)")
         ax.set_ylabel(CL_lbl)
+        ax.spines["right"].set_visible(false)
+        ax.spines["top"].set_visible(false)
 
         ax = axs1[4]
         ax.set_xlabel("Simulation time (s)")
         ax.set_ylabel(CD_lbl)
+        ax.spines["right"].set_visible(false)
+        ax.spines["top"].set_visible(false)
 
         fig1.tight_layout()
 
-        fig2 = figure(figname*"_2", figsize=[7*2, 5*1]*figsize_factor)
+        fig2 = plt.figure(figname*"_2", figsize=[7*2, 5*1]*figsize_factor)
+        fig2.suptitle(title_lbl)
         axs2 = fig2.subplots(1, 2)
+
         ax = axs2[1]
-        ax.set_xlabel(L"$\frac{2y}{b}$")
+        ax.set_xlabel(y2b_lbl)
         ax.set_ylabel(L"Circulation $\Gamma$")
+        ax.spines["right"].set_visible(false)
+        ax.spines["top"].set_visible(false)
+
         ax = axs2[2]
-        ax.set_xlabel(L"$\frac{2y}{b}$")
+        ax.set_xlabel(y2b_lbl)
         ax.set_ylabel(L"Effective velocity $V_\infty$")
+        ax.spines["right"].set_visible(false)
+        ax.spines["top"].set_visible(false)
 
         fig2.tight_layout()
+
+        push!(out_figs, fig1)
+        push!(out_figs, fig2)
+        push!(out_figaxs, axs1)
+        push!(out_figaxs, axs2)
     end
 
     function extra_runtime_function(sim, PFIELD, T, DT; optargs...)
@@ -297,14 +385,21 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
 
         if PFIELD.nt>2
 
+            t = PFIELD.t
+            y2b = 2*[dot(vlm.getControlPoint(wing, i) .- X_offset(t), S_proj(t))
+                                                for i in 1:vlm.get_m(wing)]/b_ref
+
+            Lhat = L_dir isa Function ? L_dir(PFIELD.t) : L_dir
+            Dhat = D_dir isa Function ? D_dir(PFIELD.t) : D_dir
+
             # Force at each VLM element
             Ftot = calc_aerodynamicforce_fun(wing, prev_wing, PFIELD, Vinf, DT,
-                                                            rho_ref; t=PFIELD.t,
-                                                            spandir=cross(L_dir, D_dir),
+                                                            rho_ref; t=t,
+                                                            spandir=cross(Lhat, Dhat),
                                                             lencrit=lencrit,
                                                             include_trailingboundvortex=include_trailingboundvortex,
                                                             debug=debug)
-            L, D, S = decompose(Ftot, L_dir, D_dir)
+            L, D, S = decompose(Ftot, Lhat, Dhat)
             vlm._addsolution(wing, "L", L)
             vlm._addsolution(wing, "D", D)
             vlm._addsolution(wing, "S", S)
@@ -312,23 +407,23 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
             # Force per unit span at each VLM element
             ftot = calc_aerodynamicforce_fun(wing, prev_wing, PFIELD, Vinf, DT,
                                         rho_ref; t=PFIELD.t, per_unit_span=true,
-                                        spandir=cross(L_dir, D_dir),
+                                        spandir=cross(Lhat, Dhat),
                                         lencrit=lencrit,
                                         include_trailingboundvortex=include_trailingboundvortex,
                                         debug=debug)
-            l, d, s = decompose(ftot, L_dir, D_dir)
+            l, d, s = decompose(ftot, Lhat, Dhat)
 
             # Lift of the wing
             Lwing = sum(L)
-            Lwing = sign(dot(Lwing, L_dir))*norm(Lwing)
+            Lwing = sign(dot(Lwing, Lhat))*norm(Lwing)
             CLwing = Lwing/(qinf_ref*b_ref^2/ar_ref)
-            cl = broadcast(x -> sign(dot(x, L_dir)), l) .* norm.(l) / (qinf_ref*b_ref/ar_ref)
+            cl = broadcast(x -> sign(dot(x, Lhat)), l) .* norm.(l) / (qinf_ref*b_ref/ar_ref)
 
             # Drag of the wing
             Dwing = sum(D)
-            Dwing = sign(dot(Dwing, D_dir))*norm(Dwing)
+            Dwing = sign(dot(Dwing, Dhat))*norm(Dwing)
             CDwing = Dwing/(qinf_ref*b_ref^2/ar_ref)
-            cd = broadcast(x -> sign(dot(x, D_dir)), d) .* norm.(d) / (qinf_ref*b_ref/ar_ref)
+            cd = broadcast(x -> sign(dot(x, Dhat)), d) .* norm.(d) / (qinf_ref*b_ref/ar_ref)
 
             # vlm._addsolution(wing, "cl", cl)
             # vlm._addsolution(wing, "cd", cd)
@@ -392,13 +487,27 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
     end
 end
 
+"""
+    generate_monitor_statevariables(; save_path=nothing)
 
+Generate a monitor plotting the state variables of the vehicle at every time
+step. The state variables are vehicle velocity, vehicle angular velocity, and
+vehicle position.
+
+Use `save_path` to indicate a directory where to save the plots.
+
+Here is an example of this monitor on a vehicle flying a circular path:
+![image](http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/tetheredwing-example-statemonitor.png)
+"""
 function generate_monitor_statevariables(; figname="monitor_statevariables",
-                                           save_path=nothing,
-                                           run_name="",
-                                           nsteps_savefig=10)
+                                            out_figs=[],
+                                            out_figaxs=[],
+                                            save_path=nothing,
+                                            run_name="",
+                                            nsteps_savefig=10)
 
-    fig = figure(figname, figsize=[7*2, 5*1])
+    formatpyplot()
+    fig = plt.figure(figname, figsize=[7*2, 5*1])
     axs = fig.subplots(1, 3)
     ax = axs[1]
     ax.set_xlabel("Simulation time")
@@ -413,7 +522,16 @@ function generate_monitor_statevariables(; figname="monitor_statevariables",
     ax.set_ylabel(L"$O$ position")
     Olbls = [L"O_x", L"O_y", L"O_z"]
 
+    for ax in axs
+        ax.spines["right"].set_visible(false)
+        ax.spines["top"].set_visible(false)
+    end
+
+    fig.suptitle("Vehicle state variables", color="gray")
     fig.tight_layout()
+
+    push!(out_figs, fig)
+    push!(out_figaxs, axs)
 
 
     function extra_runtime_function(sim, PFIELD, T, DT; optargs...)
@@ -426,8 +544,8 @@ function generate_monitor_statevariables(; figname="monitor_statevariables",
                                                             color=clrs[j])
         end
         if sim.nt==0
-            for j in 1:2
-                axs[j].legend(loc="best", frameon=false)
+            for ax in axs
+                ax.legend(loc="best", frameon=false)
             end
         end
 
@@ -445,18 +563,41 @@ function generate_monitor_statevariables(; figname="monitor_statevariables",
     return extra_runtime_function
 end
 
+"""
+    generate_monitor_enstrophy(; save_path=nothing)
 
+Generate a monitor plotting the global enstrophy of the flow at every
+time step (computed through the particle field). This is calculated by
+integrating the local enstrophy defined as ξ = ω⋅ω / 2.
+
+Enstrophy is approximated as 0.5*Σ( Γ𝑝⋅ω(x𝑝) ). This is consistent with
+Winckelamns' 1995 CTR report, "Some Progress in LES using the 3-D VPM".
+
+Use `save_path` to indicate a directory where to save the plots. If so, it
+will also generate a CSV file with ξ.
+"""
 function generate_monitor_enstrophy(; save_path=nothing, run_name="",
-                                     disp_plot=true,
-                                     figname="monitor_enstrophy",
-                                     nsteps_savefig=10,
-                                     nsteps_plot=10)
+                                        out_figs=[],
+                                        out_figaxs=[],
+                                        disp_plot=true,
+                                        figname="monitor_enstrophy",
+                                        figsize_factor=5/6,
+                                        nsteps_savefig=10,
+                                        nsteps_plot=1)
 
     if disp_plot
-        fig = figure(figname, figsize=[7*1, 5*1])
+        formatpyplot()
+        fig = plt.figure(figname, figsize=[7*1, 5*1]*figsize_factor)
         ax = fig.gca()
+
         ax.set_xlabel("Simulation time (s)")
         ax.set_ylabel(L"Enstrophy ($\mathrm{m}^3/\mathrm{s}^2$)")
+
+        ax.spines["right"].set_visible(false)
+        ax.spines["top"].set_visible(false)
+
+        push!(out_figs, fig)
+        push!(out_figaxs, ax)
     end
 
     enstrophy = []
@@ -491,16 +632,30 @@ function generate_monitor_enstrophy(; save_path=nothing, run_name="",
     return extra_runtime_function
 end
 
+"""
+    generate_monitor_Cd(; save_path=nothing)
 
+Generate a monitor plotting the mean value of the SFS model coefficient \$C_d\$
+across the particle field at every time step. It also plots the ratio of \$C_d\$
+values that were clipped to zero (not included in the mean).
+
+Use `save_path` to indicate a directory where to save the plots. If so, it
+will also generate a CSV file with the statistics of \$C_d\$ (particles whose
+coefficients have been clipped are ignored).
+"""
 function generate_monitor_Cd(; save_path=nothing, run_name="",
-                                     disp_plot=true,
-                                     figname="monitor_Cd",
-                                     nsteps_savefig=10,
-                                     nsteps_plot=10,
-                                     ylims=[1e-5, 1e0])
+                                        out_figs=[],
+                                        out_figaxs=[],
+                                        disp_plot=true,
+                                        figname="monitor_Cd",
+                                        figsize_factor=5/6,
+                                        nsteps_plot=1,
+                                        nsteps_savefig=10,
+                                        ylims=[1e-5, 1e0])
 
     if disp_plot
-        fig = figure(figname, figsize=[7*2, 5*1])
+        formatpyplot()
+        fig = plt.figure(figname, figsize=[7*2, 5*1]*figsize_factor)
         axs = fig.subplots(1, 2)
 
         ax = axs[1]
@@ -508,10 +663,19 @@ function generate_monitor_Cd(; save_path=nothing, run_name="",
         ax.set_yscale("log")
         ax.set_xlabel("Simulation time (s)")
         ax.set_ylabel(L"Mean $\Vert C_d \Vert$")
+
         ax = axs[2]
         ax.set_xlabel("Simulation time")
         ax.set_ylabel(L"Ratio of $C_d$-zeroes"*
-                      L" $\frac{n_\mathrm{zeroes}}{n_\mathrm{particles}}$")
+                        L" $\frac{n_\mathrm{zeroes}}{n_\mathrm{particles}}$")
+
+        for ax in axs
+            ax.spines["right"].set_visible(false)
+            ax.spines["top"].set_visible(false)
+        end
+
+        push!(out_figs, fig)
+        push!(out_figaxs, axs)
     end
 
     meanCds, stdCds, zeroCds, ts, out  = [], [], [], [], []
@@ -564,3 +728,24 @@ function generate_monitor_Cd(; save_path=nothing, run_name="",
 
     return extra_runtime_function
 end
+
+"""
+    concatenate(monitors::Array{Function})
+    concatenate(monitors::NTuple{N, Function})
+    concatenate(monitor1, monitor2, ...)
+
+Concatenates a collection of monitors into a pipeline, returning one monitor of
+the form
+```julia
+monitor(args...; optargs...) =
+    monitors[1](args...; optargs...) || monitors[2](args...; optargs...) || ...
+```
+"""
+function concatenate(monitors...)
+
+    monitor(args...; optargs...) = !prod(!f(args...; optargs...) for f in monitors)
+
+    return monitor
+end
+
+concatenate(monitors) = concatenate(monitors...)

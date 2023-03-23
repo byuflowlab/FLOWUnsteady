@@ -2,9 +2,7 @@
 # DESCRIPTION
     Vehicle type handling all defined geometries and their properties.
 
-# AUTHORSHIP
-  * Author    : Eduardo J. Alvarez
-  * Email     : Edo.AlvarezR@gmail.com
+# ABOUT
   * Created   : Oct 2019
   * License   : MIT
 =###############################################################################
@@ -136,8 +134,7 @@ function generate_static_particle_fun(self::AbstractVehicle,
 end
 
 """
-    `save_vtk(self::AbstractVehicle, filename; path=nothing, num=nothing,
-optargs...)`
+    save_vtk(self::AbstractVehicle, prefix; path="", optargs...)
 
 Output VTK files with vehicle geometry and solution fields.
 """

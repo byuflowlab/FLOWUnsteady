@@ -3,9 +3,7 @@
     Vehicle with vortex-lattice method (VLM) and VPM-based propeller models
     shedding VPM wakes.
 
-# AUTHORSHIP
-  * Author    : Eduardo J. Alvarez
-  * Email     : Edo.AlvarezR@gmail.com
+# ABOUT
   * Created   : Oct 2019
   * License   : MIT
 =###############################################################################
@@ -15,30 +13,37 @@
 # UNSTEADY VLM VEHICLE TYPE
 ################################################################################
 """
-    `UVLMVehicle(system; optargs...)`
+    UVLMVehicle{N, M, R}(system; tilting_systems, rotors_systems,
+                                            vlm_system, wake_system, grids)
 
-Type handling all geometries and subsystems that define a flight vehicle made
-out of VLM (Wing, WingSystem, Rotor) components.
+Type handling all geometries and subsystems that define a vehicle made
+out of FLOWVLM components (Wing, WingSystem, Rotor).
 
 # ARGUMENTS
-* `system::vlm.WingSystem`:        System of all FLOWVLM objects. This system
+* `system::FLOWVLM.WingSystem`:        System of all FLOWVLM objects. This system
                                     is considered as the entire vehicle. Not all
                                     components in this system will be solved,
                                     but they will all be rotated and translated
-                                    during maneuver.
+                                    according to the maneuver.
 # OPTIONAL ARGUMENTS
-* `tilting_systems::Tuple(vlm.WingSystem, ...)`:   Tuple of all FLOWVLM
+* `tilting_systems::NTuple{N, FLOWVLM.WingSystem}`:   Tuple of all FLOWVLM
                                     tilting objects, where `tilting_systems[i]`
                                     contains the i-th FLOWVLM system of lifting
                                     surfaces and rotors that tilt together.
-* `rotors_systems::Tuple(Array{vlm.Rotor,1}, ...)`:   Tuple of groups of Rotors
+* `rotors_systems::NTuple{M, Array{vlm.Rotor}}`:   Tuple of groups of Rotors
                                     that share a common RPM.
-* `vlm_system::vlm.WingSystem`:    System of all FLOWVLM objects to be solved
+* `vlm_system::FLOWVLM.WingSystem`:    System of all FLOWVLM objects to be solved
                                     through the VLM solver.
-* `wake_system::vlm.WingSystem`:   System of all FLOWVLM objects that will
+* `wake_system::FLOWVLM.WingSystem`:   System of all FLOWVLM objects that will
                                     shed a VPM wake.
-* `grids::Array{gt.GridTypes, 1}`: Array of grids that will be translated and
+* `grids::Array{gt.GridTypes}`:         Array of grids that will be translated and
                                     rotated along with `system`.
+
+# State variables
+* `V::Vector`                   : Current vehicle velocity
+* `W::Vector`                   : Current vehicle angular velocity
+* `prev_data::Array{Any}`       : Information about previous step
+* `grid_O::Vector{Vector}`       : Origin of every grid
 """
 struct UVLMVehicle{N, M, R} <: AbstractVLMVehicle{N, M, R}
 
@@ -83,7 +88,11 @@ struct UVLMVehicle{N, M, R} <: AbstractVLMVehicle{N, M, R}
                 )
 end
 
-# Implicit N and M constructor
+"""
+    UVLMVehicle(system; optargs...)
+
+Constructor with implicit `N`, `M`, and `R` parameters.
+"""
 UVLMVehicle(system::vlm.WingSystem;
         V::Array{R, 1}=zeros(3), W::Array{R, 1}=zeros(3),
         tilting_systems::NTuple{N, vlm.WingSystem}=NTuple{0, vlm.WingSystem}(),
@@ -98,8 +107,8 @@ UVLMVehicle(system::vlm.WingSystem;
                                 grid_O=[zeros(R, 3) for i in 1:length(grids)],
                                 optargs...)
 
-# Alias
-const VLMVehicle = UVLMVehicle
+"""Alias for [`FLOWUnsteady.UVLMVehicle`](@ref)"""
+VLMVehicle = UVLMVehicle
 
 ##### FUNCTIONS  ###############################################################
 function shed_wake(self::VLMVehicle, Vinf::Function,
@@ -142,17 +151,35 @@ function shed_wake(self::VLMVehicle, Vinf::Function,
     end
 end
 
-
+"""
+Uniform vortex-sheet distribution for actuator surface model.
+See [Alvarez' dissertation](https://scholarsarchive.byu.edu/etd/9589/), Sec. 6.3.2.
+"""
 g_uniform(x) = 0 <= x <= 1 ? 1 : 0   # Uniform distribution
+
+
+"""
+Linear vortex-sheet distribution for actuator surface model.
+See [Alvarez' dissertation](https://scholarsarchive.byu.edu/etd/9589/), Sec. 6.3.2.
+"""
 g_linear(x) = x < 0 ? 0 :                           # Piece-wise linear distribution centered at quarter-chord
            x < 0.25 ? 0.4 + 3.04 * x/0.25 :         # as given by Kim 2015, "Improved actuator surface method for wind turbine application."
            x < 0.50 ? 3.44 - 3.2 * (x-0.25)/0.25 :
            x <=1.00 ? 0.24 - 0.24 * (x-0.5)/0.5  :
            0
+
+
+"""
+Pressure-like vortex-sheet distribution for actuator surface model.
+See [Alvarez' dissertation](https://scholarsarchive.byu.edu/etd/9589/), Sec. 6.3.2.
+"""
 g_pressure(x) = x <= 0 ? 0 :         # Pressure-like distribution: peaking by the LE with aerodynamic center at to quarter-chord.
                 x <= 1 ? (1-exp(-(x/0.02)^3))/(4*pi*x) / 0.3266200204514099 :
                 0
 
+"""
+Alias for [`FLOWUnsteady.g_linear`](@ref).
+"""
 const g_piecewiselinear = g_linear
 
 function generate_static_particle_fun(pfield::vpm.ParticleField, pfield_static::vpm.ParticleField,
