@@ -21,8 +21,8 @@ BPM = "f91b385c-3ede-44c9-92c8-2a04f762ef2f"
 [compat]
 julia = "1.6"
 GeometricTools = "2.1.6"
-FLOWVPM = "3.0.0"
-FLOWVLM = "2.1.1"
+FLOWVPM = "3.0.1"
+FLOWVLM = "2.1.2"
 FLOWNoise = "2.1.1"
 BPM = "2.0.0"
 
