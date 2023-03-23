@@ -26,7 +26,7 @@ const clrs = [
 
 function formatpyplot()
     # Fonts
-    plt.rc("font", family="Times New Roman")            # Text font
+    # plt.rc("font", family="Times New Roman")            # Text font
     plt.rc("mathtext", fontset="stix")                  # Math font
     plt.rc("font", size=12)          # controls default text sizes
     plt.rc("axes", titlesize=12)     # fontsize of the axes title

@@ -59,10 +59,12 @@ Once inside WSL, do the following steps
 * Get the path of Python: `which python3`. This is the path you will use [setting up PyCall](@ref pycall).
 
 * To be able to [pull up ParaView from the terminal](@ref paraview) through the command `paraview`:
-    1. Identify the location of `paraview.exe` (most likely, this is `C:\Program Files\ParaView 5.11.0\bin\`)
-    2. Add the path of ParaView to the system-level PATH: [LINK](https://www.computerhope.com/issues/ch000549.htm)
+    1. Donwload and install [ParaView](https://www.paraview.org/)
+    2. Identify the location of `paraview.exe` (most likely, this is `C:\Program Files\ParaView 5.11.0\bin\`)
+    3. Add the path of ParaView to the system-level PATH: [LINK](https://www.computerhope.com/issues/ch000549.htm)
+    4. Create a `paraview` alias inside WSL: `which paraview.exe | xargs -I{} sudo ln -s {} /usr/local/bin/paraview`
 
 
 ---
 
-**Now you can proceed with the general instructions: [LINK](@ref installation)**
+**Now you can proceed with [the general instructions](@ref installation)** (you can skip the Julia and ParaView setup since we already took care of that)

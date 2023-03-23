@@ -66,7 +66,7 @@ ParaView will then pull up with a rendering of a cube (click the `Apply` button 
 ## [PyCall](@id pycall)
 
 One of the dependencies, [AirfoilPrep.jl](https://github.com/byuflowlab/AirfoilPrep.jl), is a wrapper of Python code that is written in Python 3.8.
-For this reason, make sure that your Python version linked to PyCall is 3.8.
+For this reason, make sure that your Python version linked to PyCall is 3.8 or higher.
 You can do that as follows:
 ```julia
 # Install PyCall
@@ -90,7 +90,7 @@ v"3.8"
 
 ## PyPlot
 Since PyCall now relies on a custom install of Python3, make sure that:
-1. matplotlib, mpmath, and scipy are installed in that Python
+1. matplotlib, mpmath, and scipy are installed in that Python: `pip3 install matplotlib mpmath scipy --user`
 2. for optimal experience, verify that matplotlib uses the Qt5Agg backend. Useful instructions can be found [here](https://github.com/JuliaPy/PyPlot.jl#os-x) and [here](https://stackoverflow.com/questions/58627696/warning-pyplot-is-using-tkagg-backend-which-is-known-to-cause-crashes-on-macos).
 
 If you run into errors with PyPlot while running FLOWUnsteady, they are likely related to one of those two items.
@@ -206,7 +206,7 @@ Pkg.add([ Pkg.PackageSpec(; url=url*name) for name in packages ])
 
 ## Add FLOWUnsteady
 
-You are now ready to install the FLOWUnsteady package through typing the following in the Julia REPL:
+You are now ready to install the FLOWUnsteady package by typing the following in the Julia REPL:
 
 ```
 ] add https://github.com/byuflowlab/FLOWUnsteady
@@ -254,8 +254,16 @@ enjoy the simulation that you have just run.
 
     To confirm that ExaFMM is successfully parallelized, pull up whatever CPU
     monitor is available in your operative system and confirm that Julia is
-    using all your cores as the simulation is running. For instance, the monitor
-    task manager in Windows should look like this:
+    using all your cores as the simulation is running. For instance, the
+    resources tab of the Task Manager in Windows should look like this:
     ![pic](https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/cpus02.png)
     and `htop` in the terminal (Linux and MacOS) should look like this:
     ![pic](https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/cpus01.png)
+
+!!! info "Visualization in Windows"
+    Unfortunately, particle fields (files `*_pfield.xmf`) can not be opened up
+    in ParaView inside WSL (this is due to an issue inside ParaView with the
+    `.xmf` file not being able to correctly point to where the `.h5` file is).
+    To visualize the particle field, you will have to move the simulation
+    folder (*e.g.*, `wing-example/`) out of the WSL into the Windows file
+    system (`C:\`) and then open the `.xmf` files.
