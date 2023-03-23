@@ -29,9 +29,11 @@ aeroacoustics based on the
 (rVPM).
 This suite brings together various tools developed by the
 [FLOW Lab](http://flow.byu.edu/) at Brigham Young University: Vortex lattice
-method, strip theory, blade-element momentum, 3D panel method, and rVPM.
+method, strip theory, blade elements, 3D panel method, and rVPM.
 The suite also integrates an FW-H solver and a BPM code for tonal
 and broadband prediction of aeroacoustic noise.
+In the low end of fidelity, simulations are similar to a free-wake method,
+while in the high end simulations become meshless large eddy simulations.
 
 
 * *Documentation:* [flow.byu.edu/FLOWUnsteady](https://flow.byu.edu/FLOWUnsteady)
@@ -107,7 +109,10 @@ rVPM considerably reduces engineering time by avoiding the hurdles of mesh
 generation. Furthermore, since it is not limited by the time-step and stability
 constraints of conventional mesh-based CFD, rVPM can be used across all levels
 of fidelity, all in the same framework by simply coarsening or refining the
-simulation. Thus, FLOWUnsteady can be used as a high-fidelity tool that is orders of
+simulation.
+In the low end of fidelity, simulations are similar to a free-wake method,
+while in the high end simulations become meshless large eddy simulations.
+Thus, FLOWUnsteady can be used as a high-fidelity tool that is orders of
 magnitude faster than mesh-based CFD, or as a variable-fidelity tool for
 the different stages of design.
 
