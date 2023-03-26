@@ -53,8 +53,36 @@ DJI aero from rVPM paper. DJI acoustics from VFS paper.
 #### Forward Flight Case
 Rachael's AVIATION paper.
 
+
 ## Wind Turbine
-Judd's validation
+*Source: J. Mehr, E. J. Alvarez, and A. Ning, 2022*[^5]
+
+```@raw html
+<center>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/UAEturbine.png" alt="Pic here" style="width: 45%;"/>
+</center>
+```
+
+> **Case:** Test series "H" from UAE study at US Department of Energy. Sweep on
+> tip speed ratio $\lambda = \frac{\omega R}{u_\infty}$.
+
+
+> **Results:** (Excerpt from E. J. Alvarez and A. Ning, 2020[^3])
+> *"The torque coefficient outputs are also within 10% for tip speed ratios
+> above, and within 25% for tip speed ratios under, $\lambda = 2.0$;
+> also notice that the absolute magnitudes of the torque coefficient are very
+> small at low tip speed ratios, assuaging any concerns about the higher
+> relative errors at those operational states."*
+
+```@raw html
+
+<center>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/UAEturbine-val00.png"
+      alt="Pic here" style="width: 100%;"/>
+</center>
+
+<br>
+```
 
 ## Propeller
 
@@ -69,7 +97,8 @@ Judd's validation
 
 > **Case:** APC 10x7E propeller (2 blades, 10'' diameter, solidity 0.1) at a tip
 > Mach number of 0.36, $\mathrm{Re}_c = 6.2 \times 10^4$, and
-> $\mathrm{Re}_D = 6.5 \times 10^5$.
+> $\mathrm{Re}_D = 6.5 \times 10^5$. Sweep on advance ratio
+> $J = \frac{u_\infty}{n d}$.
 
 > **Results:** (Excerpt from E. J. Alvarez and A. Ning, 2020[^3])
 > *"... it is confirmed that the VPM propeller model is valid... across low and
@@ -109,3 +138,7 @@ Beaver J sweep. Beaver incidence angle sweep. Propeller wake.
     Aerodynamic Interactions for Aircraft Design," *AIAA Journal*.
     [**[DOI]**](https://doi.org/10.2514/1.J059178)
     [**[PDF]**](https://scholarsarchive.byu.edu/facpub/4179/)
+
+
+[^5]: J. Mehr, E. J. Alvarez, & A. Ning (2022), "Interactional Aerodynamics
+    Analysis of a Multi-Rotor Energy Kite," (in review).

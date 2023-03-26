@@ -52,9 +52,9 @@ using FLOWUnsteady.
 
 
 
-## Propeller Performance
+## Rotor Performance
 
-#### APC 10x7 Case
+#### APC 10x7 Propeller Case
 *Source: E. J. Alvarez and A. Ning, 2020*[^2]
 
 ```@raw html
@@ -112,10 +112,40 @@ using FLOWUnsteady.
 <br>
 ```
 
-#### Beaver Case
+#### Beaver Propeller Case
 Beaver convergence.
 
-## Propeller Wake
+#### Wind Turbine Case
+*Source: J. Mehr, E. J. Alvarez, and A. Ning, 2022*[^4]
+
+```@raw html
+<center>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/UAEturbine.png" alt="Pic here" style="width: 45%;"/>
+</center>
+```
+
+> **Case:** Test series "H" from UAE study at US Department of Energy.
+
+> **Takeaways:**
+> * Spatio-temporal discretization error on thrust $C_T$ is less than 1% with 72
+>   steps per revolution (or ``5^\circ`` per step), while error on power $C_P$ is
+>   less than 3%.
+> * Blade discretization error less than 0.1% with 50 blade elements per blade.
+
+```@raw html
+
+<center>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/UAEturbine-conv00.png"
+      alt="Pic here" style="width: 100%;"/>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/UAEturbine-conv01.png"
+      alt="Pic here" style="width: 100%;"/>
+</center>
+
+<br>
+```
+
+
+## Rotor Wake
 Beaver wake convergence.
 
 ## Immersed Vorticity
@@ -135,3 +165,6 @@ Beaver wake convergence.
     Aerodynamic Interactions for Aircraft Design," *AIAA Journal*.
     [**[DOI]**](https://doi.org/10.2514/1.J059178)
     [**[PDF]**](https://scholarsarchive.byu.edu/facpub/4179/)
+
+[^4]: J. Mehr, E. J. Alvarez, & A. Ning (2022), "Interactional Aerodynamics
+    Analysis of a Multi-Rotor Energy Kite," (in review).
