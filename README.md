@@ -17,8 +17,8 @@
 
 ---
 
-FLOWUnsteady is a variable-fidelity framework for unsteady aerodynamics and
-aeroacoustics based on the
+FLOWUnsteady is an open-source variable-fidelity framework for unsteady
+aerodynamics and aeroacoustics based on the
 [reformulated vortex particle method](https://scholarsarchive.byu.edu/etd/9589/)
 (rVPM).
 This suite brings together various tools developed by the

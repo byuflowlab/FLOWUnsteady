@@ -34,12 +34,14 @@ makedocs(
                                                       ],
                                     "examples/tetheredwing.md",
                                     "examples/heavingwing.md",
-                                    "Propeller/Rotor" => [
+                                    "Propeller" => [
                                                         "examples/propeller-J040.md",
                                                         "examples/propeller-jsweep.md",
                                                         "examples/propeller-quasisteady.md",
                                                         "examples/propeller-incidence.md",
-                                                        "Hover" => "examples/rotorhover-aero.md",
+                                                      ],
+                                    "Rotor in Hover" => [
+                                                        "High Fidelity" => "examples/rotorhover-aero.md",
                                                         "Aeroacoustics" => "examples/rotorhover-acoustics.md",
                                                         "examples/rotorhover-fdom.md",
                                                       ],

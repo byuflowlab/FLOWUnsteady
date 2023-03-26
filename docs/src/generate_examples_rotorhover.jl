@@ -14,7 +14,7 @@ open(joinpath(output_path, output_name*"-aero.md"), "w") do fout
 
     ```@raw html
     <div style="position:relative;padding-top:50%;">
-        <iframe style="position:absolute;left:0;top:0;height:80%;width:71%;"
+        <iframe style="position:absolute;left:0;top:0;height:80%;width:72%;"
             src="https://www.youtube.com/embed/u9SgYbYhPpU?hd=1"
             title="YouTube video player" frameborder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
