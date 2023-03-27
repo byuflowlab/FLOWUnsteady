@@ -16,8 +16,7 @@
 =###############################################################################
 
 #= CHANGE LOG
-* Viscous diffusion is on
-* shed_unsteady   = true, sigma_rotor_surf= R/80, vlm_rlx= 0.5, sigmafactor_vpmonvlm = 1
+    * shed_starting   = false
 =#
 
 #= TODO
@@ -28,6 +27,43 @@
     * [ ] Cd monitor: Typically you can run one simulation with the dynamic
             coeff, write down the mean Cd, then switch to the static model coeff
             fixed to that value. It'll make the simulation 1.5x faster.
+=#
+
+#=
+Use the following parameters for the desired fidelity
+
+---- MID-LOW FIDELITY ---
+n               = 20                        # Number of blade elements per blade
+nsteps_per_rev  = 36                        # Time steps per revolution
+p_per_step      = 4                         # Sheds per time step
+sigma_rotor_surf= R/10                      # Rotor-on-VPM smoothing radius
+vpm_SFS         = vpm.SFS_none              # VPM LES subfilter-scale model
+shed_starting   = false                     # Whether to shed starting vortex
+suppress_fountain    = true                 # Suppress hub fountain effect
+sigmafactor_vpmonvlm = 1.0                  # Shrink particles by this factor when
+                                            #  calculating VPM-on-VLM/Rotor induced velocities
+
+---- MID-HIGH FIDELITY ---
+n               = 50
+nsteps_per_rev  = 72
+p_per_step      = 2
+sigma_rotor_surf= R/10
+sigmafactor_vpmonvlm = 1.0
+shed_starting   = false
+suppress_fountain    = true
+vpm_SFS         = vpm.SFS_none
+
+---- HIGH FIDELITY -----
+n               = 50
+nsteps_per_rev  = 360
+p_per_step      = 2
+sigma_rotor_surf= R/80
+sigmafactor_vpmonvlm = 5.0
+shed_starting   = true
+suppress_fountain    = false
+vpm_SFS         = vpm.DynamicSFS(vpm.Estr_fmm, vpm.pseudo3level_positive;
+                                    alpha=0.999, maxC=1.0,
+                                    clippings=[vpm.clipping_backscatter])
 =#
 
 import FLOWUnsteady as uns
@@ -52,8 +88,6 @@ data_path       = uns.def_data_path         # Path to rotor database
 pitch           = 0.0                       # (deg) collective pitch of blades
 CW              = false                     # Clock-wise rotation
 xfoil           = false                     # Whether to run XFOIL
-
-# TODO: Hide this?
 read_polar      = vlm.ap.read_polar2        # What polar reader to use
 
 # NOTE: If `xfoil=true`, XFOIL will be run to generate the airfoil polars used
@@ -68,7 +102,7 @@ read_polar      = vlm.ap.read_polar2        # What polar reader to use
 #       files.
 
 # Discretization
-n               = 50                        # Number of blade elements per blade
+n               = 20                        # Number of blade elements per blade
 r               = 1/10                      # Geometric expansion of elements
 
 # NOTE: Here a geometric expansion of 1/10 means that the spacing between the
@@ -117,42 +151,40 @@ const_solution  = VehicleType==uns.QVLMVehicle  # Whether to assume that the
                                                 # solution is constant or not
 # Time parameters
 nrevs           = 10                        # Number of revolutions in simulation
-nsteps_per_rev  = 72                        # Time steps per revolution
-# nsteps_per_rev  = 72*5
+nsteps_per_rev  = 36                        # Time steps per revolution
 nsteps          = const_solution ? 2 : nrevs*nsteps_per_rev # Number of time steps
 ttot            = nsteps/nsteps_per_rev / (RPM/60)       # (s) total simulation time
 
-# For a high-fidelity simulation use the following parameters:
-# nsteps_per_rev  = 72*5
-
-
 # VPM particle shedding
-p_per_step      = 2                         # Sheds per time step
-shed_starting   = true                      # Whether to shed starting vortex
+p_per_step      = 4                         # Sheds per time step
+shed_starting   = false                     # Whether to shed starting vortex
 shed_unsteady   = true                      # Whether to shed vorticity from unsteady loading
-# shed_unsteady   = false
+unsteady_shedcrit = 0.001                   # Shed unsteady loading whenever circulation
+                                            #  fluctuates by more than this ratio
 max_particles   = ((2*n+1)*B)*nsteps*p_per_step + 1 # Maximum number of particles
 
 # Regularization
-sigma_rotor_surf= R/80                      # Rotor-on-VPM smoothing radius
+sigma_rotor_surf= R/10                      # Rotor-on-VPM smoothing radius
 lambda_vpm      = 2.125                     # VPM core overlap
                                             # VPM smoothing radius
 sigma_vpm_overwrite = lambda_vpm * 2*pi*R/(nsteps_per_rev*p_per_step)
+sigmafactor_vpmonvlm= 1                     # Shrink particles by this factor when
+                                            #  calculating VPM-on-VLM/Rotor induced velocities
 
 # Rotor solver
 vlm_rlx         = 0.5                       # VLM relaxation <-- this also applied to rotors
 hubtiploss_correction = ((0.4, 5, 0.1, 0.05), (2, 1, 0.25, 0.05)) # Hub and tip correction
 
 # VPM solver
-# vpm_viscous   = vpm.Inviscid()          # VPM viscous diffusion scheme
-vpm_viscous     = vpm.CoreSpreading(-1, -1, vpm.zeta_fmm; beta=100.0, itmax=20, tol=1e-1)
+vpm_viscous     = vpm.Inviscid()          # VPM viscous diffusion scheme
+# vpm_viscous   = vpm.CoreSpreading(-1, -1, vpm.zeta_fmm; beta=100.0, itmax=20, tol=1e-1)
 
-# vpm_SFS       = vpm.SFS_none            # VPM LES subfilter-scale model
+vpm_SFS         = vpm.SFS_none            # VPM LES subfilter-scale model
 # vpm_SFS       = vpm.SFS_Cd_twolevel_nobackscatter
 # vpm_SFS       = vpm.SFS_Cd_threelevel_nobackscatter
-vpm_SFS         = vpm.DynamicSFS(vpm.Estr_fmm, vpm.pseudo3level_positive;
-                                    alpha=0.999, maxC=1.0,
-                                    clippings=[vpm.clipping_backscatter])
+# vpm_SFS         = vpm.DynamicSFS(vpm.Estr_fmm, vpm.pseudo3level_positive;
+#                                     alpha=0.999, maxC=1.0,
+#                                     clippings=[vpm.clipping_backscatter])
 # vpm_SFS       = vpm.DynamicSFS(vpm.Estr_fmm, vpm.pseudo3level_positive;
                                     # alpha=0.999, rlxf=0.005, minC=0, maxC=1
                                     # clippings=[vpm.clipping_backscatter],
@@ -165,15 +197,7 @@ vpm_SFS         = vpm.DynamicSFS(vpm.Estr_fmm, vpm.pseudo3level_positive;
 #       simulation with viscous diffusion enabled or not. On the other hand,
 #       such high Reynolds numbers mean that the wake quickly becomes turbulent
 #       and it is crucial to use a subfilter-scale (SFS) model to accurately
-#       capture the turbulent decay of the wake.
-
-
-# TODO: Hide this
-sigmafactor_vpmonvlm   = 1          # Shrink particles by this factor when
-                                    # calculating VPM-on-VLM/Rotor induced velocities
-# sigmafactor_vpmonvlm   = 5.50
-unsteady_shedcrit = 0.001           # Shed unsteady loading whenever circulation
-                                    # fluctuates by more than this ratio
+#       capture the turbulent decay of the wake (turbulent diffusion).
 
 if VehicleType == uns.QVLMVehicle
     # Mute warnings regarding potential colinear vortex filaments. This is
@@ -187,17 +211,21 @@ end
 # ----------------- WAKE TREATMENT ---------------------------------------------
 # NOTE: It is known in the CFD community that rotor simulations with an
 #       impulsive RPM start (*i.e.*, 0 to RPM in the first time step, as opposed
-#       to gradually ramping up the RPM) leads to the hub "fountain effect".
+#       to gradually ramping up the RPM) leads to the hub "fountain effect",
+#       with the root wake reversing the flow near the hub.
 #       The fountain eventually goes away as the wake develops, but this happens
 #       very slowly, which delays the convergence of the simulation to a steady
 #       state. To accelerate convergence, here we define a wake treatment
 #       procedure that suppresses the hub wake for the first three revolutions,
 #       avoiding the fountain effect altogether.
+#       This is especially helpful at low and mid-fidelity.
 
-# Supress wake shedding on blade elements inboard of this radial station
-no_shedding_Rthreshold = shed_unsteady ? 0.0 : 0.35
+suppress_fountain   = true                  # Toggle
 
-# Supress wake shedding before this many time steps
+# Supress wake shedding on blade elements inboard of this r/R radial station
+no_shedding_Rthreshold = suppress_fountain ? 0.35 : 0.0
+
+# Supress wake shedding for this many time steps
 no_shedding_nstepsthreshold = 3*nsteps_per_rev
 
 omit_shedding = []          # Index of blade elements to supress wake shedding
