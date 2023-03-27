@@ -334,7 +334,7 @@ function run_simulation(
     end
 
     if vpm_surface
-        static_particles_function = generate_static_particle_fun(pfield, staticpfield,
+        vehicle_static_particles_function = generate_static_particle_fun(pfield, staticpfield,
                                     sim.vehicle, sigma_vlm_surf, sigma_rotor_surf;
                                     vlm_vortexsheet=vlm_vortexsheet,
                                     vlm_vortexsheet_overlap=vlm_vortexsheet_overlap,
@@ -343,7 +343,13 @@ function run_simulation(
                                     save_path=save_static_particles ? save_path : nothing,
                                     run_name=run_name, nsteps_save=nsteps_save)
     else
-        static_particles_function = (pfield, t, dt)->nothing
+        vehicle_static_particles_function = (pfield, t, dt)->nothing
+    end
+
+    function static_particles_function(args...; optargs...)
+        vehicle_static_particles_function(args...; optargs...)
+        extra_static_particles_fun(args...; optargs...)
+        return nothing
     end
 
     ############################################################################
