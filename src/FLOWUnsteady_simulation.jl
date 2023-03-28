@@ -163,6 +163,7 @@ function run_simulation(
             sigma_vpm_overwrite = nothing,      # Overwrite core size of wake to this value (ignoring `sigmafactor_vpm`)
 
             extra_static_particles_fun = (args...; optargs...) -> nothing,
+            shed_wake_panel = (args...; optargs...) -> nothing,
 
             # -------- RESTART OPTIONS -----------------------------------------
             restart_vpmfile     = nothing,      # VPM restart file to restart simulation
@@ -285,6 +286,18 @@ function run_simulation(
                             overwrite_sigma=sigma_vpm_overwrite,
                             omit_shedding=omit_shedding)
 
+        # NOTE: Here I assume that the MultiBody was stored in this array
+        body = sim.vehicle.prev_data[4]
+
+        shed_wake_panel(body, PFIELD, DT, sim.nt;
+                            unsteady_shedcrit=-1,
+                            shed_starting=false,
+                            p_per_step=p_per_step,
+                            sigmafactor=sigmafactor_vpm,
+                            overwrite_sigma=sigma_vpm_overwrite,
+                            omit_shedding=[] # TODO: Implement omit_shedding for panel
+                        )
+
         # Solve aerodynamics of the vehicle
         solve(sim, Vinf, PFIELD, wake_coupled, DT, vlm_rlx,
                 sigma_vlm_surf, sigma_rotor_surf, rho, sound_spd,
@@ -301,6 +314,15 @@ function run_simulation(
                         p_per_step=p_per_step, sigmafactor=sigmafactor_vpm,
                         overwrite_sigma=sigma_vpm_overwrite,
                         omit_shedding=omit_shedding)
+
+            shed_wake_panel(body, PFIELD, DT, sim.nt;
+                                unsteady_shedcrit=unsteady_shedcrit,
+                                shed_starting=shed_starting,
+                                p_per_step=p_per_step,
+                                sigmafactor=sigmafactor_vpm,
+                                overwrite_sigma=sigma_vpm_overwrite,
+                                omit_shedding=[]
+                            )
         end
 
         if shed_boundarylayer
