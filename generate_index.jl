@@ -16,7 +16,7 @@ youtubeflag = "href=\"https://www.youtube.com/watch?v="
 str_youtube(url) = """
     ```@raw html
     <div style="position:relative;padding-top:50%;">
-        <iframe style="position:absolute;left:0;top:0;height:80%;width:71%;"
+        <iframe style="position:absolute;left:0;top:0;height:80%;width:71.0%;"
             src="https://www.youtube.com/embed/$(url)?hd=1"
             title="YouTube video player" frameborder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
