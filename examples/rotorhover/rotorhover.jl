@@ -15,28 +15,15 @@
   * License         : MIT
 =###############################################################################
 
-#= CHANGE LOG
-    * shed_starting   = false
-=#
-
-#= TODO
-    * [ ] Bring down the number of elements in the DJI example to speed things up?
-    * [ ] Rotor noise
-    * [ ] Visualization guide
-        * [ ] Changing ParaView ugly default color
-    * [ ] Cd monitor: Typically you can run one simulation with the dynamic
-            coeff, write down the mean Cd, then switch to the static model coeff
-            fixed to that value. It'll make the simulation 1.5x faster.
-=#
-
 #=
-Use the following parameters for the desired fidelity
+Use the following parameters to obtain the desired fidelity
 
 ---- MID-LOW FIDELITY ---
 n               = 20                        # Number of blade elements per blade
 nsteps_per_rev  = 36                        # Time steps per revolution
 p_per_step      = 4                         # Sheds per time step
 sigma_rotor_surf= R/10                      # Rotor-on-VPM smoothing radius
+vpm_integration = vpm.euler                 # VPM time integration scheme
 vpm_SFS         = vpm.SFS_none              # VPM LES subfilter-scale model
 shed_starting   = false                     # Whether to shed starting vortex
 suppress_fountain    = true                 # Suppress hub fountain effect
@@ -51,6 +38,7 @@ sigma_rotor_surf= R/10
 sigmafactor_vpmonvlm = 1.0
 shed_starting   = false
 suppress_fountain    = true
+vpm_integration = vpm.rungekutta3
 vpm_SFS         = vpm.SFS_none
 
 ---- HIGH FIDELITY -----
@@ -61,6 +49,7 @@ sigma_rotor_surf= R/80
 sigmafactor_vpmonvlm = 5.0
 shed_starting   = true
 suppress_fountain    = false
+vpm_integration = vpm.rungekutta3
 vpm_SFS         = vpm.DynamicSFS(vpm.Estr_fmm, vpm.pseudo3level_positive;
                                     alpha=0.999, maxC=1.0,
                                     clippings=[vpm.clipping_backscatter])
@@ -71,15 +60,13 @@ import FLOWVLM as vlm
 import FLOWVPM as vpm
 
 run_name        = "rotorhover-example"      # Name of this simulation
-
 save_path       = run_name                  # Where to save this simulation
 paraview        = true                      # Whether to visualize with Paraview
 
-# save_path       = String(split(@__FILE__, ".")[1])
-# run_name        = "singlerotor"
-# paraview        = false
-
-
+# Uncomment this to have the folder named after this file instead
+# save_path     = String(split(@__FILE__, ".")[1])
+# run_name      = "singlerotor"
+# paraview      = false
 # ----------------- GEOMETRY PARAMETERS ----------------------------------------
 
 # Rotor geometry
@@ -176,20 +163,23 @@ vlm_rlx         = 0.5                       # VLM relaxation <-- this also appli
 hubtiploss_correction = ((0.4, 5, 0.1, 0.05), (2, 1, 0.25, 0.05)) # Hub and tip correction
 
 # VPM solver
-vpm_viscous     = vpm.Inviscid()          # VPM viscous diffusion scheme
+vpm_integration = vpm.euler                 # VPM temporal integration scheme
+# vpm_integration = vpm.rungekutta3
+
+vpm_viscous     = vpm.Inviscid()            # VPM viscous diffusion scheme
 # vpm_viscous   = vpm.CoreSpreading(-1, -1, vpm.zeta_fmm; beta=100.0, itmax=20, tol=1e-1)
 
-vpm_SFS         = vpm.SFS_none            # VPM LES subfilter-scale model
+vpm_SFS         = vpm.SFS_none              # VPM LES subfilter-scale model
 # vpm_SFS       = vpm.SFS_Cd_twolevel_nobackscatter
 # vpm_SFS       = vpm.SFS_Cd_threelevel_nobackscatter
-# vpm_SFS         = vpm.DynamicSFS(vpm.Estr_fmm, vpm.pseudo3level_positive;
-#                                     alpha=0.999, maxC=1.0,
-#                                     clippings=[vpm.clipping_backscatter])
 # vpm_SFS       = vpm.DynamicSFS(vpm.Estr_fmm, vpm.pseudo3level_positive;
-                                    # alpha=0.999, rlxf=0.005, minC=0, maxC=1
-                                    # clippings=[vpm.clipping_backscatter],
-                                    # controls=[control_sigmasensor],
-                                    # )
+#                                   alpha=0.999, maxC=1.0,
+#                                   clippings=[vpm.clipping_backscatter])
+# vpm_SFS       = vpm.DynamicSFS(vpm.Estr_fmm, vpm.pseudo3level_positive;
+#                                   alpha=0.999, rlxf=0.005, minC=0, maxC=1
+#                                   clippings=[vpm.clipping_backscatter],
+#                                   controls=[control_sigmasensor],
+#                                   )
 
 # NOTE: In most practical situations, open rotors operate at a Reynolds number
 #       high enough that viscous diffusion in the wake is actually negligible.
@@ -218,7 +208,7 @@ end
 #       state. To accelerate convergence, here we define a wake treatment
 #       procedure that suppresses the hub wake for the first three revolutions,
 #       avoiding the fountain effect altogether.
-#       This is especially helpful at low and mid-fidelity.
+#       This is especially helpful in low and mid-fidelity simulations.
 
 suppress_fountain   = true                  # Toggle
 
@@ -373,24 +363,25 @@ uns.run_simulation(simulation, nsteps;
                     # ----- SOLVERS OPTIONS ----------------
                     p_per_step=p_per_step,
                     max_particles=max_particles,
+                    vpm_integration=vpm_integration,
                     vpm_viscous=vpm_viscous,
                     vpm_SFS=vpm_SFS,
                     sigma_vlm_surf=sigma_rotor_surf,
                     sigma_rotor_surf=sigma_rotor_surf,
                     sigma_vpm_overwrite=sigma_vpm_overwrite,
+                    sigmafactor_vpmonvlm=sigmafactor_vpmonvlm,
                     vlm_rlx=vlm_rlx,
                     hubtiploss_correction=hubtiploss_correction,
-                    shed_unsteady=shed_unsteady,
                     shed_starting=shed_starting,
+                    shed_unsteady=shed_unsteady,
+                    unsteady_shedcrit=unsteady_shedcrit,
                     omit_shedding=omit_shedding,
                     extra_runtime_function=runtime_function,
                     # ----- OUTPUT OPTIONS ------------------
                     save_path=save_path,
                     run_name=run_name,
                     save_wopwopin=true,  # <--- Generates input files for PSU-WOPWOP noise analysis
-
-                    sigmafactor_vpmonvlm=sigmafactor_vpmonvlm,
-                    unsteady_shedcrit=unsteady_shedcrit,
+                    save_code=@__FILE__
                     );
 
 

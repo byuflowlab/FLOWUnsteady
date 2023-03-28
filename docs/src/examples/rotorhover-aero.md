@@ -1,4 +1,4 @@
-# Rotor in Hover
+# Variable Fidelity
 
 ```@raw html
 <div style="position:relative;padding-top:50%;">
@@ -12,22 +12,48 @@
 
 While propeller simulations are numerically well behaved, a hover case
 can pose multiple numerical challenges.
-This is because, in the absence of a freestream velocity, the wake forms
-and evolves purely due to its own self induced velocity, and it becomes
-crucial to have a well resolved simulation.
+The rotation of blades in static air drives a strong axial flow caused by
+the shedding of tip vortices.
+This is a challenging case to simulate since, in the absence of a
+freestream, the wake quickly becomes fully turbulent and breaks down as tip
+vortices leapfrog and mix close to the rotor.
+Thus, a rotor in hover is a good engineering application to showcase the
+numerical stability and accuracy of FLOWUnsteady.
 
 In this example we simulate a DJI rotor in hover, and we use this case to
-demonstrate the artillery of FLOWUnsteady that makes it robust and
-numerically stable, among other things:
+demonstrate some of the advanced features of FLOWUnsteady that makes it
+robust even in this challenging case:
 
-* Subfilter scale (SFS) model of turbulence related to vortex stretching
+* [Subfilter scale (SFS) model](@ref sfsmodel) of turbulence related to vortex stretching
 * Defining a wake treatment procedure to suppress hub wake at begining of
-    simulation to avoid fountain effects (due to impulsive start) and
+    simulation in order to avoid hub fountain effects (due to impulsive start) and
     accelerate convergence
 * Defining hub and tip loss corrections
-* Viscous diffusion through core spreading
-* Monitor of global flow enstrophy to track numerical stability
-* Monitor of dynamic SFS model coefficient
+* How to generate a monitor of global flow enstrophy with
+    [`uns.generate_monitor_enstrophy`](@ref) to track numerical stability
+* How to generate a monitor of dynamic SFS model coefficient
+    [`uns.generate_monitor_Cd`](@ref)
+
+Also, in this example you can vary the fidelity of the simulation by
+setting the following parameters:
+
+| Parameter | Mid-low fidelity | Mid-high fidelity | High fidelity | Description |
+| :-------: | :--------------: | :---------------: | :-----------: | :---------- |
+| `n` | `20` | `50` | `50` | Number of blade elements per blade |
+| `nsteps_per_rev` | `36` | `72` | `360` | Time steps per revolution |
+| `p_per_step` | `4` | `2` | `2` | Particle sheds per time step |
+| `sigma_rotor_surf` | `R/10` | `R/10` | `R/80` | Rotor-on-VPM smoothing radius |
+| `sigmafactor_vpmonvlm` | `1.0` | `1.0` | `5.0` | Shrink particles by this factor when calculating VPM-on-VLM/Rotor induced velocities |
+| `shed_starting` | `false` | `false` | `true` | Whether to shed starting vortex |
+| `suppress_fountain` | `true` | `true` | `false` | Whether to suppress hub fountain effect |
+| `vpm_integration` | `vpm.euler` | RK3``^\star`` | RK3``^\star`` | VPM time integration scheme |
+| `vpm_SFS` | None``^\dag`` | None``^\dag`` | Dynamic``^\ddag`` | VPM LES subfilter-scale model |
+
+* ``^\star``*RK3:* `vpm_integration = vpm.rungekutta3`
+* ``^\dag``*None:* `vpm_SFS = vpm.SFS_none`
+* ``^\ddag``*Dynamic:* `vpm_SFS = vpm.SFS_Cd_twolevel_nobackscatter`
+
+
 
 ```@raw html
 <br>
@@ -51,34 +77,14 @@ numerically stable, among other things:
   * License         : MIT
 =###############################################################################
 
-#= CHANGE LOG
-* Viscous diffusion is on
-* shed_unsteady   = true, sigma_rotor_surf= R/80, vlm_rlx= 0.5, sigmafactor_vpmonvlm = 1
-=#
-
-#= TODO
-    * [ ] Bring down the number of elements in the DJI example to speed things up?
-    * [ ] Rotor noise
-    * [ ] Visualization guide
-        * [ ] Changing ParaView ugly default color
-    * [ ] Cd monitor: Typically you can run one simulation with the dynamic
-            coeff, write down the mean Cd, then switch to the static model coeff
-            fixed to that value. It'll make the simulation 1.5x faster.
-=#
 
 import FLOWUnsteady as uns
 import FLOWVLM as vlm
 import FLOWVPM as vpm
 
 run_name        = "rotorhover-example"      # Name of this simulation
-
 save_path       = run_name                  # Where to save this simulation
 paraview        = true                      # Whether to visualize with Paraview
-
-# save_path       = String(split(@__FILE__, ".")[1])
-# run_name        = "singlerotor"
-# paraview        = false
-
 
 # ----------------- GEOMETRY PARAMETERS ----------------------------------------
 
@@ -88,8 +94,6 @@ data_path       = uns.def_data_path         # Path to rotor database
 pitch           = 0.0                       # (deg) collective pitch of blades
 CW              = false                     # Clock-wise rotation
 xfoil           = false                     # Whether to run XFOIL
-
-# TODO: Hide this?
 read_polar      = vlm.ap.read_polar2        # What polar reader to use
 
 # NOTE: If `xfoil=true`, XFOIL will be run to generate the airfoil polars used
@@ -104,7 +108,7 @@ read_polar      = vlm.ap.read_polar2        # What polar reader to use
 #       files.
 
 # Discretization
-n               = 50                        # Number of blade elements per blade
+n               = 20                        # Number of blade elements per blade
 r               = 1/10                      # Geometric expansion of elements
 
 # NOTE: Here a geometric expansion of 1/10 means that the spacing between the
@@ -153,47 +157,48 @@ const_solution  = VehicleType==uns.QVLMVehicle  # Whether to assume that the
                                                 # solution is constant or not
 # Time parameters
 nrevs           = 10                        # Number of revolutions in simulation
-nsteps_per_rev  = 72                        # Time steps per revolution
-# nsteps_per_rev  = 72*5
+nsteps_per_rev  = 36                        # Time steps per revolution
 nsteps          = const_solution ? 2 : nrevs*nsteps_per_rev # Number of time steps
 ttot            = nsteps/nsteps_per_rev / (RPM/60)       # (s) total simulation time
 
-# For a high-fidelity simulation use the following parameters:
-# nsteps_per_rev  = 72*5
-
-
 # VPM particle shedding
-p_per_step      = 2                         # Sheds per time step
-shed_starting   = true                      # Whether to shed starting vortex
+p_per_step      = 4                         # Sheds per time step
+shed_starting   = false                     # Whether to shed starting vortex
 shed_unsteady   = true                      # Whether to shed vorticity from unsteady loading
-# shed_unsteady   = false
+unsteady_shedcrit = 0.001                   # Shed unsteady loading whenever circulation
+                                            #  fluctuates by more than this ratio
 max_particles   = ((2*n+1)*B)*nsteps*p_per_step + 1 # Maximum number of particles
 
 # Regularization
-sigma_rotor_surf= R/80                      # Rotor-on-VPM smoothing radius
+sigma_rotor_surf= R/10                      # Rotor-on-VPM smoothing radius
 lambda_vpm      = 2.125                     # VPM core overlap
                                             # VPM smoothing radius
 sigma_vpm_overwrite = lambda_vpm * 2*pi*R/(nsteps_per_rev*p_per_step)
+sigmafactor_vpmonvlm= 1                     # Shrink particles by this factor when
+                                            #  calculating VPM-on-VLM/Rotor induced velocities
 
 # Rotor solver
 vlm_rlx         = 0.5                       # VLM relaxation <-- this also applied to rotors
 hubtiploss_correction = ((0.4, 5, 0.1, 0.05), (2, 1, 0.25, 0.05)) # Hub and tip correction
 
 # VPM solver
-# vpm_viscous   = vpm.Inviscid()          # VPM viscous diffusion scheme
-vpm_viscous     = vpm.CoreSpreading(-1, -1, vpm.zeta_fmm; beta=100.0, itmax=20, tol=1e-1)
+vpm_integration = vpm.euler                 # VPM temporal integration scheme
+# vpm_integration = vpm.rungekutta3
 
-# vpm_SFS       = vpm.SFS_none            # VPM LES subfilter-scale model
+vpm_viscous     = vpm.Inviscid()            # VPM viscous diffusion scheme
+# vpm_viscous   = vpm.CoreSpreading(-1, -1, vpm.zeta_fmm; beta=100.0, itmax=20, tol=1e-1)
+
+vpm_SFS         = vpm.SFS_none              # VPM LES subfilter-scale model
 # vpm_SFS       = vpm.SFS_Cd_twolevel_nobackscatter
 # vpm_SFS       = vpm.SFS_Cd_threelevel_nobackscatter
-vpm_SFS         = vpm.DynamicSFS(vpm.Estr_fmm, vpm.pseudo3level_positive;
-                                    alpha=0.999, maxC=1.0,
-                                    clippings=[vpm.clipping_backscatter])
 # vpm_SFS       = vpm.DynamicSFS(vpm.Estr_fmm, vpm.pseudo3level_positive;
-                                    # alpha=0.999, rlxf=0.005, minC=0, maxC=1
-                                    # clippings=[vpm.clipping_backscatter],
-                                    # controls=[control_sigmasensor],
-                                    # )
+#                                   alpha=0.999, maxC=1.0,
+#                                   clippings=[vpm.clipping_backscatter])
+# vpm_SFS       = vpm.DynamicSFS(vpm.Estr_fmm, vpm.pseudo3level_positive;
+#                                   alpha=0.999, rlxf=0.005, minC=0, maxC=1
+#                                   clippings=[vpm.clipping_backscatter],
+#                                   controls=[control_sigmasensor],
+#                                   )
 
 # NOTE: In most practical situations, open rotors operate at a Reynolds number
 #       high enough that viscous diffusion in the wake is actually negligible.
@@ -201,15 +206,7 @@ vpm_SFS         = vpm.DynamicSFS(vpm.Estr_fmm, vpm.pseudo3level_positive;
 #       simulation with viscous diffusion enabled or not. On the other hand,
 #       such high Reynolds numbers mean that the wake quickly becomes turbulent
 #       and it is crucial to use a subfilter-scale (SFS) model to accurately
-#       capture the turbulent decay of the wake.
-
-
-# TODO: Hide this
-sigmafactor_vpmonvlm   = 1          # Shrink particles by this factor when
-                                    # calculating VPM-on-VLM/Rotor induced velocities
-# sigmafactor_vpmonvlm   = 5.50
-unsteady_shedcrit = 0.001           # Shed unsteady loading whenever circulation
-                                    # fluctuates by more than this ratio
+#       capture the turbulent decay of the wake (turbulent diffusion).
 
 if VehicleType == uns.QVLMVehicle
     # Mute warnings regarding potential colinear vortex filaments. This is
@@ -223,17 +220,21 @@ end
 # ----------------- WAKE TREATMENT ---------------------------------------------
 # NOTE: It is known in the CFD community that rotor simulations with an
 #       impulsive RPM start (*i.e.*, 0 to RPM in the first time step, as opposed
-#       to gradually ramping up the RPM) leads to the hub "fountain effect".
+#       to gradually ramping up the RPM) leads to the hub "fountain effect",
+#       with the root wake reversing the flow near the hub.
 #       The fountain eventually goes away as the wake develops, but this happens
 #       very slowly, which delays the convergence of the simulation to a steady
 #       state. To accelerate convergence, here we define a wake treatment
 #       procedure that suppresses the hub wake for the first three revolutions,
 #       avoiding the fountain effect altogether.
+#       This is especially helpful in low and mid-fidelity simulations.
 
-# Supress wake shedding on blade elements inboard of this radial station
-no_shedding_Rthreshold = shed_unsteady ? 0.0 : 0.35
+suppress_fountain   = true                  # Toggle
 
-# Supress wake shedding before this many time steps
+# Supress wake shedding on blade elements inboard of this r/R radial station
+no_shedding_Rthreshold = suppress_fountain ? 0.35 : 0.0
+
+# Supress wake shedding for this many time steps
 no_shedding_nstepsthreshold = 3*nsteps_per_rev
 
 omit_shedding = []          # Index of blade elements to supress wake shedding
@@ -381,24 +382,24 @@ uns.run_simulation(simulation, nsteps;
                     # ----- SOLVERS OPTIONS ----------------
                     p_per_step=p_per_step,
                     max_particles=max_particles,
+                    vpm_integration=vpm_integration,
                     vpm_viscous=vpm_viscous,
                     vpm_SFS=vpm_SFS,
                     sigma_vlm_surf=sigma_rotor_surf,
                     sigma_rotor_surf=sigma_rotor_surf,
                     sigma_vpm_overwrite=sigma_vpm_overwrite,
+                    sigmafactor_vpmonvlm=sigmafactor_vpmonvlm,
                     vlm_rlx=vlm_rlx,
                     hubtiploss_correction=hubtiploss_correction,
-                    shed_unsteady=shed_unsteady,
                     shed_starting=shed_starting,
+                    shed_unsteady=shed_unsteady,
+                    unsteady_shedcrit=unsteady_shedcrit,
                     omit_shedding=omit_shedding,
                     extra_runtime_function=runtime_function,
                     # ----- OUTPUT OPTIONS ------------------
                     save_path=save_path,
                     run_name=run_name,
                     save_wopwopin=true,  # <--- Generates input files for PSU-WOPWOP noise analysis
-
-                    sigmafactor_vpmonvlm=sigmafactor_vpmonvlm,
-                    unsteady_shedcrit=unsteady_shedcrit,
                     );
 
 
@@ -425,10 +426,78 @@ end
 ```
 ```@raw html
 <span style="font-size: 0.9em; color:gray;"><i>
-    Run time: ~2 minutes on a Dell Precision 7760 laptop.
+    Mid-low fidelity runtime: ~7 minutes on a 16-core AMD EPYC 7302 processor. <br>
+    Mid-high fidelity runtime: ~60 minutes on a 16-core AMD EPYC 7302 processor. <br>
+    High fidelity runtime: ~14 hours on a 64-core AMD EPYC 7702 processor.
 </i></span>
 <br><br>
 ```
+
+Here we show the rotor monitor for the high-fidelity case:
+```@raw html
+<center>
+    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//rotorhover-example16-singlerotor_convergence.png" alt="Pic here" style="width:100%;"/>
+</center>
+```
+
+As the simulation runs, you will see the monitor shown below plotting the
+global enstrophy in the flow. The global enstrophy achieves a steady state
+once the rate of enstrophy produced by the rotor eventually balances out
+with the forward scatter of the SFS turbulence model, making the simulation
+indefinitely stable.
+
+```@raw html
+<center>
+    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//rotorhover-example16-singlerotorenstrophy.png" alt="Pic here" style="width:50%;"/>
+</center>
+```
+
+The SFS model uses a [dynamic procedure](@ref sfsmodel) to compute its own
+model coefficient ``C_d`` as the simulation evolves. This model coefficient
+has a different value for each particle in space and time.
+The ``C_d``-monitor shown below plots the average value from all the
+particle in the field that have a non-zero ``C_d`` (left), and also the ratio of the
+number of particles that got clipped to a zero ``C_d`` over the total number of
+particles (right).
+
+
+```@raw html
+<center>
+    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//rotorhover-example16-singlerotorChistory.png" alt="Pic here" style="width:100%;"/>
+</center>
+```
+
+
+!!! info "Prescribing the Model Coefficient"
+    The SFS model helps the simulation more accurately capture
+    the effects of turbulence from the scales that are not resolved,
+    but it comes with a computational cost.
+    The following table summarizes the cost of the rVPM, the SFS model,
+    and the ``C_d`` dynamic procedure.
+    ![pic](https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//rvpmsfs-benchmark02.png)
+    The dynamic procedure is the most costly operation, which increases the
+    simulation runtime by about 35%.
+
+    If you need to run a case multiple times with only slight changes
+    (e.g., sweeping the AOA and/or RPM), you can first run the simulation
+    with the dynamic procedure (`vpm_SFS = vpm.SFS_Cd_twolevel_nobackscatter`),
+    take note of what the mean ``C_d`` shown in the monitor converges to,
+    and then prescribe that value to subsequent simulations.
+    Prescribing ``C_d`` ends up in a simulation that is only 8% slower than
+    the classic VPM without any SFS model.
+
+    ``C_d`` can then be prescribed as follows
+    ```julia
+    vpm_SFS = vpm.ConstantSFS(vpm.Estr_fmm; Cs=value, clippings=[vpm.clipping_backscatter])
+    ```
+    where `CS = value` is the value you are prescribing for the model
+    coefficient, and `clippings=[vpm.clipping_backscatter]` clips the
+    backscatter of enstrophy (making it a purely diffusive model).
+    As a reference, in this hover case ``C_d`` converges to ``0.26`` in the
+    high-fidelity simulation.
+
+
+
 
 
 !!! info "Hub/Tip Loss Correction"

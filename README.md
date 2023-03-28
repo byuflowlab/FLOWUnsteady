@@ -274,10 +274,13 @@ If the issue still persists, please
   * [x] Move large figure files to J Drive
   * [x] Citing guide
 
+
+  * [ ] Compare results (CT, loading, and viz) with different fidelities vs BEMT vs RANS
+  * [ ] Rotor noise
+  * [ ] Visualization guide
+      * [ ] Changing ParaView ugly default color
+  * [x] Cd monitor: Typically you can run one simulation with the dynamic
+          coeff, write down the mean Cd, then switch to the static model coeff
+          fixed to that value. It'll make the simulation 1.5x faster.
+
 <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/light/vorticitytake01-smallreducedslower02-2.gif" alt="Vid here" style="width: 400px;"/>
-
-
-
-* Python v3.8 or higher
-* Add CPU monitor pic from windows
-* Fix times new roman warning

@@ -41,7 +41,7 @@ makedocs(
                                                         "examples/propeller-incidence.md",
                                                       ],
                                     "Rotor in Hover" => [
-                                                        "High Fidelity" => "examples/rotorhover-aero.md",
+                                                        "examples/rotorhover-aero.md",
                                                         "Aeroacoustics" => "examples/rotorhover-acoustics.md",
                                                         "examples/rotorhover-fdom.md",
                                                       ],

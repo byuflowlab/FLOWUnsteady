@@ -240,7 +240,7 @@ Furthermore, notice that the rVPM equations do not require more computation than
 
 > For an in-depth derivation of the rVPM governing equations, see Chapters 1 and 2 in [Alvarez' Dissertation](https://scholarsarchive.byu.edu/etd/9589).[^2]
 
-## Turbulence Model
+## [Turbulence Model](@id sfsmodel)
 
 Turning our attention back to the SFS stress tensor ``T_{ij}``, the accuracy of LES hinges on the modeling of this tensor.
 Its divergence represents the rate at which enstrophy—a measure of rotational kinetic energy—is transferred from resolved scales to subfilter scales (diffusion) and from subfilter scales to resolved scales (backscatter).
