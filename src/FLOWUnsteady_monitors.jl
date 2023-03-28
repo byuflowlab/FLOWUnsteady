@@ -596,6 +596,8 @@ function generate_monitor_enstrophy(; save_path=nothing, run_name="",
         ax.spines["right"].set_visible(false)
         ax.spines["top"].set_visible(false)
 
+        fig.tight_layout()
+
         push!(out_figs, fig)
         push!(out_figaxs, ax)
     end
@@ -673,6 +675,8 @@ function generate_monitor_Cd(; save_path=nothing, run_name="",
             ax.spines["right"].set_visible(false)
             ax.spines["top"].set_visible(false)
         end
+
+        fig.tight_layout()
 
         push!(out_figs, fig)
         push!(out_figaxs, axs)
