@@ -289,7 +289,7 @@ function run_simulation(
         # NOTE: Here I assume that the MultiBody was stored in this array
         body = sim.vehicle.prev_data[4]
 
-        shed_wake_panel(body, PFIELD, DT, sim.nt;
+        shed_wake_panel(body, Vinf, PFIELD, DT, sim.nt; t=T,
                             unsteady_shedcrit=-1,
                             shed_starting=false,
                             p_per_step=p_per_step,
@@ -315,7 +315,7 @@ function run_simulation(
                         overwrite_sigma=sigma_vpm_overwrite,
                         omit_shedding=omit_shedding)
 
-            shed_wake_panel(body, PFIELD, DT, sim.nt;
+            shed_wake_panel(body, Vinf, PFIELD, DT, sim.nt; t=T,
                                 unsteady_shedcrit=unsteady_shedcrit,
                                 shed_starting=shed_starting,
                                 p_per_step=p_per_step,
