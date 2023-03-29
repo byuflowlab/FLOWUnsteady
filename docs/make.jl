@@ -68,6 +68,7 @@ makedocs(
                                     "(6) Viz and Postprocessing" => [
                                                                 "api/flowunsteady-postprocessing-fdom.md",
                                                                 "api/flowunsteady-postprocessing-noise.md",
+                                                                "api/flowunsteady-postprocessing-misc.md",
                                                                 ],
                                     "Extras" => [
                                                 "FLOWVPM"  => [

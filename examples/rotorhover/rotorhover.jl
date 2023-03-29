@@ -46,7 +46,7 @@ n               = 50
 nsteps_per_rev  = 360
 p_per_step      = 2
 sigma_rotor_surf= R/80
-sigmafactor_vpmonvlm = 5.0
+sigmafactor_vpmonvlm = 5.5
 shed_starting   = true
 suppress_fountain    = false
 vpm_integration = vpm.rungekutta3
@@ -407,5 +407,5 @@ end
 
 # ------------- 6) POSTPROCESSING ----------------------------------------------
 
-# # Post-process monitor plots
-# include(joinpath(uns.examples_path, "heavingwing", "heavingwing_postprocessing.jl"))
+# Post-process monitor plots
+# include(joinpath(uns.examples_path, "rotorhover", "rotorhover_postprocessing.jl"))
