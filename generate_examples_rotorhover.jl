@@ -55,7 +55,7 @@ open(joinpath(output_path, output_name*"-aero.md"), "w") do fout
     | `nsteps_per_rev` | `36` | `72` | `360` | Time steps per revolution |
     | `p_per_step` | `4` | `2` | `2` | Particle sheds per time step |
     | `sigma_rotor_surf` | `R/10` | `R/10` | `R/80` | Rotor-on-VPM smoothing radius |
-    | `sigmafactor_vpmonvlm` | `1.0` | `1.0` | `5.0` | Shrink particles by this factor when calculating VPM-on-VLM/Rotor induced velocities |
+    | `sigmafactor_vpmonvlm` | `1.0` | `1.0` | `5.5` | Shrink particles by this factor when calculating VPM-on-VLM/Rotor induced velocities |
     | `shed_starting` | `false` | `false` | `true` | Whether to shed starting vortex |
     | `suppress_fountain` | `true` | `true` | `false` | Whether to suppress hub fountain effect |
     | `vpm_integration` | `vpm.euler` | RK3``^\\star`` | RK3``^\\star`` | VPM time integration scheme |
@@ -66,6 +66,30 @@ open(joinpath(output_path, output_name*"-aero.md"), "w") do fout
     * ``^\\ddag``*Dynamic:* `vpm_SFS = vpm.SFS_Cd_twolevel_nobackscatter`
 
 
+    ```@raw html
+    <br>
+
+    <center><b>Spatial discretization</b></center>
+    
+    <table>
+        <tr>
+            <td>
+                <img src="$(remote_url)/singlerotor-particlescomp-midlow-00.png" alt="Pic here" style="width:100%;"/>
+            </td>
+            <td>
+                <img src="$(remote_url)/singlerotor-particlescomp-midhigh-00.png" alt="Pic here" style="width:100%;"/>
+            </td>
+            <td>
+                <img src="$(remote_url)/singlerotor-particlescomp-high-03.png" alt="Pic here" style="width:100%;"/>
+            </td>
+        </tr>
+            <tr>
+                <th><center>Mid-Low</center></th>
+                <th><center>Mid-High</center></th>
+                <th><center>High</center></th>
+            </tr>
+    </table>
+    ```
 
     ```@raw html
     <br>
@@ -104,7 +128,7 @@ open(joinpath(output_path, output_name*"-aero.md"), "w") do fout
     <span style="font-size: 0.9em; color:gray;"><i>
         Mid-low fidelity runtime: ~7 minutes on a 16-core AMD EPYC 7302 processor. <br>
         Mid-high fidelity runtime: ~60 minutes on a 16-core AMD EPYC 7302 processor. <br>
-        High fidelity runtime: ~14 hours on a 64-core AMD EPYC 7702 processor.
+        High fidelity runtime: ~23 hours on a 64-core AMD EPYC 7702 processor.
     </i></span>
     <br><br>
     ```
@@ -173,7 +197,35 @@ open(joinpath(output_path, output_name*"-aero.md"), "w") do fout
         high-fidelity simulation.
 
 
+    In [examples/rotorhover/rotorhover_postprocess.jl](https://github.com/byuflowlab/FLOWUnsteady/blob/master/examples/rotorhover/rotorhover_postprocess.jl)
+    we show how to postprocess the simulations to compare ``C_T`` and blade
+    loading to experimental data by Zawodny & Boyd[^1] and a URANS simulation
+    (STAR-CCM+) by Schenk[^2]:
 
+    ```@raw html
+    <center>
+        <img src="$(remote_url)/dji9443-CTcomparison.png" alt="Pic here" style="width:75%;"/>
+        <img src="$(remote_url)/dji9443-loadingcomparison.png" alt="Pic here" style="width:75%;"/>
+    </center>
+    ```
+
+    |                           | ``C_T``   | Error |
+    | ------------------------: | :-------: | :---: |
+    | Experimental              | 0.072     | --    |
+    | URANS                     | 0.071     | < 1%  |
+    | rVPM -- high fidelity     | 0.074     | 3%    |
+    | rVPM -- mid-high fidelity | 0.066     | 8%    |
+    | rVPM -- mid-low fidelity  | 0.064     | 11%   |
+    | BEMT (quasi-steady)       | 0.073     | 2%    |
+
+    [^1]: N. S. Zawodny, D. D. Boyd, Jr., and C. L. Burley, “Acoustic
+        Characterization and Prediction of Representative, Small-scale
+        Rotary-wing Unmanned Aircraft System Components,” in
+        *72nd American Helicopter Society (AHS) Annual Forum* (2016).
+
+    [^2]: A. R. Schenk, "Computational Investigation of the Effects of
+        Rotor-on-Rotor Interactions on Thrust and Noise," Masters thesis,
+        *Brigham Young University* (2020).
 
 
     !!! info "Hub/Tip Loss Correction"
