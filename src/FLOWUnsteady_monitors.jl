@@ -668,6 +668,7 @@ function generate_monitor_Cd(; save_path=nothing, run_name="",
 
         ax = axs[2]
         ax.set_xlabel("Simulation time")
+        ax.set_ylim([0, 1])
         ax.set_ylabel(L"Ratio of $C_d$-zeroes"*
                         L" $\frac{n_\mathrm{zeroes}}{n_\mathrm{particles}}$")
 
