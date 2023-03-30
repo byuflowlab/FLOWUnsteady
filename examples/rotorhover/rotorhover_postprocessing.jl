@@ -19,7 +19,7 @@ sims_path = "/home/edoalvar/Dropbox/WhisperAero/LabNotebook/202303/data"
 
 # Simulations to plot
 sims_to_plot = [ # run_name, style, color, alpha, label
-                ("rotorhover-example-high00", "-", "dodgerblue", 1.0, "rVPM - high fidelity")
+                ("rotorhover-example-high02", "-", "dodgerblue", 1.0, "rVPM - high fidelity")
                 ("rotorhover-example-midhigh00", "--", "dodgerblue", 0.5, "rVPM - mid-high fidelity")
                 ("rotorhover-example-midlow01", ":", "dodgerblue", 0.5, "rVPM - mid-low fidelity")
               ]
@@ -35,8 +35,8 @@ xlims, dx = [[0, 10], 2]
 ylims, dy = [[0.04, 0.13], 0.02]
 
 # ------------ PLOT EXPERIMENTAL (Zawodny & Boyd 2016) -------------------------
-CTexp     = 0.07193                         # Experimental average CT
-CTstdexp  = 0.00177                         # Experimental CT std
+CTexp     = 0.072                         # Experimental average CT
+CTstdexp  = 0.0018                        # Experimental CT std
 
 ax.plot(xlims, CTexp*ones(2), ":", color="black", label="Experimental")
 ax.fill_between(xlims, CTexp*ones(2) .+ CTstdexp,
@@ -45,17 +45,24 @@ ax.fill_between(xlims, CTexp*ones(2) .+ CTstdexp,
 
 # ------------ PLOT URANS SIMULATION (Schenk 2020) -----------------------------
 data_path = joinpath(uns.examples_path, "..", "docs", "resources", "data")
-
 data = CSV.read(joinpath(data_path, "dji9443-Austins-RANS_Thrust_new01.csv"), DataFrame)
 
-ax.plot(data[!, 1]*5400/60, data[!, 2]/(1.071778*(5400/60)^2*240e-3^4), "-",
+urans_factor = 1/(1.071778*(5400/60)^2*240e-3^4)
+
+ax.plot(data[!, 1]*5400/60, data[!, 2]*urans_factor, "-",
                    color="darkred", alpha=1.0, linewidth=1.0, label="URANS")
+
+CTurans_mean = uns.mean(data[end-100:end, 2])*urans_factor
+CTurans_std  = sqrt(uns.mean((data[end-100:end, 2]*urans_factor .- CTurans_mean).^2))
 
 # ------------ PLOT FLOWUnsteady SIMULATIONS -----------------------------------
 nrotors = 1                 # Number of rotors
 coli    = 1                 # Column to plot (1==CT, 2==CQ, 3==eta)
+nrevs_to_average = 1        # Number of revolutions to average
 
 nsteps_per_rev = Dict()
+CTmean = Dict()
+CTstd = Dict()
 
 for (run_name, stl, clr, alpha, lbl) in sims_to_plot
 
@@ -68,6 +75,14 @@ for (run_name, stl, clr, alpha, lbl) in sims_to_plot
 
     # Calculate nsteps_per_rev
     nsteps_per_rev[run_name] = ceil(Int, 360 / (simdata[2, 1] - simdata[1, 1]))
+
+    # Calculate mean CT and std dev
+    roti = 1                # Rotor to average
+    nsteps_to_average = nrevs_to_average*nsteps_per_rev[run_name]
+    data_to_average = simdata[end-nsteps_to_average:end, 3 + (roti-1)*4 + 1+coli]
+
+    CTmean[run_name] = uns.mean(data_to_average)
+    CTstd[run_name] = sqrt(uns.mean((data_to_average .- CTmean[run_name]).^2))
 
 end
 
@@ -94,6 +109,19 @@ fig.savefig("dji9443-CTcomparison.png", dpi=300, transparent=true)
 
 
 
+# Compare statistics
+str = """
+|                          | ``C_T`` mean  | Error |
+| -----------------------: | :-----------: | :---- |
+| Experimental             |     $(CTexp)     |   --  |
+| URANS                    |     $(round(CTurans_mean, digits=3))    |  $(round(100*abs(CTurans_mean-CTexp)/CTexp, digits=1))% |
+"""
+for (run_name, _, _, _, lbl) in sims_to_plot
+    nspaces = max(24 - length(lbl), 0)
+    global str *= "| $(lbl)$(" "^nspaces) |     $(round(CTmean[run_name], digits=3))    | $(round(100*abs(CTmean[run_name]-CTexp)/CTexp, digits=1))% |\n"
+end
+
+println(str)
 
 ################################################################################
 #   Blade loading
