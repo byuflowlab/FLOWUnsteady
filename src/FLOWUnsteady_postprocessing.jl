@@ -167,3 +167,87 @@ function postprocess_bladeloading(read_path;
 
     return rs, Gamma, Np, Tp, Rp, _Ftot_axis, Rhat, That, Ftot
 end
+
+"""
+    generate_preprocessing_fluiddomain_pfield(maxsigma, maxmagGamma;
+                                                    verbose=true, v_lvl=1)
+
+Generate function for pre-processing particle fields before generating fluid
+domain: shrink oversized particles and correct blown-up particles.
+
+Pass the output function to [`FLOWUnsteady.computefluiddomain`](@ref) through
+the keyword argument `userfunction_pfield`. For example:
+```julia
+preprocess_pfield = generate_preprocessing_fluiddomain_pfield(maxsigma, maxmagGamma;
+                                                                verbose=true, v_lvl=1)
+
+computefluiddomain( ... ; userfunction_pfield=preprocess_pfield, ...)
+```
+"""
+function generate_preprocessing_fluiddomain_pfield(maxsigma, maxmagGamma; verbose=true, v_lvl=1)
+
+
+    function preprocessing(pfield, args...; optargs...)
+
+        count_sigma, count_nan, count_Gamma = 0, 0, 0
+        mean_sigma, mean_Gamma = 0.0, 0.0
+
+        for P in vpm.iterate(pfield; include_static=true)
+
+            # Check for large sigma
+            if P.sigma[1] > maxsigma
+                mean_sigma += P.sigma[1]
+                P.sigma[1] = maxsigma
+                count_sigma += 1
+            end
+
+            # Check for Gamma with NaN value
+            nangamma = !prod(isnan.(P.Gamma) .== false)
+            if nangamma
+                P.Gamma .= 1e-12
+                count_nan += 1
+            end
+
+            # Check for blown-up Gamma
+            magGamma = norm(P.Gamma)
+            if magGamma > maxmagGamma
+                P.Gamma *= maxmagGamma / magGamma
+                mean_Gamma += magGamma
+                count_Gamma += 1
+            end
+
+            # Makes sure that the minimum Gamma is different than zero
+            if magGamma < 1e-14
+                P.Gamma .+= 1e-14
+            end
+
+            if isnan(magGamma)
+                @warn "NaN found in mean_Gamma! The simulation is likely blown up"
+                @show count_sigma
+                @show count_Gamma
+                @show count_nan
+            end
+
+        end
+        mean_sigma /= count_sigma
+        mean_Gamma /= count_Gamma
+
+        if verbose
+
+            if count_sigma != 0
+                println("\t"^(v_lvl)*"Shrunk $(count_sigma) particles."*
+                        " Average sigma of shrunk particles: $(mean_sigma)")
+            end
+            if count_nan != 0
+                println("\t"^(v_lvl)*"Found and corrected $(count_nan) NaN values.")
+            end
+            if count_Gamma != 0
+                println("\t"^(v_lvl)*"Reset $(count_Gamma) particle strengths."*
+                        " Average magGamma of reset particles: $(mean_Gamma)")
+            end
+
+        end
+    end
+
+    return preprocessing
+end
