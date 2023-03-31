@@ -311,7 +311,7 @@ open(joinpath(output_path, output_name*"-aero.md"), "w") do fout
         top of this page is available here:
         [LINK](https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/singlerotor-monitors-particles11.pvsm)
         (`right click → save as...`).
-        
+
         To open in Paraview: `File → Load State → (select .pvsm file)` then
         select "Search files under specified directory" and point it to the
         folder where the simulation was saved.
@@ -361,29 +361,57 @@ open(joinpath(output_path, output_name*"-fdom.md"), "w") do fout
     println(fout, """
     # Fluid Domain
 
+    ```@raw html
+    <center>
+      <img src="$(remote_url)/dji9443-fdom00.jpeg" alt="Pic here" style="width: 75%;"/>
+    </center>
+    ```
+
+    ```@raw html
+    <br>
+    ```
+
+    The full fluid domain can be computed in a postprocessing step from the
+    particle field.
+    This is possible because the particle field
+    [is a radial basis function](@ref particlediscretization) that
+    constructs the vorticity field, and the velocity field can be recovered from
+    vorticity through the Biot-Savart law.
+
+    Here we show how to use [`uns.computefluiddomain`](@ref) to read a
+    simulation and process it to generate its fluid domain.
     """)
 
-    # println(fout, "```julia")
-    #
-    # open(joinpath(example_path, "rotorhover.jl"), "r") do fin
-    #     for l in eachline(fin)
-    #         if contains(l, "6) POSTPROCESSING")
-    #             break
-    #         end
-    #
-    #         println(fout, l)
-    #     end
-    # end
-    #
-    # println(fout, "```")
+    println(fout, "```julia")
 
-    # println(fout, """
-    # ```@raw html
-    # <span style="font-size: 0.9em; color:gray;"><i>
-    #     Run time: ~2 minutes on a Dell Precision 7760 laptop.
-    # </i></span>
-    # <br><br>
-    # ```
-    # """)
+    open(joinpath(example_path, "rotorhover_fluiddomain.jl"), "r") do fin
+
+        for l in eachline(fin)
+            if !contains(l, "@__FILE__") && !contains(l, "# Copy this driver file")
+                println(fout, l)
+            end
+        end
+
+    end
+
+    println(fout, "```")
+
+    println(fout, """
+    ```@raw html
+    <span style="font-size: 0.9em; color:gray;"><i>
+        Run time: ~1 minute on a Dell Precision 7760 laptop.
+    </i></span>
+    <br><br>
+    ```
+    !!! info "Paraview Visualization"
+        The `.pvsm` file visualizing the simulation as shown at the
+        top of this page is available here:
+        [LINK](https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/dji9443-fdom03.pvsm)
+        (`right click → save as...`).
+
+        To open in Paraview: `File → Load State → (select .pvsm file)` then
+        select "Search files under specified directory" and point it to the
+        folder where the simulation was saved.
+    """)
 
 end

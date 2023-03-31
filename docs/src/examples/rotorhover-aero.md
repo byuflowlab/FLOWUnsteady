@@ -635,7 +635,7 @@ vlm.hubtiploss_correction_modprandtl
     top of this page is available here:
     [LINK](https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/singlerotor-monitors-particles11.pvsm)
     (`right click → save as...`).
-    
+
     To open in Paraview: `File → Load State → (select .pvsm file)` then
     select "Search files under specified directory" and point it to the
     folder where the simulation was saved.

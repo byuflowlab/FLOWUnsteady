@@ -38,7 +38,7 @@ Notice that casting the Navier-Stokes equation into this vorticity form gets rid
 Furthermore, this equation depends on ``\boldsymbol{\omega}`` alone since ``\bf{u}`` can be calculated directly from ``\boldsymbol{\omega} = \nabla \times \bf{u}`` through the Biot-Savart law.
 
 
-## Particle Discretization
+## [Particle Discretization](@id particlediscretization)
 
 The material derivative in Eq. (2) and the material-conservative nature of the vorticity makes the ``\boldsymbol{\omega}`` field especially well fit for a Lagrangian description.
 The unfiltered ``\boldsymbol{\omega}`` field is discretized with singular vortex particles of positions ``{\bf x}_p`` and coefficients ``\boldsymbol{\Gamma}_p`` (called *vortex strength*), approximating ``\boldsymbol{\omega}`` as
