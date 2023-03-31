@@ -74,12 +74,14 @@ of ``\boldsymbol\Gamma`` (arrows scaled by magnitude), thus forming the vortex l
 </center>
 ```
 
-This type of visualization has three advantages:
-* It clearly reveals the vortical structure (vortex lines) in a quick glimpse
-* One can envision the velocity field around the vortex lines using the right
+This type of visualization has four advantages:
+* It clearly **reveals the vortical structure** (vortex lines) in a quick glimpse
+* One can **envision the velocity field** around the vortex lines using the right
   hand rule (Biot-Savart law shown below)
 * Adding small points at the position of each particle gives us an idea of
-  the spatial resolution around vortices.
+  the **spatial resolution around vortices**
+* One can easily spot if the simulation is becoming numerically unstable since
+  **blown-up particles become giant arrows**
 
 ```@raw html
 <center>
