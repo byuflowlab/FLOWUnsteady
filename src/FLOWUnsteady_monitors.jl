@@ -33,6 +33,9 @@ here is defined as \$J=\\frac{u_\\infty}{n d}\$ with \
 for generating the color gradient).
 * Use `save_path` to indicate a directory where to save the plots. If so, it \
 will also generate a CSV file with \$C_T\$, \$C_Q\$, and \$\\eta\$.
+
+
+![image](http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/rotorhover-example-high02-singlerotor_convergence.png)
 """
 function generate_monitor_rotors( rotors::Array{vlm.Rotor, 1},
                                     J_ref::Real, rho_ref::Real, RPM_ref::Real,
@@ -575,6 +578,9 @@ Winckelamns' 1995 CTR report, "Some Progress in LES using the 3-D VPM".
 
 Use `save_path` to indicate a directory where to save the plots. If so, it
 will also generate a CSV file with ξ.
+
+Here is an example of this monitor:
+![image](http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/rotorhover-example-high02-singlerotorenstrophy.png)
 """
 function generate_monitor_enstrophy(; save_path=nothing, run_name="",
                                         out_figs=[],
@@ -644,6 +650,9 @@ values that were clipped to zero (not included in the mean).
 Use `save_path` to indicate a directory where to save the plots. If so, it
 will also generate a CSV file with the statistics of \$C_d\$ (particles whose
 coefficients have been clipped are ignored).
+
+Here is an example of this monitor:
+![image](http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/rotorhover-example-high02-singlerotorChistory.png)
 """
 function generate_monitor_Cd(; save_path=nothing, run_name="",
                                         out_figs=[],

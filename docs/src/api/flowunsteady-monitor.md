@@ -43,10 +43,10 @@ own user-defined monitors.
 
 ```@docs
 FLOWUnsteady.generate_monitor_statevariables
+FLOWUnsteady.generate_monitor_wing
+FLOWUnsteady.generate_monitor_rotors
 FLOWUnsteady.generate_monitor_enstrophy
 FLOWUnsteady.generate_monitor_Cd
-FLOWUnsteady.generate_monitor_rotors
-FLOWUnsteady.generate_monitor_wing
 FLOWUnsteady.concatenate
 ```
 
