@@ -12,13 +12,13 @@ import FLOWUnsteady: vpm, gt, dot, norm
 
 # --------------- INPUTS AND OUTPUTS -------------------------------------------
 # INPUT OPTIONS
-simulation_name = "rotorhover-example-high02"               # Simulation to read
+simulation_name = "rotorhover-example-midhigh00"               # Simulation to read
 read_path       = "/home/edoalvar/simulationdata202330/"*simulation_name # Where to read simulation from
 
 pfield_prefix   = "singlerotor_pfield"      # Prefix of particle field files to read
 staticpfield_prefix = "singlerotor_staticpfield" # Prefix of static particle field files to read
 
-nums            = [3330, 3599]              # Time steps to process
+nums            = [719]              # Time steps to process
 
 # OUTPUT OPTIONS
 save_path       = joinpath(read_path, "..", simulation_name*"-fdom")  # Where to save fluid domain

@@ -630,13 +630,13 @@ import FLOWUnsteady: vlm            # hide
 # Modified Prandtl with a strong hub correction
 vlm.hubtiploss_correction_modprandtl
 ```
-!!! info "Paraview Visualization"
+!!! info "ParaView Visualization"
     The `.pvsm` file visualizing the simulation as shown at the
     top of this page is available here:
     [LINK](https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/singlerotor-monitors-particles11.pvsm)
     (`right click → save as...`).
 
-    To open in Paraview: `File → Load State → (select .pvsm file)` then
+    To open in ParaView: `File → Load State → (select .pvsm file)` then
     select "Search files under specified directory" and point it to the
     folder where the simulation was saved.
 

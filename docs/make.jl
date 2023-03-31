@@ -47,8 +47,8 @@ makedocs(
                                                       ],
                                     "examples/blownwing.md",
                                     "examples/vahana.md",
-                                    "Visualization" => "visualization.md",
-                                   ],
+                                    ],
+                "Visualization" => "visualization.md",
                 "Theory"        => [
                                     "theory/rvpm.md"
                                     "theory/convergence.md"

@@ -357,9 +357,9 @@ If the issue still persists, please
   * [x] Citing guide
 
 
-  * [ ] Compare results (CT, loading, and viz) with different fidelities vs BEMT vs RANS
+  * [x] Compare results (CT, loading, and viz) with different fidelities vs BEMT vs RANS
   * [ ] Rotor noise
-  * [ ] Visualization guide
+  * [x] Visualization guide
       * [ ] Changing ParaView ugly default color
   * [x] Cd monitor: Typically you can run one simulation with the dynamic
           coeff, write down the mean Cd, then switch to the static model coeff
