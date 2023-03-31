@@ -437,8 +437,19 @@ end
 """
 Returns the velocity induced by particle field on every position `Xs`
 """
-# function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs::AbstractArray; static_particles_fun=(args...)->nothing, dt=0, fsgm=1)
-function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs; static_particles_fun=(args...)->nothing, dt=0, fsgm=1)
+function Vvpm_on_Xs(pfield, Xs; optargs...)
+
+    Vvpm = [zeros(3) for i in 1:length(Xs)]
+
+    Vvpm_on_Xs!(Vvpm, pfield, Xs; optargs...)
+
+    return Vvpm
+end
+
+function Vvpm_on_Xs!(Vvpm, pfield::vpm.ParticleField, Xs; static_particles_fun=(args...)->nothing, dt=0, fsgm=1)
+
+    @assert length(Vvpm) == length(Xs) ""*
+        "Vvpm and Xs do not have the same length ($(length(Vvpm)) != $(length(Xs)))"
 
     if length(Xs)!=0 && vpm.get_np(pfield)!=0
         # Omit freestream
@@ -470,7 +481,9 @@ function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs; static_particles_fun=(args...
         pfield.UJ(pfield)
 
         # Retrieve velocity at probes
-        Vvpm = [Array(P.U) for P in vpm.iterator(pfield; start_i=sta_np+1)]
+        for (V, P) in zip(Vvpm, vpm.iterator(pfield; start_i=sta_np+1))
+            V .= P.U
+        end
 
         # Remove static particles and probes
         for pi in vpm.get_np(pfield):-1:(org_np+1)
@@ -487,10 +500,15 @@ function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs; static_particles_fun=(args...
         # Restore freestream
         pfield.Uinf = Uinf
     else
-        Vvpm = [zeros(3) for i in 1:length(Xs)]
+        for V in Vvpm
+            V .= 0
+        end
     end
 
     return Vvpm
 end
+#
+# add_probe(pfield::vpm.ParticleField, X) = vpm.add_particle(pfield, X, zeros(3), 1e-6; vol=0)
 
-add_probe(pfield::vpm.ParticleField, X) = vpm.add_particle(pfield, X, zeros(3), 1e-6; vol=0)
+const zeros3 = zeros(3)
+add_probe(pfield::vpm.ParticleField, X) = vpm.add_particle(pfield, X, zeros3, 1e-12; vol=0)
