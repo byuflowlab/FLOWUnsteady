@@ -24,7 +24,7 @@ GeometricTools = "2.1.6"
 FLOWVPM = "3.0.1"
 FLOWVLM = "2.1.2"
 FLOWNoise = "2.3.1"
-BPM = "2.0.0"
+BPM = "2.0.1"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
