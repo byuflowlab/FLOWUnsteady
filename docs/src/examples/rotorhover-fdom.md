@@ -130,12 +130,32 @@ end
 <span style="font-size: 0.9em; color:gray;"><i>
     Run time: ~1 minute on a Dell Precision 7760 laptop.
 </i></span>
+
 <br><br>
 ```
+
+
+```@raw html
+<center>
+    <b>Mid-High Fidelity</b>
+    <br>
+    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//rotorhover-example-midhigh00-wvol00.png" alt="Pic here" style="width: 75%;"/>
+    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//rotorhover-example-midhigh00-wy00.png" alt="Pic here" style="width: 75%;"/>
+    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//rotorhover-example-midhigh00-ux00.png" alt="Pic here" style="width: 75%;"/>
+    <br><br><br>
+    <b>High Fidelity</b>
+    <br>
+    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//rotorhover-example-high02-wvol00.png" alt="Pic here" style="width: 75%;"/>
+    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//rotorhover-example-high02-wy00.png" alt="Pic here" style="width: 75%;"/>
+    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//rotorhover-example-high02-ux00.png" alt="Pic here" style="width: 75%;"/>
+</center>
+```
 !!! info "ParaView Visualization"
-    The `.pvsm` file visualizing the simulation as shown at the
-    top of this page is available here:
-    [LINK](https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/dji9443-fdom03.pvsm)
+    The `.pvsm` files visualizing the fluid domain as shown above are
+    available in the following links
+    * High fidelity: [LINK](https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//dji9443-fdom-high02.pvsm)
+    * Mid-high fidelity: [LINK](https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//dji9443-fdom-midhigh00.pvsm)
+
     (`right click → save as...`).
 
     To open in ParaView: `File → Load State → (select .pvsm file)` then

@@ -1,4 +1,4 @@
-# Variable Fidelity
+# [Variable Fidelity](@id rotorhoveraero)
 
 ```@raw html
 <div style="position:relative;padding-top:50%;">
@@ -10,7 +10,7 @@
 </div>
 ```
 
-While propeller simulations tend to be numerically well behaved, hover cases
+While propeller simulations tend to be numerically well behaved, a hover case
 can pose multiple numerical challenges.
 The rotation of blades in static air drives a strong axial flow that is
 solely caused by the shedding of tip vortices.
@@ -25,15 +25,15 @@ demonstrate some of the advanced features of FLOWUnsteady that make it
 robust and accurate in resolving turbulent mixing:
 
 * [Subfilter scale (SFS) model](@ref sfsmodel) of turbulence related to vortex stretching
-* How to generate a monitor of dynamic SFS model coefficient
+* How to monitor the dynamic SFS model coefficient with
     [`uns.generate_monitor_Cd`](@ref)
-* How to generate a monitor of global flow enstrophy with
-    [`uns.generate_monitor_enstrophy`](@ref) to track numerical stability
+* How to monitor the global flow enstrophy with
+    [`uns.generate_monitor_enstrophy`](@ref) and track numerical stability
 * Defining a wake treatment procedure to suppress initial hub wake, avoiding
     hub fountain effects and accelerating convergence
 * Defining hub and tip loss corrections
 
-Also, in this example you can vary the fidelity of the simulation with the
+Also, in this example you can vary the fidelity of the simulation setting the
 following parameters:
 
 | Parameter | Mid-low fidelity | Mid-high fidelity | High fidelity | Description |
@@ -56,25 +56,24 @@ following parameters:
 ```@raw html
 <br>
 
-<center><b>Spatial discretization</b></center>
-
 <table>
     <tr>
         <td>
             <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//singlerotor-particlescomp-midlow-00.png" alt="Pic here" style="width:100%;"/>
+            <br>
+            <center><b>Mid-Low</b><br>70k particles<br>~7 mins.</center>
         </td>
         <td>
             <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//singlerotor-particlescomp-midhigh-00.png" alt="Pic here" style="width:100%;"/>
+            <br>
+            <center><b>Mid-High</b><br>200k particles<br>~60 mins.</center>
         </td>
         <td>
             <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//singlerotor-particlescomp-high-03.png" alt="Pic here" style="width:100%;"/>
+            <br>
+            <center><b>High</b><br>1M particles<br>~30 hrs.</center>
         </td>
     </tr>
-        <tr>
-            <th><center>Mid-Low</center></th>
-            <th><center>Mid-High</center></th>
-            <th><center>High</center></th>
-        </tr>
 </table>
 ```
 
@@ -476,8 +475,8 @@ indefinitely stable.
 ```
 
 The SFS model uses a [dynamic procedure](@ref sfsmodel) to compute its own
-model coefficient ``C_d`` as the simulation evolves. This model coefficient
-has a different value for each particle in space and time.
+model coefficient ``C_d`` as the simulation evolves. The value of the model
+coefficient varies for each particle in space and time.
 The ``C_d``-monitor shown below plots the mean value from all the
 particle in the field that have a non-zero ``C_d`` (left), and also the ratio of the
 number of particles that got clipped to a zero ``C_d`` over the total number of
@@ -494,7 +493,7 @@ particles (right).
 !!! info "Prescribing the Model Coefficient"
     The SFS model helps the simulation to more accurately capture
     the effects of turbulence from the scales that are not resolved,
-    but it comes with a computational cost.
+    but it adds computational cost.
     The following table summarizes the cost of the rVPM, the SFS model,
     and the ``C_d`` dynamic procedure.
     ![pic](https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//rvpmsfs-benchmark02.png)
@@ -522,7 +521,7 @@ particles (right).
 
 In [examples/rotorhover/rotorhover_postprocess.jl](https://github.com/byuflowlab/FLOWUnsteady/blob/master/examples/rotorhover/rotorhover_postprocess.jl)
 we show how to postprocess the simulations to compare ``C_T`` and blade
-loading to experimental data by Zawodny & Boyd[^1] and a URANS simulation
+loading to experimental data by Zawodny *et al*.[^1] and a URANS simulation
 (STAR-CCM+) by Schenk[^2]:
 
 ```@raw html
@@ -633,7 +632,7 @@ vlm.hubtiploss_correction_modprandtl
 !!! info "ParaView Visualization"
     The `.pvsm` file visualizing the simulation as shown at the
     top of this page is available here:
-    [LINK](https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/singlerotor-monitors-particles11.pvsm)
+    [LINK](https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//singlerotor-monitors-particles11.pvsm)
     (`right click → save as...`).
 
     To open in ParaView: `File → Load State → (select .pvsm file)` then

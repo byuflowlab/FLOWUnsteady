@@ -334,7 +334,7 @@ If the issue still persists, please
     * [ ] List of publications
     * [x] Brief theory
   * [x] Installation instructions
-  * [ ] Visualization Guidelines
+  * [x] Visualization Guidelines
   * [ ] Numerical recommendations notebook
   * [ ] Examples
     * [x] Simple wing

@@ -42,8 +42,9 @@ makedocs(
                                                       ],
                                     "Rotor in Hover" => [
                                                         "examples/rotorhover-aero.md",
-                                                        "Aeroacoustics" => "examples/rotorhover-acoustics.md",
                                                         "examples/rotorhover-fdom.md",
+                                                        "Aeroacoustics" => "examples/rotorhover-acoustics.md",
+                                                        "examples/rotorhover-quasisteady.md",
                                                       ],
                                     "examples/blownwing.md",
                                     "examples/vahana.md",
