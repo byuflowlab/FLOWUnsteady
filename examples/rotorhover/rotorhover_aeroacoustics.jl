@@ -1,67 +1,21 @@
-# [Aeroacoustic Noise](@id rotorhovernoise)
+#=##############################################################################
+# Description
+    Computes aeroacoustic noise of DJI 9443 simulation and compares results to
+    experimental data
+=###############################################################################
 
-```@raw html
-<center>
-    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//dji9443_ccblade01_1.gif" alt="Pic here" style="width:75%;"/>
-</center>
-```
-
-Using the aerodynamic solution obtained in the previous section, we can now
-feed the time-resolved loading and blade motion to PSU-WOPWOP and
-[BPM.jl](https://github.com/byuflowlab/BPM.jl) to compute aeroacoustic
-noise.
-PSU-WOPWOP is a Ffowcs Williams-Hawkings acoustic analogy using the
-time-domain integral Farassat 1A formulation to compute **tonal noise** from
-loading and thickness sources (FLOWUnsteady uses a compact representation
-for the loading source, while using the actual 3D loft of the blade for the
-thickness source).
-[BPM.jl](https://github.com/byuflowlab/BPM.jl) is an implementation of the
-semi-empirical methodology developed by Brooks, Pope, and Marcolini to
-predict **broadband noise**.
-The methodology models five self-noise mechanisms due to boundary-layer
-phenomena: boundary-layer turbulence passing the trailing edge, separated
-boundary-layer and stalled-airfoil flow, vortex shedding due to
-laminar-boundary-layer instabilities, vortex shedding from blunt trailing
-edges, and turbulent flow due to vortex tip formation.
-
-In the following code we exemplify the following:
-* How to define observers (microphones) to probe the aeroacoustic noise
-* How to call PSU-WOPWOP through [`uns.run_noise_wopwop`](@ref)
-* How to call BPM.jl through [`uns.run_noise_bpm`](@ref)
-* How to add the tonal and broadband noise together and postprocess
-
-As a reference, this is the orientation of the rotor and microphone array
-used in this example:
-
-
-```@raw html
-<center>
-    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//ransnoise_dji9443_single_new01_00_2.gif" alt="Pic here" style="width:50%;"/>
-</center>
-```
-
-!!! info "PSU-WOPWOP"
-    PSU-WOPWOP is a closed-source code that is not included in FLOWUnsteady,
-    but is graciously made available as a binary by its developers at
-    Penn State University upon inquiry. We recommend contacting them
-    directly to obtain a binary.
-
-    FLOWUnsteady has been tested with PSU-WOPWOP v3.4.4.
-
-```julia
-
-```
+#=##############################################################################
 # Preamble
 
 We load FLOWUnsteady and the `FLOWUnsteady.noise` module:
-```julia
+=###############################################################################
 import FLOWUnsteady as uns
 import FLOWUnsteady: gt, vlm, noise
 
 # Path where to read and save simulation data
 sims_path = "/media/edoalvar/T7/simulationdata202304"
 
-```
+#=##############################################################################
 # Tonal Noise
 
 First, we calculate the tonal noise from loading and thickness sources.
@@ -74,7 +28,7 @@ These files are read calling [`uns.run_noise_wopwop`](@ref), which converts
 the outputs of the aero solution into a PSU-WOPWOP case. The PSU-WOPWOP binary
 is then called to read the case and propagate the noise to a set of observers
 (microphones). The PSU-WOPWOP solution is then written to the same case folder.
-```julia
+=###############################################################################
 # Path from where to read aerodynamic solution
 read_path       = joinpath(sims_path, "rotorhover-example-midhigh00") # <-- This must point to you aero simulation
 
@@ -192,7 +146,7 @@ microphoneX     = nothing              # Comment and uncomment this to switch fr
                             case_name="runcase",            # Name of case to create and run
                             );
 
-```
+#=
 ```@raw html
 <span style="font-size: 0.9em; color:gray;"><i>
     Run time: ~1 minute on a Dell Precision 7760 laptop.
@@ -229,7 +183,7 @@ files that we gave to PSU-WOPWOP back to VTK and visualize them in ParaView.
 This helps verify that we are passing the right things to PSU-WOPWOP. The
 following lines grab those input files that are formated for PSU-WOPWOP,
 converts them into VTK files, and opens them in ParaView:
-```julia
+=#
 
 read_ww_path   = joinpath(save_ww_path, "runcase")      # Path to PWW's input files
 save_vtk_path  = joinpath(read_ww_path, "vtks")         # Where to save VTK files
@@ -242,12 +196,12 @@ println("Generated the following files:\n\t$(vtk_str)")
 # Call Paraview to visualize VTKs
 run(`paraview --data=$(vtk_str)`)
 
-```
+#=##############################################################################
 # Broadband Noise
 
 Now, we calculate the broadband noise from non-deterministic sources through
 BPM. This is done calling [`uns.run_noise_bpm`](@ref) as follows:
-```julia
+=###############################################################################
 # Path where to save BPM outputs
 save_bpm_path   = joinpath(sims_path, "rotorhover-example-midhigh00-bpm")
 
@@ -328,14 +282,14 @@ uns.run_noise_bpm(rotors, RPM, Vinf, rho, mu, speedofsound,
                                 prompt=true
                                 );
 
-```
+#=##############################################################################
 # Results
 
 Finally, we add tonal and broadband noise together and plot the results
 
 ### Read datasets
 We start by reading the outputs from PSU-WOPWOP and BPM:
-```julia
+=###############################################################################
 # Dataset to read and associated information
 dataset_infos = [ # (label, PWW solution, BPM solution, line style, color)
                     ("FLOWUnsteady",
@@ -352,10 +306,10 @@ noise.read_data(dataset_infos; datasets_pww=datasets_pww, datasets_bpm=datasets_
 
 println("Done!")
 
-```
+#=
 Also, we need to recreate the circular array of microphones that was used when
 generating the aeroacoustic solutions:
-```julia
+=#
 # These parameters will be used for plotting
 RPM          = 5400                  # RPM of solution
 nblades      = 2                     # Number of blades
@@ -379,18 +333,18 @@ grid = noise.observer_sphere(sph_R, sph_nR, sph_ntht, sph_nphi;
 # This function calculates the angle that corresponds to every microphone
 pangle(i) = -180/pi*atan(gt.get_node(grid, i)[1], gt.get_node(grid, i)[2])
 
-```
+#=
 ### Pressure waveform
 Here we plot the pressure waveform at some of the microphones.
 *This pressure waveform includes only the tonal component*, as given by
 PSU-WOPWOP.
-```julia
+=#
 microphones  = [-45, 90]            # (deg) microphones to plot
 
 noise.plot_pressure(dataset_infos, microphones, RPM, sph_ntht, pangle;
                                 datasets_pww=datasets_pww, xlims=[0, 5])
 
-```
+#=
 ```@raw html
 <center>
   <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/rotorhover_noise_1.png" alt="Pic here" style="width: 75%;"/>
@@ -409,7 +363,7 @@ Zawodny *et al*.[^1].
     *72nd American Helicopter Society (AHS) Annual Forum* (2016).
 
 One-third octave band:
-```julia
+=#
 microphones  = [-45]                # (deg) microphone to plot
 Aweighted    = false                # Plot A-weighted SPL
 onethirdoctave = true               # Plot 1/3 octave band
@@ -427,7 +381,7 @@ noise.plot_spectrum_spl(dataset_infos, microphones, BPF, sph_ntht, pangle;
                           plot_csv=plot_experimental,
                           xBPF=false, xlims=[100, 3e4], ylims=[0, 80], BPF_lines=8)
 
-```
+#=
 ```@raw html
 <center>
   <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/rotorhover_noise_3.png" alt="Pic here" style="width: 75%;"/>
@@ -435,7 +389,7 @@ noise.plot_spectrum_spl(dataset_infos, microphones, BPF, sph_ntht, pangle;
 ```
 
 A-weighted narrow band:
-```julia
+=#
 Aweighted    = true                # Plot A-weighted SPL
 
 # Experimental data from Zawodny et al., Fig. 9
@@ -448,7 +402,7 @@ noise.plot_spectrum_spl(dataset_infos, microphones, BPF, sph_ntht, pangle;
                           Aweighted=Aweighted,
                           plot_csv=plot_experimental,
                           xBPF=false, xlims=[100, 3e4], BPF_lines=21)
-```
+#=
 ```@raw html
 <center>
   <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/rotorhover_noise_4.png" alt="Pic here" style="width: 75%;"/>
@@ -470,7 +424,7 @@ Here we plot only the tonal component of noise associated with harmonics of the
 blade passing frequency (BPF),
 
 Tonal SPL spectrum
-```julia
+=#
 Aweighted       = false
 add_broadband   = false
 
@@ -486,14 +440,14 @@ noise.plot_spectrum_spl(dataset_infos, microphones, BPF, sph_ntht, pangle;
                           add_broadband=add_broadband,
                           xBPF=false, xlims=[100, 3e4], BPF_lines=21)
 
-```
+#=
 ```@raw html
 <center>
   <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/rotorhover_noise_5.png" alt="Pic here" style="width: 75%;"/>
 </center>
 ```
 Directivity of ``1^\mathrm{st}`` BPF
-```julia
+=#
 BPFi = 1                 # Multiple of blade-passing frequency to plot
 
 # Experimental and computational data reported by Zawodny et al., Fig. 14
@@ -511,7 +465,7 @@ noise.plot_directivity_splbpf(dataset_infos, BPFi, BPF, pangle;
                                     plot_csv=plot_experimental,
                                     rticks=40:4:52, rlims=[40, 54], rorigin=36)
 
-```
+#=
 ```@raw html
 <center>
   <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/rotorhover_noise_6.png" alt="Pic here" style="width: 50%;"/>
@@ -519,7 +473,7 @@ noise.plot_directivity_splbpf(dataset_infos, BPFi, BPF, pangle;
 ```
 
 Directivity of ``2^\mathrm{nd}`` BPF
-```julia
+=#
 BPFi = 2                 # Multiple of blade-passing frequency to plot
 
 # Experimental and computational data reported by Zawodny et al., Fig. 14
@@ -537,7 +491,7 @@ noise.plot_directivity_splbpf(dataset_infos, BPFi, BPF, pangle;
                                     plot_csv=plot_experimental,
                                     rticks=15:5:30, rlims=[0, 32], rorigin=0)
 
-```
+#=
 ```@raw html
 <center>
   <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/rotorhover_noise_7.png" alt="Pic here" style="width: 50%;"/>
@@ -546,7 +500,7 @@ noise.plot_directivity_splbpf(dataset_infos, BPFi, BPF, pangle;
 
 ### OASPL directivity
 Unweighted overall SPL (OASPL)
-```julia
+=#
 Aweighted = false
 
 # Experimental and computational data reported by Zawodny et al., Fig. 12
@@ -561,7 +515,7 @@ noise.plot_directivity_oaspl(dataset_infos, pangle;
                                     plot_csv=plot_experimental,
                                     rticks=40:10:70, rlims=[40, 72], rorigin=30)
 
-```
+#=
 ```@raw html
 <center>
   <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/rotorhover_noise_8.png" alt="Pic here" style="width: 50%;"/>
@@ -569,7 +523,7 @@ noise.plot_directivity_oaspl(dataset_infos, pangle;
 ```
 
 A-weighted OASPL
-```julia
+=#
 Aweighted = true
 
 # Experimental and computational data reported by Zawodny et al., Fig. 12
@@ -583,11 +537,15 @@ noise.plot_directivity_oaspl(dataset_infos, pangle;
                                     Aweighted=Aweighted,
                                     plot_csv=plot_experimental,
                                     rticks=40:10:70, rlims=[40, 72], rorigin=30)
-```
+#=
 ```@raw html
 <center>
 <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/rotorhover_noise_9.png" alt="Pic here" style="width: 50%;"/>
 </center>
 ```
-```julia
-```
+=#
+# Save figures
+for fi in noise.plt.get_fignums()
+    fig = noise.plt.figure(fi)
+    fig.savefig("rotorhover_noise_$(fi).png", transparent=true, dpi=300)
+end

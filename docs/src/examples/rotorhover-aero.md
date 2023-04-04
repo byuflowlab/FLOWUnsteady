@@ -1,4 +1,4 @@
-# Variable Fidelity
+# [Variable Fidelity](@id rotorhoveraero)
 
 ```@raw html
 <div style="position:relative;padding-top:50%;">
@@ -10,32 +10,31 @@
 </div>
 ```
 
-While propeller simulations are numerically well behaved, a hover case
+While propeller simulations tend to be numerically well behaved, a hover case
 can pose multiple numerical challenges.
-The rotation of blades in static air drives a strong axial flow caused by
-the shedding of tip vortices.
-This is a challenging case to simulate since, in the absence of a
+The rotation of blades in static air drives a strong axial flow that is
+solely caused by the shedding of tip vortices.
+This is challenging to simulate since, in the absence of a
 freestream, the wake quickly becomes fully turbulent and breaks down as tip
 vortices leapfrog and mix close to the rotor.
 Thus, a rotor in hover is a good engineering application to showcase the
 numerical stability and accuracy of FLOWUnsteady.
 
 In this example we simulate a DJI rotor in hover, and we use this case to
-demonstrate some of the advanced features of FLOWUnsteady that makes it
-robust even in this challenging case:
+demonstrate some of the advanced features of FLOWUnsteady that make it
+robust and accurate in resolving turbulent mixing:
 
 * [Subfilter scale (SFS) model](@ref sfsmodel) of turbulence related to vortex stretching
-* Defining a wake treatment procedure to suppress hub wake at begining of
-    simulation in order to avoid hub fountain effects (due to impulsive start) and
-    accelerate convergence
-* Defining hub and tip loss corrections
-* How to generate a monitor of global flow enstrophy with
-    [`uns.generate_monitor_enstrophy`](@ref) to track numerical stability
-* How to generate a monitor of dynamic SFS model coefficient
+* How to monitor the dynamic SFS model coefficient with
     [`uns.generate_monitor_Cd`](@ref)
+* How to monitor the global flow enstrophy with
+    [`uns.generate_monitor_enstrophy`](@ref) and track numerical stability
+* Defining a wake treatment procedure to suppress initial hub wake, avoiding
+    hub fountain effects and accelerating convergence
+* Defining hub and tip loss corrections
 
-Also, in this example you can vary the fidelity of the simulation by
-setting the following parameters:
+Also, in this example you can vary the fidelity of the simulation setting the
+following parameters:
 
 | Parameter | Mid-low fidelity | Mid-high fidelity | High fidelity | Description |
 | :-------: | :--------------: | :---------------: | :-----------: | :---------- |
@@ -43,7 +42,7 @@ setting the following parameters:
 | `nsteps_per_rev` | `36` | `72` | `360` | Time steps per revolution |
 | `p_per_step` | `4` | `2` | `2` | Particle sheds per time step |
 | `sigma_rotor_surf` | `R/10` | `R/10` | `R/80` | Rotor-on-VPM smoothing radius |
-| `sigmafactor_vpmonvlm` | `1.0` | `1.0` | `5.0` | Shrink particles by this factor when calculating VPM-on-VLM/Rotor induced velocities |
+| `sigmafactor_vpmonvlm` | `1.0` | `1.0` | `5.5` | Expand particles by this factor when calculating VPM-on-VLM/Rotor induced velocities |
 | `shed_starting` | `false` | `false` | `true` | Whether to shed starting vortex |
 | `suppress_fountain` | `true` | `true` | `false` | Whether to suppress hub fountain effect |
 | `vpm_integration` | `vpm.euler` | RK3``^\star`` | RK3``^\star`` | VPM time integration scheme |
@@ -54,6 +53,29 @@ setting the following parameters:
 * ``^\ddag``*Dynamic:* `vpm_SFS = vpm.SFS_Cd_twolevel_nobackscatter`
 
 
+```@raw html
+<br>
+
+<table>
+    <tr>
+        <td>
+            <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//singlerotor-particlescomp-midlow-00.png" alt="Pic here" style="width:100%;"/>
+            <br>
+            <center><b>Mid-Low</b><br>70k particles<br>~7 mins.</center>
+        </td>
+        <td>
+            <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//singlerotor-particlescomp-midhigh-00.png" alt="Pic here" style="width:100%;"/>
+            <br>
+            <center><b>Mid-High</b><br>200k particles<br>~60 mins.</center>
+        </td>
+        <td>
+            <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//singlerotor-particlescomp-high-03.png" alt="Pic here" style="width:100%;"/>
+            <br>
+            <center><b>High</b><br>1M particles<br>~30 hrs.</center>
+        </td>
+    </tr>
+</table>
+```
 
 ```@raw html
 <br>
@@ -428,34 +450,34 @@ end
 <span style="font-size: 0.9em; color:gray;"><i>
     Mid-low fidelity runtime: ~7 minutes on a 16-core AMD EPYC 7302 processor. <br>
     Mid-high fidelity runtime: ~60 minutes on a 16-core AMD EPYC 7302 processor. <br>
-    High fidelity runtime: ~14 hours on a 64-core AMD EPYC 7702 processor.
+    High fidelity runtime: ~30 hours on a 16-core AMD EPYC 7302 processor.
 </i></span>
 <br><br>
 ```
 
-Here we show the rotor monitor for the high-fidelity case:
+Rotor monitor in the high-fidelity case:
 ```@raw html
 <center>
-    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//rotorhover-example16-singlerotor_convergence.png" alt="Pic here" style="width:100%;"/>
+    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//rotorhover-example-high02-singlerotor_convergence.png" alt="Pic here" style="width:100%;"/>
 </center>
 ```
 
 As the simulation runs, you will see the monitor shown below plotting the
-global enstrophy in the flow. The global enstrophy achieves a steady state
+global enstrophy of the flow. The global enstrophy achieves a steady state
 once the rate of enstrophy produced by the rotor eventually balances out
 with the forward scatter of the SFS turbulence model, making the simulation
 indefinitely stable.
 
 ```@raw html
 <center>
-    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//rotorhover-example16-singlerotorenstrophy.png" alt="Pic here" style="width:50%;"/>
+    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//rotorhover-example-high02-singlerotorenstrophy.png" alt="Pic here" style="width:50%;"/>
 </center>
 ```
 
 The SFS model uses a [dynamic procedure](@ref sfsmodel) to compute its own
-model coefficient ``C_d`` as the simulation evolves. This model coefficient
-has a different value for each particle in space and time.
-The ``C_d``-monitor shown below plots the average value from all the
+model coefficient ``C_d`` as the simulation evolves. The value of the model
+coefficient varies for each particle in space and time.
+The ``C_d``-monitor shown below plots the mean value from all the
 particle in the field that have a non-zero ``C_d`` (left), and also the ratio of the
 number of particles that got clipped to a zero ``C_d`` over the total number of
 particles (right).
@@ -463,15 +485,15 @@ particles (right).
 
 ```@raw html
 <center>
-    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//rotorhover-example16-singlerotorChistory.png" alt="Pic here" style="width:100%;"/>
+    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//rotorhover-example-high02-singlerotorChistory.png" alt="Pic here" style="width:100%;"/>
 </center>
 ```
 
 
 !!! info "Prescribing the Model Coefficient"
-    The SFS model helps the simulation more accurately capture
+    The SFS model helps the simulation to more accurately capture
     the effects of turbulence from the scales that are not resolved,
-    but it comes with a computational cost.
+    but it adds computational cost.
     The following table summarizes the cost of the rVPM, the SFS model,
     and the ``C_d`` dynamic procedure.
     ![pic](https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//rvpmsfs-benchmark02.png)
@@ -490,20 +512,48 @@ particles (right).
     ```julia
     vpm_SFS = vpm.ConstantSFS(vpm.Estr_fmm; Cs=value, clippings=[vpm.clipping_backscatter])
     ```
-    where `CS = value` is the value you are prescribing for the model
+    where `CS = value` is the value to prescribe for the model
     coefficient, and `clippings=[vpm.clipping_backscatter]` clips the
     backscatter of enstrophy (making it a purely diffusive model).
-    As a reference, in this hover case ``C_d`` converges to ``0.26`` in the
+    As a reference, in this hover case, ``C_d`` converges to ``0.26`` in the
     high-fidelity simulation.
 
 
+In [examples/rotorhover/rotorhover_postprocess.jl](https://github.com/byuflowlab/FLOWUnsteady/blob/master/examples/rotorhover/rotorhover_postprocess.jl)
+we show how to postprocess the simulations to compare ``C_T`` and blade
+loading to experimental data by Zawodny *et al*.[^1] and a URANS simulation
+(STAR-CCM+) by Schenk[^2]:
 
+```@raw html
+<center>
+    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//dji9443-CTcomparison.png" alt="Pic here" style="width:75%;"/>
+    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//dji9443-loadingcomparison.png" alt="Pic here" style="width:75%;"/>
+</center>
+```
+
+|                           | ``C_T``   | Error |
+| ------------------------: | :-------: | :---: |
+| Experimental              | 0.072     | --    |
+| URANS                     | 0.071     | 1%    |
+| rVPM -- high fidelity     | 0.073     | 1%    |
+| rVPM -- mid-high fidelity | 0.066     | 8%    |
+| rVPM -- mid-low fidelity  | 0.064     | 11%   |
+| BEMT (quasi-steady)       | 0.073     | 2%    |
+
+[^1]: N. S. Zawodny, D. D. Boyd, Jr., and C. L. Burley, “Acoustic
+    Characterization and Prediction of Representative, Small-scale
+    Rotary-wing Unmanned Aircraft System Components,” in
+    *72nd American Helicopter Society (AHS) Annual Forum* (2016).
+
+[^2]: A. R. Schenk, "Computational Investigation of the Effects of
+    Rotor-on-Rotor Interactions on Thrust and Noise," Masters thesis,
+    *Brigham Young University* (2020).
 
 
 !!! info "Hub/Tip Loss Correction"
-    In the rotor actuator line model, a hub and tip corrections can be
+    In the rotor actuator line model, hub and tip corrections can be
     applied to ``c_\ell`` to account for the effects that bring the
-    aerodynamic loading at hub and tip to zero.
+    aerodynamic loading to zero at the hub and tips.
     These correction factors, ``F_\mathrm{tip}`` and ``F_\mathrm{hub}``,
     are defined as modified Prandtl loss functions,
     ```math
@@ -579,4 +629,13 @@ import FLOWUnsteady: vlm            # hide
 # Modified Prandtl with a strong hub correction
 vlm.hubtiploss_correction_modprandtl
 ```
+!!! info "ParaView Visualization"
+    The `.pvsm` file visualizing the simulation as shown at the
+    top of this page is available here:
+    [LINK](https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//singlerotor-monitors-particles11.pvsm)
+    (`right click → save as...`).
+
+    To open in ParaView: `File → Load State → (select .pvsm file)` then
+    select "Search files under specified directory" and point it to the
+    folder where the simulation was saved.
 

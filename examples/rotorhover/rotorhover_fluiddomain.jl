@@ -1,26 +1,3 @@
-# [Fluid Domain](@id rotorfdom)
-
-```@raw html
-<center>
-  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//dji9443-fdom00.jpeg" alt="Pic here" style="width: 75%;"/>
-</center>
-```
-
-```@raw html
-<br>
-```
-
-The full fluid domain can be computed in a postprocessing step from the
-particle field.
-This is possible because the particle field
-[is a radial basis function](@ref particlediscretization) that
-constructs the vorticity field, and the velocity field can be recovered from
-vorticity through the Biot-Savart law.
-
-Here we show how to use [`uns.computefluiddomain`](@ref) to read a
-simulation and process it to generate its fluid domain.
-
-```julia
 #=##############################################################################
     Computes the fluid domain of DJI 9443 simulation using a volumetric domain.
     This is done probing the velocity and vorticity that the particle field
@@ -97,6 +74,8 @@ if save_path != read_path
     gt.create_path(save_path, prompt)
 end
 
+# Copy this driver file
+cp(@__FILE__, joinpath(save_path, splitdir(@__FILE__)[2]); force=true)
 
 # Generate function to process the field clipping particle sizes
 preprocessing_pfield = uns.generate_preprocessing_fluiddomain_pfield(maxsigma, maxmagGamma;
@@ -125,40 +104,3 @@ for these_nums in threaded_nums[nthread:nthread]
                                 verbose=verbose, v_lvl=v_lvl)
 
 end
-```
-```@raw html
-<span style="font-size: 0.9em; color:gray;"><i>
-    Run time: ~1 minute on a Dell Precision 7760 laptop.
-</i></span>
-
-<br><br>
-```
-
-
-```@raw html
-<center>
-    <b>Mid-High Fidelity</b>
-    <br>
-    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//rotorhover-example-midhigh00-wvol00.png" alt="Pic here" style="width: 75%;"/>
-    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//rotorhover-example-midhigh00-wy00.png" alt="Pic here" style="width: 75%;"/>
-    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//rotorhover-example-midhigh00-ux00.png" alt="Pic here" style="width: 75%;"/>
-    <br><br><br>
-    <b>High Fidelity</b>
-    <br>
-    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//rotorhover-example-high02-wvol00.png" alt="Pic here" style="width: 75%;"/>
-    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//rotorhover-example-high02-wy00.png" alt="Pic here" style="width: 75%;"/>
-    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//rotorhover-example-high02-ux00.png" alt="Pic here" style="width: 75%;"/>
-</center>
-```
-!!! info "ParaView Visualization"
-    The `.pvsm` files visualizing the fluid domain as shown above are
-    available in the following links
-    * High fidelity: [LINK](https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//dji9443-fdom-high02.pvsm)
-    * Mid-high fidelity: [LINK](https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//dji9443-fdom-midhigh00.pvsm)
-
-    (`right click → save as...`).
-
-    To open in ParaView: `File → Load State → (select .pvsm file)` then
-    select "Search files under specified directory" and point it to the
-    folder where the simulation was saved.
-

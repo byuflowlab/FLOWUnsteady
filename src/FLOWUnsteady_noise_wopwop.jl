@@ -132,7 +132,9 @@ function run_noise_wopwop(read_path::String,                        # Path from 
             @warn("axisrot set to \"automatic\"; defaulting to $(_axisrot).")
         end
     elseif periodic
-        @warn("Running periodic solution. Make sure that loading is indeed periodic")
+        @warn("Running periodic solution."*
+              " Make sure that loading is indeed periodic or close to,"*
+              " otherwise, prediction might be dominated by FFT numerical noise.")
     end
 
     ww_nt = ceil(Int, ww_nrevs *  ww_nsteps_per_rev)  # Number of time steps in PSU-WOPWOP

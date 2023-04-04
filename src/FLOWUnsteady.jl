@@ -53,11 +53,14 @@ for header_name in ["vehicle", "vehicle_vlm",
                     "maneuver", "rotor",
                     "simulation_types", "simulation", "utils",
                     "processing", "processing_force", "monitors",
-                    "noise_wopwop", "noise_bpm"]
+                    "noise_wopwop", "noise_bpm", "postprocessing"]
 
     include("FLOWUnsteady_"*header_name*".jl")
 
 end
+
+# Format PyPlot
+formatpyplot()
 
 # VPM utilities
 include(joinpath(vpm.utilities_path, "utilities_fluiddomain.jl"))

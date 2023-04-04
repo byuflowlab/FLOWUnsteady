@@ -42,13 +42,14 @@ makedocs(
                                                       ],
                                     "Rotor in Hover" => [
                                                         "examples/rotorhover-aero.md",
-                                                        "Aeroacoustics" => "examples/rotorhover-acoustics.md",
                                                         "examples/rotorhover-fdom.md",
+                                                        "Aeroacoustics" => "examples/rotorhover-acoustics.md",
+                                                        "examples/rotorhover-quasisteady.md",
                                                       ],
                                     "examples/blownwing.md",
                                     "examples/vahana.md",
-                                    "Visualization" => "visualization.md",
-                                   ],
+                                    ],
+                "Visualization" => "visualization.md",
                 "Theory"        => [
                                     "theory/rvpm.md"
                                     "theory/convergence.md"
@@ -68,6 +69,7 @@ makedocs(
                                     "(6) Viz and Postprocessing" => [
                                                                 "api/flowunsteady-postprocessing-fdom.md",
                                                                 "api/flowunsteady-postprocessing-noise.md",
+                                                                "api/flowunsteady-postprocessing-misc.md",
                                                                 ],
                                     "Extras" => [
                                                 "FLOWVPM"  => [

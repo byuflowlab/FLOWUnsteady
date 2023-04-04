@@ -334,7 +334,7 @@ If the issue still persists, please
     * [ ] List of publications
     * [x] Brief theory
   * [x] Installation instructions
-  * [ ] Visualization Guidelines
+  * [x] Visualization Guidelines
   * [ ] Numerical recommendations notebook
   * [ ] Examples
     * [x] Simple wing
@@ -356,21 +356,15 @@ If the issue still persists, please
   * [x] Move large figure files to J Drive
   * [x] Citing guide
 
-  
-  * [ ] Bring down the number of elements in the DJI example to speed things up?
+
+  * [x] Compare results (CT, loading, and viz) with different fidelities vs BEMT vs RANS
   * [ ] Rotor noise
-  * [ ] Visualization guide
+  * [x] Visualization guide
       * [ ] Changing ParaView ugly default color
-  * [ ] Cd monitor: Typically you can run one simulation with the dynamic
+  * [x] Cd monitor: Typically you can run one simulation with the dynamic
           coeff, write down the mean Cd, then switch to the static model coeff
           fixed to that value. It'll make the simulation 1.5x faster.
 
 ```@raw html
 <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/light/vorticitytake01-smallreducedslower02-2.gif" alt="Vid here" style="width: 400px;"/>
 ```
-
-
-
-* Python v3.8 or higher
-* Add CPU monitor pic from windows
-* Fix times new roman warning
