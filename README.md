@@ -163,17 +163,17 @@ See the following publications for an in-depth dive into the theory and validati
 
 ### Examples
 
-**Propeller:** [Tutorial] [Validation] [[Video](https://www.youtube.com/watch?v=lUIytQybCpQ)]
+**Propeller:** [[Tutorial](https://flow.byu.edu/FLOWUnsteady/examples/propeller-J040)] [Validation]
 
 <p align="center"> <a href="https://www.youtube.com/watch?v=lUIytQybCpQ&hd=1"> <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/youtube-prop.png" alt="youtube.com/watch?v=lUIytQybCpQ" style="width:70%"> </a> </p>
 
 
-**Rotor in Hover:** [Tutorial] [Validation] [[Video](https://www.youtube.com/watch?v=u9SgYbYhPpU)]
+**Rotor in Hover:** [[Tutorial](https://flow.byu.edu/FLOWUnsteady/examples/rotorhover-aero)] [Validation]
 
 <p align="center"> <a href="https://www.youtube.com/watch?v=u9SgYbYhPpU&hd=1"> <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/youtube-hover.png" alt="youtube.com/watch?v=u9SgYbYhPpU" style="width:70%"> </a> </p>
 
 
-**Blown Wing:** [Tutorial] [Validation]
+**Blown Wing:** [[Tutorial](https://flow.byu.edu/FLOWUnsteady/examples/blownwing-aero)] [Validation]
 
 <p align="center">
   <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/prowimhtp-wvol34-cropped00.jpg" alt="img" style="width:100%">
@@ -197,7 +197,7 @@ High-fidelity
 <p align="center"> <a href="https://www.youtube.com/watch?v=-6aR37Z6hig&hd=1"> <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/youtube-vahanahi.png" alt="youtube.com/watch?v=-6aR37Z6hig" style="width:70%"> </a> </p>
 
 
-**Aeroacoustic Noise:** [Tutorial] [Validation]
+**Aeroacoustic Noise:** [[Tutorial](https://flow.byu.edu/FLOWUnsteady/examples/rotorhover-acoustics)] [Validation]
 
 <p align="center">
   <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/cfdnoise_ningdji_multi_005D_03_20.gif" alt="Vid" style="width:60%"/>
@@ -238,49 +238,12 @@ If the issue still persists, please
   * Created           : Oct 2019
   * License           : MIT License
 
-
-
-
-
-
-  **TODO**
-  * [ ] README
-    * [x] Rewrite description
-    * [ ] Add links to examples in README
-  * [ ] Theory
-    * [ ] Add a validations section compiling all validation studies
-    * [ ] List of publications
-    * [x] Brief theory
-  * [x] Installation instructions
-  * [x] Visualization Guidelines
-  * [ ] Numerical recommendations notebook
-  * [ ] Examples
-    * [x] Simple wing
-    * [x] Circular path?
-    * [x] Heaving wing
-    * [x] Single rotor aero
-    * [ ] Single rotor noise
-    * [ ] Blown wing
-    * [ ] Vahana
-  * [ ] API
-    * [ ] Add pics of each monitor
-    * [x] Docstring for run_simulation
-    * [x] Polish docstrings
-      * [x] Vehicle: Rotor
-      * [x] Vehicle: SimpleWing and ComplexWing
-      * [x] Add database definition
-      * [x] Postprocessing: noise functions
-      * [x] Postprocessing: Fluid domain
-  * [x] Move large figure files to J Drive
-  * [x] Citing guide
-
-
-  * [x] Compare results (CT, loading, and viz) with different fidelities vs BEMT vs RANS
-  * [ ] Rotor noise
-  * [x] Visualization guide
-      * [ ] Changing ParaView ugly default color
-  * [x] Cd monitor: Typically you can run one simulation with the dynamic
-          coeff, write down the mean Cd, then switch to the static model coeff
-          fixed to that value. It'll make the simulation 1.5x faster.
-
-<img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/light/vorticitytake01-smallreducedslower02-2.gif" alt="Vid here" style="width: 400px;"/>
+**TODO**
+* [ ] README
+  * [ ] Add links to examples in README
+* [ ] Theory
+  * [ ] Add a validations section compiling all validation studies
+  * [ ] List of publications
+* [ ] Test installation instructions on MacOS
+* [ ] Examples
+  * [ ] Vahana

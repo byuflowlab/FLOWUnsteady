@@ -190,7 +190,7 @@ See the following publications for an in-depth dive into the theory and validati
 
 ### Examples
 
-**Propeller:** [Tutorial] [Validation] [[Video](https://www.youtube.com/watch?v=lUIytQybCpQ)]
+**Propeller:** [[Tutorial](https://flow.byu.edu/FLOWUnsteady/examples/propeller-J040)] [Validation]
 
 ```@raw html
 <div style="position:relative;padding-top:50%;">
@@ -204,7 +204,7 @@ See the following publications for an in-depth dive into the theory and validati
 
 
 
-**Rotor in Hover:** [Tutorial] [Validation] [[Video](https://www.youtube.com/watch?v=u9SgYbYhPpU)]
+**Rotor in Hover:** [[Tutorial](https://flow.byu.edu/FLOWUnsteady/examples/rotorhover-aero)] [Validation]
 
 ```@raw html
 <div style="position:relative;padding-top:50%;">
@@ -218,7 +218,7 @@ See the following publications for an in-depth dive into the theory and validati
 
 
 
-**Blown Wing:** [Tutorial] [Validation]
+**Blown Wing:** [[Tutorial](https://flow.byu.edu/FLOWUnsteady/examples/blownwing-aero)] [Validation]
 
 ```@raw html
 <p align="center">
@@ -266,7 +266,7 @@ High-fidelity
 
 
 
-**Aeroacoustic Noise:** [Tutorial] [Validation]
+**Aeroacoustic Noise:** [[Tutorial](https://flow.byu.edu/FLOWUnsteady/examples/rotorhover-acoustics)] [Validation]
 
 ```@raw html
 <p align="center">
@@ -320,51 +320,12 @@ If the issue still persists, please
   * Created           : Oct 2019
   * License           : MIT License
 
-
-
-
-
-
-  **TODO**
-  * [ ] README
-    * [x] Rewrite description
-    * [ ] Add links to examples in README
-  * [ ] Theory
-    * [ ] Add a validations section compiling all validation studies
-    * [ ] List of publications
-    * [x] Brief theory
-  * [x] Installation instructions
-  * [x] Visualization Guidelines
-  * [ ] Numerical recommendations notebook
-  * [ ] Examples
-    * [x] Simple wing
-    * [x] Circular path?
-    * [x] Heaving wing
-    * [x] Single rotor aero
-    * [ ] Single rotor noise
-    * [ ] Blown wing
-    * [ ] Vahana
-  * [ ] API
-    * [ ] Add pics of each monitor
-    * [x] Docstring for run_simulation
-    * [x] Polish docstrings
-      * [x] Vehicle: Rotor
-      * [x] Vehicle: SimpleWing and ComplexWing
-      * [x] Add database definition
-      * [x] Postprocessing: noise functions
-      * [x] Postprocessing: Fluid domain
-  * [x] Move large figure files to J Drive
-  * [x] Citing guide
-
-
-  * [x] Compare results (CT, loading, and viz) with different fidelities vs BEMT vs RANS
-  * [ ] Rotor noise
-  * [x] Visualization guide
-      * [ ] Changing ParaView ugly default color
-  * [x] Cd monitor: Typically you can run one simulation with the dynamic
-          coeff, write down the mean Cd, then switch to the static model coeff
-          fixed to that value. It'll make the simulation 1.5x faster.
-
-```@raw html
-<img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/light/vorticitytake01-smallreducedslower02-2.gif" alt="Vid here" style="width: 400px;"/>
-```
+**TODO**
+* [ ] README
+  * [ ] Add links to examples in README
+* [ ] Theory
+  * [ ] Add a validations section compiling all validation studies
+  * [ ] List of publications
+* [ ] Test installation instructions on MacOS
+* [ ] Examples
+  * [ ] Vahana
