@@ -46,7 +46,11 @@ makedocs(
                                                         "Aeroacoustics" => "examples/rotorhover-acoustics.md",
                                                         "examples/rotorhover-quasisteady.md",
                                                       ],
-                                    "examples/blownwing.md",
+                                    "Blown Wing" => [
+                                                        "examples/blownwing-aero.md",
+                                                        # "examples/blownwing-acoustics.md",
+                                                        "examples/blownwing-asm.md",
+                                                    ],
                                     "examples/vahana.md",
                                     ],
                 "Visualization" => "visualization.md",

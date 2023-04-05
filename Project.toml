@@ -1,6 +1,6 @@
 name = "FLOWUnsteady"
 uuid = "b491798d-ac6e-455f-a27c-49c10bb0a666"
-authors = ["Eduardo J. Alvarez <Edo.AlvarezR@gmail.com>"]
+authors = ["Eduardo J. Alvarez <Edo.AlvarezR@gmail.com> and contributors"]
 version = "3.2.0"
 
 [deps]

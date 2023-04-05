@@ -322,7 +322,7 @@ try
            iB=1
            TranslationType='KnownFunction'
            Y0=0,0,0
-           VH=$(observer[1]),$(observer[2]),$(observer[3])
+           VH=$(Vobserver[1]),$(Vobserver[2]),$(Vobserver[3])
          /
         """
         print(f, str)
