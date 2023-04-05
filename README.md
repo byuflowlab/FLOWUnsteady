@@ -235,7 +235,7 @@ If the issue still persists, please
 [open a new issue](https://github.com/byuflowlab/FLOWUnsteady/issues).
 
   * Main developer    : Eduardo J. Alvarez ([edoalvarez.com](https://www.edoalvarez.com/))
-  * Created           : Oct 2019
+  * Created           : Sep 2017
   * License           : MIT License
 
 **TODO**

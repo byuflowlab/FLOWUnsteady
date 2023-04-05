@@ -5,7 +5,7 @@
     * Main developer  : Eduardo J. Alvarez (edoalvarez.com)
     * Email           : Edo.AlvarezR@gmail.com
     * Repo            : github.com/byuflowlab/FLOWUnsteady
-    * Created         : Oct 2019
+    * Created         : Sep 2017
     * License         : MIT
 """
 module FLOWUnsteady
