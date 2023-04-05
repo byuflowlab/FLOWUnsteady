@@ -36,9 +36,9 @@ the position of the particles:
 </center>
 ```
 Why is this a bad visualization? Even though its intent is to depict the
-flow field taking advantage that the particles follow streamlines and vortical
+flow field by taking advantage of the fact that particles follow streamlines and vortical
 structures, what
-we are actually visualizing is the spatial discretization.
+is actually visualized is the spatial discretization.
 After all, we are just looking at the position of the computational elements.
 Here is an equivalent visualization of the computational elements in a
 mesh-based simulation of the same rotor in hover:
@@ -115,7 +115,7 @@ analytical functions, their values and their derivatives can be calculated
 anywhere in space.
 
 FLOWUnsteady provides the function
-[`uns.computefluiddomain`](@ref) that reads a simulation and process it to
+[`uns.computefluiddomain`](@ref) that reads a simulation and processes it to
 generate its fluid domain.
 See the [Rotor in Hover tutorial](@ref rotorfdom) for an example on how to use
 [`uns.computefluiddomain`](@ref).
