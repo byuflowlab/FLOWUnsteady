@@ -51,7 +51,12 @@ makedocs(
                                                         # "examples/blownwing-acoustics.md",
                                                         "examples/blownwing-asm.md",
                                                     ],
-                                    "examples/vahana.md",
+                                    "eVTOL Aircraft" => [
+                                                        "examples/vahana-vehicle.md",
+                                                        "examples/vahana-maneuver.md",
+                                                        "examples/vahana-monitor.md",
+                                                        "examples/vahana-run.md",
+                                                        ],
                                     ],
                 "Visualization" => "visualization.md",
                 "Theory"        => [

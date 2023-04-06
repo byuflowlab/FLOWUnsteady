@@ -244,6 +244,9 @@ If the issue still persists, please
 * [ ] Theory
   * [ ] Add a validations section compiling all validation studies
   * [ ] List of publications
-* [ ] Test installation instructions on MacOS
+* [ ] Test installation instructions on MacOS and native Windows
 * [ ] Examples
   * [ ] Vahana
+    * [ ] Bring fidelity down, list parameters for high fidelity
+    * [ ] Post processing: fluid domain?
+* [ ] Add analytics
