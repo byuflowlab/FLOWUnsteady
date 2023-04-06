@@ -317,7 +317,7 @@ If the issue still persists, please
 [open a new issue](https://github.com/byuflowlab/FLOWUnsteady/issues).
 
   * Main developer    : Eduardo J. Alvarez ([edoalvarez.com](https://www.edoalvarez.com/))
-  * Created           : Oct 2019
+  * Created           : Sep 2017
   * License           : MIT License
 
 **TODO**
@@ -326,6 +326,9 @@ If the issue still persists, please
 * [ ] Theory
   * [ ] Add a validations section compiling all validation studies
   * [ ] List of publications
-* [ ] Test installation instructions on MacOS
+* [ ] Test installation instructions on MacOS and native Windows
 * [ ] Examples
   * [ ] Vahana
+    * [ ] Bring fidelity down, list parameters for high fidelity
+    * [ ] Post processing: fluid domain?
+* [ ] Add analytics
