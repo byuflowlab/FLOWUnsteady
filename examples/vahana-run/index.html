@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Run Simulation · FLOWUnsteady</title><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.045/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.24/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script><link href="../../assets/favicon.ico" rel="icon" type="image/x-icon"/></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../../"><img src="../../assets/logo.png" alt="FLOWUnsteady logo"/></a><form class="docs-search" action="../../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../../">Intro</a></li><li><a class="tocitem" href="../../installation/general/">Installation</a></li><li><input class="collapse-toggle" id="menuitem-4" type="checkbox" checked/><label class="tocitem" for="menuitem-4"><span class="docs-label">Tutorials</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><input class="collapse-toggle" id="menuitem-4-1" type="checkbox"/><label class="tocitem" for="menuitem-4-1"><span class="docs-label">Simple Wing</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../wing-4p2aoa/">Basics</a></li><li><a class="tocitem" href="../wing-aoasweep/">AOA Sweep</a></li></ul></li><li><a class="tocitem" href="../tetheredwing/">Tethered Wing</a></li><li><a class="tocitem" href="../heavingwing/">Heaving Wing</a></li><li><input class="collapse-toggle" id="menuitem-4-4" type="checkbox"/><label class="tocitem" for="menuitem-4-4"><span class="docs-label">Propeller</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../propeller-J040/">Basics</a></li><li><a class="tocitem" href="../propeller-jsweep/"><span>$J$</span> Sweep</a></li><li><a class="tocitem" href="../propeller-quasisteady/">Quasi-Steady Solver</a></li><li><a class="tocitem" href="../propeller-incidence/">Incidence Sweep</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4-5" type="checkbox"/><label class="tocitem" for="menuitem-4-5"><span class="docs-label">Rotor in Hover</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../rotorhover-aero/">Variable Fidelity</a></li><li><a class="tocitem" href="../rotorhover-fdom/">Fluid Domain</a></li><li><a class="tocitem" href="../rotorhover-acoustics/">Aeroacoustics</a></li><li><a class="tocitem" href="../rotorhover-quasisteady/">Quasi-Steady Solver</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4-6" type="checkbox"/><label class="tocitem" for="menuitem-4-6"><span class="docs-label">Blown Wing</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../blownwing-aero/">Aerodynamic Solution</a></li><li><a class="tocitem" href="../blownwing-asm/">Actuator Surface Model</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4-7" type="checkbox" checked/><label class="tocitem" for="menuitem-4-7"><span class="docs-label">eVTOL Aircraft</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../vahana-vehicle/">Vehicle Definition</a></li><li><a class="tocitem" href="../vahana-maneuver/">Maneuver Definition</a></li><li><a class="tocitem" href="../vahana-monitor/">Monitors Definitions</a></li><li class="is-active"><a class="tocitem" href>Run Simulation</a></li></ul></li></ul></li><li><a class="tocitem" href="../../visualization/">Visualization</a></li><li><input class="collapse-toggle" id="menuitem-6" type="checkbox"/><label class="tocitem" for="menuitem-6"><span class="docs-label">Theory</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../theory/rvpm/">Reformulated VPM</a></li><li><a class="tocitem" href="../../theory/convergence/">Convergence</a></li><li><a class="tocitem" href="../../theory/validation/">Validation</a></li><li><a class="tocitem" href="../../theory/publications/">Publications</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-7" type="checkbox"/><label class="tocitem" for="menuitem-7"><span class="docs-label">API Guide</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><input class="collapse-toggle" id="menuitem-7-1" type="checkbox"/><label class="tocitem" for="menuitem-7-1"><span class="docs-label">(1) Vehicle Definition</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../api/flowunsteady-vehicle-types/">Vehicle types</a></li><li><a class="tocitem" href="../../api/flowunsteady-vehicle-components/">Generating components</a></li><li><a class="tocitem" href="../../api/flowunsteady-vehicle-asm/">Actuator surface model</a></li></ul></li><li><a class="tocitem" href="../../api/flowunsteady-maneuver/">(2) Maneuver Definition</a></li><li><a class="tocitem" href="../../api/flowunsteady-simulation/">(3) Simulation Definition</a></li><li><a class="tocitem" href="../../api/flowunsteady-monitor/">(4) Monitors Definitions</a></li><li><a class="tocitem" href="../../api/flowunsteady-run/">(5) Run Simulation</a></li><li><input class="collapse-toggle" id="menuitem-7-6" type="checkbox"/><label class="tocitem" for="menuitem-7-6"><span class="docs-label">(6) Viz and Postprocessing</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../api/flowunsteady-postprocessing-fdom/">Fluid Domain</a></li><li><a class="tocitem" href="../../api/flowunsteady-postprocessing-noise/">Aeroacoustic Noise</a></li><li><a class="tocitem" href="../../api/flowunsteady-postprocessing-misc/">Miscellaneous</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-7-7" type="checkbox"/><label class="tocitem" for="menuitem-7-7"><span class="docs-label">Extras</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><input class="collapse-toggle" id="menuitem-7-7-1" type="checkbox"/><label class="tocitem" for="menuitem-7-7-1"><span class="docs-label">FLOWVPM</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../api/flowvpm-particle/">Particle Field</a></li><li><a class="tocitem" href="../../api/flowvpm-uj/">UJ Scheme</a></li><li><a class="tocitem" href="../../api/flowvpm-viscous/">Viscous Scheme</a></li><li><a class="tocitem" href="../../api/flowvpm-relaxation/">Relaxation Scheme</a></li><li><a class="tocitem" href="../../api/flowvpm-sfs/">SFS Scheme</a></li><li><a class="tocitem" href="../../api/flowvpm-time/">Time Integration</a></li><li><a class="tocitem" href="../../api/flowvpm-utils/">Utilities</a></li></ul></li></ul></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Tutorials</a></li><li><a class="is-disabled">eVTOL Aircraft</a></li><li class="is-active"><a href>Run Simulation</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Run Simulation</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/byuflowlab/FLOWUnsteady/blob/master/docs/src/examples/vahana-run.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="vahanarun"><a class="docs-heading-anchor" href="#vahanarun">Run Simulation</a><a id="vahanarun-1"></a><a class="docs-heading-anchor-permalink" href="#vahanarun" title="Permalink"></a></h1><div style="position:relative;padding-top:50%;">
+    <iframe style="position:absolute;left:0;top:0;height:80%;width:72%;"
+        src="https://www.youtube.com/embed/d__wNtRIBY8?hd=1"
+        title="YouTube video player" frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowfullscreen></iframe>
+</div><pre><code class="language-julia hljs">#=##############################################################################
+# DESCRIPTION
+    Simulation of eVTOL transition maneuver of a tandem tilt-wing multirotor
+    aircraft. The aircraft configuration resembles the Vahana eVTOL aircraft
+    but with tilt, stacked, and variable-pitch rotors.
+
+# AUTHORSHIP
+  * Author          : Eduardo J. Alvarez (edoalvarez.com)
+  * Email           : Edo.AlvarezR@gmail.com
+  * Created         : Feb 2021
+  * Last updated    : Feb 2021
+  * License         : MIT
+=###############################################################################
+
+import FLOWUnsteady as uns
+import FLOWUnsteady: vlm, vpm, gt, Im
+
+include(joinpath(uns.examples_path, &quot;vahana_vehicle.jl&quot;))
+include(joinpath(uns.examples_path, &quot;vahana_maneuver.jl&quot;))
+include(joinpath(uns.examples_path, &quot;vahana_monitor.jl&quot;))
+
+run_name        = &quot;vahana-example&quot;          # Name of this simulation
+save_path       = run_name                  # Where to save this simulation
+paraview        = true                      # Whether to visualize with Paraview
+
+# ----------------- GEOMETRY PARAMETERS ----------------------------------------
+n_factor        = 4                         # Discretization factor
+add_wings       = true                      # Whether to include wings
+add_rotors      = true                      # Whether to include rotors
+
+R               = 0.75                      # (m) reference blade radius
+b               = 5.86                      # (m) reference wing span
+chord           = b/7.4                     # (m) reference wing chord
+thickness       = 0.04*chord                # (m) reference wing thickness
+
+# ----------------- SIMULATION PARAMETERS --------------------------------------
+# Maneuver settings
+Vcruise         = 30.0                      # (m/s) cruise speed (reference)
+RPMh_w          = 600.0                     # RPM of main-wing rotors in hover (reference)
+ttot            = 30.0                      # (s) total time to perform maneuver
+
+use_variable_pitch = true                   # Whether to use variable pitch in cruise
+
+# Freestream
+Vinf(X,t)       = 1e-5*[1, 0, -1]           # (m/s) freestream velocity (if 0 the solvers can become unstable)
+rho             = 1.225                     # (kg/m^3) air density
+mu              = 1.81e-5                   # (kg/ms) air dynamic viscosity
+
+# NOTE: Use these parameters to start and end the simulation at any arbitrary
+#       point along the eVTOL maneuver (tstart=0 and tquit=ttot will simulate
+#       the entire maneuver, tstart=0.25*ttot will start it in the middle of
+#       the hover-&gt;cruise transition)
+tstart          = 0.25*ttot                 # (s) start the simulation at this point in time
+tquit           = 0.35*ttot                 # (s) end the simulation at this point in time
+
+start_kinmaneuver = true                    # If true, it starts the maneuver with the
+                                            # velocity and angles of tstart.
+                                            # If false, starts with velocity=0
+                                            # and angles as initiated by the geometry
+# ----------------- SOLVER PARAMETERS ------------------------------------------
+
+# Aerodynamic solver
+VehicleType     = uns.UVLMVehicle           # Unsteady solver
+# VehicleType     = uns.QVLMVehicle         # Quasi-steady solver
+
+# Time parameters
+nsteps          = 2*4*5400                  # Time steps for entire maneuver
+dt              = ttot/nsteps               # (s) time step
+
+# VPM particle shedding
+p_per_step      = 5                         # Sheds per time step
+shed_starting   = false                     # Whether to shed starting vortex
+shed_unsteady   = true                      # Whether to shed vorticity from unsteady loading
+unsteady_shedcrit = 0.001                   # Shed unsteady loading whenever circulation
+                                            #  fluctuates by more than this ratio
+
+# Regularization of embedded vorticity
+sigma_vlm_surf  = b/400                     # VLM-on-VPM smoothing radius
+sigma_rotor_surf= R/20                      # Rotor-on-VPM smoothing radius
+lambda_vpm      = 1.2*2.125                 # VPM core overlap
+                                            # VPM smoothing radius
+sigma_vpm_overwrite = lambda_vpm * (2*pi*RPMh_w/60*R + Vcruise)*dt / p_per_step
+sigmafactor_vpmonvlm= 1                     # Shrink particles by this factor when
+                                            #  calculating VPM-on-VLM/Rotor induced velocities
+
+vlm_vortexsheet = true                      # Whether to spread the wing circulation as a vortex sheet
+vlm_vortexsheet_overlap = 2.125             # Overlap of the particles that make the vortex sheet
+vlm_vortexsheet_distribution = uns.g_pressure   # Distribution of the vortex sheet
+# vlm_vortexsheet_sigma_tbv = thickness*chord / 100  # Size of particles in trailing bound vortices
+vlm_vortexsheet_sigma_tbv = sigma_vpm_overwrite
+                                            # How many particles to preallocate for the vortex sheet
+vlm_vortexsheet_maxstaticparticle = vlm_vortexsheet==false ? nothing : 6000000
+
+# Rotor solver
+vlm_rlx         = 0.2                       # VLM relaxation &lt;-- this also applied to rotors
+hubtiploss_correction = vlm.hubtiploss_correction_prandtl # Hub and tip correction
+
+
+# Wing solver
+KJforce_type                = &quot;regular&quot;     # KJ force evaluated at middle of bound vortices_vortexsheet also true)
+include_trailingboundvortex = false         # Include trailing bound vortices in force calculations
+
+include_unsteadyforce       = true          # Include unsteady force
+add_unsteadyforce           = false         # Whether to add the unsteady force to Ftot or to simply output it
+
+include_parasiticdrag       = true          # Include parasitic-drag force
+add_skinfriction            = true          # If false, the parasitic drag is purely parasitic, meaning no skin friction
+calc_cd_from_cl             = false         # Whether to calculate cd from cl or effective AOA
+wing_polar_file             = &quot;xf-n0012-il-500000-n5.csv&quot;    # Airfoil polar for parasitic drag
+
+
+# VPM solver
+vpm_integration = vpm.rungekutta3           # VPM temporal integration scheme
+# vpm_integration = vpm.euler
+
+vpm_viscous     = vpm.Inviscid()            # VPM viscous diffusion scheme
+# vpm_viscous   = vpm.CoreSpreading(-1, -1, vpm.zeta_fmm; beta=100.0, itmax=20, tol=1e-1)
+
+# vpm_SFS         = vpm.SFS_none            # VPM LES subfilter-scale model
+vpm_SFS       = vpm.DynamicSFS(vpm.Estr_fmm, vpm.pseudo3level_positive;
+                                  alpha=0.999, maxC=1.0,
+                                  clippings=[vpm.clipping_backscatter],
+                                  controls=[vpm.control_directional, vpm.control_magnitude])
+
+if VehicleType == uns.QVLMVehicle
+    # Mute warnings regarding potential colinear vortex filaments. This is
+    # needed since the quasi-steady solver will probe induced velocities at the
+    # lifting line of the blade
+    uns.vlm.VLMSolver._mute_warning(true)
+end
+
+
+
+
+# ----------------- 1) VEHICLE DEFINITION --------------------------------------
+vehicle = generate_vahana_vehicle(; xfoil       = false,
+                                    n_factor    = n_factor,
+                                    add_wings   = add_wings,
+                                    add_rotors  = add_rotors,
+                                    VehicleType = VehicleType,
+                                    run_name    = &quot;vahana&quot;
+                                    )
+
+
+
+# ------------- 2) MANEUVER DEFINITION -----------------------------------------
+maneuver = generate_maneuver_vahana(; add_rotors=add_rotors)
+
+# Plot maneuver before running the simulation
+uns.plot_maneuver(maneuver)
+
+
+
+# ------------- 3) SIMULATION DEFINITION ---------------------------------------
+# Reference parameters
+Vref = Vcruise                              # Reference velocity to scale maneuver by
+RPMref = RPMh_w                             # Reference RPM to scale maneuver by
+
+# Initial conditions
+t0 = tstart/ttot*start_kinmaneuver          # Time at start of simulation
+Vinit = Vref*maneuver.Vvehicle(t0)          # Initial vehicle velocity
+Winit = pi/180 * (maneuver.anglevehicle(t0+1e-12)- maneuver.anglevehicle(t0))/(ttot*1e-12) # Initial angular velocity
+
+# Define simulation
+simulation = uns.Simulation(vehicle, maneuver, Vref, RPMref, ttot;
+                                            Vinit=Vinit, Winit=Winit, t=tstart);
+
+# Maximum number of particles (for pre-allocating memory)
+max_particles = ceil(Int, (nsteps+2)*(2*vlm.get_m(vehicle.vlm_system)+1)*p_per_step)
+max_particles = tquit != Inf ? ceil(Int, max_particles*(tquit-tstart)/ttot) : max_particles
+max_particles = min(30000000, max_particles)
+max_particles = VehicleType==uns.QVLMVehicle ? 10000 : max_particles
+
+
+
+
+
+
+# ------------- 4) MONITORS DEFINITIONS ----------------------------------------
+
+# ------------- Routine for force calculation on wings
+forces = []
+
+# Calculate Kutta-Joukowski force
+kuttajoukowski = uns.generate_aerodynamicforce_kuttajoukowski(KJforce_type,
+                                sigma_vlm_surf, sigma_rotor_surf,
+                                vlm_vortexsheet, vlm_vortexsheet_overlap,
+                                vlm_vortexsheet_distribution,
+                                vlm_vortexsheet_sigma_tbv;
+                                vehicle=vehicle)
+push!(forces, kuttajoukowski)
+
+
+# Force due to unsteady circulation
+if include_unsteadyforce
+    unsteady(args...; optargs...) = uns.calc_aerodynamicforce_unsteady(args...; add_to_Ftot=add_unsteadyforce, optargs...)
+
+    push!(forces, unsteady)
+end
+
+# Parasatic-drag force (form drag and skin friction)
+if include_parasiticdrag
+    parasiticdrag = uns.generate_aerodynamicforce_parasiticdrag(wing_polar_file;
+                                                            calc_cd_from_cl=calc_cd_from_cl,
+                                                            add_skinfriction=add_skinfriction)
+    push!(forces, parasiticdrag)
+end
+
+
+# Stitch all the forces into one function
+function calc_aerodynamicforce_fun(vlm_system, args...; per_unit_span=false, optargs...)
+
+    # Delete any previous force field
+    fieldname = per_unit_span ? &quot;ftot&quot; : &quot;Ftot&quot;
+    if fieldname in keys(vlm_system.sol)
+        pop!(vlm_system.sol, fieldname)
+    end
+
+    Ftot = nothing
+
+    for force in forces
+        Ftot = force(vlm_system, args...; per_unit_span=per_unit_span, optargs...)
+    end
+
+    return Ftot
+end
+
+
+# Extra options for generation of wing monitors
+wingmonitor_optargs = (
+                        include_trailingboundvortex=include_trailingboundvortex,
+                        calc_aerodynamicforce_fun=calc_aerodynamicforce_fun
+                      )
+
+# ------------- Create monitors
+monitors = generate_monitor_vahana(vehicle, rho, RPMref, nsteps,
+                                         save_path, Vinf;
+                                         add_wings=add_wings,
+                                         wingmonitor_optargs=wingmonitor_optargs)
+
+
+
+
+# ------------- INTERMEDIATE STEP BEFORE RUN ------------------------------------
+
+# ------------- Define function for variable pitch
+
+# Original blade twists
+org_theta = [
+                [
+                    deepcopy(rotor._theta) for (ri, rotor) in enumerate(rotors)
+                ]
+                for (si, rotors) in enumerate(simulation.vehicle.rotor_systems)
+            ]
+
+# End time of each stage
+#  Stage 1: [0, t1]  -&gt; Take off
+#  Stage 2: [t1, t2] -&gt; Transition
+#  Stage 3: [t2, t3] -&gt; Cruise
+#  Stage 4: [t3, t4] -&gt; Transition
+#  Stage 5: [t4, 1]  -&gt; Landing
+t1, t2, t3, t4 = 0.2, 0.3, 0.5, 0.6
+
+# Pitch at each stage
+pitch_takeoff  = 0
+pitch_cruise   = 35
+pitch_landing  = 0
+
+# Function for smoothly transitioning pitch between stages
+collective(tstr) =  tstr &lt; t1 ? pitch_takeoff :
+                    tstr &lt; t2 ? pitch_takeoff + (pitch_cruise-pitch_takeoff)*(tstr-t1)/(t2-t1) :
+                    tstr &lt; t3 ? pitch_cruise :
+                    tstr &lt; t4 ? pitch_cruise + (pitch_landing-pitch_cruise)*(tstr-t3)/(t4-t3) :
+                                pitch_landing
+
+function variable_pitch(sim, args...; optargs...)
+
+    if !use_variable_pitch
+        return false
+    end
+
+    tstr = sim.t/sim.ttot               # Non-dimensional time
+
+    for (si, rotors) in enumerate(sim.vehicle.rotor_systems)
+        for (ri, rotor) in enumerate(rotors)
+
+            if si==1                            # Main wing rotors
+
+                # Restore original twist distribution
+                rotor._theta .=  org_theta[si][ri]
+
+                # Add collective pitch
+                rotor._theta .+= 1.0 * (-1)^(rotor.CW)*collective(tstr)
+
+            elseif si==2                        # Stacked upper rotors
+                nothing
+
+            elseif si==3                        # Stacked lower rotors
+                nothing
+
+            elseif si==4                        # Tandem-wing rotors
+                rotor._theta .=  org_theta[si][ri]
+                rotor._theta .+= 1.25 * (-1)^(rotor.CW)*collective(tstr)
+
+            end
+
+        end
+    end
+
+    return false
+end
+
+
+# ------------- Define wake treatment
+
+# Remove by particle strength
+# (remove particles neglibly faint, remove blown up)
+rmv_strngth = 2*2/p_per_step * dt/(30/(4*5400))         # Reference strength
+minmaxGamma = rmv_strngth*[0.0001, 0.05]                # Strength bounds (removes particles outside of these bounds)
+wake_treatment_strength = uns.remove_particles_strength( minmaxGamma[1]^2, minmaxGamma[2]^2; every_nsteps=1)
+
+# Remove by particle size
+# (remove particle nearly singular, remove negligibly smeared)
+minmaxsigma = sigma_vpm_overwrite*[0.1, 5]              # Size bounds (removes particles outside of these bounds)
+wake_treatment_sigma = uns.remove_particles_sigma( minmaxsigma[1], minmaxsigma[2]; every_nsteps=1)
+
+# Remove by distance
+# (remove particles outside of the computational domain of interest, i.e., far from vehicle)
+wake_treatment_sphere = uns.remove_particles_sphere((1.25*b)^2, 1; Xoff=[4.0, 0, 0])
+
+# Concatenate all wake treatments
+wake_treatment = uns.concatenate(wake_treatment_sphere, wake_treatment_strength, wake_treatment_sigma)
+
+
+
+# ------------- Define runtime function: monitors + variable pitch + wake treatment
+runtime_function = uns.concatenate(wake_treatment, monitors, variable_pitch)
+
+
+
+
+
+
+# ------------- 5) RUN SIMULATION ----------------------------------------------
+println(&quot;Running simulation...&quot;)
+
+
+# Run simulation
+uns.run_simulation(simulation, nsteps;
+                    # ----- SIMULATION OPTIONS -------------
+                    Vinf=Vinf,
+                    rho=rho, mu=mu, tquit=tquit,
+                    # ----- SOLVERS OPTIONS ----------------
+                    p_per_step=p_per_step,
+                    max_particles=max_particles,
+                    max_static_particles=vlm_vortexsheet_maxstaticparticle,
+                    vpm_integration=vpm_integration,
+                    vpm_viscous=vpm_viscous,
+                    vpm_SFS=vpm_SFS,
+                    sigma_vlm_surf=sigma_vlm_surf,
+                    sigma_rotor_surf=sigma_rotor_surf,
+                    sigma_vpm_overwrite=sigma_vpm_overwrite,
+                    sigmafactor_vpmonvlm=sigmafactor_vpmonvlm,
+                    vlm_vortexsheet=vlm_vortexsheet,
+                    vlm_vortexsheet_overlap=vlm_vortexsheet_overlap,
+                    vlm_vortexsheet_distribution=vlm_vortexsheet_distribution,
+                    vlm_vortexsheet_sigma_tbv=vlm_vortexsheet_sigma_tbv,
+                    vlm_rlx=vlm_rlx,
+                    hubtiploss_correction=hubtiploss_correction,
+                    shed_starting=shed_starting,
+                    shed_unsteady=shed_unsteady,
+                    unsteady_shedcrit=unsteady_shedcrit,
+                    extra_runtime_function=runtime_function,
+                    # ----- OUTPUT OPTIONS ------------------
+                    save_path=save_path,
+                    run_name=run_name,
+                    save_wopwopin=true,  # &lt;--- Generates input files for PSU-WOPWOP noise analysis
+                    save_code=splitdir(@__FILE__)[1]
+                    );</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../vahana-monitor/">« Monitors Definitions</a><a class="docs-footer-nextpage" href="../../visualization/">Visualization »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.24 on <span class="colophon-date" title="Thursday 6 April 2023 02:38">Thursday 6 April 2023</span>. Using Julia version 1.8.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
