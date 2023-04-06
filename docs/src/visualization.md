@@ -162,3 +162,18 @@ the resulting fluid domain:
       To open in ParaView: `File → Load State → (select .pvsm file)` then
       select "Search files under specified directory" and point it to the
       folder where the simulation was saved.
+
+
+!!! tip "Practice Dataset and Template"
+      To help you practice in ParaView, we have uploaded the particle field
+      and fluid domain of [the DJI 9443 rotor case](@ref rotorhoveraero) of
+      mid-high fidelity and high fidelity simulations:
+      * High fidelity: [LINK](https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/rotorhover-highfidelity-particlefdom.zip)
+      * Mid-high fidelity: [LINK](https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/rotorhover-midhighfidelity-particlefdom.zip)
+
+      We have also added a `.pvsm` ParaView state file that you can use as a
+      template for visualizing your particle field with glyphs and processing the
+      fluid domain.
+      To open in ParaView: `File → Load State → (select .pvsm file)` then
+      select "Search files under specified directory" and point it to the
+      folder with your simulation results.
