@@ -110,6 +110,9 @@ end
                                 vis_nsteps=300, figname="maneuver", tstages=[])
 
 Plots the kinematics and controls of a `KinematicManeuver`.
+
+![image](http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/vahana-kinematics.png)
+![image](http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/vahana-controls.png)
 """
 function plot_maneuver(maneuver::KinematicManeuver;
                         ti::Real=0, tf::Real=1, vis_nsteps=300,
