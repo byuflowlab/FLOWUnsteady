@@ -1,6 +1,6 @@
 # Visualization Guide
 
-## What NOT to do
+## What *NOT* to do
 Unfortunately, the first thing that ParaView shows when you open a particle
 field is a "scatter plot" full of confusing colors like this:
 

@@ -206,7 +206,7 @@ OASPL. For updated results, see the [Rotor in Hover tutorial](@ref rotorhovernoi
 
 
 #### Beaver Case
-*Source: E. J. Alvarez*[^3]*and E. J. Alvarez and A. Ning, 2020*[^9]
+*Source: E. J. Alvarez, 2022*[^1]*, and E. J. Alvarez and A. Ning, 2022*[^9]
 
 ```@raw html
 <center>
@@ -328,7 +328,7 @@ OASPL. For updated results, see the [Rotor in Hover tutorial](@ref rotorhovernoi
 ## Rotor-Wing Interactions
 
 #### Tailplane w/ Tip-Mounted Propellers
-*Source: E. J. Alvarez*[^3]*and E. J. Alvarez and A. Ning, 2020*[^9]
+*Source: E. J. Alvarez, 2022*[^1]*, and E. J. Alvarez and A. Ning, 2022*[^9]
 
 ```@raw html
 <center>
@@ -382,7 +382,7 @@ OASPL. For updated results, see the [Rotor in Hover tutorial](@ref rotorhovernoi
 ```
 
 #### Blown Wing
-*Source: E. J. Alvarez*[^3]*and E. J. Alvarez and A. Ning, 2020*[^9]
+*Source: E. J. Alvarez, 2022*[^1]*, and E. J. Alvarez and A. Ning, 2022*[^9]
 
 ```@raw html
 <center>
