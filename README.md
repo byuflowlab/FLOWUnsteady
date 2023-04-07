@@ -163,17 +163,17 @@ See the following publications for an in-depth dive into the theory and validati
 
 ### Examples
 
-**Propeller:** [[Tutorial](https://flow.byu.edu/FLOWUnsteady/examples/propeller-J040)] [Validation]
+**Propeller:** [[Tutorial](https://flow.byu.edu/FLOWUnsteady/examples/propeller-J040)] [[Validation](https://flow.byu.edu/FLOWUnsteady/theory/validation/#Propeller)]
 
 <p align="center"> <a href="https://www.youtube.com/watch?v=lUIytQybCpQ&hd=1"> <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/youtube-prop.png" alt="youtube.com/watch?v=lUIytQybCpQ" style="width:70%"> </a> </p>
 
 
-**Rotor in Hover:** [[Tutorial](https://flow.byu.edu/FLOWUnsteady/examples/rotorhover-aero)] [Validation]
+**Rotor in Hover:** [[Tutorial](https://flow.byu.edu/FLOWUnsteady/examples/rotorhover-aero)] [[Validation](https://flow.byu.edu/FLOWUnsteady/theory/validation/#Rotor)]
 
 <p align="center"> <a href="https://www.youtube.com/watch?v=u9SgYbYhPpU&hd=1"> <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/youtube-hover.png" alt="youtube.com/watch?v=u9SgYbYhPpU" style="width:70%"> </a> </p>
 
 
-**Blown Wing:** [[Tutorial](https://flow.byu.edu/FLOWUnsteady/examples/blownwing-aero)] [Validation]
+**Blown Wing:** [[Tutorial](https://flow.byu.edu/FLOWUnsteady/examples/blownwing-aero)] [[Validation](https://flow.byu.edu/FLOWUnsteady/theory/validation/#Rotor-Wing-Interactions)]
 
 <p align="center">
   <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/prowimhtp-wvol34-cropped00.jpg" alt="img" style="width:100%">
@@ -181,14 +181,14 @@ See the following publications for an in-depth dive into the theory and validati
 
 <p><br></p>
 
-**Airborne-Wind-Energy Aircraft:** [Validation] [[Video](https://www.youtube.com/watch?v=iFM3B4_N2Ls)]
+**Airborne-Wind-Energy Aircraft:** [[Video](https://www.youtube.com/watch?v=iFM3B4_N2Ls)]
 
 <p align="left">
   <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/circular-fdom-top02.jpg" alt="img" style="width:75%">
 </p>
 
 
-**eVTOL Transition:** [Tutorial] [[Video 1](https://www.youtube.com/watch?v=-6aR37Z6hig)] [[Video 2](https://www.youtube.com/watch?v=d__wNtRIBY8)]
+**eVTOL Transition:** [[Tutorial](https://flow.byu.edu/FLOWUnsteady/examples/vahana-vehicle/)]
 
 Mid-fidelity
 <p align="center"> <a href="https://www.youtube.com/watch?v=d__wNtRIBY8&hd=1"> <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/youtube-vahanamid.png" alt="youtube.com/watch?v=d__wNtRIBY8" style="width:70%"> </a> </p>
@@ -197,7 +197,7 @@ High-fidelity
 <p align="center"> <a href="https://www.youtube.com/watch?v=-6aR37Z6hig&hd=1"> <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/youtube-vahanahi.png" alt="youtube.com/watch?v=-6aR37Z6hig" style="width:70%"> </a> </p>
 
 
-**Aeroacoustic Noise:** [[Tutorial](https://flow.byu.edu/FLOWUnsteady/examples/rotorhover-acoustics)] [Validation]
+**Aeroacoustic Noise:** [[Tutorial](https://flow.byu.edu/FLOWUnsteady/examples/rotorhover-acoustics)] [[Validation](https://flow.byu.edu/FLOWUnsteady/theory/validation/#Rotor)]
 
 <p align="center">
   <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/cfdnoise_ningdji_multi_005D_03_20.gif" alt="Vid" style="width:60%"/>
@@ -237,16 +237,3 @@ If the issue still persists, please
   * Main developer    : Eduardo J. Alvarez ([edoalvarez.com](https://www.edoalvarez.com/))
   * Created           : Sep 2017
   * License           : MIT License
-
-**TODO**
-* [ ] README
-  * [ ] Add links to examples in README
-* [ ] Theory
-  * [ ] Add a validations section compiling all validation studies
-  * [ ] List of publications
-* [ ] Test installation instructions on MacOS and native Windows
-* [ ] Examples
-  * [ ] Vahana
-    * [ ] Bring fidelity down, list parameters for high fidelity
-    * [ ] Post processing: fluid domain?
-* [ ] Add analytics

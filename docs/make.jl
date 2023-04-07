@@ -16,7 +16,7 @@ include("src/generate_examples.jl")
 
 makedocs(
     sitename = "FLOWUnsteady",
-    format = Documenter.HTML(;
+    format = Documenter.HTML(;  analytics = "G-B7CBF7WC7L",
                                 sidebar_sitename = false,
                                 assets = ["assets/favicon.ico"],
                                 collapselevel = 1

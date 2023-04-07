@@ -112,9 +112,6 @@ using FLOWUnsteady.
 <br>
 ```
 
-#### Beaver Propeller Case
-Beaver convergence.
-
 #### Wind Turbine Case
 *Source: J. Mehr, E. J. Alvarez, and A. Ning, 2022*[^4]
 
@@ -144,12 +141,123 @@ Beaver convergence.
 <br>
 ```
 
+#### Beaver Propeller Case
+*Source: E. J. Alvarez, 2022*[^1]*, and E. J. Alvarez and A. Ning, 2022*[^3]
+```@raw html
+<center>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/conv-beaver-aero01.png" alt="Pic here" style="width: 100%;"/>
+</center>
+```
+
+> **Case:** Beaver propeller at an advance ratio of 0.8, tip Mach number of
+> 0.46, and $\mathrm{Re}_{0.7D} = 1.8 \times 10^6$.
+> Convergence of thrust, torque, and blade loading w.r.t. the following parameters:
+> * ``N_\mathrm{sheds}``, number of particle sheds per revolution.
+> * ``n``, number of blade elements per blade.
+> Constant parameters: ``N_\mathrm{steps}=72`` and
+> ``\lambda=\frac{\sigma}{\Delta x} = \frac{\sigma N_\mathrm{sheds}}{2\pi R} = 2.125``,
+> which leads to a decreasing $\sigma$ as ``N_\mathrm{sheds}``increases.
+
+```@raw html
+
+<center>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/conv-beaver-aero02.png"
+      alt="Pic here" style="width: 100%;"/>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/conv-beaver-aero03.png"
+      alt="Pic here" style="width: 100%;"/>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/conv-beaver-aero04.png"
+      alt="Pic here" style="width: 90%;"/>
+</center>
+
+<br>
+```
+
 
 ## Rotor Wake
-Beaver wake convergence.
+*Source: E. J. Alvarez, 2022*[^1]*, and E. J. Alvarez and A. Ning, 2022*[^3]
+
+> **Case:** Continuation of Beaver propeller convergence study. Wake structure
+> and flow field compared to experimental PIV measurements.
+
+> **Takeaways:**
+> Even though the aerodynamic performance of the rotor (thrust, torque, and
+> blade loading) is sufficiently converged with ``N_\mathrm{sheds}=144`` and
+> ``n=50``, higher refinement might be needed in order to properly time-resolve
+> the vortical structure downstream of the rotor (which might be important
+> when the rotor wake impinges on another surface).
+> However, ``N_\mathrm{sheds}=144`` and ``n=50`` is sufficient to capture
+> the time-average velocity in the wake.
+> This study shows that tip vortices and the inner vortex sheet can be resolved
+> with as much granularity as desired by going to finer discretizations.
+
+```@raw html
+
+<center>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/conv-beaver-wake00.png"
+      alt="Pic here" style="width: 100%;"/>
+  <br><br>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/conv-beaver-wake01.png"
+      alt="Pic here" style="width: 70%;"/>
+  <br><br>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/conv-beaver-wake02.png"
+      alt="Pic here" style="width: 70%;"/>
+
+  <br>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/prowim_isolatedprop-vortvolslice_1-shortsmall00.gif"
+      alt="Vid here" style="width: 70%;"/>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/prowim_isolatedprop-vortslice_1-shortsmall00.gif"
+      alt="Vid here" style="width: 70%;"/>
+</center>
+
+<br>
+```
 
 ## Immersed Vorticity
-1/100 $\sigma$ rule.
+> We have noticed that in cases with strong wake interactions (*e.g.,* a rotor
+> wake impinging on a wing surface), the size of the particles used to immerse
+> the surface vorticity can change the effects of the interaction.
+> However, over the years we have discovered a heuristic that seems to converge
+> to the right solution, independent of the nature of the problem: **the size of**
+> **the embedded particles needs to be about two orders of magnitude smaller than
+> the relevant length scale.**
+>
+> In FLOWUnsteady, there are three different core sizes related to the immersed
+> vorticity:
+> * ``\sigma_\mathrm{rotor}``, smoothing radius
+>   of the rotor bound vorticity (`sigma_rotor_surf`)
+> * ``\sigma_\mathrm{LBV}``, smoothing radius
+>   of the lifting bound vorticity of wings (`sigma_vlm_surf`)
+> * ``\sigma_\mathrm{TBV}``, smoothing radius
+>   of the trailing bound vorticity of wings (`vlm_vortexsheet_sigma_tbv`)
+> Accordingly, whenever possible, we recommend choosing $\sigma$-values close
+> to
+> * ``\sigma_\mathrm{rotor} \approx 0.01D``, where $D$ is the rotor diameter
+> * ``\sigma_\mathrm{LBV} \approx 0.01b``, where $b$ is the wing span
+> * ``\sigma_\mathrm{TBV} \approx 0.01t``, where $t$ is the thickness of the wing
+>
+> The following is an excerpt from E. J. Alvarez, 2022,[^1] Sec. 8.3.,
+> confirming the validity of the "``\sigma \approx 0.01\ell``" heuristic:
+
+```@raw html
+
+<center>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/conv-sigma100rule-00.png"
+      alt="Pic here" style="width: 70%;"/>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/conv-sigma100rule-01.png"
+      alt="Pic here" style="width: 70%;"/>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/conv-sigma100rule-06.png"
+      alt="Pic here" style="width: 100%;"/>
+  <br>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/conv-sigma100rule-02.png"
+      alt="Pic here" style="width: 70%;"/>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/conv-sigma100rule-04.png"
+      alt="Pic here" style="width: 70%;"/>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/conv-sigma100rule-07.png"
+      alt="Pic here" style="width: 90%;"/>
+</center>
+
+<br>
+```
 
 
 
@@ -165,6 +273,10 @@ Beaver wake convergence.
     Aerodynamic Interactions for Aircraft Design," *AIAA Journal*.
     [**[DOI]**](https://doi.org/10.2514/1.J059178)
     [**[PDF]**](https://scholarsarchive.byu.edu/facpub/4179/)
+
+[^3]: E. J. Alvarez & A. Ning (2022), "Meshless Large Eddy Simulation of
+    Rotor-Wing Interactions with Reformulated Vortex Particle Method,"
+    *(in review)*.
 
 [^4]: J. Mehr, E. J. Alvarez, & A. Ning (2022), "Interactional Aerodynamics
     Analysis of a Multi-Rotor Energy Kite," (in review).

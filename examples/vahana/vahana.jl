@@ -12,25 +12,49 @@
   * License         : MIT
 =###############################################################################
 
+
+#=
+Use the following parameters to obtain the desired fidelity
+
+---- MID FIDELITY -----     <--- Full maneuver (takeoff, cruise, landing)
+n_factor        = 1                         # Discretization factor
+tstart          = 0.0                       # (s) start simulation at this point in time
+tquit           = ttot                      # (s) end imulation at this point in time
+nsteps          = 4*5400                    # Time steps
+lambda_vpm      = 2.125                     # VPM core overlap
+vlm_vortexsheet = false                     # Whether to spread the wing surface vorticity as a vortex sheet
+vpm_integration = vpm.euler                 # VPM temporal integration scheme
+
+---- HIGH FIDELITY -----    <--- Simulates only transition from hover to cruise
+n_factor        = 4
+tstart          = 0.20*ttot
+tquit           = 0.30*ttot
+nsteps          = 8*5400
+lambda_vpm      = 1.5*2.125
+vlm_vortexsheet = true
+vpm_integration = vpm.rungekutta3
+
+=#
+
 import FLOWUnsteady as uns
 import FLOWUnsteady: vlm, vpm, gt, Im
 
-include(joinpath(uns.examples_path, "vahana_vehicle.jl"))
-include(joinpath(uns.examples_path, "vahana_maneuver.jl"))
-include(joinpath(uns.examples_path, "vahana_monitor.jl"))
+include(joinpath(uns.examples_path, "vahana", "vahana_vehicle.jl"))
+include(joinpath(uns.examples_path, "vahana", "vahana_maneuver.jl"))
+include(joinpath(uns.examples_path, "vahana", "vahana_monitor.jl"))
 
-run_name        = "vahana-example"          # Name of this simulation
-save_path       = run_name                  # Where to save this simulation
+run_name        = "vahana"                  # Name of this simulation
+save_path       = "vahana-example"          # Where to save this simulation
 paraview        = true                      # Whether to visualize with Paraview
 
 # Uncomment this to have the folder named after this file instead
 # save_path     = String(split(@__FILE__, ".")[1])
-# run_name      = "vahana"
 # ----------------- GEOMETRY PARAMETERS ----------------------------------------
-n_factor        = 4                         # Discretization factor
+n_factor        = 1                         # Discretization factor
 add_wings       = true                      # Whether to include wings
 add_rotors      = true                      # Whether to include rotors
 
+# Reference lengths
 R               = 0.75                      # (m) reference blade radius
 b               = 5.86                      # (m) reference wing span
 chord           = b/7.4                     # (m) reference wing chord
@@ -38,7 +62,7 @@ thickness       = 0.04*chord                # (m) reference wing thickness
 
 # ----------------- SIMULATION PARAMETERS --------------------------------------
 # Maneuver settings
-Vcruise         = 30.0                      # (m/s) cruise speed (reference)
+Vcruise         = 15.0                      # (m/s) cruise speed (reference)
 RPMh_w          = 600.0                     # RPM of main-wing rotors in hover (reference)
 ttot            = 30.0                      # (s) total time to perform maneuver
 
@@ -51,10 +75,10 @@ mu              = 1.81e-5                   # (kg/ms) air dynamic viscosity
 
 # NOTE: Use these parameters to start and end the simulation at any arbitrary
 #       point along the eVTOL maneuver (tstart=0 and tquit=ttot will simulate
-#       the entire maneuver, tstart=0.25*ttot will start it in the middle of
+#       the entire maneuver, tstart=0.20*ttot will start it at the beginning of
 #       the hover->cruise transition)
-tstart          = 0.25*ttot                 # (s) start the simulation at this point in time
-tquit           = 0.35*ttot                 # (s) end the simulation at this point in time
+tstart          = 0.00*ttot                 # (s) start simulation at this point in time
+tquit           = 1.00*ttot                 # (s) end simulation at this point in time
 
 start_kinmaneuver = true                    # If true, it starts the maneuver with the
                                             # velocity and angles of tstart.
@@ -67,7 +91,7 @@ VehicleType     = uns.UVLMVehicle           # Unsteady solver
 # VehicleType     = uns.QVLMVehicle         # Quasi-steady solver
 
 # Time parameters
-nsteps          = 2*4*5400                  # Time steps for entire maneuver
+nsteps          = 4*5400                    # Time steps for entire maneuver
 dt              = ttot/nsteps               # (s) time step
 
 # VPM particle shedding
@@ -80,26 +104,26 @@ unsteady_shedcrit = 0.001                   # Shed unsteady loading whenever cir
 # Regularization of embedded vorticity
 sigma_vlm_surf  = b/400                     # VLM-on-VPM smoothing radius
 sigma_rotor_surf= R/20                      # Rotor-on-VPM smoothing radius
-lambda_vpm      = 1.2*2.125                 # VPM core overlap
+lambda_vpm      = 2.125                     # VPM core overlap
                                             # VPM smoothing radius
-sigma_vpm_overwrite = lambda_vpm * (2*pi*RPMh_w/60*R + Vcruise)*dt / p_per_step
-sigmafactor_vpmonvlm= 1                     # Shrink particles by this factor when
+sigma_vpm_overwrite         = lambda_vpm * (2*pi*RPMh_w/60*R + Vcruise)*dt / p_per_step
+sigmafactor_vpmonvlm        = 1             # Shrink particles by this factor when
                                             #  calculating VPM-on-VLM/Rotor induced velocities
 
-vlm_vortexsheet = true                      # Whether to spread the wing circulation as a vortex sheet
-vlm_vortexsheet_overlap = 2.125             # Overlap of the particles that make the vortex sheet
-vlm_vortexsheet_distribution = uns.g_pressure   # Distribution of the vortex sheet
+# Rotor solver
+vlm_rlx                     = 0.2           # VLM relaxation <-- this also applied to rotors
+hubtiploss_correction       = vlm.hubtiploss_correction_prandtl # Hub and tip correction
+
+# Wing solver: actuator surface model (ASM)
+vlm_vortexsheet             = false         # Whether to spread the wing surface vorticity as a vortex sheet (activates ASM)
+vlm_vortexsheet_overlap     = 2.125         # Overlap of the particles that make the vortex sheet
+vlm_vortexsheet_distribution= uns.g_pressure# Distribution of the vortex sheet
 # vlm_vortexsheet_sigma_tbv = thickness*chord / 100  # Size of particles in trailing bound vortices
-vlm_vortexsheet_sigma_tbv = sigma_vpm_overwrite
+vlm_vortexsheet_sigma_tbv   = sigma_vpm_overwrite
                                             # How many particles to preallocate for the vortex sheet
 vlm_vortexsheet_maxstaticparticle = vlm_vortexsheet==false ? nothing : 6000000
 
-# Rotor solver
-vlm_rlx         = 0.2                       # VLM relaxation <-- this also applied to rotors
-hubtiploss_correction = vlm.hubtiploss_correction_prandtl # Hub and tip correction
-
-
-# Wing solver
+# Wing solver: force calculation
 KJforce_type                = "regular"     # KJ force evaluated at middle of bound vortices_vortexsheet also true)
 include_trailingboundvortex = false         # Include trailing bound vortices in force calculations
 
@@ -113,14 +137,14 @@ wing_polar_file             = "xf-n0012-il-500000-n5.csv"    # Airfoil polar for
 
 
 # VPM solver
-vpm_integration = vpm.rungekutta3           # VPM temporal integration scheme
-# vpm_integration = vpm.euler
+# vpm_integration = vpm.rungekutta3         # VPM temporal integration scheme
+vpm_integration = vpm.euler
 
 vpm_viscous     = vpm.Inviscid()            # VPM viscous diffusion scheme
 # vpm_viscous   = vpm.CoreSpreading(-1, -1, vpm.zeta_fmm; beta=100.0, itmax=20, tol=1e-1)
 
-# vpm_SFS         = vpm.SFS_none            # VPM LES subfilter-scale model
-vpm_SFS       = vpm.DynamicSFS(vpm.Estr_fmm, vpm.pseudo3level_positive;
+# vpm_SFS       = vpm.SFS_none              # VPM LES subfilter-scale model
+vpm_SFS         = vpm.DynamicSFS(vpm.Estr_fmm, vpm.pseudo3level_positive;
                                   alpha=0.999, maxC=1.0,
                                   clippings=[vpm.clipping_backscatter],
                                   controls=[vpm.control_directional, vpm.control_magnitude])
@@ -169,9 +193,9 @@ simulation = uns.Simulation(vehicle, maneuver, Vref, RPMref, ttot;
                                             Vinit=Vinit, Winit=Winit, t=tstart);
 
 # Maximum number of particles (for pre-allocating memory)
-max_particles = ceil(Int, (nsteps+2)*(2*vlm.get_m(vehicle.vlm_system)+1)*p_per_step)
+max_particles = ceil(Int, (nsteps+2)*(2*vlm.get_m(vehicle.wake_system)*(p_per_step+1) + p_per_step) )
 max_particles = tquit != Inf ? ceil(Int, max_particles*(tquit-tstart)/ttot) : max_particles
-max_particles = min(30000000, max_particles)
+max_particles = min(10000000, max_particles)
 max_particles = VehicleType==uns.QVLMVehicle ? 10000 : max_particles
 
 

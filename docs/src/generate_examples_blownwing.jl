@@ -140,7 +140,7 @@ end
 open(joinpath(output_path, output_name*"-asm.md"), "w") do fout
 
     println(fout, """
-    # Actuator Surface Model
+    # [Actuator Surface Model](@id asm)
 
     The aerodynamic solution computed in [the first section](@ref blownwingaero)
     was intended to be a mid-low fidelity simulation, which modeled the wing

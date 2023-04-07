@@ -190,7 +190,7 @@ See the following publications for an in-depth dive into the theory and validati
 
 ### Examples
 
-**Propeller:** [[Tutorial](https://flow.byu.edu/FLOWUnsteady/examples/propeller-J040)] [Validation]
+**Propeller:** [[Tutorial](https://flow.byu.edu/FLOWUnsteady/examples/propeller-J040)] [[Validation](https://flow.byu.edu/FLOWUnsteady/theory/validation/#Propeller)]
 
 ```@raw html
 <div style="position:relative;padding-top:50%;">
@@ -204,7 +204,7 @@ See the following publications for an in-depth dive into the theory and validati
 
 
 
-**Rotor in Hover:** [[Tutorial](https://flow.byu.edu/FLOWUnsteady/examples/rotorhover-aero)] [Validation]
+**Rotor in Hover:** [[Tutorial](https://flow.byu.edu/FLOWUnsteady/examples/rotorhover-aero)] [[Validation](https://flow.byu.edu/FLOWUnsteady/theory/validation/#Rotor)]
 
 ```@raw html
 <div style="position:relative;padding-top:50%;">
@@ -218,7 +218,7 @@ See the following publications for an in-depth dive into the theory and validati
 
 
 
-**Blown Wing:** [[Tutorial](https://flow.byu.edu/FLOWUnsteady/examples/blownwing-aero)] [Validation]
+**Blown Wing:** [[Tutorial](https://flow.byu.edu/FLOWUnsteady/examples/blownwing-aero)] [[Validation](https://flow.byu.edu/FLOWUnsteady/theory/validation/#Rotor-Wing-Interactions)]
 
 ```@raw html
 <p align="center">
@@ -230,7 +230,7 @@ See the following publications for an in-depth dive into the theory and validati
 <p><br></p>
 ```
 
-**Airborne-Wind-Energy Aircraft:** [Validation] [[Video](https://www.youtube.com/watch?v=iFM3B4_N2Ls)]
+**Airborne-Wind-Energy Aircraft:** [[Video](https://www.youtube.com/watch?v=iFM3B4_N2Ls)]
 
 ```@raw html
 <p align="left">
@@ -239,7 +239,7 @@ See the following publications for an in-depth dive into the theory and validati
 ```
 
 
-**eVTOL Transition:** [Tutorial] [[Video 1](https://www.youtube.com/watch?v=-6aR37Z6hig)] [[Video 2](https://www.youtube.com/watch?v=d__wNtRIBY8)]
+**eVTOL Transition:** [[Tutorial](https://flow.byu.edu/FLOWUnsteady/examples/vahana-vehicle/)]
 
 Mid-fidelity
 ```@raw html
@@ -266,7 +266,7 @@ High-fidelity
 
 
 
-**Aeroacoustic Noise:** [[Tutorial](https://flow.byu.edu/FLOWUnsteady/examples/rotorhover-acoustics)] [Validation]
+**Aeroacoustic Noise:** [[Tutorial](https://flow.byu.edu/FLOWUnsteady/examples/rotorhover-acoustics)] [[Validation](https://flow.byu.edu/FLOWUnsteady/theory/validation/#Rotor)]
 
 ```@raw html
 <p align="center">
@@ -319,16 +319,3 @@ If the issue still persists, please
   * Main developer    : Eduardo J. Alvarez ([edoalvarez.com](https://www.edoalvarez.com/))
   * Created           : Sep 2017
   * License           : MIT License
-
-**TODO**
-* [ ] README
-  * [ ] Add links to examples in README
-* [ ] Theory
-  * [ ] Add a validations section compiling all validation studies
-  * [ ] List of publications
-* [ ] Test installation instructions on MacOS and native Windows
-* [ ] Examples
-  * [ ] Vahana
-    * [ ] Bring fidelity down, list parameters for high fidelity
-    * [ ] Post processing: fluid domain?
-* [ ] Add analytics
