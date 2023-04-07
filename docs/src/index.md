@@ -239,7 +239,7 @@ See the following publications for an in-depth dive into the theory and validati
 ```
 
 
-**eVTOL Transition:** [Tutorial] [[Video 1](https://www.youtube.com/watch?v=-6aR37Z6hig)] [[Video 2](https://www.youtube.com/watch?v=d__wNtRIBY8)]
+**eVTOL Transition:** [[Tutorial](https://flow.byu.edu/FLOWUnsteady/examples/vahana-vehicle/)]
 
 Mid-fidelity
 ```@raw html
@@ -327,8 +327,4 @@ If the issue still persists, please
   * [ ] Add a validations section compiling all validation studies
   * [ ] List of publications
 * [ ] Test installation instructions on MacOS and native Windows
-* [ ] Examples
-  * [ ] Vahana
-    * [ ] Bring fidelity down, list parameters for high fidelity
-    * [ ] Post processing: fluid domain?
 * [ ] Add analytics

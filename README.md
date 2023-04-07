@@ -188,7 +188,7 @@ See the following publications for an in-depth dive into the theory and validati
 </p>
 
 
-**eVTOL Transition:** [Tutorial] [[Video 1](https://www.youtube.com/watch?v=-6aR37Z6hig)] [[Video 2](https://www.youtube.com/watch?v=d__wNtRIBY8)]
+**eVTOL Transition:** [[Tutorial](https://flow.byu.edu/FLOWUnsteady/examples/vahana-vehicle/)]
 
 Mid-fidelity
 <p align="center"> <a href="https://www.youtube.com/watch?v=d__wNtRIBY8&hd=1"> <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/youtube-vahanamid.png" alt="youtube.com/watch?v=d__wNtRIBY8" style="width:70%"> </a> </p>
@@ -245,8 +245,4 @@ If the issue still persists, please
   * [ ] Add a validations section compiling all validation studies
   * [ ] List of publications
 * [ ] Test installation instructions on MacOS and native Windows
-* [ ] Examples
-  * [ ] Vahana
-    * [ ] Bring fidelity down, list parameters for high fidelity
-    * [ ] Post processing: fluid domain?
 * [ ] Add analytics
