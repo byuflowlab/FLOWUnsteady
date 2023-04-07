@@ -7,10 +7,43 @@
   <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//weber-particles06.png" alt="Pic here" style="width: 40%;"/>
   <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//weber-n100-00.png" alt="Pic here" style="width: 40%;"/>
 </center><blockquote><p><strong>Case:</strong> <span>$45^\circ$</span> swept-back wing at an angle of attack of <span>$4.2^\circ$</span>, aspect ratio of 5.0, RAE 101 airfoil section with 12% thickness, no dihedral, twist, nor taper. Freestream velocity of <span>$49.7,\mathrm{m/s}$</span>, corresponding to a chord-based Reynolds number of <span>$1.7 \times 10^6$</span>. The high sweep of the wing causes non-negligible spanwise flow. The wing loads reported by Weber and Brebner (experimental) were integrated from pressure-tap measurements, hence the drag reported in this section includes induced and form drag while excluding skin friction drag.</p></blockquote><blockquote><p><strong>Results:</strong> (Excerpt from E. J. Alvarez and A. Ning, 2022<sup class="footnote-reference"><a id="citeref-2" href="#footnote-2">[2]</a></sup>) <em>&quot;Fig. 9 shows the loading distribution and integrated lift and drag across AOA predicted with the actuator surface model (ASM), compared to the experimental measurements. The loading distribution shows satisfactory agreement with the experiment, validating that both the circulation solver and the force calculation... are accurate for predicting not only lift but also drag distribution across the span. The integrated lift and drag (Fig. 9, bottom) show excellent agreement with the experiment from <span>$0^\circ$</span> to <span>$10.5^\circ$</span>. We expect this to be the case only for mild AOAs before approaching stall conditions since our ASM does not capture the mechanisms of flow separation. Thus, through this swept-wing case, we gain confidence that our ASM yields accurate predictions in conditions with spanwise flow up to a moderate AOA.&quot;</em></p></blockquote><center>
-  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//weber-val00.png" alt="Pic here" style="width: 100%;"/>
-</center><h2 id="Rotor"><a class="docs-heading-anchor" href="#Rotor">Rotor</a><a id="Rotor-1"></a><a class="docs-heading-anchor-permalink" href="#Rotor" title="Permalink"></a></h2><h4 id="Hover-Case"><a class="docs-heading-anchor" href="#Hover-Case">Hover Case</a><a id="Hover-Case-1"></a><a class="docs-heading-anchor-permalink" href="#Hover-Case" title="Permalink"></a></h4><p>DJI aero from rVPM paper. DJI acoustics from VFS paper.</p><h4 id="Forward-Flight-Case"><a class="docs-heading-anchor" href="#Forward-Flight-Case">Forward Flight Case</a><a id="Forward-Flight-Case-1"></a><a class="docs-heading-anchor-permalink" href="#Forward-Flight-Case" title="Permalink"></a></h4><p>Rachael&#39;s AVIATION paper.</p><h2 id="Wind-Turbine"><a class="docs-heading-anchor" href="#Wind-Turbine">Wind Turbine</a><a id="Wind-Turbine-1"></a><a class="docs-heading-anchor-permalink" href="#Wind-Turbine" title="Permalink"></a></h2><p><em>Source: J. Mehr, E. J. Alvarez, and A. Ning, 2022</em><sup class="footnote-reference"><a id="citeref-5" href="#footnote-5">[5]</a></sup></p><center>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//weber-val00.png"
+                                          alt="Pic here" style="width: 100%;"/>
+</center><h2 id="Rotor"><a class="docs-heading-anchor" href="#Rotor">Rotor</a><a id="Rotor-1"></a><a class="docs-heading-anchor-permalink" href="#Rotor" title="Permalink"></a></h2><h4 id="Hover-Case:-Aero"><a class="docs-heading-anchor" href="#Hover-Case:-Aero">Hover Case: Aero</a><a id="Hover-Case:-Aero-1"></a><a class="docs-heading-anchor-permalink" href="#Hover-Case:-Aero" title="Permalink"></a></h4><p><em>Source: E. J. Alvarez, 2022</em><sup class="footnote-reference"><a id="citeref-1" href="#footnote-1">[1]</a></sup><em>, and E. J. Alvarez and A. Ning, 2022</em><sup class="footnote-reference"><a id="citeref-6" href="#footnote-6">[6]</a></sup></p><center>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/visualization-highfidelity00.png"
+                                            alt="Pic here" style="width: 80%;"/>
+</center><blockquote><p><strong>Case:</strong> DJI 9443 rotor in hover at 5400 RPM. This is a two-bladed rotor with a diameter of 9.4 inches. Validation case at Mach number of 0.2, <span>$\mathrm{Re}_c = 6 \times 10^4$</span>, and <span>$\mathrm{Re}_{0.7D} = 7 \times 10^5$</span>. Thrust and blade loading are compared to experiment and mesh-based CFD. Computational time is benchmarked against conventional mesh-based CFD.</p></blockquote><blockquote><p><strong>Results:</strong> (Excerpt from E. J. Alvarez and A. Ning, 2020<sup class="footnote-reference"><a id="citeref-6" href="#footnote-6">[6]</a></sup>) <em>&quot;...the VPM simulation shows excellent agreement with the experiment, predicting a mean <span>$C_T$</span> value within 2% of the experimental mean value... Our meshless LES appears to be two orders of magnitude faster than a mesh-based LES with similar fidelity, while being one order of magnitude faster than a low-fidelity URANS simulation and three orders of magnitude than high-fidelity DES.&quot;</em></p></blockquote>
+<center>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/val-dji9443-aero00.png"
+      alt="Pic here" style="width: 49%;"/>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/val-dji9443-aero01.png"
+      alt="Pic here" style="width: 49%;"/>
+  <br><br>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/val-dji9443-aero02.png"
+      alt="Pic here" style="width: 100%;"/>
+</center>
+
+<br><h4 id="Hover-Case:-Acoustics"><a class="docs-heading-anchor" href="#Hover-Case:-Acoustics">Hover Case: Acoustics</a><a id="Hover-Case:-Acoustics-1"></a><a class="docs-heading-anchor-permalink" href="#Hover-Case:-Acoustics" title="Permalink"></a></h4><p><em>Source: E. J. Alvarez, A. Schenk, T. Critchfield, and A. Ning, 2020</em><sup class="footnote-reference"><a id="citeref-7" href="#footnote-7">[7]</a></sup></p><blockquote><p><strong>Case:</strong> Same DJI 9443 case in hover. FLOWUnsteady predictions (VPM) are compared against experiment and URANS (STAR-CCM+) and DES (OVERFLOW2).</p></blockquote>
+<center>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/val-dji9443-noise00.png"
+      alt="Pic here" style="width: 100%;"/>
+  <br><br>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/val-dji9443-noise10.png"
+      alt="Pic here" style="width: 70%;"/>
+</center>
+
+<br><p>NOTE: The broadband results in E. J. Alvarez, A. Schenk, T. Critchfield, and A. Ning, 2020<sup class="footnote-reference"><a id="citeref-7" href="#footnote-7">[7]</a></sup> contained a bug that ended up evaluating the microphone array in the wrong plane, which led to a large discrepancy in A-weighted OASPL. For updated results, see the <a href="../../examples/rotorhover-acoustics/#rotorhovernoise">Rotor in Hover tutorial</a>.</p><h4 id="Forward-Flight-Case"><a class="docs-heading-anchor" href="#Forward-Flight-Case">Forward Flight Case</a><a id="Forward-Flight-Case-1"></a><a class="docs-heading-anchor-permalink" href="#Forward-Flight-Case" title="Permalink"></a></h4><p><em>Source: R. M. Erhard and J. J. Alonso, 2022</em><sup class="footnote-reference"><a id="citeref-8" href="#footnote-8">[8]</a></sup></p><center>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/val-erhard00.png"
+                                            alt="Pic here" style="width:100%;"/>
+</center><blockquote><p><strong>Case:</strong> TUD F29 rotor in forward flight at an incidence angle (edgewise flow). This is a four-bladed rotor. Thrust and power predicted by FLOWUnsteady (VPM) was compared to experiment and low-fidelity methods at  multiple incidence angles <span>$\alpha$</span> and advance ratios <span>$J$</span>.</p></blockquote><blockquote><p><strong>Results:</strong> Good agreement between FLOWUnsteady and experiment for incidence angles up to <span>$\alpha=60^\circ$</span> across advance ratio.</p></blockquote>
+<center>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/val-erhard01.png"
+      alt="Pic here" style="width: 100%;"/>
+</center>
+
+<br><h2 id="Wind-Turbine"><a class="docs-heading-anchor" href="#Wind-Turbine">Wind Turbine</a><a id="Wind-Turbine-1"></a><a class="docs-heading-anchor-permalink" href="#Wind-Turbine" title="Permalink"></a></h2><p><em>Source: J. Mehr, E. J. Alvarez, and A. Ning, 2022</em><sup class="footnote-reference"><a id="citeref-5" href="#footnote-5">[5]</a></sup></p><center>
   <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/UAEturbine.png" alt="Pic here" style="width: 45%;"/>
-</center><blockquote><p><strong>Case:</strong> Test series &quot;H&quot; from UAE study at US Department of Energy. Sweep on tip speed ratio <span>$\lambda = \frac{\omega R}{u_\infty}$</span>.</p></blockquote><blockquote><p><strong>Results:</strong> (Excerpt from E. J. Alvarez and A. Ning, 2020<sup class="footnote-reference"><a id="citeref-3" href="#footnote-3">[3]</a></sup>) <em>&quot;The torque coefficient outputs are also within 10% for tip speed ratios above, and within 25% for tip speed ratios under, <span>$\lambda = 2.0$</span>; also notice that the absolute magnitudes of the torque coefficient are very small at low tip speed ratios, assuaging any concerns about the higher relative errors at those operational states.&quot;</em></p></blockquote>
+</center><blockquote><p><strong>Case:</strong> Test series &quot;H&quot; from UAE study at US Department of Energy. Sweep on tip speed ratio <span>$\lambda = \frac{\omega R}{u_\infty}$</span>.</p></blockquote><blockquote><p><strong>Results:</strong> (Excerpt from J. Mehr, E. J. Alvarez, and A. Ning, 2020<sup class="footnote-reference"><a id="citeref-5" href="#footnote-5">[5]</a></sup>) <em>&quot;The torque coefficient outputs are also within 10% for tip speed ratios above, and within 25% for tip speed ratios under, <span>$\lambda = 2.0$</span>; also notice that the absolute magnitudes of the torque coefficient are very small at low tip speed ratios, assuaging any concerns about the higher relative errors at those operational states.&quot;</em></p></blockquote>
 <center>
   <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/UAEturbine-val00.png"
       alt="Pic here" style="width: 100%;"/>
@@ -24,4 +57,110 @@
       alt="Pic here" style="width: 100%;"/>
 </center>
 
-<br><h4 id="Beaver-Case"><a class="docs-heading-anchor" href="#Beaver-Case">Beaver Case</a><a id="Beaver-Case-1"></a><a class="docs-heading-anchor-permalink" href="#Beaver-Case" title="Permalink"></a></h4><p>Beaver J sweep. Beaver incidence angle sweep. Propeller wake.</p><h2 id="Rotor-Rotor-Interactions"><a class="docs-heading-anchor" href="#Rotor-Rotor-Interactions">Rotor-Rotor Interactions</a><a id="Rotor-Rotor-Interactions-1"></a><a class="docs-heading-anchor-permalink" href="#Rotor-Rotor-Interactions" title="Permalink"></a></h2><h2 id="Rotor-Wing-Interactions"><a class="docs-heading-anchor" href="#Rotor-Wing-Interactions">Rotor-Wing Interactions</a><a id="Rotor-Wing-Interactions-1"></a><a class="docs-heading-anchor-permalink" href="#Rotor-Wing-Interactions" title="Permalink"></a></h2><h4 id="Horizontal-Stabilizer-w/-Tip-Mounted-Propellers"><a class="docs-heading-anchor" href="#Horizontal-Stabilizer-w/-Tip-Mounted-Propellers">Horizontal-Stabilizer w/ Tip-Mounted Propellers</a><a id="Horizontal-Stabilizer-w/-Tip-Mounted-Propellers-1"></a><a class="docs-heading-anchor-permalink" href="#Horizontal-Stabilizer-w/-Tip-Mounted-Propellers" title="Permalink"></a></h4><h4 id="Blown-Wing"><a class="docs-heading-anchor" href="#Blown-Wing">Blown Wing</a><a id="Blown-Wing-1"></a><a class="docs-heading-anchor-permalink" href="#Blown-Wing" title="Permalink"></a></h4><section class="footnotes is-size-7"><ul><li class="footnote" id="footnote-1"><a class="tag is-link" href="#citeref-1">1</a>E. J. Alvarez (2022), &quot;Reformulated Vortex Particle Method and Meshless Large Eddy Simulation of Multirotor Aircraft,&quot; <em>Doctoral Dissertation, Brigham Young University</em>. <a href="https://scholarsarchive.byu.edu/etd/9589/"><strong>[PDF]</strong></a></li><li class="footnote" id="footnote-2"><a class="tag is-link" href="#citeref-2">2</a>E. J. Alvarez &amp; A. Ning (2022), &quot;Meshless Large Eddy Simulation of Rotor-Wing Interactions Through the Reformulated Vortex Particle Method,&quot; (in review).</li><li class="footnote" id="footnote-3"><a class="tag is-link" href="#citeref-3">3</a>E. J. Alvarez &amp; A. Ning (2020), &quot;High-Fidelity Modeling of Multirotor Aerodynamic Interactions for Aircraft Design,&quot; <em>AIAA Journal</em>. <a href="https://doi.org/10.2514/1.J059178"><strong>[DOI]</strong></a> <a href="https://scholarsarchive.byu.edu/facpub/4179/"><strong>[PDF]</strong></a></li><li class="footnote" id="footnote-5"><a class="tag is-link" href="#citeref-5">5</a>J. Mehr, E. J. Alvarez, &amp; A. Ning (2022), &quot;Interactional Aerodynamics Analysis of a Multi-Rotor Energy Kite,&quot; (in review).</li></ul></section></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../convergence/">« Convergence</a><a class="docs-footer-nextpage" href="../publications/">Publications »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.24 on <span class="colophon-date" title="Thursday 6 April 2023 23:45">Thursday 6 April 2023</span>. Using Julia version 1.8.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+<br><h4 id="Beaver-Case"><a class="docs-heading-anchor" href="#Beaver-Case">Beaver Case</a><a id="Beaver-Case-1"></a><a class="docs-heading-anchor-permalink" href="#Beaver-Case" title="Permalink"></a></h4><p><em>Source: E. J. Alvarez</em><sup class="footnote-reference"><a id="citeref-3" href="#footnote-3">[3]</a></sup><em>and E. J. Alvarez and A. Ning, 2020</em><sup class="footnote-reference"><a id="citeref-9" href="#footnote-9">[9]</a></sup></p><center>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/prowim_isolatedprop-vortvol_3-shortsmall01.gif"
+      alt="Vid here" style="width: 75%;"/>
+</center><blockquote><p><strong>Case:</strong> Beaver propeller (4 blades, 0.237 m diameter) at <span>$\mathrm{Re}_{0.7D} = 1.8\times 10^6$</span>. Extensive validation with predicted thrust, torque, efficiency, blade loading, and flow field compared to experimental measurements.</p></blockquote>
+<center>
+  <b>Sweep of advance ratio</b><br>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/val-beaver01.png"
+      alt="Pic here" style="width: 100%;"/>
+
+  <br>
+  <b>Sweep of incidence angle</b><br>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/val-beaver02.png"
+      alt="Pic here" style="width: 75%;"/>
+
+  <br><br>
+  <b>Blade loading</b><br>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/val-beaver03.png"
+      alt="Pic here" style="width: 100%;"/>
+
+  <br>
+  <b>Wake structure</b><br>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/val-beaver04.png"
+      alt="Pic here" style="width: 80%;"/>
+
+  <br><br>
+  <b>Flow field</b><br>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/val-beaver05.png"
+      alt="Pic here" style="width: 100%;"/>
+  <br>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/val-beaver06.png"
+      alt="Pic here" style="width: 100%;"/>
+
+  <br>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/prowim_isolatedprop-vortvolslice_1-shortsmall00.gif"
+      alt="Vid here" style="width: 70%;"/>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/prowim_isolatedprop-vortslice_1-shortsmall00.gif"
+      alt="Vid here" style="width: 70%;"/>
+</center>
+
+<br><h2 id="Rotor-Rotor-Interactions"><a class="docs-heading-anchor" href="#Rotor-Rotor-Interactions">Rotor-Rotor Interactions</a><a id="Rotor-Rotor-Interactions-1"></a><a class="docs-heading-anchor-permalink" href="#Rotor-Rotor-Interactions" title="Permalink"></a></h2><h4 id="Side-by-Side-Rotors-in-Hover"><a class="docs-heading-anchor" href="#Side-by-Side-Rotors-in-Hover">Side-by-Side Rotors in Hover</a><a id="Side-by-Side-Rotors-in-Hover-1"></a><a class="docs-heading-anchor-permalink" href="#Side-by-Side-Rotors-in-Hover" title="Permalink"></a></h4><p><em>Source: E. J. Alvarez and A. Ning, 2020</em><sup class="footnote-reference"><a id="citeref-3" href="#footnote-3">[3]</a></sup></p><center>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/val-sidebyside00.png" alt="Pic here" style="width: 55%;"/>
+</center><blockquote><p><strong>Case:</strong> Two side-by-side DJI rotors in hover. Two-bladed rotors with a diameter of 9.4 inches. Test at 4860 RPM, tip Mach number of 0.18, <span>$\mathrm{Re}_c = 6.2\times 10^4$</span>, and <span>$\mathrm{Re}_{0.7D} = 6.5\times 10^5$</span>. Aerodynamic interactions as the tip-to-tip spacing <span>$s$</span> between rotors is decreased.</p></blockquote><blockquote><p><strong>Results:</strong> FLOWUnsteady accurately captures both the drop in thrust and the increase in fluctuations as rotors are brought closer together.</p></blockquote>
+<center>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/val-sidebyside01.png"
+      alt="Pic here" style="width: 100%;"/>
+</center>
+
+<br><h4 id="Side-by-Side-and-Tandem-Propeller"><a class="docs-heading-anchor" href="#Side-by-Side-and-Tandem-Propeller">Side-by-Side and Tandem Propeller</a><a id="Side-by-Side-and-Tandem-Propeller-1"></a><a class="docs-heading-anchor-permalink" href="#Side-by-Side-and-Tandem-Propeller" title="Permalink"></a></h4><p><em>Source: R. M. Erhard and J. J. Alonso, 2022</em><sup class="footnote-reference"><a id="citeref-8" href="#footnote-8">[8]</a></sup></p><center>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/val-erhard02.png"
+                                            alt="Pic here" style="width:100%;"/>
+</center><blockquote><p><strong>Case:</strong> Two TUD F29 propellers in side-by-side and tandem configurations at an multile incidence angles (edgewise flow). This is a four-bladed rotor. Thrust and power predicted by FLOWUnsteady (VPM) was compared to experiment and low-fidelity methods at  multiple incidence angles <span>$\alpha$</span> and advance ratios <span>$J$</span>.</p></blockquote><blockquote><p><strong>Results:</strong> Good agreement between FLOWUnsteady and experiment for incidence angles up to <span>$\alpha=60^\circ$</span> across advance ratio.</p></blockquote>
+<center>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/val-erhard05.png"
+    alt="Pic here" style="width: 90%;"/>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/val-erhard04.png"
+    alt="Pic here" style="width: 70%;"/>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/val-erhard03.png"
+      alt="Pic here" style="width: 50%;"/>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/val-erhard06.png"
+      alt="Pic here" style="width: 47%;"/>
+</center>
+
+<br><h2 id="Rotor-Wing-Interactions"><a class="docs-heading-anchor" href="#Rotor-Wing-Interactions">Rotor-Wing Interactions</a><a id="Rotor-Wing-Interactions-1"></a><a class="docs-heading-anchor-permalink" href="#Rotor-Wing-Interactions" title="Permalink"></a></h2><h4 id="Tailplane-w/-Tip-Mounted-Propellers"><a class="docs-heading-anchor" href="#Tailplane-w/-Tip-Mounted-Propellers">Tailplane w/ Tip-Mounted Propellers</a><a id="Tailplane-w/-Tip-Mounted-Propellers-1"></a><a class="docs-heading-anchor-permalink" href="#Tailplane-w/-Tip-Mounted-Propellers" title="Permalink"></a></h4><p><em>Source: E. J. Alvarez</em><sup class="footnote-reference"><a id="citeref-3" href="#footnote-3">[3]</a></sup><em>and E. J. Alvarez and A. Ning, 2020</em><sup class="footnote-reference"><a id="citeref-9" href="#footnote-9">[9]</a></sup></p><center>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/val-tailplane00.png"
+      alt="Pic here" style="width: 100%;"/>
+</center><blockquote><p><strong>Case:</strong> Horizontal stabilizer (tailplane) with tip-mounted Beaver propellers. Wing with low aspect ratio (<span>$b/c=2.7$</span>), symmetric NACA <span>$64_2-\mathrm{A}015$</span> profile, and elevator flap. Test at advance ratio <span>$J$</span> of 0.8 and inboard-up propeller rotation at a thrust setting of <span>$C_T = 0.0935$</span>. Flap deflection captured in the actuator surface model (ASM) through an equivalent twist. Effects of wake impingement on wing loading predicted by FLOWUnsteady are compared to experiment.</p></blockquote>
+<center>
+  <b>Flat wing ($\alpha = 0^\circ$, $\delta_e=0^\circ$)</b><br>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/val-tailplane03.png"
+      alt="Pic here" style="width: 90%;"/>
+
+  <br><br><br>
+  <b>Lift augmentation</b><br>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/val-tailplane02.png"
+      alt="Pic here" style="width: 35%;"/>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/val-tailplane08.png"
+      alt="Pic here" style="width: 50%;"/>
+
+  <br><br><br>
+  <b>Wing wake and Streamtube</b><br>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/val-tailplane04.png"
+      alt="Pic here" style="width: 64%;"/>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/val-tailplane05.png"
+      alt="Pic here" style="width: 35%;"/>
+
+  <br><br><br>
+  <b>Effects of swirl direction</b><br>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/val-tailplane06.png"
+      alt="Pic here" style="width: 100%;"/>
+
+  <br><br><br>
+  <b>Strong impingement</b><br>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/val-tailplane09.png"
+      alt="Pic here" style="width: 100%;"/>
+</center>
+
+<br><h4 id="Blown-Wing"><a class="docs-heading-anchor" href="#Blown-Wing">Blown Wing</a><a id="Blown-Wing-1"></a><a class="docs-heading-anchor-permalink" href="#Blown-Wing" title="Permalink"></a></h4><p><em>Source: E. J. Alvarez</em><sup class="footnote-reference"><a id="citeref-3" href="#footnote-3">[3]</a></sup><em>and E. J. Alvarez and A. Ning, 2020</em><sup class="footnote-reference"><a id="citeref-9" href="#footnote-9">[9]</a></sup></p><center>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/val-blown00.png"
+      alt="Pic here" style="width: 40%;"/>
+</center><blockquote><p><strong>Case:</strong> Straight wing with Beaver propellers mounted mid-span. Wing of aspect ratio <span>$b/c=5.33$</span>, symmetric NACA <span>$64_2-\mathrm{A}015$</span> profile. Test at advance ratio <span>$J$</span> of 0.85 and inboard-up propeller rotation at a thrust setting of <span>$C_T = 0.121$</span>. Effects of wake impingement on wing loading predicted by FLOWUnsteady are compared to experiment.</p></blockquote><center>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/val-blown01.png"
+      alt="Pic here" style="width: 80%;"/>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/val-blown02.png"
+      alt="Pic here" style="width: 80%;"/>
+</center>
+
+<br><section class="footnotes is-size-7"><ul><li class="footnote" id="footnote-1"><a class="tag is-link" href="#citeref-1">1</a>E. J. Alvarez (2022), &quot;Reformulated Vortex Particle Method and Meshless Large Eddy Simulation of Multirotor Aircraft,&quot; <em>Doctoral Dissertation, Brigham Young University</em>. <a href="https://scholarsarchive.byu.edu/etd/9589/"><strong>[PDF]</strong></a></li><li class="footnote" id="footnote-2"><a class="tag is-link" href="#citeref-2">2</a>E. J. Alvarez &amp; A. Ning (2022), &quot;Meshless Large Eddy Simulation of Rotor-Wing Interactions Through the Reformulated Vortex Particle Method,&quot; (in review).</li><li class="footnote" id="footnote-3"><a class="tag is-link" href="#citeref-3">3</a>E. J. Alvarez &amp; A. Ning (2020), &quot;High-Fidelity Modeling of Multirotor Aerodynamic Interactions for Aircraft Design,&quot; <em>AIAA Journal</em>. <a href="https://doi.org/10.2514/1.J059178"><strong>[DOI]</strong></a> <a href="https://scholarsarchive.byu.edu/facpub/4179/"><strong>[PDF]</strong></a></li><li class="footnote" id="footnote-5"><a class="tag is-link" href="#citeref-5">5</a>J. Mehr, E. J. Alvarez, &amp; A. Ning (2022), &quot;Interactional Aerodynamics Analysis of a Multi-Rotor Energy Kite,&quot; <em>(in review)</em>.</li><li class="footnote" id="footnote-6"><a class="tag is-link" href="#citeref-6">6</a>E. J. Alvarez &amp; A. Ning (2022), &quot;Reviving the Vortex Particle Method: A Stable Formulation for Meshless Large Eddy Simulation,&quot; <em>(in review)</em>. <a href="https://arxiv.org/pdf/2206.03658.pdf"><strong>[PDF]</strong></a></li><li class="footnote" id="footnote-7"><a class="tag is-link" href="#citeref-7">7</a>E. J. Alvarez, A. Schenk, T. Critchfield, and A. Ning (2020), “Rotor-on-Rotor Aeroacoustic Interactions of Multirotor in Hover,” <em>VFS 76th Forum</em>. <a href="https://scholarsarchive.byu.edu/facpub/4053/"><strong>[PDF]</strong></a></li><li class="footnote" id="footnote-8"><a class="tag is-link" href="#citeref-8">8</a>R. M. Erhard and J. J. Alonso (2022), &quot;Comparison of Propeller Wake Models for Distributed Electric Propulsion and eVTOL Aircraft in Complex Flow Conditions,&quot; <em>AIAA SciTech Forum</em>. <a href="https://www.researchgate.net/publication/357565378_A_Comparison_of_Propeller_Wake_Models_for_Distributed_Electric_Propulsion_and_eVTOL_Aircraft_in_Complex_Flow_Conditions"><strong>[PDF]</strong></a></li><li class="footnote" id="footnote-9"><a class="tag is-link" href="#citeref-9">9</a>E. J. Alvarez &amp; A. Ning (2022), &quot;Meshless Large Eddy Simulation of Rotor-Wing Interactions with Reformulated Vortex Particle Method,&quot; <em>(in review)</em>.</li></ul></section></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../convergence/">« Convergence</a><a class="docs-footer-nextpage" href="../publications/">Publications »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.24 on <span class="colophon-date" title="Friday 7 April 2023 02:38">Friday 7 April 2023</span>. Using Julia version 1.8.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
