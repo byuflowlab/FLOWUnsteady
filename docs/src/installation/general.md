@@ -11,7 +11,7 @@ FLOWUnsteady.
 
 
 !!! info "Windows Users"
-    If using Windows, please follow [these instructions](@ref windows) first to
+    On Windows please follow [these instructions](@ref windows) first to
     set up Windows Subsystem for Linux.
 
 ## Julia
@@ -189,7 +189,7 @@ add FLOWVPM:
 
 If you run into any issues, please try the following:
 * Test that you can correctly compile C++ code wrapped for Julia following these instructions: [LINK](https://nbviewer.org/github/byuflowlab/FLOWVPM.jl/blob/master/docs/installation-linux.ipynb)
-* Mac users, take a look at these thread: [LINK](https://github.com/byuflowlab/FLOWUnsteady/issues/26)
+* Mac users, take a look at this thread: [LINK](https://github.com/byuflowlab/FLOWUnsteady/issues/26)
 * Instructions for BYU Fulton supercomputer: [LINK](https://nbviewer.jupyter.org/url/edoalvar2.groups.et.byu.net/LabNotebook/202108/FLOWVPMSuperComputer.ipynb)
 
 If issues persist, please check the resolved issues in [the FLOWExaFMM repo](https://github.com/byuflowlab/FLOWExaFMM.jl/issues)

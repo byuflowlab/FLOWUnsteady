@@ -237,6 +237,3 @@ If the issue still persists, please
   * Main developer    : Eduardo J. Alvarez ([edoalvarez.com](https://www.edoalvarez.com/))
   * Created           : Sep 2017
   * License           : MIT License
-
-**TODO**
-* [ ] Test installation instructions on MacOS and native Windows
