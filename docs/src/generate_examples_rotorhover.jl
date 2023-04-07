@@ -195,7 +195,7 @@ open(joinpath(output_path, output_name*"-aero.md"), "w") do fout
         high-fidelity simulation.
 
 
-    In [examples/rotorhover/rotorhover_postprocess.jl](https://github.com/byuflowlab/FLOWUnsteady/blob/master/examples/rotorhover/rotorhover_postprocess.jl)
+    In [examples/rotorhover/rotorhover_postprocessing.jl](https://github.com/byuflowlab/FLOWUnsteady/blob/master/examples/rotorhover/rotorhover_postprocessing.jl)
     we show how to postprocess the simulations to compare ``C_T`` and blade
     loading to experimental data by Zawodny *et al*.[^1] and a URANS simulation
     (STAR-CCM+) by Schenk[^2]:

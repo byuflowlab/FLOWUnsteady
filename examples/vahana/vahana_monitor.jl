@@ -83,7 +83,8 @@ function generate_monitor_vahana(vehicle, rho, RPMref, nsteps, save_path, Vinf;
                                                         nsteps;
                                                         save_path=save_path,
                                                         run_name=monitor_name,
-                                                        figname=monitor_name)
+                                                        figname=monitor_name,
+                                                        save_init_plots=false)
         push!(monitors, rotors_monitor)
     end
 

@@ -546,15 +546,15 @@ function generate_vahana_vehicle(;
 
     # System solved through VLM solver
     vlm_system_m = vlm.WingSystem()
+    vlm.addwing(vlm_system_m, "letL", winglet_L)
+    vlm.addwing(vlm_system_m, "L", wing_L)
     vlm.addwing(vlm_system_m, "middle", wing_md)
     vlm.addwing(vlm_system_m, "R", wing_R)
     vlm.addwing(vlm_system_m, "letR", winglet_R)
-    vlm.addwing(vlm_system_m, "L", wing_L)
-    vlm.addwing(vlm_system_m, "letL", winglet_L)
 
     vlm_system_t = vlm.WingSystem()
-    vlm.addwing(vlm_system_t, "R", twing_R)
     vlm.addwing(vlm_system_t, "L", twing_L)
+    vlm.addwing(vlm_system_t, "R", twing_R)
 
     vlm_system = vlm.WingSystem()
     if add_wings

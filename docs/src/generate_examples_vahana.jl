@@ -232,6 +232,11 @@ open(joinpath(output_path, output_name*"-run.md"), "w") do fout
     println(fout, """
     # [Run Simulation](@id vahanarun)
 
+    A mid fidelity resolution makes the computational cost
+    tractable and possible to be run the full maneuver (30 seconds of real time)
+    overnight on a laptop computer.
+    This is a video of the full maneuver in mid fidelity:
+
     ```@raw html
     <div style="position:relative;padding-top:50%;">
         <iframe style="position:absolute;left:0;top:0;height:80%;width:72%;"
@@ -242,18 +247,76 @@ open(joinpath(output_path, output_name*"-run.md"), "w") do fout
     </div>
     ```
 
+    With a finer temporal and spatial resolution, it becomes impractical to resolve
+    the entire maneuver, and instead we recommend simulating one fragment of
+    the maneuver at a time.
+    For instance, here is a high-fidelity simulation of the transition from
+    hover to cruise:
+
+    ```@raw html
+    <div style="position:relative;padding-top:50%;">
+        <iframe style="position:absolute;left:0;top:0;height:80%;width:72%;"
+            src="https://www.youtube.com/embed/-6aR37Z6hig?hd=1"
+            title="YouTube video player" frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowfullscreen></iframe>
+    </div>
+    ```
+
+    As a reference, here are the parameters that we have used for the mid and high
+    fidelity simulations:
+
+
+    | Parameter | Mid fidelity | High fidelity | Description |
+    | :-------: | :----------: | :-----------: | :---------- |
+    | `n_factor`| `1` | `4` | Factor that controls the level of discretization of wings and blade surfaces |
+    | `nsteps`  | `4*5400` | `8*5400` | Time steps for the entire maneuver |
+    | `t_start` | `0` | `0.20*ttot` | (s) start simulation at this point in time |
+    | `t_quit`  | `ttot` | `0.30*ttot` | (s) end imulation at this point in time |
+    | `lambda_vpm` | `2.125` | `1.5*2.125` | VPM core overlap |
+    | `vlm_vortexsheet` | `false` | `true` | Whether to spread the wing surface vorticity as a vortex sheet |
+    | `vpm_integration` | `vpm.euler` | `vpm.rungekutta3` | VPM time integration scheme |
+
+
+    ```@raw html
+    <br>
+    ```
+
+    Along the way, in this simulation we exemplify the following advanced features:
+    * Defining a variable pitch for rotors between hover and cruise
+    * Using the [actuator surface model](@ref asm) for wing surfaces
+    * Defining a [wake treatment](@ref waketreatmentapi) that speeds up the
+        simulation by removing particles that can be neglected
+
+    ```@raw html
+    <br>
+    ```
+
     """)
 
     println(fout, "```julia")
 
     open(joinpath(example_path, "vahana.jl"), "r") do fin
 
+        ignore = false
+
         for (li, l) in enumerate(eachline(fin))
 
-            if contains(l, "# Uncomment") || contains(l, "# save_path") || contains(l, "# run_name")
+            if contains(l, "# Uncomment") || contains(l, "# save_path") || contains(l, "# run_name") || contains(l, "save_code=splitdir")
                 nothing
             else
-                println(fout, l)
+
+                if l=="#="
+                    ignore=true
+                end
+
+                if !ignore
+                    println(fout, l)
+                end
+
+                if l=="=#"
+                    ignore=false
+                end
             end
 
         end
