@@ -1,11 +1,59 @@
 # Publications
-* Alvarez, E. J., & Ning, A. (2021, in progress). <i>Unsteady Mixed-fidelity Aerodynamics Solver
-for Maneuvering Multirotor Aircraft</i>. AIAA SciTech Forum. <a href="https://github.com/byuflowlab/FLOWUnsteady/blob/master/docs/resources/AlvarezNing_2021-SciTechAbstract-FLOWUnsteady_solver.pdf"><b>[PDF]</b></a><br><br>
-* Alvarez, E. J., Schenk, A., Critchfield, T., and Ning, A. (2020, in review). <i>Rotor-on-Rotor Aeroacoustic Interactions of Multirotor in Hover</i>. Journal of the American Helicopter Society. <a href="http://edoalvar2.groups.et.byu.net/public/AlvarezSchenkCritchfield_2020-PresentationVFSForum-multirotor_noise_interactions_in_hoverSTATIC.pdf"><b>[SLIDES]</b></a><a href="https://scholarsarchive.byu.edu/facpub/4053/"><b>[PDF]</b></a><br><br>
-* Alvarez, E. J., (2020). <i>Quasi-steady Aerodynamics Solver for a High-fidelity Controls Framework</i>. FLOWUnsteady Documentation. <a href="https://github.com/byuflowlab/FLOWUnsteady/blob/master/docs/resources/quasisteadysolver.pdf"><b>[PDF]</b></a><br><br>
-* Alvarez, E. J., & Ning, A. (2020). <i>High-fidelity Modeling of Multirotor Aerodynamic Interactions for Aircraft Design</i>. AIAA Journal. DOI: <a href="https://arc.aiaa.org/doi/10.2514/1.J059178">10.2514/1.J059178</a> <a href="https://scholarsarchive.byu.edu/facpub/4179/"><b>[PDF]</b></a><br><br>
-* Alvarez, E. J., & Ning, A. (2019). <i>Modeling Multirotor Aerodynamic Interactions Through the Vortex Particle Method</i>. AIAA AVIATION Forum. DOI: <a href="https://doi.org/10.2514/6.2019-2827 ">10.2514/6.2019-2827</a> <a href="http://edoalvar2.groups.et.byu.net/public/AlvarezNing_2019-AVIATION-Multirotor_aerodynamic_interactions_through_VPM-STATIC.pdf"><b>[SLIDES]</b></a><a href="https://scholarsarchive.byu.edu/facpub/3191/"><b>[PDF]</b></a><br><br>
-* Alvarez, E. J., & Ning, A. (2018). <i>Development of a Vortex Particle Code for the Modeling of Wake Interaction in Distributed Propulsion</i>. AIAA AVIATION Forum. DOI: <a href="https://doi.org/10.2514/6.2018-3646 ">10.2514/6.2018-3646</a> <a href="http://www.et.byu.edu/~edoalvar/public/AlvarezNing_2018-AIAA-VPM_distibuted_propulsion-SLIDE-static.pdf"><b>[SLIDES]</b></a><a href="https://scholarsarchive.byu.edu/facpub/2116/"><b>[PDF]</b></a><br><br>
+
+The following is a compilation of studies that have used FLOWUnsteady
+
+* Anderson, R., Ning, A., Xiang, R., Schie, S. P. C. van, Sperry, M., Sarojini,
+    D., Kamensky, D., & Hwang, J. T., (2023) “Aerostructural Predictions Combining
+    FEniCS and a Viscous Vortex Particle Method,” *AIAA SCITECH Forum*.
+    [**[PDF]**](https://scholarsarchive.byu.edu/cgi/viewcontent.cgi?article=7399&context=facpub)
+
+* E. J. Alvarez (2022), "Reformulated Vortex Particle Method and Meshless
+    Large Eddy Simulation of Multirotor Aircraft," *Doctoral Dissertation, Brigham
+    Young University*. [**[PDF]**](https://scholarsarchive.byu.edu/etd/9589/)
+
+* E. J. Alvarez & A. Ning (2022), "Reviving the Vortex Particle Method: A
+    Stable Formulation for Meshless Large Eddy Simulation," *(in review)*.
+    [**[PDF]**](https://arxiv.org/pdf/2206.03658.pdf)
+
+* E. J. Alvarez & A. Ning (2022), "Meshless Large Eddy Simulation of
+    Rotor-Wing Interactions Through the Reformulated Vortex Particle Method," (in
+    review).
+
+* J. Mehr, E. J. Alvarez, & A. Ning (2022), "Interactional Aerodynamics
+    Analysis of a Multi-Rotor Energy Kite," *(in review)*.
+
+* E. J. Alvarez, J. Mehr, & A. Ning (2022), "FLOWUnsteady: An Interactional
+    Aerodynamics Solver for Multirotor Aircraft and Wind Energy,"
+    *AIAA AVIATION Forum*. [**[VIDEO]**](https://youtu.be/SFW2X8Lbsdw)
+    [**[PDF]**](https://scholarsarchive.byu.edu/facpub/5830/)
+
+* R. M. Erhard & J. J. Alonso (2022), "Comparison of Propeller Wake Models
+    for Distributed Electric Propulsion and eVTOL Aircraft in Complex Flow
+    Conditions," *AIAA SciTech Forum*.
+    [**[PDF]**](https://www.researchgate.net/publication/357565378_A_Comparison_of_Propeller_Wake_Models_for_Distributed_Electric_Propulsion_and_eVTOL_Aircraft_in_Complex_Flow_Conditions)
+
+* E. J. Alvarez & A. Ning (2020), "High-Fidelity Modeling of Multirotor
+    Aerodynamic Interactions for Aircraft Design," *AIAA Journal*.
+    [**[DOI]**](https://doi.org/10.2514/1.J059178)
+    [**[PDF]**](https://scholarsarchive.byu.edu/facpub/4179/)
+
+* J. Mehr, E. J. Alvarez, & A. Ning (2020), "Unsteady Aerodynamic Analysis of
+    Wind Harvesting Aircraft," *AIAA AVIATION Forum*.
+    [**[VIDEO]**](https://youtu.be/iFM3B4_N2Ls)
+    [**[PDF]**](https://scholarsarchive.byu.edu/facpub/4054/)
+
+* E. J. Alvarez, A. Schenk, T. Critchfield, & A. Ning (2020), “Rotor-on-Rotor
+    Aeroacoustic Interactions of Multirotor in Hover,” *VFS 76th Forum*.
+    [**[PDF]**](https://scholarsarchive.byu.edu/facpub/4053/)
+
+* E. J. Alvarez & A. Ning (2019), "Modeling Multirotor Aerodynamic
+    Interactions Through the Vortex Particle Method," *AIAA AVIATION Forum*.
+    [**[PDF]**](https://scholarsarchive.byu.edu/facpub/3191/)
+
+* E. J. Alvarez & A. Ning (2018). "Development of a Vortex Particle Code for
+    the Modeling of Wake Interaction in Distributed Propulsion," *AIAA AVIATION
+    Forum*.
+    [**[PDF]**](https://scholarsarchive.byu.edu/facpub/2116/)
 
 
 ```@raw html

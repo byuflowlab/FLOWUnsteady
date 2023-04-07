@@ -239,6 +239,4 @@ If the issue still persists, please
   * License           : MIT License
 
 **TODO**
-* [ ] Theory
-  * [ ] List of publications
 * [ ] Test installation instructions on MacOS and native Windows
