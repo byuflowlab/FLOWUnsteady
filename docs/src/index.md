@@ -327,4 +327,3 @@ If the issue still persists, please
   * [ ] Add a validations section compiling all validation studies
   * [ ] List of publications
 * [ ] Test installation instructions on MacOS and native Windows
-* [ ] Add analytics
