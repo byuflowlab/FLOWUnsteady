@@ -227,7 +227,7 @@ function calc_dV(self::DynamicManeuver, vehicle::AbstractVehicle, t::Real,
 end
 
 
-function calc_dw(self::KinematicManeuver, vehicle::AbstractVehicle, t::Real,
+function calc_dw(self::DynamicManeuver, vehicle::AbstractVehicle, t::Real,
                                                          dt::Real, ttot::Real)
      # Here calculate change in angular velocity of the vehicle based on current
      # aerodynamics forces
