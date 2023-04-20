@@ -211,7 +211,7 @@ for ri in 1:nrotors
 
     # Translate rotor to its position along wing
     O = [x, y, z]                                       # New position
-    Oaxis = uns.gt.rotation_matrix2(0, 0, 0)            # New orientation
+    Oaxis = uns.gt.rotation_matrix2(0, 0, 180)          # New orientation
     vlm.setcoordsystem(rotor, O, Oaxis)
 
     push!(rotors, rotor)
