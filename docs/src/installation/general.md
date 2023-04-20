@@ -203,9 +203,11 @@ in the official Julia registry:
 import Pkg
 
 url = "https://github.com/byuflowlab/"
-packages = ("AirfoilPrep.jl", "FLOWVLM", "BPM.jl", "FLOWNoise")
 
-Pkg.add([ Pkg.PackageSpec(; url=url*name) for name in packages ])
+packages = (("AirfoilPrep.jl", "v2.1.2"), ("FLOWVLM", "v2.1.2"),
+            ("BPM.jl", "v2.0.1"), ("FLOWNoise", "v2.3.1"))
+
+Pkg.add([ Pkg.PackageSpec(; url=url*name, rev=v) for (name, v) in packages ])
 ```
 
 !!! info "Troubleshooting"
