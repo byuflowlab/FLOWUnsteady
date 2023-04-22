@@ -378,7 +378,7 @@ uns.run_simulation(simulation, nsteps;
                     omit_shedding=omit_shedding,
                     extra_runtime_function=runtime_function,
                     # ----- RESTART OPTIONS -----------------
-                    restart_file=restart_file,
+                    restart_vpmfile=restart_file,
                     # ----- OUTPUT OPTIONS ------------------
                     save_path=save_path,
                     run_name=run_name,
