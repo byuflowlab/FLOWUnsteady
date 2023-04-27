@@ -50,6 +50,7 @@ for AOA in AOAs
     pfield = uns.run_simulation(simulation, nsteps;
                                     # SIMULATION OPTIONS
                                     Vinf=Vinf,
+                                    rho=rho,
                                     # SOLVERS OPTIONS
                                     p_per_step=p_per_step,
                                     max_particles=max_particles,

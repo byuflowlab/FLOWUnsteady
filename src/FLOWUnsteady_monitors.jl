@@ -24,15 +24,13 @@ The aerodynamic performance consists of thrust coefficient
 \$C_Q = \\frac{Q}{\\rho n^2 d^5}\$, and propulsive efficiency
 \$\\eta = \\frac{T u_\\infty}{2\\pi n Q}\$.
 
-* `J_ref` and `rho_ref` are the reference advance ratio and air density used \
-for calculating propulsive efficiency and coefficients. The advance ratio used \
-here is defined as \$J=\\frac{u_\\infty}{n d}\$ with \
-\$n = \\frac{\\mathrm{RPM}}{60}\$.
+* `J_ref` and `rho_ref` are the reference advance ratio and air density used for calculating propulsive efficiency and coefficients. The advance ratio used here is defined as \$J=\\frac{u_\\infty}{n d}\$ with \$n = \\frac{\\mathrm{RPM}}{60}\$.
 * `RPM_ref` is the reference RPM used to estimate the age of the wake.
-* `nsteps_sim` is the number of time steps by the end of the simulation (used \
-for generating the color gradient).
-* Use `save_path` to indicate a directory where to save the plots. If so, it \
-will also generate a CSV file with \$C_T\$, \$C_Q\$, and \$\\eta\$.
+* `nsteps_sim` is the number of time steps by the end of the simulation (used for generating the color gradient).
+* Use `save_path` to indicate a directory where to save the plots. If so, it will also generate a CSV file with \$C_T\$, \$C_Q\$, and \$\\eta\$.
+
+
+![image](http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/rotorhover-example-high02-singlerotor_convergence.png)
 """
 function generate_monitor_rotors( rotors::Array{vlm.Rotor, 1},
                                     J_ref::Real, rho_ref::Real, RPM_ref::Real,
@@ -250,15 +248,11 @@ Kutta-Joukowski force, parasitic drag (calculated from a NACA 0012 airfoil
 polar), and unsteady-circulation force.
 
 * `b_ref`       : Reference span length.
-* `ar_ref`      : Reference aspect ratio, used to calculate the equivalent \
-                    chord \$c = \\frac{b}{\\mathrm{ar}}\$.
+* `ar_ref`      : Reference aspect ratio, used to calculate the equivalent chord \$c = \\frac{b}{\\mathrm{ar}}\$.
 * `rho_ref`     : Reference density.
-* `qinf_ref`    : Reference dynamic pressure \
-                    \$q_\\infty = \\frac{1}{2}\\rho u_\\infty^2\$.
-* `nsteps_sim`  : the number of time steps by the end of the simulation (used \
-                    for generating the color gradient).
-* Use `save_path` to indicate a directory where to save the plots. If so, it \
-will also generate a CSV file with \$C_L\$ and \$C_D\$.
+* `qinf_ref`    : Reference dynamic pressure \$q_\\infty = \\frac{1}{2}\\rho u_\\infty^2\$.
+* `nsteps_sim`  : the number of time steps by the end of the simulation (used for generating the color gradient).
+* Use `save_path` to indicate a directory where to save the plots. If so, it will also generate a CSV file with \$C_L\$ and \$C_D\$.
 
 Here is an example of this monitor:
 ![image](http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/wing-example_convergence.png)
@@ -575,6 +569,9 @@ Winckelamns' 1995 CTR report, "Some Progress in LES using the 3-D VPM".
 
 Use `save_path` to indicate a directory where to save the plots. If so, it
 will also generate a CSV file with ξ.
+
+Here is an example of this monitor:
+![image](http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/rotorhover-example-high02-singlerotorenstrophy.png)
 """
 function generate_monitor_enstrophy(; save_path=nothing, run_name="",
                                         out_figs=[],
@@ -595,6 +592,8 @@ function generate_monitor_enstrophy(; save_path=nothing, run_name="",
 
         ax.spines["right"].set_visible(false)
         ax.spines["top"].set_visible(false)
+
+        fig.tight_layout()
 
         push!(out_figs, fig)
         push!(out_figaxs, ax)
@@ -642,6 +641,9 @@ values that were clipped to zero (not included in the mean).
 Use `save_path` to indicate a directory where to save the plots. If so, it
 will also generate a CSV file with the statistics of \$C_d\$ (particles whose
 coefficients have been clipped are ignored).
+
+Here is an example of this monitor:
+![image](http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/rotorhover-example-high02-singlerotorChistory.png)
 """
 function generate_monitor_Cd(; save_path=nothing, run_name="",
                                         out_figs=[],
@@ -666,6 +668,7 @@ function generate_monitor_Cd(; save_path=nothing, run_name="",
 
         ax = axs[2]
         ax.set_xlabel("Simulation time")
+        ax.set_ylim([0, 1])
         ax.set_ylabel(L"Ratio of $C_d$-zeroes"*
                         L" $\frac{n_\mathrm{zeroes}}{n_\mathrm{particles}}$")
 
@@ -673,6 +676,8 @@ function generate_monitor_Cd(; save_path=nothing, run_name="",
             ax.spines["right"].set_visible(false)
             ax.spines["top"].set_visible(false)
         end
+
+        fig.tight_layout()
 
         push!(out_figs, fig)
         push!(out_figaxs, axs)

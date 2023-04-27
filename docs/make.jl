@@ -16,14 +16,17 @@ include("src/generate_examples.jl")
 
 makedocs(
     sitename = "FLOWUnsteady",
-    format = Documenter.HTML(;
+    format = Documenter.HTML(;  analytics = "G-B7CBF7WC7L",
                                 sidebar_sitename = false,
                                 assets = ["assets/favicon.ico"],
                                 collapselevel = 1
                             ),
     pages = [
-                "Introduction"          => "index.md",
-                "Installation"  => "installation.md",
+                "Intro"         => "index.md",
+
+                "Installation"  => "installation/general.md",
+                hide("installation/windows.md"),
+
                 "Tutorials"     => [
                                     "Simple Wing" => [
                                                         "Basics" => "examples/wing-4p2aoa.md",
@@ -35,10 +38,31 @@ makedocs(
                                                         "examples/propeller-J040.md",
                                                         "examples/propeller-jsweep.md",
                                                         "examples/propeller-quasisteady.md",
-                                                        "examples/propeller-incidence.md"
+                                                        "examples/propeller-incidence.md",
                                                       ],
-                                   ],
+                                    "Rotor in Hover" => [
+                                                        "examples/rotorhover-aero.md",
+                                                        "examples/rotorhover-fdom.md",
+                                                        "Aeroacoustics" => "examples/rotorhover-acoustics.md",
+                                                        "examples/rotorhover-quasisteady.md",
+                                                      ],
+                                    "Blown Wing" => [
+                                                        "examples/blownwing-aero.md",
+                                                        # "examples/blownwing-acoustics.md",
+                                                        "examples/blownwing-asm.md",
+                                                    ],
+                                    "eVTOL Aircraft" => [
+                                                        "examples/vahana-vehicle.md",
+                                                        "examples/vahana-maneuver.md",
+                                                        "examples/vahana-monitor.md",
+                                                        "examples/vahana-run.md",
+                                                        ],
+                                    ],
+                "Visualization" => "visualization.md",
                 "Theory"        => [
+                                    "theory/rvpm.md"
+                                    "theory/convergence.md"
+                                    "theory/validation.md"
                                     "theory/publications.md"
                                    ],
                 "API Guide"     => [
@@ -54,6 +78,7 @@ makedocs(
                                     "(6) Viz and Postprocessing" => [
                                                                 "api/flowunsteady-postprocessing-fdom.md",
                                                                 "api/flowunsteady-postprocessing-noise.md",
+                                                                "api/flowunsteady-postprocessing-misc.md",
                                                                 ],
                                     "Extras" => [
                                                 "FLOWVPM"  => [

@@ -10,7 +10,7 @@
 <br>
 ```
 
-In this example we simulate an
+In this example we first simulate an
 [APC Thin-Electric 10x7 propeller](https://www.apcprop.com/product/10x7e/)
 operating in cruise conditions.
 Along the way, we demonstrate the basics of how to set up and run a rotor
@@ -279,6 +279,7 @@ println("Running simulation...")
 uns.run_simulation(simulation, nsteps;
                     # ----- SIMULATION OPTIONS -------------
                     Vinf=Vinf,
+                    rho=rho, mu=mu, sound_spd=speedofsound,
                     # ----- SOLVERS OPTIONS ----------------
                     p_per_step=p_per_step,
                     max_particles=max_particles,

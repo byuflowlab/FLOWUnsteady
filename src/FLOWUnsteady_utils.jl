@@ -26,8 +26,8 @@ const clrs = [
 
 function formatpyplot()
     # Fonts
-    plt.rc("font", family="Times New Roman")            # Text font
-    plt.rc("mathtext", fontset="stix")                  # Math font
+    plt.rc("font", family="STIXGeneral")            # Text font
+    plt.rc("mathtext", fontset="stix")              # Math font
     plt.rc("font", size=12)          # controls default text sizes
     plt.rc("axes", titlesize=12)     # fontsize of the axes title
     plt.rc("axes", labelsize=14)     # fontsize of the x and y labels
@@ -110,6 +110,9 @@ end
                                 vis_nsteps=300, figname="maneuver", tstages=[])
 
 Plots the kinematics and controls of a `KinematicManeuver`.
+
+![image](http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/vahana-kinematics.png)
+![image](http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/vahana-controls.png)
 """
 function plot_maneuver(maneuver::KinematicManeuver;
                         ti::Real=0, tf::Real=1, vis_nsteps=300,
@@ -175,7 +178,7 @@ function plot_maneuver(maneuver::KinematicManeuver;
 
     # -------------------- Vehicle angle history -------------------------------
     ax = axs1[3]
-    ax.title.set_text("Angles")
+    ax.title.set_text("Attitude")
     as = avhcl.(ts)
     amax = max([maximum([a[i] for a in as]) for i in 1:3]...)
     amin = min([minimum([a[i] for a in as]) for i in 1:3]...)
@@ -220,7 +223,7 @@ function plot_maneuver(maneuver::KinematicManeuver;
                                                         constrained_layout=true)
         axs2 = fig2.subplots(gdims[1], gdims[2])
         axs2 = gdims[1]==1 && gdims[2]==1 ? [axs2] : axs2
-        fig2.suptitle("VEHICLE CONTROLS")
+        fig2.suptitle("VEHICLE CONTROL INPUTS")
     end
 
     if length(angle_syss)!=0

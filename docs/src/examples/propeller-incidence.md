@@ -217,6 +217,7 @@ for AOA in AOAs
     uns.run_simulation(simulation, nsteps;
                         # ----- SIMULATION OPTIONS -------------
                         Vinf=Vinf,
+                        rho=rho, mu=mu, sound_spd=speedofsound,
                         # ----- SOLVERS OPTIONS ----------------
                         p_per_step=p_per_step,
                         max_particles=max_particles,

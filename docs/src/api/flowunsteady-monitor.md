@@ -43,10 +43,10 @@ own user-defined monitors.
 
 ```@docs
 FLOWUnsteady.generate_monitor_statevariables
+FLOWUnsteady.generate_monitor_wing
+FLOWUnsteady.generate_monitor_rotors
 FLOWUnsteady.generate_monitor_enstrophy
 FLOWUnsteady.generate_monitor_Cd
-FLOWUnsteady.generate_monitor_rotors
-FLOWUnsteady.generate_monitor_wing
 FLOWUnsteady.concatenate
 ```
 
@@ -63,7 +63,7 @@ FLOWUnsteady.generate_aerodynamicforce_parasiticdrag
 FLOWUnsteady.calc_aerodynamicforce_unsteady
 ```
 
-## Wake Treatment
+## [Wake Treatment](@id waketreatmentapi)
 Since the full set of state variables is passed to `extra_runtime_function`,
 this function can also be used to alter the simulation on the fly.
 In some circumstances it is desirable to be able to remove or modify particles,
@@ -84,13 +84,13 @@ monitor_states = uns.generate_monitor_statevariables()
 monitor_enstrophy = uns.generate_monitor_enstrophy()
 
 # Monitor pipeline
-monitors(args...; optargs...) = monitor_states(args...; optargs...) || monitor_enstrophy(args...; optargs...)
+monitors = uns.concatenate(monitor_states, monitor_enstrophy)
 
 # Define wake treatment
 wake_treatment = uns.remove_particles_sphere(1.0, 1; Xoff=zeros(3))
 
 # Extra runtime function pipeline
-extra_runtime_function(args...; optargs...) = monitors(args...; optargs...) || wake_treatment(args...; optargs...)
+extra_runtime_function = uns.concatenate(monitors, wake_treatment)
 
 ```
 Then pass this pipeline to the simulation as

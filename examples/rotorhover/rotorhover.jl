@@ -15,42 +15,67 @@
   * License         : MIT
 =###############################################################################
 
-#= TODO
-    * [ ] Bring down the number of elements in the DJI example to speed things up?
-    * [ ] Visualization guide
-        * [ ] Changing ParaView ugly default color
-    * [ ] Rotor noise
-    * [ ] Cd monitor: Typically you can run one simulation with the dynamic
-            coeff, write down the mean Cd, then switch to the static model coeff
-            fixed to that value. It'll make the simulation 1.5x faster.
+#=
+Use the following parameters to obtain the desired fidelity
+
+---- MID-LOW FIDELITY ---
+n               = 20                        # Number of blade elements per blade
+nsteps_per_rev  = 36                        # Time steps per revolution
+p_per_step      = 4                         # Sheds per time step
+sigma_rotor_surf= R/10                      # Rotor-on-VPM smoothing radius
+vpm_integration = vpm.euler                 # VPM time integration scheme
+vpm_SFS         = vpm.SFS_none              # VPM LES subfilter-scale model
+shed_starting   = false                     # Whether to shed starting vortex
+suppress_fountain    = true                 # Suppress hub fountain effect
+sigmafactor_vpmonvlm = 1.0                  # Shrink particles by this factor when
+                                            #  calculating VPM-on-VLM/Rotor induced velocities
+
+---- MID-HIGH FIDELITY ---
+n               = 50
+nsteps_per_rev  = 72
+p_per_step      = 2
+sigma_rotor_surf= R/10
+sigmafactor_vpmonvlm = 1.0
+shed_starting   = false
+suppress_fountain    = true
+vpm_integration = vpm.rungekutta3
+vpm_SFS         = vpm.SFS_none
+
+---- HIGH FIDELITY -----
+n               = 50
+nsteps_per_rev  = 360
+p_per_step      = 2
+sigma_rotor_surf= R/80
+sigmafactor_vpmonvlm = 5.5
+shed_starting   = true
+suppress_fountain    = false
+vpm_integration = vpm.rungekutta3
+vpm_SFS         = vpm.DynamicSFS(vpm.Estr_fmm, vpm.pseudo3level_positive;
+                                    alpha=0.999, maxC=1.0,
+                                    clippings=[vpm.clipping_backscatter])
 =#
 
 import FLOWUnsteady as uns
 import FLOWVLM as vlm
 import FLOWVPM as vpm
 
-run_name        = "rotorhover-example03"      # Name of this simulation
-
+run_name        = "rotorhover-example"      # Name of this simulation
 save_path       = run_name                  # Where to save this simulation
-# paraview        = true                      # Whether to visualize with Paraview
+paraview        = true                      # Whether to visualize with Paraview
 
-paraview        = false
-
-
+# Uncomment this to have the folder named after this file instead
+# save_path     = String(split(@__FILE__, ".")[1])
+# run_name      = "singlerotor"
+# paraview      = false
 # ----------------- GEOMETRY PARAMETERS ----------------------------------------
 
 # Rotor geometry
-# rotor_file      = "DJI9443.csv"             # Rotor geometry
-rotor_file      = "DJI9443-smoothpolars.csv"# Rotor geometry
+rotor_file      = "DJI9443.csv"             # Rotor geometry
 data_path       = uns.def_data_path         # Path to rotor database
 pitch           = 0.0                       # (deg) collective pitch of blades
 CW              = false                     # Clock-wise rotation
 xfoil           = false                     # Whether to run XFOIL
-# xfoil           = true
-
-# TODO: Hide this?
-# read_polar      = vlm.ap.read_polar         # What polar reader to use
-read_polar      = vlm.ap.read_polar2
+read_polar      = vlm.ap.read_polar2        # What polar reader to use
 
 # NOTE: If `xfoil=true`, XFOIL will be run to generate the airfoil polars used
 #       by blade elements before starting the simulation. XFOIL is run
@@ -64,7 +89,7 @@ read_polar      = vlm.ap.read_polar2
 #       files.
 
 # Discretization
-n               = 50                        # Number of blade elements per blade
+n               = 20                        # Number of blade elements per blade
 r               = 1/10                      # Geometric expansion of elements
 
 # NOTE: Here a geometric expansion of 1/10 means that the spacing between the
@@ -86,15 +111,16 @@ rho             = 1.071778                  # (kg/m^3) air density
 mu              = 1.85508e-5                # (kg/ms) air dynamic viscosity
 speedofsound    = 342.35                    # (m/s) speed of sound
 
-# NOTE: For cases with zero freestream velocity, in order to avoid numerical
-#       instabilities, it is recommended that a negligible small velocity is
-#       used instead of zero (hence, J here is negligible small instead of zero)
+# NOTE: For cases with zero freestream velocity, it is recommended that a
+#       negligible small velocity is used instead of zero in order to avoid
+#       potential numerical instabilities (hence, J here is negligible small
+#       instead of zero)
 
 magVinf         = J*RPM/60*(2*R)
-Vinf(X, t)      = magVinf*[cosd(AOA), sind(AOA), 0] # (m/s) freestream velocity vector
+Vinf(X, t)      = magVinf*[cos(AOA*pi/180), sin(AOA*pi/180), 0]  # (m/s) freestream velocity vector
 
 ReD             = 2*pi*RPM/60*R * rho/mu * 2*R      # Diameter-based Reynolds number
-Matip           = 2*pi*RPM/60*R / speedofsound      # Tip Mach number
+Matip           = 2*pi*RPM/60 * R / speedofsound    # Tip Mach number
 
 println("""
     RPM:    $(RPM)
@@ -107,101 +133,100 @@ println("""
 
 # Aerodynamic solver
 VehicleType     = uns.UVLMVehicle           # Unsteady solver
-# VehicleType   = uns.QVLMVehicle           # Quasi-steady solver
+# VehicleType     = uns.QVLMVehicle         # Quasi-steady solver
 const_solution  = VehicleType==uns.QVLMVehicle  # Whether to assume that the
                                                 # solution is constant or not
 # Time parameters
-# nrevs           = 4                         # Number of revolutions in simulation
-# nrevs           = 7
-nrevs           = 10
-# nsteps_per_rev  = 72                        # Time steps per revolution
-nsteps_per_rev  = 72*5
+nrevs           = 10                        # Number of revolutions in simulation
+nsteps_per_rev  = 36                        # Time steps per revolution
 nsteps          = const_solution ? 2 : nrevs*nsteps_per_rev # Number of time steps
 ttot            = nsteps/nsteps_per_rev / (RPM/60)       # (s) total simulation time
 
 # VPM particle shedding
-p_per_step      = 2                         # Sheds per time step
-shed_starting   = true                      # Whether to shed starting vortex
-# shed_unsteady   = true                      # Whether to shed vorticity from unsteady loading
-shed_unsteady   = false
+p_per_step      = 4                         # Sheds per time step
+shed_starting   = false                     # Whether to shed starting vortex
+shed_unsteady   = true                      # Whether to shed vorticity from unsteady loading
+unsteady_shedcrit = 0.001                   # Shed unsteady loading whenever circulation
+                                            #  fluctuates by more than this ratio
 max_particles   = ((2*n+1)*B)*nsteps*p_per_step + 1 # Maximum number of particles
 
 # Regularization
-# sigma_rotor_surf= R/10                      # Rotor-on-VPM smoothing radius
-# sigma_rotor_surf= R/40
-sigma_rotor_surf= R/80
+sigma_rotor_surf= R/10                      # Rotor-on-VPM smoothing radius
 lambda_vpm      = 2.125                     # VPM core overlap
                                             # VPM smoothing radius
 sigma_vpm_overwrite = lambda_vpm * 2*pi*R/(nsteps_per_rev*p_per_step)
+sigmafactor_vpmonvlm= 1                     # Shrink particles by this factor when
+                                            #  calculating VPM-on-VLM/Rotor induced velocities
 
 # Rotor solver
-# vlm_rlx         = 0.7                       # VLM relaxation <-- This also applied to Rotor
-# vlm_rlx         = 0.5
-vlm_rlx         = 0.1
-
-# hubtiploss_correction = vlm.hubtiploss_correction_prandtl   # Hub and tip correction
-# hubtiploss_correction = vlm.hubtiploss_correction_modprandtl
-hubtiploss_correction = ((0.4, 5, 0.1, 0.05), vlm.hubtiploss_correction_modprandtl[2])
-
-# no_shedding_Rthreshold = 0.35           # Supress wake shedding on elements inboard of this radial station
-# no_shedding_Rthreshold = shed_unsteady ? 0.0 : 0.35
-# no_shedding_nstepsthreshold = 3*nsteps_per_rev # Supress wake shedding before this many time steps
-# no_shedding_nstepsthreshold = 1*nsteps_per_rev # Supress wake shedding before this many time steps
-# no_shedding_nstepsthreshold = nsteps
+vlm_rlx         = 0.5                       # VLM relaxation <-- this also applied to rotors
+hubtiploss_correction = ((0.4, 5, 0.1, 0.05), (2, 1, 0.25, 0.05)) # Hub and tip correction
 
 # VPM solver
+vpm_integration = vpm.euler                 # VPM temporal integration scheme
+# vpm_integration = vpm.rungekutta3
+
 vpm_viscous     = vpm.Inviscid()            # VPM viscous diffusion scheme
-# vpm_viscous     = vpm.CoreSpreading(-1, -1, vpm.zeta_fmm; beta=100.0, itmax=20, tol=1e-1)
-# vpm_SFS         = vpm.SFS_none            # VPM LES subfilter-scale model
-# vpm_SFS         = vpm.SFS_Cd_twolevel_nobackscatter
-# vpm_SFS         = vpm.SFS_Cd_threelevel_nobackscatter
-vpm_SFS         = vpm.DynamicSFS(vpm.Estr_fmm, vpm.pseudo3level_positive; alpha=0.999, clippings=[vpm.clipping_backscatter], maxC=1.0)
-# vpm_SFS         = vpm.DynamicSFS(vpm.Estr_fmm, vpm.pseudo3level_positive; clippings=[vpm.clipping_backscatter],
-                                                        # controls=[control_sigmasensor],
-                                                        # alpha=0.999, rlxf=0.005, minC=0, maxC=1)
+# vpm_viscous   = vpm.CoreSpreading(-1, -1, vpm.zeta_fmm; beta=100.0, itmax=20, tol=1e-1)
+
+vpm_SFS         = vpm.SFS_none              # VPM LES subfilter-scale model
+# vpm_SFS       = vpm.SFS_Cd_twolevel_nobackscatter
+# vpm_SFS       = vpm.SFS_Cd_threelevel_nobackscatter
+# vpm_SFS       = vpm.DynamicSFS(vpm.Estr_fmm, vpm.pseudo3level_positive;
+#                                   alpha=0.999, maxC=1.0,
+#                                   clippings=[vpm.clipping_backscatter])
+# vpm_SFS       = vpm.DynamicSFS(vpm.Estr_fmm, vpm.pseudo3level_positive;
+#                                   alpha=0.999, rlxf=0.005, minC=0, maxC=1
+#                                   clippings=[vpm.clipping_backscatter],
+#                                   controls=[vpm.control_sigmasensor],
+#                                   )
 
 # NOTE: In most practical situations, open rotors operate at a Reynolds number
-#       high enough that viscous diffusion in the wake is negligible.
+#       high enough that viscous diffusion in the wake is actually negligible.
 #       Hence, it does not make much of a difference whether we run the
 #       simulation with viscous diffusion enabled or not. On the other hand,
 #       such high Reynolds numbers mean that the wake quickly becomes turbulent
 #       and it is crucial to use a subfilter-scale (SFS) model to accurately
-#       capture the turbulent decay of the wake.
-
-
-
-
-# TODO: Hide this
-# sigmafactor_vpmonvlm   = 1                  # Shrinks the particles by this factor when calculated VPM-on-VLM/Rotor induced velocities
-sigmafactor_vpmonvlm   = 5.50
-unsteady_shedcrit = 0.001                   # Shed unsteady loading whenever circulation fluctuates more than this ratio
-
-!xfoil ? @warn("XFOIL deactivated!") : nothing
-!shed_unsteady ? @warn("Unsteady loading wake deactivated!") : nothing
-
+#       capture the turbulent decay of the wake (turbulent diffusion).
 
 if VehicleType == uns.QVLMVehicle
-    # NOTE: If the quasi-steady solver is used, this mutes warnings regarding
-    #       potential colinear vortex filaments. This is needed since the
-    #       quasi-steady solver will probe induced velocities at the lifting
-    #       line of the blade
+    # Mute warnings regarding potential colinear vortex filaments. This is
+    # needed since the quasi-steady solver will probe induced velocities at the
+    # lifting line of the blade
     uns.vlm.VLMSolver._mute_warning(true)
 end
 
 
 
+# ----------------- WAKE TREATMENT ---------------------------------------------
+# NOTE: It is known in the CFD community that rotor simulations with an
+#       impulsive RPM start (*i.e.*, 0 to RPM in the first time step, as opposed
+#       to gradually ramping up the RPM) leads to the hub "fountain effect",
+#       with the root wake reversing the flow near the hub.
+#       The fountain eventually goes away as the wake develops, but this happens
+#       very slowly, which delays the convergence of the simulation to a steady
+#       state. To accelerate convergence, here we define a wake treatment
+#       procedure that suppresses the hub wake for the first three revolutions,
+#       avoiding the fountain effect altogether.
+#       This is especially helpful in low and mid-fidelity simulations.
 
-no_shedding_Rthreshold = shed_unsteady ? 0.0 : 0.35
-no_shedding_nstepsthreshold = 3*nsteps_per_rev # Supress wake shedding before this many time steps
+suppress_fountain   = true                  # Toggle
 
-# Determine horseshoes to supress wake shedding
-omit_shedding = []
+# Supress wake shedding on blade elements inboard of this r/R radial station
+no_shedding_Rthreshold = suppress_fountain ? 0.35 : 0.0
 
-# Function to stop supressing wake shedding
+# Supress wake shedding for this many time steps
+no_shedding_nstepsthreshold = 3*nsteps_per_rev
+
+omit_shedding = []          # Index of blade elements to supress wake shedding
+
+# Function to suppress or activate wake shedding
 function wake_treatment_supress(sim, args...; optargs...)
 
-    # Identify horseshoes to supress
+    # Case: start of simulation -> suppress shedding
     if sim.nt == 1
+
+        # Identify blade elements on which to suppress shedding
         for i in 1:vlm.get_m(rotor)
             HS = vlm.getHorseshoe(rotor, i)
             CP = HS[5]
@@ -212,14 +237,16 @@ function wake_treatment_supress(sim, args...; optargs...)
         end
     end
 
-    # Flag to stop supressing
+    # Case: sufficient time steps -> enable shedding
     if sim.nt == no_shedding_nstepsthreshold
+
+        # Flag to stop suppressing
         omit_shedding .= -1
+
     end
 
     return false
 end
-
 
 
 # ----------------- 1) VEHICLE DEFINITION --------------------------------------
@@ -233,7 +260,6 @@ rotor = uns.generate_rotor(rotor_file; pitch=pitch,
                                         read_polar=read_polar,
                                         data_path=data_path,
                                         verbose=true,
-                                        verbose_xfoil=true,
                                         plot_disc=true
                                         );
 
@@ -257,11 +283,6 @@ vehicle = VehicleType(   system;
                             wake_system=wake_system
                          );
 
-# NOTE: Through the `rotor_systems` keyword argument to `uns.VLMVehicle` we
-#       have declared any systems (groups) of rotors that share a common RPM.
-#       We will later declare the control inputs to each rotor system when we
-#       define the `uns.KinematicManeuver`.
-
 
 # ------------- 2) MANEUVER DEFINITION -----------------------------------------
 # Non-dimensional translational velocity of vehicle over time
@@ -278,26 +299,11 @@ RPMs = (RPMcontrol, )                       # RPM of each rotor system
 
 maneuver = uns.KinematicManeuver(angles, RPMs, Vvehicle, anglevehicle)
 
-# NOTE: `FLOWUnsteady.KinematicManeuver` defines a maneuver with prescribed
-#       kinematics. `Vvehicle` defines the velocity of the vehicle (a vector)
-#       over time. `anglevehicle` defines the attitude of the vehicle over time.
-#       `angle` defines the tilting angle of each tilting system over time.
-#       `RPM` defines the RPM of each rotor system over time.
-#       Each of these functions receives a nondimensional time `t`, which is the
-#       simulation time normalized by the total time `ttot`, from 0 to
-#       1, beginning to end of simulation. They all return a nondimensional
-#       output that is then scaled by either a reference velocity (`Vref`) or
-#       a reference RPM (`RPMref`). Defining the kinematics and controls of the
-#       maneuver in this way allows the user to have more control over how fast
-#       to perform the maneuver, since the total time, reference velocity and
-#       RPM are then defined in the simulation parameters shown below.
-
 
 # ------------- 3) SIMULATION DEFINITION ---------------------------------------
 
 Vref = 0.0                                  # Reference velocity to scale maneuver by
 RPMref = RPM                                # Reference RPM to scale maneuver by
-
 Vinit = Vref*Vvehicle(0)                    # Initial vehicle velocity
 Winit = pi/180*(anglevehicle(1e-6) - anglevehicle(0))/(1e-6*ttot)  # Initial angular velocity
 
@@ -312,7 +318,7 @@ restart_file = nothing
 #       time step, and `run_simulation` will start this simulation with the
 #       particle field found in the restart simulation.
 
-# restart_file = "/path/to/a/previous/simulation/rotorhover-example_Rotor_pfield.360"
+# restart_file = "/path/to/a/previous/simulation/rotorhover-example_pfield.360"
 
 
 # ------------- 4) MONITORS DEFINITIONS ----------------------------------------
@@ -339,42 +345,44 @@ monitor_Cd = uns.generate_monitor_Cd(;
                                             run_name=run_name,
                                             figname="Cd monitor"
                                             )
-
+# Concatenate monitors
 monitors = uns.concatenate(monitor_rotor, monitor_enstrophy, monitor_Cd)
-
-
-runtime_function = uns.concatenate(monitors, wake_treatment_supress)
 
 
 # ------------- 5) RUN SIMULATION ----------------------------------------------
 println("Running simulation...")
 
+# Concatenate monitors and wake treatment procedure into one runtime function
+runtime_function = uns.concatenate(monitors, wake_treatment_supress)
+
+# Run simulation
 uns.run_simulation(simulation, nsteps;
                     # ----- SIMULATION OPTIONS -------------
                     Vinf=Vinf,
+                    rho=rho, mu=mu, sound_spd=speedofsound,
                     # ----- SOLVERS OPTIONS ----------------
                     p_per_step=p_per_step,
                     max_particles=max_particles,
+                    vpm_integration=vpm_integration,
                     vpm_viscous=vpm_viscous,
                     vpm_SFS=vpm_SFS,
                     sigma_vlm_surf=sigma_rotor_surf,
                     sigma_rotor_surf=sigma_rotor_surf,
                     sigma_vpm_overwrite=sigma_vpm_overwrite,
+                    sigmafactor_vpmonvlm=sigmafactor_vpmonvlm,
                     vlm_rlx=vlm_rlx,
                     hubtiploss_correction=hubtiploss_correction,
-                    shed_unsteady=shed_unsteady,
                     shed_starting=shed_starting,
-                    # extra_runtime_function=monitors,
+                    shed_unsteady=shed_unsteady,
+                    unsteady_shedcrit=unsteady_shedcrit,
                     omit_shedding=omit_shedding,
                     extra_runtime_function=runtime_function,
+                    # ----- RESTART OPTIONS -----------------
+                    restart_vpmfile=restart_file,
                     # ----- OUTPUT OPTIONS ------------------
                     save_path=save_path,
                     run_name=run_name,
-                    save_wopwopin=true,  # <--- Generate input files for PSU-WOPWOP noise analysis
-
-
-                    sigmafactor_vpmonvlm=sigmafactor_vpmonvlm,
-                    unsteady_shedcrit=unsteady_shedcrit,
+                    save_wopwopin=true,  # <--- Generates input files for PSU-WOPWOP noise analysis
                     save_code=@__FILE__
                     );
 
@@ -401,5 +409,5 @@ end
 
 # ------------- 6) POSTPROCESSING ----------------------------------------------
 
-# # Post-process monitor plots
-# include(joinpath(uns.examples_path, "heavingwing", "heavingwing_postprocessing.jl"))
+# Post-process monitor plots
+# include(joinpath(uns.examples_path, "rotorhover", "rotorhover_postprocessing.jl"))

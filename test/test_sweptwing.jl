@@ -157,6 +157,7 @@ function run_sweptwing(testname;
     pfield = uns.run_simulation(simulation, nsteps;
                                     # SIMULATION OPTIONS
                                     Vinf=Vinf,
+                                    rho=rho,
                                     # SOLVERS OPTIONS
                                     p_per_step=p_per_step,
                                     vlm_init=vlm_init,

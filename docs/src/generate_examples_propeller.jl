@@ -22,7 +22,7 @@ open(joinpath(output_path, output_name*"-J040.md"), "w") do fout
     <br>
     ```
 
-    In this example we simulate an
+    In this example we first simulate an
     [APC Thin-Electric 10x7 propeller](https://www.apcprop.com/product/10x7e/)
     operating in cruise conditions.
     Along the way, we demonstrate the basics of how to set up and run a rotor
@@ -256,7 +256,7 @@ open(joinpath(output_path, output_name*"-incidence.md"), "w") do fout
         <img src="$(remote_url)/propeller-incidencesweep-example.png" alt="Pic here" style="width: 50%;"/>
     </center>
     ```
-    
+
     !!! info "Paraview visualization"
         The `.pvsm` file visualizing the simulation as shown at the
         top of this page is available here:

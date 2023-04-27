@@ -293,6 +293,7 @@ println("Running simulation...")
 uns.run_simulation(simulation, nsteps;
                     # ----- SIMULATION OPTIONS -------------
                     Vinf=Vinf,
+                    rho=rho,
                     # ----- SOLVERS OPTIONS ----------------
                     p_per_step=p_per_step,
                     max_particles=max_particles,
@@ -331,7 +332,7 @@ end
 <span style="font-size: 0.9em; color:gray;"><i>
     Run time: ~10 minutes on a Dell Precision 7760 laptop.
     <br>
-    Reduce resolution (n and steps) to speed up simulation without loss of accuracy.
+    Reduce resolution (`n` and `nsteps`) to speed up simulation without loss of accuracy.
 </i></span>
 <br><br>
 ```
