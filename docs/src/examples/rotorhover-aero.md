@@ -219,7 +219,7 @@ vpm_SFS         = vpm.SFS_none              # VPM LES subfilter-scale model
 # vpm_SFS       = vpm.DynamicSFS(vpm.Estr_fmm, vpm.pseudo3level_positive;
 #                                   alpha=0.999, rlxf=0.005, minC=0, maxC=1
 #                                   clippings=[vpm.clipping_backscatter],
-#                                   controls=[control_sigmasensor],
+#                                   controls=[vpm.control_sigmasensor],
 #                                   )
 
 # NOTE: In most practical situations, open rotors operate at a Reynolds number
