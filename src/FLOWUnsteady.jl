@@ -57,7 +57,8 @@ for header_name in ["vehicle", "vehicle_vlm",
                     "maneuver", "rotor",
                     "simulation_types", "simulation", "utils",
                     "processing", "processing_force", "monitors",
-                    "noise_wopwop", "noise_bpm", "postprocessing"]
+                    "noise_wopwop", "noise_bpm", "postprocessing",
+                    "panel"]
 
     include("FLOWUnsteady_"*header_name*".jl")
 
