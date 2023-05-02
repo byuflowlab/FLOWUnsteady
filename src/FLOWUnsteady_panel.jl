@@ -143,26 +143,38 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
             Gamma, Gammals, G, Gred, Gls, RHS, RHSls = solverprealloc
             if mbp == nothing; mbp = similar(RHS); end;
 
-            # Compute Gred, Gls=Gred'*Gred, and -bp
-            Vtot .= 0         # Set Vinfs = 0 so then RHS becomes simply -bp
+            print("Precomputing G matrix... ")
+            t = @elapsed begin
+                # Compute Gred, Gls=Gred'*Gred, and -bp
+                Vtot .= 0         # Set Vinfs = 0 so then RHS becomes simply -bp
 
-            pnl._G_U_RHS_leastsquares!(panelbody,
-                                        G, Gred, Gls, RHS, RHSls,
-                                        Vtot, controlpoints, normals,
-                                        Das, Dbs,
-                                        elprescribe;
-                                        omit_wake=true
-                                        )
-            mbp .= RHS
-            tGred = transpose(Gred)
+                pnl._G_U_RHS_leastsquares!(panelbody,
+                                            G, Gred, Gls, RHS, RHSls,
+                                            Vtot, controlpoints, normals,
+                                            Das, Dbs,
+                                            elprescribe;
+                                            omit_wake=true
+                                            )
+                mbp .= RHS
+                tGred = transpose(Gred)
+            end
+            println("$(t) seconds")
 
-            # Precompute LU decomposition
-            Glu = pnl.calc_Alu!(Gls)
+            print("Precomputing LU decomposition... ")
+            t = @elapsed begin
+                # Precompute LU decomposition
+                Glu = pnl.calc_Alu!(Gls)
+            end
+            println("$(t) seconds")
 
-            # Precompute coefficients of self-induced velocity
-            pnl._G_Uvortexring!(panelbody, Gpanelt, off_controlpoints, tangents, Das, Dbs; omit_wake=true)
-            pnl._G_Uvortexring!(panelbody, Gpaneln, off_controlpoints, normals,  Das, Dbs; omit_wake=true)
-            pnl._G_Uvortexring!(panelbody, Gpanelo, off_controlpoints, obliques, Das, Dbs; omit_wake=true)
+            print("Precomputing self-induced velocity coeffs... ")
+            t = @elapsed begin
+                # Precompute coefficients of self-induced velocity
+                pnl._G_Uvortexring!(panelbody, Gpanelt, off_controlpoints, tangents, Das, Dbs; omit_wake=true)
+                pnl._G_Uvortexring!(panelbody, Gpaneln, off_controlpoints, normals,  Das, Dbs; omit_wake=true)
+                pnl._G_Uvortexring!(panelbody, Gpanelo, off_controlpoints, obliques, Das, Dbs; omit_wake=true)
+            end
+            println("$(t) seconds")
 
             return false
         end
