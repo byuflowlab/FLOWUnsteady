@@ -39,6 +39,7 @@ NOTE 4: `panel_solver()` currently pre-computes the LU decomposition of the
 """
 function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
                                 sigmafactor_vpmonpanel=1.0,
+                                rlx=-1,
                                 offset_U=0.03,                  # Offset CPs by this amount in U calc
                                 save_path=nothing)
 
@@ -54,6 +55,7 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
     solverprealloc = nothing
     elprescribe = nothing
     mbp, Glu, tGred = nothing, nothing, nothing
+    prevGammals = nothing
 
     Vind = nothing
     Gpanelt, Gpaneln, Gpanelo = nothing, nothing, nothing
@@ -150,6 +152,10 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
 
             Gamma, Gammals, G, Gred, Gls, RHS, RHSls = solverprealloc
             if mbp == nothing; mbp = similar(RHS); end;
+            if prevGammals == nothing
+                prevGammals = similar(Gammals)
+                prevGammals .= NaN
+            end
 
             print("Precomputing G matrix... ")
             t = @elapsed begin
@@ -330,8 +336,18 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
         # Solve system of equations using precomputed LU decomposition
         pnl.solve_ludiv!(Gammals, Gls, RHSls; Alu=Glu)
 
+        # Apply relaxation: Γ = α·Γnew + (1-α)·Γold      (omit in first step)
+        if rlx > 0 && isnothing(findfirst(el->isnan(el), prevGammals))
+            Gammals *= rlx
+            prevGammals *= (1-rlx)
+            Gammals += prevGammals
+        end
+
         # Save solution
         pnl.set_solution(panelbody, Gamma, Gammals, elprescribe, Vtot, Das, Dbs)
+
+        # Store current solution
+        prevGammals .= Gammals
 
         # ----------------------------------------------------------
 
