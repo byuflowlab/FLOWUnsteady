@@ -60,7 +60,7 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
     Vpanelt, Vpaneln, Vpanelo = nothing, nothing, nothing
     tangents, obliques = nothing, nothing
 
-    Xsheddingss, prev_Xsheddingss = [], []
+    Xsheddingss, prev_Xsheddingss, oldstrengthss = [], [], []
 
     function panel_solver(sim, PFIELD, T, DT; initialize=false, optargs...)
 
@@ -128,11 +128,19 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
                 Xsheddings = zeros(3, body.nsheddings*2)
                 prev_Xsheddings = zeros(3, body.nsheddings*2)
 
-                pnl.add_field(body, "Xsheddings", "vector", Xsheddings, "system")
-                pnl.add_field(body, "prev_Xsheddings", "vector", prev_Xsheddings, "system")
+                pnl.add_field(body, "Xsheddings", "vector", Xsheddings,
+                                                "system"; collectfield=false)
+                pnl.add_field(body, "prev_Xsheddings", "vector", prev_Xsheddings,
+                                                "system"; collectfield=false)
+
+                # Allocate memory for storing TE circulation
+                oldstrengths = fill(NaN, body.nsheddings)
+                pnl.add_field(body, "oldstrengths", "vector", oldstrengths,
+                                                "system"; collectfield=false)
 
                 push!(Xsheddingss, Xsheddings)
                 push!(prev_Xsheddingss, prev_Xsheddings)
+                push!(oldstrengthss, oldstrengths)
             end
             applytobottom(create_Xsheddings_field, panelbody)
 
@@ -390,8 +398,12 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
         bodyi = 1
         function restore_Xsheddings_field(body::pnl.RigidWakeBody)
 
-            pnl.add_field(body, "Xsheddings", "vector", Xsheddingss[bodyi], "system")
-            pnl.add_field(body, "prev_Xsheddings", "vector", prev_Xsheddingss[bodyi], "system")
+            pnl.add_field(body, "Xsheddings", "vector", Xsheddingss[bodyi],
+                                                "system"; collectfield=false)
+            pnl.add_field(body, "prev_Xsheddings", "vector", prev_Xsheddingss[bodyi],
+                                                "system"; collectfield=false)
+            pnl.add_field(body, "oldstrengths", "vector", oldstrengthss[bodyi],
+                                                "system"; collectfield=false)
 
             bodyi += 1
         end
@@ -420,8 +432,9 @@ Shed VPM wake from panel bodies
 
 TODO:
 * [ ] Implement `omit_shedding`
-* [ ] Implement starting vortex shedding
-* [ ] Implement unsteady shedding
+* [x] Implement starting vortex shedding
+* [x] Implement unsteady shedding
+* [ ] Spread the unsteady shedding into a sheet
 
 """
 function shed_wake_panel(body::pnl.RigidWakeBody, Vinf::Function,
@@ -481,6 +494,9 @@ function shed_wake_panel(body::pnl.RigidWakeBody, Vinf::Function,
     Xsheddings = pnl.get_field(body, "Xsheddings")["field_data"]
 
     prevstep_Xsheddings .= Xsheddings    # Store previous Xsheddings
+
+    # Trailing edge circulation from previous time step
+    oldstrengths = pnl.get_field(body, "oldstrengths")["field_data"]
 
     # Fetch last shedding element to check closed geometry later on
     lasti = body.nsheddings
@@ -643,6 +659,73 @@ function shed_wake_panel(body::pnl.RigidWakeBody, Vinf::Function,
                 end
             end
 
+            # Case shedding unsteady vorticity at trailing edge
+            if unsteady_shedcrit>0
+
+                println("Rabbit1")
+
+                strength_old = oldstrengths[ei]
+
+                # Case shedding starting vortex
+                if isnan(strength_old) && shed_starting
+                    strength_old = 0
+                end
+
+                if !isnan(strength_old)
+
+                    println("Rabbit2")
+
+                    # Unsteady circulation
+                    strength_unsteady = -(strength - strength_old)
+
+                    # Smoothing radius
+                    sigma = edgelength * sigmafactor
+
+                    # Effective velocity at pa
+                    pai = 2*(ei-1) + 1
+                    for i in 1:3
+                        V[i] = -(Xsheddings[i, pai] - prevstep_Xsheddings[i, pai]) / dt
+                    end
+                    V += Vinf(view(Xsheddings, :, pai), t)
+
+                    # Filament starting point: pa + dt*V(pa)
+                    pstart1 = pa1 + V[1]*dt
+                    pstart2 = pa2 + V[2]*dt
+                    pstart3 = pa3 + V[3]*dt
+
+                    # Effective velocity at pb
+                    pbi = 2*(ei-1) + 2
+                    for i in 1:3
+                        V[i] = -(Xsheddings[i, pbi] - prevstep_Xsheddings[i, pbi]) / dt
+                    end
+                    V += Vinf(view(Xsheddings, :, pbi), t)
+
+                    # Filament end point: pb + dt*V(pb)
+                    pend1 = pb1 + V[1]*dt
+                    pend2 = pb2 + V[2]*dt
+                    pend3 = pb3 + V[3]*dt
+
+                    # Shed vorticity only if strength is greater than certain threshold
+                    println("strength:\t$(strength)")
+                    println("strength_old:\t$(strength_old)")
+                    println("crit:\t$(abs(strength_unsteady/strength_old))")
+                    if abs(strength_unsteady/strength_old) > unsteady_shedcrit
+
+                        _add_filamentparticle!(pfield, X, Gamma,
+                                                strength_unsteady,
+                                                pstart1, pstart2, pstart3,
+                                                pend1, pend2, pend3, sigma;
+                                                p_per_step=p_per_step, overwrite_sigma=overwrite_sigma
+                                                )
+
+                    end
+                end
+
+                # Update old strengths for unsteady shedding
+                oldstrengths[ei] = strength
+
+            end
+
             prev_strength = strength
             prev_pa[1] = pa1
             prev_pa[2] = pa2
@@ -686,7 +769,6 @@ function _add_filamentparticle!(pfield, X, Gamma,
     else
         sigmap = overwrite_sigma
     end
-
 
     # Particle position
     X[1] = pa1 - (pb1 - pa1)/pps/2
