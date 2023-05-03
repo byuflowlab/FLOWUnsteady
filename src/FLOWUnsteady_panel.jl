@@ -8,6 +8,7 @@
 
 
 # TODO
+* [ ] Output panel static particles
 * [ ] Test solver with MultiBody
 * [ ] Verify that least-square solver in `panel_solver` also applies to open
         bodies or revisit
@@ -41,7 +42,8 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
                                 sigmafactor_vpmonpanel=1.0,
                                 rlx=-1,
                                 offset_U=0.03,                  # Offset CPs by this amount in U calc
-                                save_path=nothing)
+                                save_path=nothing,
+                                run_name=run_name)
 
     normals, controlpoints, prev_controlpoints, off_controlpoints = nothing, nothing, nothing, nothing
     Vkin, Vtot = nothing, nothing
@@ -92,8 +94,7 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
             if tangents == nothing; tangents = pnl.calc_tangents(panelbody); end;
             if obliques == nothing; obliques = pnl.calc_obliques(panelbody); end;
             if off_controlpoints == nothing
-                off_controlpoints = pnl.calc_controlpoints(panelbody, normals; off=offset_U,
-                                            characteristiclength=panelbody.characteristiclength)
+                off_controlpoints = pnl.calc_controlpoints(panelbody, normals; off=offset_U)
             end
 
             # Initialize storage
@@ -127,12 +128,12 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
 
             # Add Xsheddings storage space to body
             function create_Xsheddings_field(body::pnl.RigidWakeBody)
-                Xsheddings = zeros(3, body.nsheddings*2)
-                prev_Xsheddings = zeros(3, body.nsheddings*2)
+                this_Xsheddings = zeros(3, body.nsheddings*2)
+                this_prev_Xsheddings = zeros(3, body.nsheddings*2)
 
-                pnl.add_field(body, "Xsheddings", "vector", Xsheddings,
+                pnl.add_field(body, "Xsheddings", "vector", this_Xsheddings,
                                                 "system"; collectfield=false)
-                pnl.add_field(body, "prev_Xsheddings", "vector", prev_Xsheddings,
+                pnl.add_field(body, "prev_Xsheddings", "vector", this_prev_Xsheddings,
                                                 "system"; collectfield=false)
 
                 # Allocate memory for storing TE circulation
@@ -140,8 +141,8 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
                 pnl.add_field(body, "oldstrengths", "vector", oldstrengths,
                                                 "system"; collectfield=false)
 
-                push!(Xsheddingss, Xsheddings)
-                push!(prev_Xsheddingss, prev_Xsheddings)
+                push!(Xsheddingss, this_Xsheddings)
+                push!(prev_Xsheddingss, this_prev_Xsheddings)
                 push!(oldstrengthss, oldstrengths)
             end
             applytobottom(create_Xsheddings_field, panelbody)
@@ -200,13 +201,14 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
         pnl.calc_obliques!(panelbody, obliques)
         pnl.calc_areas!(panelbody, areas)
         pnl.calc_controlpoints!(panelbody, controlpoints, normals)
-        pnl.calc_controlpoints!(panelbody.grid, off_controlpoints, normals;
-                                off=offset_U, characteristiclength=panelbody.characteristiclength)
+        pnl.calc_controlpoints!(panelbody, off_controlpoints, normals; off=offset_U)
 
         # Get shedding points
         countsheddings = 0
 
         function calc_Xsheddings(body::pnl.RigidWakeBody)
+
+            this_Xsheddings = pnl.get_field(body, "Xsheddings")["field_data"]
 
             grid = body.grid
             nodes = grid.orggrid.nodes
@@ -224,6 +226,9 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
                 for i in 1:3
                     Xsheddings[i, 2*countsheddings + 2*(ei-1) + 1] = nodes[i, pia]
                     Xsheddings[i, 2*countsheddings + 2*(ei-1) + 2] = nodes[i, pib]
+
+                    this_Xsheddings[i, 2*(ei-1) + 1] = nodes[i, pia]
+                    this_Xsheddings[i, 2*(ei-1) + 2] = nodes[i, pib]
                 end
 
             end
@@ -426,10 +431,11 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
         applytobottom(restore_Xsheddings_field, panelbody)
 
         if save_path != nothing
-            pnl.save(panelbody, "panelbody"; path=save_path, num=sim.nt,
+            pnl.save(panelbody, run_name; path=save_path, num=sim.nt,
                                                 out_wake=true,
                                                 wake_panel=false,
-                                                debug=false)
+                                                debug=false,
+                                                suffix="_panel")
         end
 
 
@@ -748,9 +754,9 @@ function shed_wake_panel(body::pnl.RigidWakeBody, Vinf::Function,
 end
 
 
-function shed_wake_panel(multibody::pnl.MultiBody, pfield, dt, nt; optargs...)
+function shed_wake_panel(multibody::pnl.MultiBody, Vinf, pfield, dt, nt; optargs...)
 
-    applytobottom(shed_wake_panel, body)
+    applytobottom(shed_wake_panel, multibody; args=[Vinf, pfield, dt, nt], optargs=optargs)
 
 end
 
@@ -924,7 +930,7 @@ Iterates over each body of `multibody` applying `f(component)` if the
 body is not a `MultiBody`, or applying recursion otherwise.
 """
 function applytobottom(f::Function, multibody::pnl.MultiBody; optargs...)
-    for body in multibody
+    for body in multibody.bodies
         applytobottom(f, body; optargs...)
     end
 end
