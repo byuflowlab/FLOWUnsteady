@@ -662,8 +662,6 @@ function shed_wake_panel(body::pnl.RigidWakeBody, Vinf::Function,
             # Case shedding unsteady vorticity at trailing edge
             if unsteady_shedcrit>0
 
-                println("Rabbit1")
-
                 strength_old = oldstrengths[ei]
 
                 # Case shedding starting vortex
@@ -672,8 +670,6 @@ function shed_wake_panel(body::pnl.RigidWakeBody, Vinf::Function,
                 end
 
                 if !isnan(strength_old)
-
-                    println("Rabbit2")
 
                     # Unsteady circulation
                     strength_unsteady = -(strength - strength_old)
@@ -706,9 +702,6 @@ function shed_wake_panel(body::pnl.RigidWakeBody, Vinf::Function,
                     pend3 = pb3 + V[3]*dt
 
                     # Shed vorticity only if strength is greater than certain threshold
-                    println("strength:\t$(strength)")
-                    println("strength_old:\t$(strength_old)")
-                    println("crit:\t$(abs(strength_unsteady/strength_old))")
                     if abs(strength_unsteady/strength_old) > unsteady_shedcrit
 
                         _add_filamentparticle!(pfield, X, Gamma,
