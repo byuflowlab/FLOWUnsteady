@@ -367,6 +367,7 @@ function run_simulation(
                                     vlm_vortexsheet_distribution=vlm_vortexsheet_distribution,
                                     vlm_vortexsheet_sigma_tbv=vlm_vortexsheet_sigma_tbv,
                                     save_path=save_static_particles ? save_path : nothing,
+                                    extra_static_particles_fun=extra_static_particles_fun,
                                     run_name=run_name, nsteps_save=nsteps_save)
     else
         vehicle_static_particles_function = (pfield, t, dt)->nothing
