@@ -8,7 +8,6 @@
 
 
 # TODO
-* [ ] Output panel static particles
 * [ ] Test solver with MultiBody
 * [ ] Verify that least-square solver in `panel_solver` also applies to open
         bodies or revisit
@@ -40,6 +39,7 @@ NOTE 4: `panel_solver()` currently pre-computes the LU decomposition of the
 """
 function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
                                 sigmafactor_vpmonpanel=1.0,
+                                calc_elprescribe=pnl.calc_elprescribe,
                                 rlx=-1,
                                 offset_U=0.03,                  # Offset CPs by this amount in U calc
                                 save_path=nothing,
@@ -148,7 +148,7 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
             applytobottom(create_Xsheddings_field, panelbody)
 
             # Pre-allocate solver memory
-            elprescribe = pnl.calc_elprescribe(panelbody)
+            elprescribe = calc_elprescribe(panelbody)
             solverprealloc = pnl.allocate_solver(panelbody, elprescribe, Float64)
 
             Gamma, Gammals, G, Gred, Gls, RHS, RHSls = solverprealloc
@@ -177,8 +177,18 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
 
             print("Precomputing LU decomposition... ")
             t = @elapsed begin
+
                 # Precompute LU decomposition
-                Glu = pnl.calc_Alu!(Gls)
+                if length(elprescribe)==0
+                    # Case of direct solver
+                    Glu = pnl.calc_Alu!(G)
+                    tGred = I
+                    Gls .= G
+                else
+                    # Case of least-square solver
+                    Glu = pnl.calc_Alu!(Gls)
+                end
+
             end
             println("$(t) seconds")
 
