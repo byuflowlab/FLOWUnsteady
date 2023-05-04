@@ -8,9 +8,11 @@
 
 
 # TODO
-* [ ] Test solver with MultiBody
-* [ ] Verify that least-square solver in `panel_solver` also applies to open
+* [ ] Validate solver with MultiBody
+* [x] Verify that least-square solver in `panel_solver` also applies to open
         bodies or revisit
+* [x] Avoid shedding at interface of contiguous bodies
+* [ ] Spread the unsteady shedding into a sheet
 * [ ] Verify correct implementation of `panel_solver` on a moving body
         (kinematic velocity)
 =###############################################################################
@@ -462,8 +464,15 @@ end
 """
 Shed VPM wake from panel bodies
 
+Use `omit_shedding` to omit shedding from specific TE panels in a body.
+`omit_shedding[body][ei] = (bool_pa, bool_pb, bool_te)` indicates that the
+body `body` should omit shedding from the `ei`-th TE panel. `bool_pa==true`
+indicates to omit shedding the trailing vorticity from its pa point, `bool_pb`
+from the pb point, and `bool_te` omits shedding the unsteady vorticity
+transversal to the trailing.
+
 TODO:
-* [ ] Implement `omit_shedding`
+* [x] Implement `omit_shedding`
 * [x] Implement starting vortex shedding
 * [x] Implement unsteady shedding
 * [ ] Spread the unsteady shedding into a sheet
@@ -476,7 +485,7 @@ function shed_wake_panel(body::pnl.RigidWakeBody, Vinf::Function,
                             shed_starting=false,
                             p_per_step=1,
                             sigmafactor=1.0, overwrite_sigma=nothing,
-                            omit_shedding=[],
+                            omit_shedding::Dict{<:pnl.AbstractBody, Dict{Int64, Tuple{Bool, Bool, Bool}}}=Dict(),
                             tol=1e-6
                         )
     #=
@@ -529,6 +538,8 @@ function shed_wake_panel(body::pnl.RigidWakeBody, Vinf::Function,
 
     # Trailing edge circulation from previous time step
     oldstrengths = pnl.get_field(body, "oldstrengths")["field_data"]
+
+    noshedding = body in keys(omit_shedding) ? omit_shedding[body] : []
 
     # Fetch last shedding element to check closed geometry later on
     lasti = body.nsheddings
@@ -626,7 +637,7 @@ function shed_wake_panel(body::pnl.RigidWakeBody, Vinf::Function,
                 prev_paend3 = prev_pa[3] + V[3]*dt
 
                 # Shed previous incoming filament
-                if unsteady_shedcrit<=0
+                if unsteady_shedcrit<=0 && !(ei-1 in keys(noshedding) && noshedding[ei-1][1])
                     _add_filamentparticle!(pfield, X, Gamma,
                                             prev_strength,
                                             prev_paend1, prev_paend2, prev_paend3,
@@ -653,7 +664,7 @@ function shed_wake_panel(body::pnl.RigidWakeBody, Vinf::Function,
 
 
             # Shed outgoing filament
-            if unsteady_shedcrit<=0
+            if unsteady_shedcrit<=0 && !(ei in keys(noshedding) && noshedding[ei][2])
                 _add_filamentparticle!(pfield, X, Gamma,
                                         -strength_pb,
                                         pbend1, pbend2, pbend3,
@@ -681,7 +692,7 @@ function shed_wake_panel(body::pnl.RigidWakeBody, Vinf::Function,
                 paend3 = pa3 + V[3]*dt
 
                 # Shed incoming filament
-                if unsteady_shedcrit<=0
+                if unsteady_shedcrit<=0 && !(ei in keys(noshedding) && noshedding[ei][1])
                     _add_filamentparticle!(pfield, X, Gamma,
                                             strength,
                                             paend1, paend2, paend3,
@@ -691,8 +702,10 @@ function shed_wake_panel(body::pnl.RigidWakeBody, Vinf::Function,
                 end
             end
 
+
+            # ----------------- Shed from TE ----------------------------
             # Case shedding unsteady vorticity at trailing edge
-            if unsteady_shedcrit>0
+            if unsteady_shedcrit>0  && !(ei in keys(noshedding) && noshedding[ei][3])
 
                 strength_old = oldstrengths[ei]
 

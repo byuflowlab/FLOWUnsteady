@@ -153,6 +153,7 @@ function run_simulation(
             boundarylayer_prescribedCd = 0.1,   # (experimental) prescribed Cd for boundary layer shedding used for wings
             boundarylayer_d     = 0.0,          # (experimental) dipole width for boundary layer shedding
             omit_shedding       = [],           # Indices of elements in `sim.vehicle.wake_system` on which omit shedding VPM particles
+            panel_omit_shedding = Dict(),
 
             # Regularization of solvers
             sigma_vlm_solver    = -1,           # Regularization of VLM solver (internal VLM-on-VLM)
@@ -296,7 +297,7 @@ function run_simulation(
                                 p_per_step=p_per_step,
                                 sigmafactor=sigmafactor_vpm,
                                 overwrite_sigma=sigma_vpm_overwrite,
-                                omit_shedding=[] # TODO: Implement omit_shedding for panel
+                                omit_shedding=panel_omit_shedding
                             )
         end
 
@@ -324,7 +325,7 @@ function run_simulation(
                                     p_per_step=p_per_step,
                                     sigmafactor=sigmafactor_vpm,
                                     overwrite_sigma=sigma_vpm_overwrite,
-                                    omit_shedding=[]
+                                    omit_shedding=panel_omit_shedding
                                 )
             end
         end
