@@ -47,7 +47,8 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
                                 save_path=nothing,
                                 run_name=run_name)
 
-    normals, controlpoints, prev_controlpoints, off_controlpoints = nothing, nothing, nothing, nothing
+    normals, normalscorr = nothing, nothing
+    controlpoints, prev_controlpoints, off_controlpoints = nothing, nothing, nothing
     Vkin, Vtot = nothing, nothing
     Vas, Vbs = nothing, nothing
     Das, Dbs = nothing, nothing
@@ -90,6 +91,7 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
 
             # Precompute normals and control points
             if normals == nothing; normals = pnl.calc_normals(panelbody); end;
+            if normalscorr == nothing; normalscorr = pnl.calc_normals(panelbody; flipbyCPoffset=true); end;
             if controlpoints == nothing; controlpoints = pnl.calc_controlpoints(panelbody, normals); end;
 
             # Precompute unit vectors and offset control points for U calc
@@ -209,6 +211,7 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
         # Get panel control points
         prev_controlpoints .= controlpoints
         pnl.calc_normals!(panelbody, normals)
+        pnl.calc_normals!(panelbody, normalscorr; flipbyCPoffset=true)
         pnl.calc_tangents!(panelbody, tangents)
         pnl.calc_obliques!(panelbody, obliques)
         pnl.calc_areas!(panelbody, areas)
@@ -425,7 +428,7 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
 
         # Calculate the force of each panel (based on Cp)
         Fs .= 0
-        pnl.calcfield_F!(Fs, panelbody, areas, normals, Us, ref_magVinf, ref_rho)
+        pnl.calcfield_F!(Fs, panelbody, areas, normalscorr, Us, ref_magVinf, ref_rho)
 
         # Restore fields erased by solve
         bodyi = 1

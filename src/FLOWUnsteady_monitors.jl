@@ -486,6 +486,7 @@ function generate_monitor_panel_slice(body::Union{pnl.NonLiftingBody, pnl.Abstra
                                         fieldname, sliceposs, nsteps_sim;
                                         formatplot=(fcalls, fig, axs)->nothing,
                                         plot_optargs=(; alpha=0.75),
+                                        nsteps_savefig=10,
                                         optargs...)
 
     # NOTE: Here we assume that the control points stay constant throughout
@@ -509,6 +510,7 @@ function generate_monitor_panel_slice(body::Union{pnl.NonLiftingBody, pnl.Abstra
         fig, axs = pnl.monitor_slice(body, controlpoints, fieldname, sliceposs;
                                                 _fig=fig, _axs=axs, num=PFIELD.nt,
                                                 plot_optargs=(; color=clr, plot_optargs...),
+                                                savefig=PFIELD.nt%nsteps_savefig==0,
                                                 optargs...)
 
         # Format plot
@@ -532,6 +534,9 @@ function generate_monitor_panel_Cp(body, Uref, args...;
 
     function formatplot(fcalls, fig, axs)
         if fcalls==0
+
+            formatpyplot()
+
             fig.suptitle("Pressure slices")
 
             for ax in axs
@@ -596,10 +601,10 @@ function generate_monitor_panel_wing(body, bref, arref, Uref, rhoref, nsteps_sim
                                         y2b_lbl=L"Span position $\frac{2y}{b}$",
                                         cl_ttl="Spanwise lift distribution",
                                         cd_ttl="Spanwise drag distribution",
-                                        extraformatplot=(fcalls, fig, axs)->nothing,
                                         save_path=nothing,
                                         filepref="wing",
                                         plot_optargs=[],
+                                        nsteps_savefig=10,
                                         optargs...)
 
     # Number of function calls
@@ -612,6 +617,9 @@ function generate_monitor_panel_wing(body, bref, arref, Uref, rhoref, nsteps_sim
 
     # Figure handles
     if disp_plot
+
+        formatpyplot()
+
         fig = plt.figure(figname, figsize=[7*2, 5*2]*2/3)
         fig.suptitle(title_lbl)
         axs = fig.subplots(2, 2)
@@ -691,12 +699,13 @@ function generate_monitor_panel_wing(body, bref, arref, Uref, rhoref, nsteps_sim
                                         _fig=fig, _axs=axs[3:4],
                                         disp_plot=disp_plot,
                                         to_plot=[1, 2],
-                                        yscalings=0.5*rhoref*Uref^2*bref/arref*ones(2),
+                                        yscalings=ones(2)/(0.5*rhoref*Uref^2*bref/arref),
                                         ylbls="Sectional ".*[L"lift $c_\ell$", L"drag $c_d$"],
                                         plot_optargs=(; color=clr, plot_optargs...),
                                         save_path=save_path,
                                         filepref=filepref,
                                         num=PFIELD.nt,
+                                        savefig=PFIELD.nt%nsteps_savefig==0,
                                         optargs...)
 
         fcalls += 1
