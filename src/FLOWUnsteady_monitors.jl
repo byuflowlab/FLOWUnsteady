@@ -554,6 +554,8 @@ function generate_monitor_panel_Cp(body, Uref, args...;
             for (ax, ttl) in zip(axs, axtitles)
                 ax.set_title(ttl, color="gray")
             end
+
+            fig.tight_layout()
         end
 
         extraformatplot(fcalls, fig, axs)
