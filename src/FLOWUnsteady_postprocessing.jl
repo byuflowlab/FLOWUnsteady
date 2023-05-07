@@ -184,7 +184,8 @@ preprocess_pfield = generate_preprocessing_fluiddomain_pfield(maxsigma, maxmagGa
 computefluiddomain( ... ; userfunction_pfield=preprocess_pfield, ...)
 ```
 """
-function generate_preprocessing_fluiddomain_pfield(maxsigma, maxmagGamma; verbose=true, v_lvl=1)
+function generate_preprocessing_fluiddomain_pfield(maxsigma, maxmagGamma;
+                                                    minsigma=-Inf, verbose=true, v_lvl=1)
 
 
     function preprocessing(pfield, args...; optargs...)
@@ -199,6 +200,11 @@ function generate_preprocessing_fluiddomain_pfield(maxsigma, maxmagGamma; verbos
                 mean_sigma += P.sigma[1]
                 P.sigma[1] = maxsigma
                 count_sigma += 1
+            end
+
+            # Check for small sigma
+            if P.sigma[1] < minsigma
+                P.sigma[1] = minsigma
             end
 
             # Check for Gamma with NaN value
