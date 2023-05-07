@@ -43,7 +43,7 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
                                 sigmafactor_vpmonpanel=1.0,
                                 calc_elprescribe=pnl.calc_elprescribe,
                                 rlx=-1,
-                                offset_U=0.03,                  # Offset CPs by this amount in U calc
+                                offset_U=0,                  # Offset CPs by this amount in U calc
                                 save_path=nothing,
                                 run_name=run_name)
 
@@ -415,14 +415,12 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
 
         # Calculate surface velocity U_∇μ due to the gradient of the doublet strength
         Ugradmus .= 0
-        pnl.calcfield_Ugradmu!(Ugradmus, panelbody)
+        pnl.calcfield_Ugradmu!(Ugradmus, panelbody, areas, normals, controlpoints)
 
         # Add both velocities together
-        # addfields(panelbody, "Ugradmu", "U")
+        pnl.addfields(panelbody, "Ugradmu", "U")
 
         # Calculate pressure coefficient (based on U + U_∇μ)
-        # magVinf         = 40.0
-        # rho             = 1.225
         Cps .= 0
         pnl.calcfield_Cp!(Cps, panelbody, Us, ref_magVinf)
 

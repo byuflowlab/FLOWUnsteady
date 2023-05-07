@@ -603,7 +603,7 @@ function generate_monitor_panel_wing(body, bref, arref, Uref, rhoref, nsteps_sim
                                         cd_ttl="Spanwise drag distribution",
                                         save_path=nothing,
                                         filepref="wing",
-                                        plot_optargs=[],
+                                        plot_optargs=(; alpha=0.7),
                                         nsteps_savefig=10,
                                         optargs...)
 
