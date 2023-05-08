@@ -486,7 +486,8 @@ function shed_wake_panel(body::pnl.RigidWakeBody, Vinf::Function,
                             shed_starting=false,
                             p_per_step=1,
                             sigmafactor=1.0, overwrite_sigma=nothing,
-                            omit_shedding::Dict{<:pnl.AbstractBody, Dict{Int64, Tuple{Bool, Bool, Bool}}}=Dict(),
+                            # omit_shedding::Dict{<:pnl.AbstractBody, Dict{Int64, Tuple{Bool, Bool, Bool}}}=Dict(),
+                            omit_shedding=Dict(),
                             tol=1e-6
                         )
     #=
