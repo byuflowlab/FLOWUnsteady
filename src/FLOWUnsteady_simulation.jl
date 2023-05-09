@@ -162,6 +162,7 @@ function run_simulation(
             sigmafactor_vpm     = 1.0,          # Core overlap of wake particles
             sigmafactor_vpmonvlm = 1,           # (experimental) shrinks the particles by this factor when calculating VPM-on-VLM/Rotor induced velocities
             sigma_vpm_overwrite = nothing,      # Overwrite core size of wake to this value (ignoring `sigmafactor_vpm`)
+            sigma_vpmpanel_overwrite = nothing, # Overwrite core size of panel wake to this value (ignoring `sigmafactor_vpm`)
 
             extra_static_particles_fun = (args...; optargs...) -> nothing,
             shed_wake_panel = nothing,
@@ -296,7 +297,7 @@ function run_simulation(
                                 shed_starting=false,
                                 p_per_step=p_per_step,
                                 sigmafactor=sigmafactor_vpm,
-                                overwrite_sigma=sigma_vpm_overwrite,
+                                overwrite_sigma=isnothing(sigma_vpmpanel_overwrite) ? sigma_vpm_overwrite : sigma_vpmpanel_overwrite,
                                 omit_shedding=panel_omit_shedding
                             )
         end
@@ -324,7 +325,7 @@ function run_simulation(
                                     shed_starting=shed_starting,
                                     p_per_step=p_per_step,
                                     sigmafactor=sigmafactor_vpm,
-                                    overwrite_sigma=sigma_vpm_overwrite,
+                                    overwrite_sigma=isnothing(sigma_vpmpanel_overwrite) ? sigma_vpm_overwrite : sigma_vpmpanel_overwrite,
                                     omit_shedding=panel_omit_shedding
                                 )
             end
