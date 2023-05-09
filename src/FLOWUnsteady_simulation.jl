@@ -124,6 +124,7 @@ function run_simulation(
             max_particles   = Int(1e5),         # Maximum number of particles
             max_static_particles = nothing,     # Maximum number of static particles (use `nothing` to automatically estimate it)
             p_per_step      = 1,                # Particle sheds per time step
+            p_per_step_panel= 1,                # Particle sheds per time step for panel bodies
             vpm_formulation = vpm.rVPM,         # VPM formulation (`vpm.rVPM` or `vpm.cVPM`)
             vpm_kernel      = vpm.gaussianerf,  # VPM kernel (`vpm.gaussianerf` or `vpm.winckelmans`)
             vpm_UJ          = vpm.UJ_fmm,       # VPM particle-to-particle interaction scheme (`vpm.UJ_fmm` or `vpm.UJ_direct`)
@@ -295,7 +296,7 @@ function run_simulation(
             shed_wake_panel(body, Vinf, PFIELD, DT, sim.nt; t=T,
                                 unsteady_shedcrit=-1,
                                 shed_starting=false,
-                                p_per_step=p_per_step,
+                                p_per_step=p_per_step_panel,
                                 sigmafactor=sigmafactor_vpm,
                                 overwrite_sigma=isnothing(sigma_vpmpanel_overwrite) ? sigma_vpm_overwrite : sigma_vpmpanel_overwrite,
                                 omit_shedding=panel_omit_shedding
@@ -323,7 +324,7 @@ function run_simulation(
                 shed_wake_panel(body, Vinf, PFIELD, DT, sim.nt; t=T,
                                     unsteady_shedcrit=unsteady_shedcrit,
                                     shed_starting=shed_starting,
-                                    p_per_step=p_per_step,
+                                    p_per_step=p_per_step_panel,
                                     sigmafactor=sigmafactor_vpm,
                                     overwrite_sigma=isnothing(sigma_vpmpanel_overwrite) ? sigma_vpm_overwrite : sigma_vpmpanel_overwrite,
                                     omit_shedding=panel_omit_shedding
