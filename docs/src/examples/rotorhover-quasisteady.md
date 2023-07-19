@@ -9,5 +9,5 @@ VehicleType     = uns.QVLMVehicle
 and this parameter when [calling PSU-WOPWOP](@ref rotorhovernoise):
 ```julia
 const_solution  = true
+n = 50   # <---- For some reason PSU-WOPWOP breaks with less blade elements
 ```
-
