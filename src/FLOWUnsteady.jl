@@ -32,6 +32,7 @@ import GeometricTools
 # NOTE: Unregistered packages available at https://github.com/byuflowlab
 import FLOWVPM
 import FLOWVLM
+import VSPGeom
 import FLOWNoise
 import BPM
 
@@ -39,6 +40,7 @@ import BPM
 const gt    = GeometricTools
 const vpm   = FLOWVPM
 const vlm   = FLOWVLM
+const vsp   = VSPGeom
 const noise = FLOWNoise
 
 # ------------ GLOBAL VARIABLES ------------------------------------------------
@@ -55,7 +57,8 @@ for header_name in ["vehicle", "vehicle_vlm",
                     "maneuver", "rotor",
                     "simulation_types", "simulation", "utils",
                     "processing", "processing_force", "monitors",
-                    "noise_wopwop", "noise_bpm", "postprocessing"]
+                    "noise_wopwop", "noise_bpm", "postprocessing",
+                    "openvsp"]
 
     include("FLOWUnsteady_"*header_name*".jl")
 
