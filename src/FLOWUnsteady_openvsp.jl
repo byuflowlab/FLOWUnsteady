@@ -186,41 +186,40 @@ function import_vsp(comp; geomType::String="wing",
         geom = gt.GridTriangleSurface(fuselage_grid, 1)
 
     elseif lowercase(geomType) == "propeller"
-        ArgumentError("Propeller import not implemented. Use FLOWUnsteady functions to create geometry.")
+        error("Propeller import not implemented. Use FLOWUnsteady functions to create geometry.")
         geom = Nothing
 
     elseif lowercase(geomType) == "duct"
-        ArgumentError("Propeller import not implemented. Use FLOWUnsteady functions to create geometry.")
-        geom = Nothing
+        @warn "Duct import not fully implemented. Use FLOWUnsteady functions instead.
+        The input duct geometry has to be aligned along the X-axis. A wake will not be generated."
 
-        # WARNING:
-        # The following code only works for a duct geometry aligned along the X-axis
-        # Also, the trailing edge wake has not been defined
+        # This function could be improved by directly assigning the coordinates 
+        # to the Grid object rather than using the profile to create a body of revolution
 
-        # nXsecs, npts = vsp.degenGeomSize(comp.surface_node)
-        #
-        # imax = transpose_grid ? npts : nXsecs
-        # jmax = transpose_grid ? nXsecs : npts
-        #
-        # # Build list of coordinates of profile
-        # profile = Array{Float64, 2}(undef, jmax, 2)
-        #
-        # for j = 1:jmax
-        #     profile[j, 1] = comp.surface_node.x[j]
-        #     profile[j, 2] = comp.surface_node.y[j]
-        # end
-        #
-        # duct_grid = gt.surface_revolution(profile, imax; loop_dim=2, axis_angle=270)
-        #
-        # # Rotate to align centerline with X-axis
-        # Oaxis = gt.rotation_matrix2(0, 0, 90)
-        # gt.lintransform!(duct_grid, Oaxis, zeros(3))
-        #
-        # # Convert to trigrid
-        # geom = gt.GridTriangleSurface(duct_grid, 1)
+        nXsecs, npts = vsp.degenGeomSize(comp.surface_node)
+
+        imax = transpose_grid ? npts : nXsecs
+        jmax = transpose_grid ? nXsecs : npts
+
+        # Build list of coordinates of profile
+        profile = Array{Float64, 2}(undef, jmax, 2)
+
+        for j = 1:jmax
+            profile[j, 1] = comp.surface_node.x[j]
+            profile[j, 2] = comp.surface_node.y[j]
+        end
+
+        duct_grid = gt.surface_revolution(profile, imax; loop_dim=2, axis_angle=270)
+
+        # Rotate to align centerline with X-axis
+        Oaxis = gt.rotation_matrix2(0, 0, 90)
+        gt.lintransform!(duct_grid, Oaxis, zeros(3))
+
+        # Convert to trigrid
+        geom = gt.GridTriangleSurface(duct_grid, 1)
 
     else
-        ArgumentError("Invalid geomType string")
+        error("The geomType \"$geomType\" is invalid")
         geom = Nothing
     end
 
