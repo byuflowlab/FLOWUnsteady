@@ -24,21 +24,33 @@ function read_degengeom(filename::String)
 end
 
 """
-    import_vsp(comp; geomType, flip_y)
+    import_vsp(comp; geomType::String="", flip_y::Bool=false, transpose_grid::Bool=false)
 
-Imports properties from OpenVSP component to FLOWUnsteady objects. Importing propeller and duct geometries are under development.
+Imports properties from OpenVSP component to FLOWUnsteady objects. Importing prop and duct geometries are under development.
 
 **Arguments**
 - `comp::VSPComponent`: Single `VSPComponent` object
-- `geomType::String` : Geometry type may be one of - `wing`, `fuselage`, `propeller`, `duct`
+- `geomType::String` : Geometry type may be one of - `wing`, `fuselage`, `prop`, `duct`
 - `flip_y::Bool` : Flip y-coordinates about longitudinal plane
 - `transpose_grid::Bool` : Swap ordering of grid points
 
 **Returns**
 - `geom`: FLOWUnsteady geometry
 """
-function import_vsp(comp; geomType::String="wing",
+function import_vsp(comp; geomType::String="",
         flip_y::Bool=false, transpose_grid::Bool=false)
+
+    @show comp.type
+    # Infer type of geometry from VSPComponent if not specified
+    if geomType == ""
+        if lowercase(comp.type) == "lifting_surface"
+            geomType = "wing"
+        elseif lowercase(comp.type) == "body"
+            geomType = "fuselage"
+        elseif lowercase(comp.type) == "duct"
+            geomType = "duct"
+        end
+    end
 
     if lowercase(geomType) == "wing"
 
@@ -185,8 +197,8 @@ function import_vsp(comp; geomType::String="wing",
         # Convert to trigrid
         geom = gt.GridTriangleSurface(fuselage_grid, 1)
 
-    elseif lowercase(geomType) == "propeller"
-        error("Propeller import not implemented. Use FLOWUnsteady functions to create geometry.")
+    elseif lowercase(geomType) == "prop"
+        error("Prop import not implemented. Use FLOWUnsteady functions to create geometry.")
         geom = Nothing
 
     elseif lowercase(geomType) == "duct"
