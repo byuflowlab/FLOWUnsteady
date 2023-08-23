@@ -26,24 +26,29 @@ end
 """
     import_vsp(comp; geomType, flip_y)
 
-Imports properties from OpenVSP component to FLOWUnsteady objects
+Imports properties from OpenVSP component to FLOWUnsteady objects. Importing propeller and duct geometries are under development.
 
 **Arguments**
 - `comp::VSPComponent`: Single `VSPComponent` object
-- `geomType::String` : wing, fuselage, propeller, duct
+- `geomType::String` : Geometry type may be one of - `wing`, `fuselage`, `propeller`, `duct`
 - `flip_y::Bool` : Flip y-coordinates about longitudinal plane
+- `transpose_grid::Bool` : Swap ordering of grid points
 
 **Returns**
 - `geom`: FLOWUnsteady geometry
 """
-function import_vsp(comp; geomType::String="wing", flip_y::Bool=false)
+function import_vsp(comp; geomType::String="wing",
+        flip_y::Bool=false, transpose_grid::Bool=false)
 
-    if geomType == "wing"
+    if lowercase(geomType) == "wing"
 
         nXsecs, npts = vsp.degenGeomSize(comp.plate)
 
+        imax = transpose_grid ? npts : nXsecs
+        jmax = transpose_grid ? nXsecs : npts
+
         # 2 endpoints for nXsecs, each with 3 coordinates
-        section = Array{Float64, 3}(undef, 3, 2, nXsecs)
+        section = Array{Float64, 3}(undef, 3, 2, imax)
 
         # Compute lifting surface coordinates
         x = comp.plate.x .+ comp.plate.zCamber .* comp.plate.nCamberx
@@ -58,16 +63,16 @@ function import_vsp(comp; geomType::String="wing", flip_y::Bool=false)
         # and build wing from left to right as FLOWVPM likes.
         # Wing left half
 
-        for i = 1:nXsecs
+        for i = 1:imax
             # Extract leading edge
-            il = nXsecs-i+1
-            ir = npts*i
+            il = imax-i+1
+            ir = jmax*i
             section[1, 1, il] = x[ir]
             section[2, 1, il] = y[ir]
             section[3, 1, il] = z[ir]
 
             # Extract trailing edge
-            ir = npts*(i-1)+1
+            ir = jmax*(i-1)+1
             section[1, 2, il] = x[ir]
             section[2, 2, il] = y[ir]
             section[3, 2, il] = z[ir]
@@ -92,10 +97,10 @@ function import_vsp(comp; geomType::String="wing", flip_y::Bool=false)
         wing = vlm.Wing(leftxl, lefty, leftzl, leftchord, leftchordtwist)
 
         # Assign coordinates for panels, control points and bound vortices
-        wing.m = nXsecs-1    # No. of spanwise elements
+        wing.m = imax-1    # No. of spanwise elements
 
         ## Discretized wing geometry
-        for i = 2:nXsecs
+        for i = 2:imax
             push!(wing._xlwingdcr, section[1, 1, i])
             push!(wing._xtwingdcr, section[1, 2, i])
             push!(wing._ywingdcr, section[2, 1, i])
@@ -104,7 +109,7 @@ function import_vsp(comp; geomType::String="wing", flip_y::Bool=false)
         end
 
         ## VLM domain
-        for i = 2:nXsecs
+        for i = 2:imax
             # Bound vortex
             El = section[:, 1, i]
             Et = section[:, 2, i]
@@ -114,7 +119,7 @@ function import_vsp(comp; geomType::String="wing", flip_y::Bool=false)
             push!(wing._zn, boundVortex[3])
         end
 
-        for i = 1:nXsecs-1
+        for i = 1:imax-1
             # Control point
             Ml = 0.5*(section[:, 1, i+1] + section[:, 1, i])
             Mt = 0.5*(section[:, 2, i+1] + section[:, 2, i])
@@ -126,16 +131,19 @@ function import_vsp(comp; geomType::String="wing", flip_y::Bool=false)
 
         geom = wing
 
-    elseif geomType == "fuselage"
+    elseif lowercase(geomType) == "fuselage"
 
         nXsecs, npts = vsp.degenGeomSize(comp.surface_node)
 
-        # nXsecs, each with 3 npts points
-        pt = Array{Float64, 3}(undef, 3, nXsecs, npts)
-
         idx = 1
-        for i = 1:nXsecs
-            for j = 1:npts
+        imax = transpose_grid ? npts : nXsecs
+        jmax = transpose_grid ? nXsecs : npts
+
+        # nXsecs, each with 3 npts points
+        pt = Array{Float64, 3}(undef, 3, imax, jmax)
+
+        for i = 1:imax
+            for j = 1:jmax
                 pt[1, i, j] = comp.surface_node.x[idx]
                 pt[2, i, j] = comp.surface_node.y[idx]
                 pt[3, i, j] = comp.surface_node.z[idx]
@@ -150,12 +158,12 @@ function import_vsp(comp; geomType::String="wing", flip_y::Bool=false)
         crosssections = Array{Tuple{Float64, Matrix{Float64}}}(undef, 1)
         crosssections[1] = (1.0, zeros(2, 2))  # Dummy tuple to provide hint of dimensions
 
-        for is = 1:nXsecs
-            sectionArr = zeros(npts+1, 2)
-            for i = 1:npts
+        for is = 1:imax
+            sectionArr = zeros(jmax+1, 2)
+            for i = 1:jmax
                 sectionArr[i, :] = [pt[2, is, i], pt[3, is, i]]
             end
-            sectionArr[npts+1, :] = [pt[2, is, 1], pt[3, is, 1]]
+            sectionArr[jmax+1, :] = [pt[2, is, 1], pt[3, is, 1]]
             push!(crosssections, (pt[1, is, 1], sectionArr))
         end
         deleteat!(crosssections, 1)  # Remove dummy tuple
@@ -177,15 +185,44 @@ function import_vsp(comp; geomType::String="wing", flip_y::Bool=false)
         # Convert to trigrid
         geom = gt.GridTriangleSurface(fuselage_grid, 1)
 
-    elseif geomType == "propeller"
+    elseif lowercase(geomType) == "propeller"
         ArgumentError("Propeller import not implemented. Use FLOWUnsteady functions to create geometry.")
         geom = Nothing
-    elseif geomType == "duct"
-        ArgumentError("Duct import not implemented. Use FLOWUnsteady functions to create geometry.")
+
+    elseif lowercase(geomType) == "duct"
+        ArgumentError("Propeller import not implemented. Use FLOWUnsteady functions to create geometry.")
         geom = Nothing
+
+        # WARNING:
+        # The following code only works for a duct geometry aligned along the X-axis
+        # Also, the trailing edge wake has not been defined
+
+        # nXsecs, npts = vsp.degenGeomSize(comp.surface_node)
+        #
+        # imax = transpose_grid ? npts : nXsecs
+        # jmax = transpose_grid ? nXsecs : npts
+        #
+        # # Build list of coordinates of profile
+        # profile = Array{Float64, 2}(undef, jmax, 2)
+        #
+        # for j = 1:jmax
+        #     profile[j, 1] = comp.surface_node.x[j]
+        #     profile[j, 2] = comp.surface_node.y[j]
+        # end
+        #
+        # duct_grid = gt.surface_revolution(profile, imax; loop_dim=2, axis_angle=270)
+        #
+        # # Rotate to align centerline with X-axis
+        # Oaxis = gt.rotation_matrix2(0, 0, 90)
+        # gt.lintransform!(duct_grid, Oaxis, zeros(3))
+        #
+        # # Convert to trigrid
+        # geom = gt.GridTriangleSurface(duct_grid, 1)
+
     else
         ArgumentError("Invalid geomType string")
         geom = Nothing
     end
+
     return geom
 end
