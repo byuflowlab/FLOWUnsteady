@@ -3,8 +3,8 @@
 Tools for processing openvsp degenerate geometry (DegenGeom).
 
 # ABOUT
-  * Created   : Aug 2023
-  * License   : MIT
+* Created   : Aug 2023
+* License   : MIT
 =###############################################################################
 
 """
@@ -37,6 +37,7 @@ Imports properties from OpenVSP component to FLOWUnsteady objects
 - `geom`: FLOWUnsteady geometry
 """
 function import_vsp(comp; geomType::String="wing", flip_y::Bool=false)
+
     if geomType == "wing"
 
         nXsecs, npts = vsp.degenGeomSize(comp.plate)
@@ -167,24 +168,24 @@ function import_vsp(comp; geomType::String="wing", flip_y::Bool=false)
         LE_x = zeros(size(b_pos))
         LE_z = zeros(size(b_pos))
 
-        geom = gt.generate_loft(crosssections, bscale, b_pos, chords, twists, LE_x, LE_z)
+        fuselage_grid = gt.generate_loft(crosssections, bscale, b_pos, chords, twists, LE_x, LE_z)
 
         # Rotate to align centerline with X-axis
         Oaxis = gt.rotation_matrix2(0, 0, 90)
-        gt.lintransform!(geom, Oaxis, zeros(3))
+        gt.lintransform!(fuselage_grid, Oaxis, zeros(3))
 
         # Convert to trigrid
-        geom = gt.GridTriangleSurface(geom, 1)
+        geom = gt.GridTriangleSurface(fuselage_grid, 1)
 
     elseif geomType == "propeller"
-        ArgumentError("Propeller import not implemented")
+        ArgumentError("Propeller import not implemented. Use FLOWUnsteady functions to create geometry.")
+        geom = Nothing
     elseif geomType == "duct"
-        ArgumentError("Duct import not implemented")
+        ArgumentError("Duct import not implemented. Use FLOWUnsteady functions to create geometry.")
+        geom = Nothing
     else
         ArgumentError("Invalid geomType string")
+        geom = Nothing
     end
     return geom
 end
-
-
-
