@@ -10,7 +10,8 @@ After creating the aircraft geometry in OpenVSP, we write out a DegenGeom file u
 ```@example inspect
 import FLOWUnsteady as uns
 
-comp = uns.read_degengeom("assets/aircraft.csv");
+geom_path = joinpath(uns.examples_path, "aircraft-vsp", "aircraft.csv")
+comp = uns.read_degengeom(geom_path);
 
 for i in 1:length(comp)
   println("$i. $(comp[i].name)")
@@ -37,6 +38,8 @@ import FLOWUnsteady as uns
 run_name        = "aircraft-vsp"            # Name of this simulation
 save_path       = run_name                  # Where to save this simulation
 
+# Path to DegenGeom file
+geom_path = joinpath(uns.examples_path, "aircraft-vsp", "aircraft.csv")
 
 Vinf(X, t)      = [1.0, 0.0, 0.0]  # Freestream function
 
@@ -44,7 +47,7 @@ Vinf(X, t)      = [1.0, 0.0, 0.0]  # Freestream function
 println("Importing geometry...")
 
 # Import VSP Components from DegenGeom file
-comp = uns.read_degengeom("aircraft.csv")
+comp = uns.read_degengeom(geom_path);
 
 fuselage = uns.import_vsp(comp[1])
 wingL = uns.import_vsp(comp[2])
