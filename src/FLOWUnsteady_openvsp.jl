@@ -40,7 +40,6 @@ Imports properties from OpenVSP component to FLOWUnsteady objects. Importing pro
 function import_vsp(comp; geomType::String="",
         flip_y::Bool=false, transpose_grid::Bool=false)
 
-    @show comp.type
     # Infer type of geometry from VSPComponent if not specified
     if geomType == ""
         if lowercase(comp.type) == "lifting_surface"
