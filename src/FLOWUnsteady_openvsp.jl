@@ -206,6 +206,7 @@ function import_vsp(comp; geomType::String="",
 
         # This function could be improved by directly assigning the coordinates 
         # to the Grid object rather than using the profile to create a body of revolution
+        # Or, the user could provide the orientation of the duct.
 
         nXsecs, npts = vsp.degenGeomSize(comp.surface_node)
 
