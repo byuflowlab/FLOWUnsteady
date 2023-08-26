@@ -24,7 +24,7 @@ function read_degengeom(filename::String)
 end
 
 """
-    import_vsp(comp::VSPComponent; geomType::String="", flip_y::Bool=false, transpose_grid::Bool=false)
+    import_vsp(comp::vsp.VSPComponent; geomType::String="", flip_y::Bool=false, transpose_grid::Bool=false)
 
 Imports properties from OpenVSP component to FLOWUnsteady objects. Importing prop and duct geometries are under development.
 
