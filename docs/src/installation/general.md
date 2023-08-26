@@ -195,6 +195,11 @@ If you run into any issues, please try the following:
 If issues persist, please check the resolved issues in [the FLOWExaFMM repo](https://github.com/byuflowlab/FLOWExaFMM.jl/issues)
 and feel free to open a new issue.
 
+## VSPGeom
+Install [VSPGeom.jl](https://github.com/byuflowlab/VSPGeom.jl) by adding the link:
+```julia
+] add https://github.com/byuflowlab/VSPGeom.jl
+```
 
 ## Other Packages
 Run the following commands in the Julia REPL to add some dependencies that are not
