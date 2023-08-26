@@ -6,7 +6,7 @@ After creating the aircraft geometry in OpenVSP, we write out a DegenGeom file u
 
 ![DegenGeom](assets/DegenGeom.png)
 
- Let's import the geometry in Julia and inspect it.
+Let's import the geometry into Julia using the `read_degengeom` function and inspect it.
 ```@example inspect
 import FLOWUnsteady as uns
 

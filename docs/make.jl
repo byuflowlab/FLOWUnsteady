@@ -70,7 +70,8 @@ makedocs(
                                     "(1) Vehicle Definition" => [
                                                                 "api/flowunsteady-vehicle-types.md",
                                                                 "api/flowunsteady-vehicle-components.md",
-                                                                "api/flowunsteady-vehicle-asm.md"
+                                                                "api/flowunsteady-vehicle-asm.md",
+                                                                "api/flowunsteady-openvsp.md"
                                                                 ],
                                     "api/flowunsteady-maneuver.md",
                                     "api/flowunsteady-simulation.md",
