@@ -8,7 +8,7 @@ Tools for processing openvsp degenerate geometry (DegenGeom).
 =###############################################################################
 
 """
-    read_degengeom(filename)
+    read_degengeom(filename::String)
 
 Read all geometry components from a DegenGeom file written out by OpenVSP
 
@@ -16,7 +16,7 @@ Read all geometry components from a DegenGeom file written out by OpenVSP
 - `filename::String`: DegenGeom filename
 
 **Returns**
-- `comp`: Vector of `VSPComponent` objects
+- `comp`: Vector of `vsp.VSPComponent` objects
 """
 function read_degengeom(filename::String)
     comp = vsp.readDegenGeom(filename)
@@ -24,12 +24,13 @@ function read_degengeom(filename::String)
 end
 
 """
-    import_vsp(comp::vsp.VSPComponent; geomType::String="", flip_y::Bool=false, transpose_grid::Bool=false)
+    import_vsp(comp::vsp.VSPComponent; geomType::String="",
+                flip_y::Bool=false, transpose_grid::Bool=false)
 
 Imports properties from OpenVSP component to FLOWUnsteady objects. Importing prop and duct geometries are under development.
 
 **Arguments**
-- `comp::VSPComponent`: Single `VSPComponent` object
+- `comp::vsp.VSPComponent`: Single `vsp.VSPComponent` object
 - `geomType::String` : Geometry type may be one of - `wing`, `fuselage`, `prop`, `duct`
 - `flip_y::Bool` : Flip y-coordinates about longitudinal plane
 - `transpose_grid::Bool` : Swap ordering of grid points
