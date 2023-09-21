@@ -5,6 +5,7 @@ simply changing the following parameter in
 [the aero solution](@ref rotorhoveraero):
 ```julia
 VehicleType     = uns.QVLMVehicle
+n               = 50   # <---- For some reason PSU-WOPWOP breaks with less blade elements
 ```
 and this parameter when [calling PSU-WOPWOP](@ref rotorhovernoise):
 ```julia
