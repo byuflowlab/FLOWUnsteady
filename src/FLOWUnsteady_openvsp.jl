@@ -32,7 +32,7 @@ Imports properties from OpenVSP component to FLOWUnsteady objects. Importing pro
 **Arguments**
 - `comp::vsp.VSPComponent`: Single `vsp.VSPComponent` object
 - `geomType::String` : Geometry type may be one of - `wing`, `fuselage`, `prop`, `duct`
-- `flip_y::Bool` : Flip y-coordinates about longitudinal plane
+- `flip_y::Bool` : Flip y-coordinates about longitudinal plane. Useful for symmetric geometry
 - `transpose_grid::Bool` : Swap ordering of grid points
 
 **Returns**
