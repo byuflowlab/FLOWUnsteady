@@ -32,13 +32,14 @@ Imports properties from OpenVSP component to FLOWUnsteady objects. Importing pro
 **Arguments**
 - `comp::vsp.VSPComponent`: Single `vsp.VSPComponent` object
 - `geomType::String` : Geometry type may be one of - `wing`, `fuselage`, `prop`, `duct`
+- `symmetric::Bool` : Creates a symmetric wing using the semi-span coordinates
 - `flip_y::Bool` : Flip y-coordinates about longitudinal plane. Useful for symmetric geometry
 - `transpose_grid::Bool` : Swap ordering of grid points
 
 **Returns**
 - `geom`: FLOWUnsteady geometry
 """
-function import_vsp(comp::vsp.VSPComponent; geomType::String="",
+function import_vsp(comp::vsp.VSPComponent; geomType::String="", symmetric::Bool=false,
         flip_y::Bool=false, transpose_grid::Bool=false)
 
     # Infer type of geometry from VSPComponent if not specified
@@ -59,8 +60,13 @@ function import_vsp(comp::vsp.VSPComponent; geomType::String="",
         imax = transpose_grid ? npts : nXsecs
         jmax = transpose_grid ? nXsecs : npts
 
-        # 2 endpoints for nXsecs, each with 3 coordinates
-        section = Array{Float64, 3}(undef, 3, 2, imax)
+        if symmetric == false
+            # 2 endpoints for nXsecs, each with 3 coordinates
+            section = Array{Float64, 3}(undef, 3, 2, imax)
+        else
+            # 2 endpoints for 2*nXsecs-1, each with 3 coordinates
+            section = Array{Float64, 3}(undef, 3, 2, 2*imax-1)
+        end
 
         # Compute lifting surface coordinates
         x = comp.plate.x .+ comp.plate.zCamber .* comp.plate.nCamberx
@@ -76,8 +82,8 @@ function import_vsp(comp::vsp.VSPComponent; geomType::String="",
         # Wing left half
 
         for i = 1:imax
-            # Extract leading edge
             il = imax-i+1
+            # Extract leading edge
             ir = jmax*i
             section[1, 1, il] = x[ir]
             section[2, 1, il] = y[ir]
@@ -88,6 +94,22 @@ function import_vsp(comp::vsp.VSPComponent; geomType::String="",
             section[1, 2, il] = x[ir]
             section[2, 2, il] = y[ir]
             section[3, 2, il] = z[ir]
+        end
+
+        if symmetric
+            for i = 2:imax
+                # Extract leading edge
+                ir = jmax*i
+                section[1, 1, imax+i-1] = x[ir]
+                section[2, 1, imax+i-1] = -y[ir]
+                section[3, 1, imax+i-1] = z[ir]
+
+                # Extract trailing edge
+                ir = jmax*(i-1)+1
+                section[1, 2, imax+i-1] = x[ir]
+                section[2, 2, imax+i-1] = -y[ir]
+                section[3, 2, imax+i-1] = z[ir]
+            end
         end
 
         if flip_y == false
@@ -109,6 +131,7 @@ function import_vsp(comp::vsp.VSPComponent; geomType::String="",
         wing = vlm.Wing(leftxl, lefty, leftzl, leftchord, leftchordtwist)
 
         # Assign coordinates for panels, control points and bound vortices
+        imax = symmetric ? 2*imax-1 : imax
         wing.m = imax-1    # No. of spanwise elements
 
         ## Discretized wing geometry
