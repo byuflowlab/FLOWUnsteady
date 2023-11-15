@@ -56,9 +56,9 @@ over long distances with minimal numerical dissipation.
 The rVPM uses particles to discretize the Navier-Stokes equations, with the
 particles representing radial basis functions that construct a continuous
 vorticity/velocity field. The basis functions become the LES filter, providing a
-variable filter width and spatial adaption as the particles are convected and
+variable filter width and spatial adaptation as the particles are convected and
 stretched by the velocity field. The local evolution of the filter width
-provides an extra degree of freedom to reinforce conservations laws, which makes
+provides an extra degree of freedom to reinforce conservation laws, which makes
 the reformulated VPM numerically stable (overcoming the numerical issues that
 plague the classic VPM).
 

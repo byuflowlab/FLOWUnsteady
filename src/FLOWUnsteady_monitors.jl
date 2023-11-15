@@ -24,15 +24,10 @@ The aerodynamic performance consists of thrust coefficient
 \$C_Q = \\frac{Q}{\\rho n^2 d^5}\$, and propulsive efficiency
 \$\\eta = \\frac{T u_\\infty}{2\\pi n Q}\$.
 
-* `J_ref` and `rho_ref` are the reference advance ratio and air density used \
-for calculating propulsive efficiency and coefficients. The advance ratio used \
-here is defined as \$J=\\frac{u_\\infty}{n d}\$ with \
-\$n = \\frac{\\mathrm{RPM}}{60}\$.
+* `J_ref` and `rho_ref` are the reference advance ratio and air density used for calculating propulsive efficiency and coefficients. The advance ratio used here is defined as \$J=\\frac{u_\\infty}{n d}\$ with \$n = \\frac{\\mathrm{RPM}}{60}\$.
 * `RPM_ref` is the reference RPM used to estimate the age of the wake.
-* `nsteps_sim` is the number of time steps by the end of the simulation (used \
-for generating the color gradient).
-* Use `save_path` to indicate a directory where to save the plots. If so, it \
-will also generate a CSV file with \$C_T\$, \$C_Q\$, and \$\\eta\$.
+* `nsteps_sim` is the number of time steps by the end of the simulation (used for generating the color gradient).
+* Use `save_path` to indicate a directory where to save the plots. If so, it will also generate a CSV file with \$C_T\$, \$C_Q\$, and \$\\eta\$.
 
 
 ![image](http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/rotorhover-example-high02-singlerotor_convergence.png)
@@ -253,15 +248,11 @@ Kutta-Joukowski force, parasitic drag (calculated from a NACA 0012 airfoil
 polar), and unsteady-circulation force.
 
 * `b_ref`       : Reference span length.
-* `ar_ref`      : Reference aspect ratio, used to calculate the equivalent \
-                    chord \$c = \\frac{b}{\\mathrm{ar}}\$.
+* `ar_ref`      : Reference aspect ratio, used to calculate the equivalent chord \$c = \\frac{b}{\\mathrm{ar}}\$.
 * `rho_ref`     : Reference density.
-* `qinf_ref`    : Reference dynamic pressure \
-                    \$q_\\infty = \\frac{1}{2}\\rho u_\\infty^2\$.
-* `nsteps_sim`  : the number of time steps by the end of the simulation (used \
-                    for generating the color gradient).
-* Use `save_path` to indicate a directory where to save the plots. If so, it \
-will also generate a CSV file with \$C_L\$ and \$C_D\$.
+* `qinf_ref`    : Reference dynamic pressure \$q_\\infty = \\frac{1}{2}\\rho u_\\infty^2\$.
+* `nsteps_sim`  : the number of time steps by the end of the simulation (used for generating the color gradient).
+* Use `save_path` to indicate a directory where to save the plots. If so, it will also generate a CSV file with \$C_L\$ and \$C_D\$.
 
 Here is an example of this monitor:
 ![image](http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/wing-example_convergence.png)
