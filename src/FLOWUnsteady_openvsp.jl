@@ -8,7 +8,7 @@ Tools for processing openvsp degenerate geometry (DegenGeom).
 =###############################################################################
 
 """
-    read_degengeom(filename::String)
+    `read_degengeom(filename::String)`
 
 Read all geometry components from a DegenGeom file written out by OpenVSP
 
@@ -24,8 +24,8 @@ function read_degengeom(filename::String)
 end
 
 """
-    import_vsp(comp::vsp.VSPComponent; geomType::String="",
-                flip_y::Bool=false, transpose_grid::Bool=false)
+    `import_vsp(comp::vsp.VSPComponent; geomType::String="",
+                flip_y::Bool=false, transpose_grid::Bool=false)`
 
 Imports properties from OpenVSP component to FLOWUnsteady objects. Importing prop and duct geometries are under development.
 
@@ -228,7 +228,7 @@ function import_vsp(comp::vsp.VSPComponent; geomType::String="", symmetric::Bool
         @warn "Duct import not fully implemented. Use FLOWUnsteady functions instead.
         The input duct geometry has to be aligned along the X-axis. A wake will not be generated."
 
-        # This function could be improved by directly assigning the coordinates 
+        # This function could be improved by directly assigning the coordinates
         # to the Grid object rather than using the profile to create a body of revolution
         # Or, the user could provide the orientation of the duct.
 

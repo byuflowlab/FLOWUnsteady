@@ -1,12 +1,12 @@
 # OpenVSP Geometry
 
-In this example, we import an aircraft model created in OpenVSP into the FLOWUnsteady environment. The `aircraft.vsp3` file made use of here is available in the folder `database/aircraft-vsp/` in the FLOWUnsteady Github repo.
+In this example, we import an aircraft model created in OpenVSP into the FLOWUnsteady environment. The `aircraft.vsp3` file used here is available in the folder [`examples/aircraft-vsp/`](https://github.com/byuflowlab/FLOWUnsteady/tree/master/examples) in the FLOWUnsteady GitHub repo.
 
 After creating the aircraft geometry in OpenVSP, we write out a DegenGeom file using the tab Analysis > DegenGeom as shown below. This creates a CSV file that contains all the components of the aircraft geometry.
 
 ![DegenGeom](assets/DegenGeom.png)
 
-Let's import the geometry into Julia using the `read_degengeom` function and inspect it.
+Let's import the geometry into Julia using the [`FLOWUnsteady.read_degengeom`](@ref) function and inspect it.
 ```@example inspect
 import FLOWUnsteady as uns
 
@@ -18,7 +18,7 @@ for i in 1:length(comp)
 end
 ```
 
-Now that we have a good idea about the index of the components in the geometry, we can use them in FLOWUnsteady using the function `import_vsp`. The following example script imports the OpenVSP geometry, creates FLOWUnsteady data structures and writes it out to a vtk file. The geometry can be used with the FLOWUnsteady solver by following one of the previous examples.
+Now that we have a good idea about the index of the components in the geometry, we can use them in FLOWUnsteady using the function [`FLOWUnsteady.import_vsp`](@ref). The following example script imports the OpenVSP geometry, creates FLOWUnsteady data structures and writes it out to a vtk file. The geometry can be used with the FLOWUnsteady solver by following one of the previous examples.
 
 ```julia
 #=##############################################################################

@@ -192,14 +192,8 @@ If you run into any issues, please try the following:
 * Mac users, take a look at this thread: [LINK](https://github.com/byuflowlab/FLOWUnsteady/issues/26)
 * Instructions for BYU Fulton supercomputer: [LINK](https://nbviewer.jupyter.org/url/edoalvar2.groups.et.byu.net/LabNotebook/202108/FLOWVPMSuperComputer.ipynb)
 
-If issues persist, please check the resolved issues in [the FLOWExaFMM repo](https://github.com/byuflowlab/FLOWExaFMM.jl/issues)
-and feel free to open a new issue.
-
-## VSPGeom
-Install [VSPGeom.jl](https://github.com/byuflowlab/VSPGeom.jl) by adding the link:
-```julia
-] add https://github.com/byuflowlab/VSPGeom.jl
-```
+If issues persist, please check the resolved issues in [the FLOWExaFMM repo](https://github.com/byuflowlab/FLOWExaFMM.jl/issues?q=), the discussion forum in [the FLOWUnsteady repo](https://github.com/byuflowlab/FLOWUnsteady/discussions?discussions_q=),
+and feel free to open a new issue or discussion for help.
 
 ## Other Packages
 Run the following commands in the Julia REPL to add some dependencies that are not
@@ -208,7 +202,7 @@ in the official Julia registry:
 import Pkg
 
 url = "https://github.com/byuflowlab/"
-packages = ("AirfoilPrep.jl", "FLOWVLM", "BPM.jl", "FLOWNoise")
+packages = ("AirfoilPrep.jl", "FLOWVLM", "BPM.jl", "FLOWNoise", "VSPGeom.jl")
 
 Pkg.add([ Pkg.PackageSpec(; url=url*name) for name in packages ])
 ```

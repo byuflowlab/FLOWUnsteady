@@ -1,4 +1,4 @@
-# [OpenVSP geometry import](@id openvsp_import)
+# [Importing OpenVSP geometry](@id openvsp_import)
 
 ```@docs
 FLOWUnsteady.read_degengeom
