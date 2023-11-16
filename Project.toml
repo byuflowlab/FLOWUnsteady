@@ -1,7 +1,7 @@
 name = "FLOWUnsteady"
 uuid = "b491798d-ac6e-455f-a27c-49c10bb0a666"
 authors = ["Eduardo J. Alvarez <Edo.AlvarezR@gmail.com> and contributors"]
-version = "3.2.1"
+version = "3.3.0"
 
 [deps]
 PyPlot = "d330b81b-6aea-500a-939a-2ce795aea3ee"

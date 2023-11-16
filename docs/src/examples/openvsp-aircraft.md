@@ -82,14 +82,18 @@ vehicle = uns.VLMVehicle(   system;
                             vlm_system=vlm_system,
                             wake_system=wake_system,
                             grids=grids
-                         )
+                         );
 
-# ----------------- 2) GEOMETRY EXPORT -----------------------------------------
-rm(save_path, recursive=true, force=true)
+# ----------------- EXPORT GEOMETRY --------------------------------------------
+if isdir(save_path); rm(save_path, recursive=true, force=true); end
 mkdir(save_path)
 
 uns.vlm.setVinf(system, Vinf)
-uns.save_vtk(vehicle, run_name; path=save_path)
+str = uns.save_vtk(vehicle, run_name; path=save_path)
+
+# Open up geometry in ParaView
+str = joinpath(save_path, str)
+run(`paraview -data=$(str)`)
 ```
 
 ![Paraview](assets/aircraft-paraview.png)
