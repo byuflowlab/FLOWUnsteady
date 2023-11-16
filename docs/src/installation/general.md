@@ -16,8 +16,11 @@ FLOWUnsteady.
 
 ## Julia
 
-* Download and install Julia: [julialang.org](https://julialang.org/downloads) (we
-  recommend using v1.6.7 LTS or the latest stable release)
+* Download and install Julia: [julialang.org](https://julialang.org/downloads)
+  (currently we are only supporting up to Julia v1.8.5, so we recommend using
+    [v1.8.5](https://julialang.org/downloads/oldreleases/) or
+    [v1.6.7 LTS](https://julialang.org/downloads/#long_term_support_release)
+    )
 * Add Julia to user-level `bin` folder
   ```bash
   sudo ln -s /[user-specific-path/Julia-1.x.x]/bin/julia /usr/local/bin/julia
