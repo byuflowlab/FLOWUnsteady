@@ -367,7 +367,7 @@ end
 
 
 
-function add_particle(pfield::vpm.ParticleField{TVPM,<:Any,<:Any,<:Any,<:Any,<:Any,<:Any,<:Any}, X::Array{Float64, 1},
+function add_particle(pfield::vpm.ParticleField{TVPM,<:Any,<:Any,<:Any,<:Any,<:Any,<:Any}, X::Array{Float64, 1},
                         gamma::Float64, dt::Float64,
                         V::Float64, infD::Array{Float64, 1},
                         sigma::Float64, vol::Float64,
