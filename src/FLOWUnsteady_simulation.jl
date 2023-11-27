@@ -367,22 +367,22 @@ end
 
 
 
-function add_particle(pfield::vpm.ParticleField{R,<:Any,<:Any,<:Any,<:Any,<:Any,<:Any,<:Any}, X::Array{Float64, 1},
+function add_particle(pfield::vpm.ParticleField{TVPM,<:Any,<:Any,<:Any,<:Any,<:Any,<:Any,<:Any}, X::Array{Float64, 1},
                         gamma::Float64, dt::Float64,
                         V::Float64, infD::Array{Float64, 1},
                         sigma::Float64, vol::Float64,
-                        l::Array{T1, 1}, p_per_step::Int64;
-                        overwrite_sigma=nothing) where {T1<:Real}
+                        l::Array{TF, 1}, p_per_step::Int64;
+                        overwrite_sigma=nothing) where {TF,TVPM}
 
     Gamma = gamma*(V*dt)*infD       # Vectorial circulation
 
     # Avoid adding empty particles to the computational domain, or ExaFMM will
     # blow up
-    if sqrt(Gamma[1]^2 + Gamma[2]^2 + Gamma[3]^2) <= 5*eps(R)
-        Gamma = 5*eps(R)*ones(3)
+    if sqrt(Gamma[1]^2 + Gamma[2]^2 + Gamma[3]^2) <= 5*eps(TVPM)
+        Gamma = 5*eps(TVPM)*ones(3)
     end
 
-    circulation = max(abs(gamma), 5*eps(R))
+    circulation = max(abs(gamma), 5*eps(TVPM))
 
     # Decreases p_per_step for slowly moving parts of blade
     # aux = min((sigma/p_per_step)/overwrite_sigma, 1)
