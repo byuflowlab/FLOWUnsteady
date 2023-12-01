@@ -56,10 +56,10 @@ struct QVLMVehicle{N, M, R} <: AbstractVLMVehicle{N, M, R}
                     vlm_system=vlm.WingSystem(),
                     wake_system=vlm.WingSystem(),
                     grids=Array{gt.GridTypes, 1}(),
-                    V=zeros(R,3), W=zeros(R,3),
+                    V=zeros(3), W=zeros(3),
                     prev_data=[deepcopy(vlm_system), deepcopy(wake_system),
                                                     deepcopy(rotor_systems)],
-                    grid_O=Array{Array{R, 1}, 1}(),
+                    grid_O=Array{Array{Float64, 1}, 1}(),
                 ) where {N, M, R} = new(
                     system,
                     tilting_systems,
@@ -91,6 +91,22 @@ QVLMVehicle(system::vlm.WingSystem;
                                 grids=Array{gt.GridTypes, 1}(grids),
                                 grid_O=[zeros(R, 3) for i in 1:length(grids)],
                                 optargs...)
+
+"Constructor allows specifying float type `R`."
+QVLMVehicle(system::vlm.WingSystem, R;
+        V::Array{R, 1}=zeros(R,3), W::Array{R, 1}=zeros(R,3),
+        tilting_systems::NTuple{N, vlm.WingSystem}=NTuple{0, vlm.WingSystem}(),
+        rotor_systems::NTuple{M, Array{vlm.Rotor, 1}}=NTuple{0, Array{vlm.Rotor, 1}}(),
+        grids=Array{gt.GridTypes, 1}(),
+        optargs...
+        ) where {N, M} = QVLMVehicle{N, M, R}( system;
+                                V=V, W=W,
+                                tilting_systems=tilting_systems,
+                                rotor_systems=rotor_systems,
+                                grids=Array{gt.GridTypes, 1}(grids),
+                                grid_O=[zeros(R, 3) for i in 1:length(grids)],
+                                optargs...)
+
 
 
 ##### FUNCTIONS  ###############################################################
