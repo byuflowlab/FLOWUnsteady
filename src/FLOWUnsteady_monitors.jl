@@ -33,7 +33,7 @@ The aerodynamic performance consists of thrust coefficient
 ![image](http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/rotorhover-example-high02-singlerotor_convergence.png)
 """
 function generate_monitor_rotors( rotors::Array{vlm.Rotor, 1},
-                                    J_ref::Real, rho_ref::Real, RPM_ref::Real,
+                                    J_ref, rho_ref, RPM_ref,
                                     nsteps_sim::Int;
                                     t_scale=1.0,                    # Time scaling factor
                                     t_lbl="Simulation time (s)",    # Time-axis label
@@ -73,7 +73,7 @@ function generate_monitor_rotors( rotors::Array{vlm.Rotor, 1},
     # Function for run_vpm! to call on each iteration
     function extra_runtime_function(sim::Simulation{V, M, R},
                                     PFIELD::vpm.ParticleField,
-                                    T::Real, DT::Real; optargs...
+                                    T, DT; optargs...
                                    ) where{V<:AbstractVLMVehicle, M, R}
 
         # rotors = vcat(sim.vehicle.rotor_systems...)
@@ -257,8 +257,8 @@ polar), and unsteady-circulation force.
 Here is an example of this monitor:
 ![image](http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/wing-example_convergence.png)
 """
-function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
-                                rho_ref::Real, qinf_ref::Real, nsteps_sim::Int;
+function generate_monitor_wing(wing, Vinf::Function, b_ref, ar_ref,
+                                rho_ref, qinf_ref, nsteps_sim::Int;
                                 lencrit_f=0.5,      # Factor for critical length to ignore horseshoe forces
                                 L_dir=[0,0,1],      # Direction of lift component
                                 D_dir=[1,0,0],      # Direction of drag component

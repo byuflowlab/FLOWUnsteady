@@ -36,8 +36,8 @@ Returns the change in velocity `dV=[dVx, dVy, dVz]` (m/s) of `vehicle` performin
 reference velocity and the total time at which this maneuver is being performed,
 respectively. `dV` is in the global reference system.
 """
-function calc_dV(self::AbstractManeuver, vehicle::AbstractVehicle, t::Real,
-                                            dt::Real, ttot::Real, Vref::Real)
+function calc_dV(self::AbstractManeuver, vehicle::AbstractVehicle, t,
+                                            dt, ttot, Vref)
     error("$(typeof(self)) has no implementation yet!")
 end
 
@@ -49,8 +49,8 @@ axes, in radians) of `vehicle` performing `maneuver` at time `t` (s) after a
 time step `dt` (s). `ttot` is the total time at which this maneuver is to be
 performed.
 """
-function calc_dW(self::AbstractManeuver, vehicle::AbstractVehicle, t::Real,
-                                                        dt::Real, ttot::Real)
+function calc_dW(self::AbstractManeuver, vehicle::AbstractVehicle, t,
+                                                        dt, ttot)
     error("$(typeof(self)) has no implementation yet!")
 end
 
@@ -73,7 +73,7 @@ get_nrtrsys(self::AbstractManeuver) = typeof(self).parameters[2]
 Returns the angle (in degrees) of the i-th tilting system at the non-dimensional
 time t.
 """
-function get_angle(self::AbstractManeuver, i::Int, t::Real)
+function get_angle(self::AbstractManeuver, i::Int, t)
     if i<=0 || i>get_ntltsys(self)
         error("Invalid tilting system #$i (max is $(get_ntltsys(self))).")
     end
@@ -89,7 +89,7 @@ end
 Returns the angle (in degrees) of every tilting systems at the non-dimensional
 time t.
 """
-get_angles(self::AbstractManeuver, t::Real) = Tuple(a(t) for a in self.angle)
+get_angles(self::AbstractManeuver, t) = Tuple(a(t) for a in self.angle)
 
 """
     `get_RPM(maneuver::AbstractManeuver, i::Int, t::Real)`
@@ -97,7 +97,7 @@ get_angles(self::AbstractManeuver, t::Real) = Tuple(a(t) for a in self.angle)
 Returns the normalized RPM of the i-th rotor system at the non-dimensional time
 t.
 """
-function get_RPM(self::AbstractManeuver, i::Int, t::Real)
+function get_RPM(self::AbstractManeuver, i::Int, t)
     if i<=0 || i>get_nrtrsys(self)
         error("Invalid rotor system #$i (max is $(get_nrtrsys(self))).")
     end
@@ -113,7 +113,7 @@ end
 Returns the normalized RPM of every rotor systems at the non-dimensional time
 t.
 """
-get_RPMs(self::AbstractManeuver, t::Real) = Tuple(rpm(t) for rpm in self.RPM)
+get_RPMs(self::AbstractManeuver, t) = Tuple(rpm(t) for rpm in self.RPM)
 
 
 ##### COMMON INTERNAL FUNCTIONS  ###############################################

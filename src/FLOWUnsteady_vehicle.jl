@@ -90,7 +90,7 @@ end
 Translates and rotates the vehicle in a time step `dt` according to current
 linear and angular velocity.
 """
-function nextstep_kinematic(self::AbstractVehicle, dt::Real)
+function nextstep_kinematic(self::AbstractVehicle, dt)
     error("$(typeof(self)) has no implementation yet!")
 end
 
@@ -99,7 +99,7 @@ end
 Precalculations before calling the solver and before shedding trialing wake.
 """
 function precalculations(self::AbstractVehicle, Vinf::Function,
-                                pfield::vpm.ParticleField, t::Real, dt::Real)
+                                pfield::vpm.ParticleField, t, dt)
     error("$(typeof(self)) has no implementation yet!")
 end
 
@@ -108,7 +108,7 @@ Shed VPM wake. If `unsteady_shedcrit<=0` it sheds wake due to loading
 distribution, otherwise it will shed wake due to unsteady loading.
 """
 function shed_wake(self::AbstractVehicle, Vinf::Function,
-                            pfield::vpm.ParticleField, dt::Real; t=0.0,
+                            pfield::vpm.ParticleField, dt; t=0.0,
                             unsteady_shedcrit=-1.0, p_per_step=1,
                             sigmafactor=1.0, overwrite_sigma=nothing,
                             omit_shedding=[])
@@ -129,7 +129,7 @@ Returns a function that generates an array of particles representing the surface
 of the vehicle as a collection of vortex particles.
 """
 function generate_static_particle_fun(self::AbstractVehicle,
-                                            sigma_vlm::Real, sigma_rotor::Real)
+                                            sigma_vlm, sigma_rotor)
     error("$(typeof(self)) has no implementation yet!")
 end
 

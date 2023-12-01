@@ -46,7 +46,7 @@ strength magnitude that is larger than `sqrt(maxGamma2)` or smaller than
 `sqrt(minGamma2)`. Use `every_nsteps` to indicate every how many steps to
 remove particles.
 """
-function remove_particles_strength(minGamma2::Real, maxGamma2::Real; every_nsteps::Int=1)
+function remove_particles_strength(minGamma2, maxGamma2; every_nsteps::Int=1)
 
     function wake_treatment(sim, PFIELD, T, DT, args...; optargs...)
         if sim.nt%every_nsteps==0
@@ -89,7 +89,7 @@ Returns an `extra_runtime_function` that removes all particles with a smoothing
 radius that is larger than `maxsigma` or smaller than `minsigma`.
 Use `every_nsteps` to indicate every how many steps to remove particles.
 """
-function remove_particles_sigma(minsigma::Real, maxsigma::Real; every_nsteps::Int=1)
+function remove_particles_sigma(minsigma, maxsigma; every_nsteps::Int=1)
 
     function wake_treatment(sim, PFIELD, T, DT, args...; optargs...)
         if sim.nt%every_nsteps==0

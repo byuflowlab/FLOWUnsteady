@@ -115,7 +115,7 @@ Plots the kinematics and controls of a `KinematicManeuver`.
 ![image](http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/vahana-controls.png)
 """
 function plot_maneuver(maneuver::KinematicManeuver;
-                        ti::Real=0, tf::Real=1, vis_nsteps=300,
+                        ti=0, tf=1, vis_nsteps=300,
                         save_path=nothing,
                         figname="maneuver", tstages=[], size_factor=2/3)
 

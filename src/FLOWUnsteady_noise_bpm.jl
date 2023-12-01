@@ -50,9 +50,9 @@ function run_noise_bpm(
 ```
 """
 function run_noise_bpm(         rotors::Array{vlm.Rotor, 1},             # Rotors
-                                RPM::Real,                      # RPM of rotors
+                                RPM,                      # RPM of rotors
                                 Vinf::Function,                 # Freestream
-                                rho::Real, mu::Real, speedofsound::Real, # Air density, dynamic viscosity, and speed of sound
+                                rho, mu, speedofsound, # Air density, dynamic viscosity, and speed of sound
                                 save_path::String;              # Where to save results
 
                                 # ---------- OBSERVERS --------------------------------------

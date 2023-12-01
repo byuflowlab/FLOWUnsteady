@@ -95,7 +95,7 @@ function tilt_systems(self::AbstractVLMVehicle{0,M,R}, angles::Tuple{})  where{M
 end
 
 
-function nextstep_kinematic(self::AbstractVLMVehicle, dt::Real)
+function nextstep_kinematic(self::AbstractVLMVehicle, dt)
     dX = dt*self.V                  # Translation
     dA = 180/pi * dt*self.W         # Angular rotation (degrees)
 
@@ -134,7 +134,7 @@ Precalculations before calling the solver.
 Calculates kinematic velocity on VLM an adds them as a solution field
 """
 function precalculations(self::AbstractVLMVehicle, Vinf::Function,
-                                pfield::vpm.ParticleField, t::Real, dt::Real,
+                                pfield::vpm.ParticleField, t, dt,
                                 nt::Int)
 
     if nt!=0
@@ -270,7 +270,7 @@ function _Vkinematic_wake(self::AbstractVLMVehicle, args...; optargs...)
                                                                     optargs...)
 end
 
-function _Vkinematic(system, prev_system, dt::Real; t=0.0, targetX="CP")
+function _Vkinematic(system, prev_system, dt; t=0.0, targetX="CP")
 
     cur_Xs = _get_Xs(system, targetX; t=t)
     prev_Xs = _get_Xs(prev_system, targetX; t=t)
@@ -284,7 +284,7 @@ the si-th system formatted as the output of `_get_midXs()`.
 """
 function _Vkinematic_rotor(rotor_systems::NTuple{M, Array{vlm.Rotor, 1}},
                            prev_rotor_systems::NTuple{M, Array{vlm.Rotor, 1}},
-                           si, ri, dt::Real
+                           si, ri, dt
                           ) where{M}
 
     cur_Xs = _get_midXs(rotor_systems[si][ri])

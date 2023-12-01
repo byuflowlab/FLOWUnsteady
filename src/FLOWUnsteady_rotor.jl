@@ -122,7 +122,7 @@ for.
                             polars plot in that directory
 
 """
-function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
+function generate_rotor(Rtip, Rhub, B::Int,
                         chorddist::Array{Float64,2},
                         pitchdist::Array{Float64,2},
                         sweepdist::Array{Float64,2},
@@ -291,7 +291,7 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
 end
 
 
-function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
+function generate_rotor(Rtip, Rhub, B::Int,
                         chorddist::Array{Float64,2},
                         pitchdist::Array{Float64,2},
                         sweepdist::Array{Float64,2},
@@ -326,7 +326,7 @@ end
 Generates a `FLOWVLM.Rotor` reading the blade geometry from the blade file
 `blade_file` found in the database `data_path`.
 """
-function generate_rotor(Rtip::Real, Rhub::Real, B::Int, blade_file::String;
+function generate_rotor(Rtip, Rhub, B::Int, blade_file::String;
                         data_path=def_data_path, optargs...)
 
     (chorddist, pitchdist,

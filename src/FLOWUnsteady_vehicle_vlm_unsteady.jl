@@ -112,7 +112,7 @@ VLMVehicle = UVLMVehicle
 
 ##### FUNCTIONS  ###############################################################
 function shed_wake(self::VLMVehicle, Vinf::Function,
-                            pfield::vpm.ParticleField, dt::Real, nt::Int; t=0.0,
+                            pfield::vpm.ParticleField, dt, nt::Int; t=0.0,
                             unsteady_shedcrit=-1.0,
                             shed_starting=false,
                             p_per_step=1,
@@ -184,7 +184,7 @@ const g_piecewiselinear = g_linear
 
 function generate_static_particle_fun(pfield::vpm.ParticleField, pfield_static::vpm.ParticleField,
                                         self::VLMVehicle,
-                                        sigma_vlm::Real, sigma_rotor::Real;
+                                        sigma_vlm, sigma_rotor;
                                         vlm_vortexsheet=false,
                                         vlm_vortexsheet_overlap=2.125,
                                         vlm_vortexsheet_distribution=g_pressure,
@@ -250,10 +250,10 @@ save_vtk(self::VLMVehicle, args...;
 
 function _static_particles(pfield::vpm.ParticleField,
                             system::Union{vlm.Wing, vlm.WingSystem, vlm.Rotor},
-                            sigma::Real;
+                            sigma;
                             sigma_vpm=nothing,
                             vortexsheet::Bool=false,
-                            vortexsheet_overlap::Real=2.125,
+                            vortexsheet_overlap=2.125,
                             vortexsheet_distribution::Function=g_uniform,
                             vortexsheet_sigma_tbv=nothing,
                             vortices=1:3, # Bound vortices to add (1==AB, 2==ApA, 3==BBp)
