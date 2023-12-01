@@ -94,7 +94,7 @@ QVLMVehicle(system::vlm.WingSystem;
 
 "Constructor allows specifying float type `R`."
 QVLMVehicle(system::vlm.WingSystem, R;
-        V::Array{R, 1}=zeros(R,3), W::Array{R, 1}=zeros(R,3),
+        V::Vector=zeros(R,3), W::Vector=zeros(R,3),
         tilting_systems::NTuple{N, vlm.WingSystem}=NTuple{0, vlm.WingSystem}(),
         rotor_systems::NTuple{M, Array{vlm.Rotor, 1}}=NTuple{0, Array{vlm.Rotor, 1}}(),
         grids=Array{gt.GridTypes, 1}(),
