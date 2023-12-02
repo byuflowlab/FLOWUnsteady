@@ -74,7 +74,7 @@ struct UVLMVehicle{N, M, R} <: AbstractVLMVehicle{N, M, R}
                     V=zeros(3), W=zeros(3),
                     prev_data=[deepcopy(vlm_system), deepcopy(wake_system),
                                                     deepcopy(rotor_systems)],
-                    grid_O=Array{Array{Float64, 1}, 1}(),
+                    grid_O=Array{Array{R, 1}, 1}(),
                 ) where {N, M, R} = new(
                     system,
                     tilting_systems,
@@ -100,6 +100,21 @@ UVLMVehicle(system::vlm.WingSystem;
         grids=Array{gt.GridTypes, 1}(),
         optargs...
         ) where {N, M, R} = UVLMVehicle{N, M, R}( system;
+                                V=V, W=W,
+                                tilting_systems=tilting_systems,
+                                rotor_systems=rotor_systems,
+                                grids=Array{gt.GridTypes, 1}(grids),
+                                grid_O=[zeros(R, 3) for i in 1:length(grids)],
+                                optargs...)
+
+"Constructor allowing the real type to be specified."
+UVLMVehicle(system::vlm.WingSystem, R;
+        V=zeros(R,3), W=zeros(R,3),
+        tilting_systems::NTuple{N, vlm.WingSystem}=NTuple{0, vlm.WingSystem}(),
+        rotor_systems::NTuple{M, Array{vlm.Rotor, 1}}=NTuple{0, Array{vlm.Rotor, 1}}(),
+        grids=Array{gt.GridTypes, 1}(),
+        optargs...
+        ) where {N, M} = UVLMVehicle{N, M, R}( system;
                                 V=V, W=W,
                                 tilting_systems=tilting_systems,
                                 rotor_systems=rotor_systems,

@@ -26,7 +26,7 @@ function postprocess_statistics(read_path, save_path, nums;
                                     # PROCESSING OPTIONS
                                     idens           = [""],     # Use this to agglomerate multiple simulations
                                     to_exclude      = [],       # Exclude file names containing these words
-                                    cyl_axial_dir::Union{Nothing, Vector{Float64}} = nothing,  # Calculate cylindrical statistics if given an axial axis (vector)
+                                    cyl_axial_dir = nothing,  # Calculate cylindrical statistics if given an axial axis (vector)
                                     # OUTPUT OPTIONS
                                     prompt=true, debug=false,
                                     verbose=true, v_lvl=0)

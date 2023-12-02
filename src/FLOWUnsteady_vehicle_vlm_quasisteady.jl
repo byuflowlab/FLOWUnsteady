@@ -59,7 +59,7 @@ struct QVLMVehicle{N, M, R} <: AbstractVLMVehicle{N, M, R}
                     V=zeros(3), W=zeros(3),
                     prev_data=[deepcopy(vlm_system), deepcopy(wake_system),
                                                     deepcopy(rotor_systems)],
-                    grid_O=Array{Array{Float64, 1}, 1}(),
+                    grid_O=Array{Array{R, 1}, 1}(),
                 ) where {N, M, R} = new(
                     system,
                     tilting_systems,

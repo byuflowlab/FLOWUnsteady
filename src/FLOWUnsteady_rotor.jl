@@ -123,11 +123,11 @@ for.
 
 """
 function generate_rotor(Rtip, Rhub, B::Int,
-                        chorddist::Array{Float64,2},
-                        pitchdist::Array{Float64,2},
-                        sweepdist::Array{Float64,2},
-                        heightdist::Array{Float64,2},
-                        airfoil_contours::Array{Tuple{Float64,Array{Float64, 2},String},1};
+                        chorddist,
+                        pitchdist,
+                        sweepdist,
+                        heightdist,
+                        airfoil_contours;
                         # INPUT OPTIONS
                         data_path=default_database,
                         read_polar=vlm.ap.read_polar,
@@ -292,24 +292,26 @@ end
 
 
 function generate_rotor(Rtip, Rhub, B::Int,
-                        chorddist::Array{Float64,2},
-                        pitchdist::Array{Float64,2},
-                        sweepdist::Array{Float64,2},
-                        heightdist::Array{Float64,2},
-                        airfoil_files::Array{Tuple{Float64,String,String},1};
+                        chorddist,
+                        pitchdist,
+                        sweepdist,
+                        heightdist,
+                        airfoil_files::Array{Tuple{TF,String,String},1};
                         # INPUT OPTIONS
-                        data_path=def_data_path, optargs...)
+                        data_path=def_data_path, optargs...) where TF
 
     # Read airfoil contours
     # Airfoils along the blade as
     # airfoil_contours=[ (pos1, contour1, polar1), (pos2, contour2, pol2), ...]
     # with contour=(x,y) and pos the position from root to tip between 0 and 1.
     # pos1 must equal 0 (root airfoil) and the last must be 1 (tip airfoil)
-    airfoil_contours = Tuple{Float64,Array{Float64, 2},String}[]
+    airfoil_contours = Tuple{TF,Array{TF, 2},String}[]
     airfoil_path = joinpath(data_path, "airfoils")
     for (r, rfl_file, clcurve_file) in airfoil_files
         x,y = gt.readcontour(rfl_file; delim=",", path=airfoil_path, header_len=1)
-        rfl = hcat(x,y)
+        rfl = Array{TF,2}(undef,length(x),2)
+        rfl[:,1] .= x
+        rfl[:,2] .= y
 
         push!(airfoil_contours, (r, rfl, clcurve_file))
     end

@@ -367,10 +367,10 @@ end
 
 
 
-function add_particle(pfield::vpm.ParticleField{TVPM,<:Any,<:Any,<:Any,<:Any,<:Any,<:Any}, X::Array{Float64, 1},
-                        gamma::Float64, dt::Float64,
-                        V::Float64, infD::Array{Float64, 1},
-                        sigma::Float64, vol::Float64,
+function add_particle(pfield::vpm.ParticleField{TVPM,<:Any,<:Any,<:Any,<:Any,<:Any,<:Any}, X,
+                        gamma, dt,
+                        V, infD,
+                        sigma, vol,
                         l::Array{TF, 1}, p_per_step::Int64;
                         overwrite_sigma=nothing) where {TF,TVPM}
 
