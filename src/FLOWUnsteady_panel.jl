@@ -507,7 +507,7 @@ function shed_wake_panel(body::pnl.RigidWakeBody, Vinf::Function,
     introducing.
     =#
 
-    if nt==0
+    if nt==0 || body.nsheddings==0
         return
     end
 
