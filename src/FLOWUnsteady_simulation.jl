@@ -134,6 +134,7 @@ function run_simulation(
             vpm_fmm         = vpm.FMM(; p=4, ncrit=50, theta=0.4, nonzero_sigma=false), # VPM's FMM settings
             vpm_relaxation  = vpm.pedrizzetti,  # VPM relaxation scheme (`vpm.norelaxation`, `vpm.correctedpedrizzetti`, or `vpm.pedrizzetti`)
             vpm_surface     = true,             # Whether to include surfaces in the VPM through ASM/ALM
+            vpm_floattype   = Float64,
 
             # Actuator surface/line model (ASM/ALM): VLM and blade elements
             vlm_vortexsheet = false,            # Whether to spread surface circulation as a vortex sheet in the VPM (turns ASM on; ALM if false)
@@ -241,7 +242,7 @@ function run_simulation(
                     (:fmm, vpm_fmm),
                  ]
     Xdummy = zeros(3)
-    pfield = vpm.ParticleField(max_particles; Uinf=t->Vinf(Xdummy, t),
+    pfield = vpm.ParticleField(max_particles, vpm_floattype; Uinf=t->Vinf(Xdummy, t),
                                                                   vpm_solver...)
 
     max_staticp = max_static_particles==nothing ? 3*_get_m_static(sim.vehicle) : max_static_particles
