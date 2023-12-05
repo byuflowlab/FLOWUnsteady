@@ -376,15 +376,16 @@ will calculate the unsteady loading and save it under the field `Funs-vector`,
 but it will not be added to the Ftot vector that is used to calculate the
 wing's overall aerodynamic force.
 """
-function calc_aerodynamicforce_unsteady(vlm_system::Union{vlm.Wing, vlm.WingSystem},
+function calc_aerodynamicforce_unsteady(vlm_system::vlm.AbstractWing{TF_design,TF_trajectory},
                                 prev_vlm_system, pfield, Vinf, dt, rho; t=0.0,
                                 per_unit_span=false, spandir=[0, 1, 0],
                                 include_trailingboundvortex=false,
                                 Vout=nothing, lenout=nothing,
                                 lencrit=-1, debug=false,
                                 add_to_Ftot=false # Use false to calculate unsteady force but not add it
-                                )
+                                ) where {TF_design, TF_trajectory}
 
+    TF = promote_type(TF_design, TF_trajectory)
     m = vlm.get_m(vlm_system)    # Number of horseshoes
 
     # Nodes of every horseshoe
@@ -393,8 +394,8 @@ function calc_aerodynamicforce_unsteady(vlm_system::Union{vlm.Wing, vlm.WingSyst
     B = _get_Xs(vlm_system, "B")
     Bp = _get_Xs(vlm_system, "Bp")
 
-    Ftot = [zeros(3) for i in 1:m]
-    area = zeros(3)
+    Ftot = [zeros(TF,3) for i in 1:m]
+    area = zeros(TF,3)
 
 
     if ("Gamma" in keys(prev_vlm_system.sol)) # Case that solution from previous step is available
@@ -461,7 +462,7 @@ function calc_aerodynamicforce_unsteady(vlm_system::Union{vlm.Wing, vlm.WingSyst
 
     else
 
-        return [zeros(3) for i in 1:m]
+        return [zeros(TF,3) for i in 1:m]
 
     end
 end
