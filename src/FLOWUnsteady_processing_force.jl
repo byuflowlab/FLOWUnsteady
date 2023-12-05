@@ -134,12 +134,12 @@ function generate_aerodynamicforce_kuttajoukowski(KJforce_type::String,
                                 vehicle=nothing
                                 )
 
-    function calc_aerodynamicforce_kuttajoukowski(vlm_system::Union{vlm.Wing, vlm.WingSystem},
+    function calc_aerodynamicforce_kuttajoukowski(vlm_system::vlm.AbstractWing{TF_design,TF_trajectory},
                                     prev_vlm_system, pfield, Vinf, dt, rho; t=0.0,
                                     per_unit_span=false, spandir=[0, 1, 0],
                                     include_trailingboundvortex=false,
                                     Vout=nothing, lenout=nothing,
-                                    lencrit=-1, debug=false)
+                                    lencrit=-1, debug=false) where {TF_design,TF_trajectory}
 
         m = vlm.get_m(vlm_system)    # Number of horseshoes
 
@@ -168,9 +168,10 @@ function generate_aerodynamicforce_kuttajoukowski(KJforce_type::String,
                                                     targetX=["Ap", "A", "B", "Bp"])
 
         # Pre-allocate memory
-        Ftot = [zeros(3) for i in 1:m]
+        TF = promote_type(TF_design, TF_trajectory)
+        Ftot = [zeros(TF,3) for i in 1:m]
         if debug
-            Vvpms, Vvlms, Vtranmids = ([zeros(3) for i in 1:m] for j in 1:3)
+            Vvpms, Vvlms, Vtranmids = ([zeros(TF,3) for i in 1:m] for j in 1:3)
         end
 
         # Bound vortices to include in force calculation
@@ -204,7 +205,7 @@ function generate_aerodynamicforce_kuttajoukowski(KJforce_type::String,
                                             vlm_vortexsheet_sigma_tbv=vlm_vortexsheet_sigma_tbv)
 
             # Pre-calculate direction of lifting bound vortices
-            BVdir = [zeros(3) for i in 1:m]
+            BVdir = [zeros(TF,3) for i in 1:m]
 
             for i in 1:m
                 BVdir[i] .= B[i]
@@ -237,8 +238,8 @@ function generate_aerodynamicforce_kuttajoukowski(KJforce_type::String,
             pfield.UJ(pfield)
 
             # Collect velocities
-            weights = zeros(m)
-            Vvpm = [zeros(3) for i in 1:m]
+            weights = zeros(TF,m)
+            Vvpm = [zeros(TF,3) for i in 1:m]
 
             for P in vpm.iterate(pfield; include_static=true)
 
