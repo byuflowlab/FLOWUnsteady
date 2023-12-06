@@ -12,6 +12,7 @@ Receives an array of vectors `Fs` and decomposes them into components in the
 `ihat`, `jhat`, `khat` unitary orthogonal directions (`khat` is deduced).
 """
 function decompose(Fs, ihat, jhat)
+    TF = eltype(eltype(Fs))
 
     if abs(ihat[1]*ihat[1]+ihat[2]*ihat[2]+ihat[3]*ihat[3] - 1) >= 1e-12
         error("Got non-unitary vector ihat=$ihat")
@@ -19,14 +20,14 @@ function decompose(Fs, ihat, jhat)
         error("Got non-unitary vector jhat=$jhat")
     end
 
-    khat = zeros(3)
+    khat = zeros(TF,3)
     khat[1] = ihat[2]*jhat[3] - ihat[3]*jhat[2]
     khat[2] = ihat[3]*jhat[1] - ihat[1]*jhat[3]
     khat[3] = ihat[1]*jhat[2] - ihat[2]*jhat[1]
 
-    Fis = [zeros(3) for i in 1:length(Fs)]
-    Fjs = [zeros(3) for i in 1:length(Fs)]
-    Fks = [zeros(3) for i in 1:length(Fs)]
+    Fis = [zeros(TF,3) for i in 1:length(Fs)]
+    Fjs = [zeros(TF,3) for i in 1:length(Fs)]
+    Fks = [zeros(TF,3) for i in 1:length(Fs)]
 
     for (n, F) in enumerate(Fs)
         Fis[n] .= (F[1]*ihat[1]+F[2]*ihat[2]+F[3]*ihat[3]) * ihat
