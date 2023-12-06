@@ -545,8 +545,18 @@ function generate_aerodynamicforce_parasiticdrag(polar_file::String;
 
     # Spline through data (NOTE: AOA in radians!)
     k = min(length(alpha)-1, spl_k)
-    spl_cl = Dierckx.Spline1D(alpha*pi/180.0, cl; k=k, s=0.1)
-    spl_cd = Dierckx.Spline1D(alpha*pi/180.0, cd; k=k, s=0.001)
+
+    function spl_cl(x) let input=alpha*pi.180.0,output=cl;
+            return fm.linear(input, output, x)
+        end
+    end
+        # spl_cl = Dierckx.Spline1D(alpha*pi/180.0, cl; k=k, s=0.1)
+    
+    function spl_cd(x) let input=alpha*pi/180.0,output=cd;
+            return fm.linear(input, output, x)
+        end
+    end
+        # spl_cd = Dierckx.Spline1D(alpha*pi/180.0, cd; k=k, s=0.001)
 
     if calc_cd_from_cl
         # Make alpha(cl) an injective function
@@ -556,7 +566,12 @@ function generate_aerodynamicforce_parasiticdrag(polar_file::String;
         cd_inj = cd[cl_mini:cl_maxi]
 
         # Spline cd as a function of cl
-        spl_cdfromcl = Dierckx.Spline1D(cl_inj, cd_inj; k=k, s=0.1, bc="nearest")
+        # spl_cdfromcl = Dierckx.Spline1D(cl_inj, cd_inj; k=k, s=0.1, bc="nearest")
+        function spl_cdfromcl(x) let cl_inj=cl_inj, cd_inj=cd_inj;
+                    return fm.linear(cl_inj, cd_inj, x)
+                end
+            end
+        end
     end
 
     # Create function for evaluation parasitic drag from the polar

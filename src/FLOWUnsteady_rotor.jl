@@ -150,22 +150,38 @@ function generate_rotor(Rtip, Rhub, B::Int,
     n_bem = n
 
     # Splines
-    _spl_chord = Dierckx.Spline1D(chorddist[:, 1]*Rtip, chorddist[:, 2]*Rtip;
-                                        k= size(chorddist)[1]>2 ? spline_k : 1,
-                                        s=splines_s!=nothing ? splines_s[1] : spline_s, bc=spline_bc)
-    _spl_theta = Dierckx.Spline1D(pitchdist[:, 1]*Rtip, pitchdist[:, 2];
-                                        k= size(pitchdist)[1]>2 ? spline_k : 1,
-                                        s=splines_s!=nothing ? splines_s[2] : spline_s, bc=spline_bc)
-    _spl_LE_x = Dierckx.Spline1D(sweepdist[:, 1]*Rtip, sweepdist[:, 2]*Rtip;
-                                        k= size(sweepdist)[1]>2 ? spline_k : 1,
-                                        s=splines_s!=nothing ? splines_s[3] : spline_s, bc=spline_bc)
-    _spl_LE_z = Dierckx.Spline1D(heightdist[:, 1]*Rtip, heightdist[:, 2]*Rtip;
-                                        k= size(heightdist)[1]>2 ? spline_k : 1,
-                                        s=splines_s!=nothing ? splines_s[4] : spline_s, bc=spline_bc)
-    spl_chord(x) = Dierckx.evaluate(_spl_chord, x)
-    spl_theta(x) = pitch + Dierckx.evaluate(_spl_theta, x)
-    spl_LE_x(x) = Dierckx.evaluate(_spl_LE_x, x)
-    spl_LE_z(x) = Dierckx.evaluate(_spl_LE_z, x)
+    function spl_chord(x) let input=chorddist[:, 1]*Rtip, output=chorddist[:, 2]*Rtip;
+            return fm.linear(input,output,x)
+        end
+    end
+    # _spl_chord = Dierckx.Spline1D(chorddist[:, 1]*Rtip, chorddist[:, 2]*Rtip;
+    #                                     k= size(chorddist)[1]>2 ? spline_k : 1,
+    #                                     s=splines_s!=nothing ? splines_s[1] : spline_s, bc=spline_bc)
+    function spl_theta(x) let input=pitchdist[:, 1]*Rtip, output=pitchdist[:, 2];
+            return fm.linear(input,output,x)
+        end
+    end
+    # _spl_theta = Dierckx.Spline1D(pitchdist[:, 1]*Rtip, pitchdist[:, 2];
+    #                                     k= size(pitchdist)[1]>2 ? spline_k : 1,
+    #                                     s=splines_s!=nothing ? splines_s[2] : spline_s, bc=spline_bc)
+    function spl_LE_x(x) let input=sweepdist[:, 1]*Rtip, output=sweepdist[:, 2]*Rtip;
+            return fm.linear(input,output,x)
+        end
+    end
+    # _spl_LE_x = Dierckx.Spline1D(sweepdist[:, 1]*Rtip, sweepdist[:, 2]*Rtip;
+    #                                     k= size(sweepdist)[1]>2 ? spline_k : 1,
+    #                                     s=splines_s!=nothing ? splines_s[3] : spline_s, bc=spline_bc)
+    function spl_LE_z(x) let input=heightdist[:, 1]*Rtip, output=heightdist[:, 2]*Rtip;
+            return fm.linear(input,output,x)
+        end
+    end
+    # _spl_LE_z = Dierckx.Spline1D(heightdist[:, 1]*Rtip, heightdist[:, 2]*Rtip;
+    #                                     k= size(heightdist)[1]>2 ? spline_k : 1,
+    #                                     s=splines_s!=nothing ? splines_s[4] : spline_s, bc=spline_bc)
+    # spl_chord(x) = Dierckx.evaluate(_spl_chord, x)
+    # spl_theta(x) = pitch + Dierckx.evaluate(_spl_theta, x)
+    # spl_LE_x(x) = Dierckx.evaluate(_spl_LE_x, x)
+    # spl_LE_z(x) = Dierckx.evaluate(_spl_LE_z, x)
 
     # Geometry for CCBlade & FLOWVLM
     r = [Rhub + i*(Rtip-Rhub)/n_bem for i in 0:n_bem] # r is discretized in n+1 sections

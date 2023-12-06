@@ -15,7 +15,7 @@ module FLOWUnsteady
 =#
 
 # ------------ GENERIC MODULES -------------------------------------------------
-import Dierckx
+import FLOWMath
 import CSV
 import DataFrames
 import JLD
@@ -42,6 +42,7 @@ const vpm   = FLOWVPM
 const vlm   = FLOWVLM
 const vsp   = VSPGeom
 const noise = FLOWNoise
+const fm    = FLOWMath
 
 # ------------ GLOBAL VARIABLES ------------------------------------------------
 const module_path    = splitdir(@__FILE__)[1]              # Path to this module
