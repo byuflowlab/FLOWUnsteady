@@ -565,7 +565,7 @@ function generate_aerodynamicforce_parasiticdrag(polar_file::String;
                                                     per_unit_span=false, spandir=[0, 1, 0],
                                                     include_trailingboundvortex=false,
                                                     Vout=nothing, lenout=nothing,
-                                                    lencrit=-1, debug=false)
+                                                    lencrit=-1, debug=false) where {TF_design,TF_trajectory}
 
         TF = promote_type(TF_design, TF_trajectory)
         m = vlm.get_m(vlm_system)    # Number of horseshoes
