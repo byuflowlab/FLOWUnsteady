@@ -560,13 +560,14 @@ function generate_aerodynamicforce_parasiticdrag(polar_file::String;
     end
 
     # Create function for evaluation parasitic drag from the polar
-    function calc_aerodynamicforce_parasiticdrag(vlm_system::Union{vlm.Wing, vlm.WingSystem},
+    function calc_aerodynamicforce_parasiticdrag(vlm_system::vlm.AbstractWing{TF_design,TF_trajectory},
                                                     prev_vlm_system, pfield, Vinf, dt, rho; t=0.0,
                                                     per_unit_span=false, spandir=[0, 1, 0],
                                                     include_trailingboundvortex=false,
                                                     Vout=nothing, lenout=nothing,
                                                     lencrit=-1, debug=false)
 
+        TF = promote_type(TF_design, TF_trajectory)
         m = vlm.get_m(vlm_system)    # Number of horseshoes
 
         # Nodes of every horseshoe
@@ -595,13 +596,13 @@ function generate_aerodynamicforce_parasiticdrag(polar_file::String;
         # Evaluate kinematic velocity on each node
         Vtran = _Vkinematic(vlm_system, prev_vlm_system, dt; t=t, targetX=["A", "B"])
 
-        Ftot = [zeros(3) for i in 1:m]
-        l, leff, Vtranmid, V = (zeros(3) for j in 1:4)
-        that, shat, nhat, dhat = (zeros(3) for j in 1:4)
-        lAAp, lBBp = (zeros(3) for j in 1:2)
+        Ftot = [zeros(TF,3) for i in 1:m]
+        l, leff, Vtranmid, V = (zeros(TF,3) for j in 1:4)
+        that, shat, nhat, dhat = (zeros(TF,3) for j in 1:4)
+        lAAp, lBBp = (zeros(TF,3) for j in 1:2)
 
         if debug
-            AOAeffs, cds, cls = (zeros(m) for j in 1:3)
+            AOAeffs, cds, cls = (zeros(TF,m) for j in 1:3)
         end
 
         for i in 1:m                 # Iterate over horseshoes
@@ -741,13 +742,14 @@ function generate_calc_aerodynamicforce_freevortices(maxboundparticles::Int,
 
     pfield_FV = vpm.ParticleField(maxboundparticles)
 
-    function calc_aerodynamicforce_freevortices(vlm_system::Union{vlm.Wing, vlm.WingSystem},
+    function calc_aerodynamicforce_freevortices(vlm_system::vlm.AbstractWing{TF_design,TF_trajectory},
                                     prev_vlm_system, pfield, Vinf, dt, rho; t=0.0,
                                     per_unit_span=false, spandir=[0, 1, 0],
                                     include_trailingboundvortex=false,
                                     Vout=nothing, lenout=nothing,
-                                    lencrit=-1, debug=false)
+                                    lencrit=-1, debug=false) where {TF_design,TF_trajectory}
 
+        TF = promote_type(TF_design,TF_trajectory)
         m = vlm.get_m(vlm_system)    # Number of horseshoes
 
         # Nodes of every horseshoe
@@ -755,8 +757,8 @@ function generate_calc_aerodynamicforce_freevortices(maxboundparticles::Int,
         B = _get_Xs(vlm_system, "B")
 
         # Pre-allocate memory
-        Ftot = [zeros(3) for i in 1:m]
-        Fbxf = [zeros(3) for i in 1:m]
+        Ftot = [zeros(TF,3) for i in 1:m]
+        Fbxf = [zeros(TF,3) for i in 1:m]
 
         vortices = include_TBVs ? (1:3) : (1:1)  # 1==AB, 2==ApA, 3==BBp
 
