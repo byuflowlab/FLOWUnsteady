@@ -546,7 +546,7 @@ function generate_aerodynamicforce_parasiticdrag(polar_file::String;
     # Spline through data (NOTE: AOA in radians!)
     k = min(length(alpha)-1, spl_k)
 
-    function spl_cl(x) let input=alpha*pi.180.0,output=cl;
+    function spl_cl(x) let input=alpha*pi/180.0,output=cl;
             return fm.linear(input, output, x)
         end
     end
