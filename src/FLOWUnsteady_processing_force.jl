@@ -568,9 +568,8 @@ function generate_aerodynamicforce_parasiticdrag(polar_file::String;
         # Spline cd as a function of cl
         # spl_cdfromcl = Dierckx.Spline1D(cl_inj, cd_inj; k=k, s=0.1, bc="nearest")
         function spl_cdfromcl(x) let cl_inj=cl_inj, cd_inj=cd_inj;
-                    return fm.linear(cl_inj, cd_inj, x)
-                end
-            end
+                return fm.linear(cl_inj, cd_inj, x)
+        	end
         end
     end
 
