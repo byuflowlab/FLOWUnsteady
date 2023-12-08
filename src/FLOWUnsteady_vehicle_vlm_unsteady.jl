@@ -263,7 +263,7 @@ save_vtk(self::VLMVehicle, args...;
 
 ##### INTERNAL FUNCTIONS  ######################################################
 
-function _static_particles(pfield::vpm.ParticleField,
+function _static_particles(pfield::vpm.ParticleField{R, F, V, S, Tkernel, TUJ, Tintegration},
                             system::Union{vlm.Wing, vlm.WingSystem, vlm.Rotor},
                             sigma;
                             sigma_vpm=nothing,
@@ -272,9 +272,10 @@ function _static_particles(pfield::vpm.ParticleField,
                             vortexsheet_distribution::Function=g_uniform,
                             vortexsheet_sigma_tbv=nothing,
                             vortices=1:3, # Bound vortices to add (1==AB, 2==ApA, 3==BBp)
-                            )
+                            ) where {R, F, V, S, Tkernel, TUJ, Tintegration}
 
-    X, Gamma, dl = (zeros(3) for i in 1:3)
+    #X, Gamma, dl = (zeros(3) for i in 1:3) # zeros creates floats by default.
+    X, Gamma, dl = (zeros(R,3) for i in 1:3)
 
     # Adds a particle for every bound vortex of the VLM
     for i in 1:vlm.get_m(system)
