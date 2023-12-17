@@ -199,7 +199,7 @@ If issues persist, please check the resolved issues in [the FLOWExaFMM repo](htt
 and feel free to open a new issue or discussion for help.
 
 ## VSPGeom
-FLOWUnsteady is able to import geometry created using OpenVSP using [VSPGeom.jl](https://github.com/byuflowlab/VSPGeom.jl)
+FLOWUnsteady can import geometry created in [OpenVSP](https://openvsp.org/) using [VSPGeom.jl](https://github.com/byuflowlab/VSPGeom.jl).
 
 * Add VSPgeom:
   ```julia
