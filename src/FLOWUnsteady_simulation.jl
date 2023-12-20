@@ -134,6 +134,7 @@ function run_simulation(
             vpm_fmm         = vpm.FMM(; p=4, ncrit=50, theta=0.4, nonzero_sigma=false), # VPM's FMM settings
             vpm_relaxation  = vpm.pedrizzetti,  # VPM relaxation scheme (`vpm.norelaxation`, `vpm.correctedpedrizzetti`, or `vpm.pedrizzetti`)
             vpm_surface     = true,             # Whether to include surfaces in the VPM through ASM/ALM
+            vpm_custom_UJ   = nothing,
 
             # Actuator surface/line model (ASM/ALM): VLM and blade elements
             vlm_vortexsheet = false,            # Whether to spread surface circulation as a vortex sheet in the VPM (turns ASM on; ALM if false)
@@ -348,6 +349,7 @@ function run_simulation(
     ############################################################################
     # Here it uses the VPM-time-stepping to run the simulation
     vpm.run_vpm!(pfield, dt, nsteps;
+                      custom_UJ=vpm_custom_UJ,
                       save_path=save_path, run_name=run_name*"_pfield",
                       verbose=verbose, verbose_nsteps=verbose_nsteps,
                       v_lvl=v_lvl,

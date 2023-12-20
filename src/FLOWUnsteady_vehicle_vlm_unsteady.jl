@@ -96,7 +96,7 @@ Constructor with implicit `N`, `M`, and `R` parameters.
 UVLMVehicle(system::vlm.WingSystem;
         V::Array{R, 1}=zeros(3), W::Array{R, 1}=zeros(3),
         tilting_systems::NTuple{N, vlm.WingSystem}=NTuple{0, vlm.WingSystem}(),
-        rotor_systems::NTuple{M, Array{vlm.Rotor, 1}}=NTuple{0, Array{vlm.Rotor, 1}}(),
+        rotor_systems::NTuple{M, Array{<:vlm.Rotor, 1}}=NTuple{0, Array{vlm.Rotor, 1}}(),
         grids=Array{gt.GridTypes, 1}(),
         optargs...
         ) where {N, M, R} = UVLMVehicle{N, M, R}( system;
