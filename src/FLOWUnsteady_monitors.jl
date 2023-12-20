@@ -289,7 +289,8 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
                                 figsize_factor=5/6,
                                 nsteps_plot=1,
                                 nsteps_savefig=10,
-                                debug=false)
+                                debug=false
+                                )
 
     fcalls = 0                  # Number of function calls
     prev_wing = nothing
@@ -480,6 +481,244 @@ function generate_monitor_wing(wing, Vinf::Function, b_ref::Real, ar_ref::Real,
         return false
     end
 end
+
+function generate_monitor_panel_slice(body::Union{pnl.NonLiftingBody, pnl.AbstractLiftingBody},
+                                        fieldname, sliceposs, nsteps_sim;
+                                        formatplot=(fcalls, fig, axs)->nothing,
+                                        plot_optargs=(; alpha=0.75),
+                                        nsteps_savefig=10,
+                                        optargs...)
+
+    # NOTE: Here we assume that the control points stay constant throughout
+    #       the simulation and are calculated only upon initialization
+    normals = pnl.calc_normals(body)
+    controlpoints = pnl.calc_controlpoints(body, normals)
+
+    # Number of function calls
+    fcalls = 0
+
+    # Figure handles
+    fig, axs = nothing, nothing
+
+    function extra_runtime_function(sim, PFIELD, T, DT; this_optargs...)
+
+        # Color for lines at this timestep
+        aux = PFIELD.nt/nsteps_sim
+        clr = (1-aux, 0, aux)
+
+        # Calc slice monitor
+        fig, axs = pnl.monitor_slice(body, controlpoints, fieldname, sliceposs;
+                                                _fig=fig, _axs=axs, num=PFIELD.nt,
+                                                plot_optargs=(; color=clr, plot_optargs...),
+                                                savefig=PFIELD.nt%nsteps_savefig==0,
+                                                optargs...)
+
+        # Format plot
+        formatplot(fcalls, fig, axs)
+
+        fcalls += 1
+
+        return false
+    end
+
+    return extra_runtime_function
+end
+
+function generate_monitor_panel_Cp(body, Uref, args...;
+                                    fieldname="Cp",
+                                    slicenormal=[0, 1, 0],
+                                    chorddir=[1, 0, 0],
+                                    axtitles=[],
+                                    extraformatplot=(fcalls, fig, axs)->nothing,
+                                    optargs...)
+
+    function formatplot(fcalls, fig, axs)
+        if fcalls==0
+
+            formatpyplot()
+
+            fig.suptitle("Pressure slices")
+
+            for ax in axs
+                ax.invert_yaxis()
+            end
+
+            for i in 1:size(axs, 1)
+                axs[i, end].set_xlabel(L"x/c")
+            end
+
+            for j in 1:size(axs, 2)
+                axs[1, j].set_ylabel(L"Pressure $C_p$")
+            end
+
+            for (ax, ttl) in zip(axs, axtitles)
+                ax.set_title(ttl, color="gray")
+            end
+
+            fig.tight_layout()
+        end
+
+        extraformatplot(fcalls, fig, axs)
+    end
+
+    # Function for calculating x/c
+    function proc_xfun(points, vals)
+
+        # Project points onto the chord direction
+        xoc = mapslices(x->dot(x, chorddir), points; dims=1)
+
+        # Shift points to have the LE at x=0
+        xoc .-= minimum(xoc)
+
+        # Normalize by chord length
+        xoc ./= maximum(xoc)
+
+        # Make sure that it returns a vector an not a matrix
+        return reshape(xoc, length(xoc))
+    end
+
+    return generate_monitor_panel_slice(body, fieldname, args...;
+                                            slicenormal=slicenormal,
+                                            proc_xfun=proc_xfun,
+                                            figname="Cp monitor",
+                                            formatplot=formatplot,
+                                            optargs...)
+end
+
+
+
+
+function generate_monitor_panel_wing(body, bref, arref, Uref, rhoref, nsteps_sim;
+                                        Lhat=[0, 0, 1],
+                                        Dhat=[-1, 0, 1],
+                                        F_fieldname="F",
+                                        disp_plot=true,
+                                        formatplot=(fcalls, fig, axs)->nothing,
+                                        figname="Wing monitor",
+                                        title_lbl="",
+                                        CL_lbl=L"Lift coefficient $C_L$",
+                                        CD_lbl=L"Drag coefficient $C_D$",
+                                        cl_lbl=L"Sectional lift $c_\ell$",
+                                        cd_lbl=L"Sectional drag $c_d$",
+                                        y2b_lbl=L"Span position $\frac{2y}{b}$",
+                                        cl_ttl="Spanwise lift distribution",
+                                        cd_ttl="Spanwise drag distribution",
+                                        save_path=nothing,
+                                        filepref="wing",
+                                        plot_optargs=(; alpha=0.7),
+                                        nsteps_savefig=10,
+                                        optargs...)
+
+    # Number of function calls
+    fcalls = 0
+
+    # Name of CSV file
+    if !isnothing(save_path)
+        csvfile = joinpath(save_path, filepref*"_convergence.csv")
+    end
+
+    # Figure handles
+    if disp_plot
+
+        formatpyplot()
+
+        fig = plt.figure(figname, figsize=[7*2, 5*2]*2/3)
+        fig.suptitle(title_lbl)
+        axs = fig.subplots(2, 2)
+        axs = [axs[i, j] for j in 1:size(axs, 2), i in 1:size(axs, 1)]
+
+        for ax in axs
+            ax.spines["right"].set_visible(false)
+            ax.spines["top"].set_visible(false)
+        end
+
+        ax = axs[1]
+        ax.set_xlabel("Simulation time (s)")
+        ax.set_ylabel(CL_lbl)
+
+        ax = axs[2]
+        ax.set_xlabel("Simulation time (s)")
+        ax.set_ylabel(CD_lbl)
+
+        ax = axs[3]
+        ax.set_xlabel(y2b_lbl)
+        ax.set_ylabel(cl_lbl)
+        ax.set_title(cl_ttl, color="gray")
+
+        ax = axs[4]
+        ax.set_xlabel(y2b_lbl)
+        ax.set_ylabel(cd_lbl)
+        ax.set_title(cd_ttl, color="gray")
+
+        fig.tight_layout()
+    end
+
+    function extra_runtime_function(sim, PFIELD, T, DT; this_optargs...)
+
+        # Write header of CSV file
+        if fcalls==0 && !isnothing(save_path)
+            open(csvfile, "w") do f
+                println(f, "T,CL,CD")
+            end
+        end
+
+        # Format plot
+        formatplot(fcalls, fig, axs)
+
+        # Color for lines and markers at this time step
+        aux = PFIELD.nt/nsteps_sim
+        clr = (1-aux, 0, aux)
+
+        # Integrate total force
+        LDS = pnl.calcfield_LDS(body, Lhat, Dhat; F_fieldname=F_fieldname)
+
+        L = LDS[:, 1]
+        D = LDS[:, 2]
+
+        # Force coefficients
+        nondim = 0.5*rhoref*Uref^2*bref^2/arref   # Normalization factor
+        CL = sign(dot(L, Lhat)) * norm(L) / nondim
+        CD = sign(dot(D, Dhat)) * norm(D) / nondim
+
+        # Plot CL and CD convergence
+        if disp_plot
+
+            axs[1].plot([T], [CL], "o", alpha=0.5, color=clr)
+            axs[2].plot([T], [CD], "o", alpha=0.5, color=clr)
+
+        end
+
+        # Write CSV file with CL and CD
+        if !isnothing(save_path)
+            open(csvfile, "a") do f
+                println(f, T, ",", CL, ",", CD)
+            end
+        end
+
+        # Calculate, plot, and save loading
+        pnl.monitor_loading(body, Lhat, Dhat, bref;
+                                        F_fieldname=F_fieldname,
+                                        _fig=fig, _axs=axs[3:4],
+                                        disp_plot=disp_plot,
+                                        to_plot=[1, 2],
+                                        yscalings=ones(2)/(0.5*rhoref*Uref^2*bref/arref),
+                                        ylbls="Sectional ".*[L"lift $c_\ell$", L"drag $c_d$"],
+                                        plot_optargs=(; color=clr, plot_optargs...),
+                                        save_path=save_path,
+                                        filepref=filepref,
+                                        num=PFIELD.nt,
+                                        savefig=PFIELD.nt%nsteps_savefig==0,
+                                        optargs...)
+
+        fcalls += 1
+
+        return false
+    end
+
+    return extra_runtime_function
+end
+
+
 
 """
     generate_monitor_statevariables(; save_path=nothing)

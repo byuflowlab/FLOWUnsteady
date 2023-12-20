@@ -190,6 +190,7 @@ function generate_static_particle_fun(pfield::vpm.ParticleField, pfield_static::
                                         vlm_vortexsheet_distribution=g_pressure,
                                         vlm_vortexsheet_sigma_tbv=nothing,
                                         save_path=nothing, run_name="", suff="_staticpfield",
+                                        extra_static_particles_fun=(args...; optargs...) -> nothing,
                                         nsteps_save=1)
 
     if sigma_vlm<=0
@@ -226,6 +227,9 @@ function generate_static_particle_fun(pfield::vpm.ParticleField, pfield_static::
 
         # Save vtk with static particles
         if flag
+
+            extra_static_particles_fun(pfield_static, args...)
+
             if pfield_static.nt%nsteps_save==0
                 vpm.save(pfield_static, run_name*suff; path=save_path,
                                     add_num=true, overwrite_time=nothing)

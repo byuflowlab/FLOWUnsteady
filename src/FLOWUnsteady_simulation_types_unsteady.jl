@@ -13,7 +13,9 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
                 dt::Real, rlx::Real, sigma_vlm::Real, sigma_rotor::Real,
                 rho::Real, speedofsound, staticpfield::vpm.ParticleField,
                 hubtiploss_correction;
-                init_sol::Bool=false, sigmafactor_vpmonvlm=1, debug=false
+                init_sol::Bool=false, sigmafactor_vpmonvlm=1,
+                extra_static_particles_fun = (args...; optargs...) -> nothing,
+                debug=false
                 ) where {V<:UVLMVehicle, M<:AbstractManeuver, R}
 
 
@@ -117,7 +119,9 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
         Xs_rotors = _get_midXs(vhcl.rotor_systems)
 
         # Calculate VPM velocity on all points (VLM and rotors)
-        Vvpm = Vvpm_on_Xs(pfield, vcat(Xs_cp_vlm, Xs_ApA_AB_BBp_vlm, Xs_rotors); dt=dt, fsgm=sigmafactor_vpmonvlm)
+        Vvpm = Vvpm_on_Xs(pfield, vcat(Xs_cp_vlm, Xs_ApA_AB_BBp_vlm, Xs_rotors);
+                            dt=dt, fsgm=sigmafactor_vpmonvlm,
+                            static_particles_fun=extra_static_particles_fun)
 
         Vvpm_cp_vlm = Vvpm[1:m]
         Vvpm_ApA_AB_BBp_vlm = Vvpm[m+1:4*m]

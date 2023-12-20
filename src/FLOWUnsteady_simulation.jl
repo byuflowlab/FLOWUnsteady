@@ -124,6 +124,7 @@ function run_simulation(
             max_particles   = Int(1e5),         # Maximum number of particles
             max_static_particles = nothing,     # Maximum number of static particles (use `nothing` to automatically estimate it)
             p_per_step      = 1,                # Particle sheds per time step
+            p_per_step_panel= 1,                # Particle sheds per time step for panel bodies
             vpm_formulation = vpm.rVPM,         # VPM formulation (`vpm.rVPM` or `vpm.cVPM`)
             vpm_kernel      = vpm.gaussianerf,  # VPM kernel (`vpm.gaussianerf` or `vpm.winckelmans`)
             vpm_UJ          = vpm.UJ_fmm,       # VPM particle-to-particle interaction scheme (`vpm.UJ_fmm` or `vpm.UJ_direct`)
@@ -154,6 +155,7 @@ function run_simulation(
             boundarylayer_prescribedCd = 0.1,   # (experimental) prescribed Cd for boundary layer shedding used for wings
             boundarylayer_d     = 0.0,          # (experimental) dipole width for boundary layer shedding
             omit_shedding       = [],           # Indices of elements in `sim.vehicle.wake_system` on which omit shedding VPM particles
+            panel_omit_shedding = Dict(),
 
             # Regularization of solvers
             sigma_vlm_solver    = -1,           # Regularization of VLM solver (internal VLM-on-VLM)
@@ -162,6 +164,10 @@ function run_simulation(
             sigmafactor_vpm     = 1.0,          # Core overlap of wake particles
             sigmafactor_vpmonvlm = 1,           # (experimental) shrinks the particles by this factor when calculating VPM-on-VLM/Rotor induced velocities
             sigma_vpm_overwrite = nothing,      # Overwrite core size of wake to this value (ignoring `sigmafactor_vpm`)
+            sigma_vpmpanel_overwrite = nothing, # Overwrite core size of panel wake to this value (ignoring `sigmafactor_vpm`)
+
+            extra_static_particles_fun = (args...; optargs...) -> nothing,
+            shed_wake_panel = nothing,
 
             # -------- RESTART OPTIONS -----------------------------------------
             restart_vpmfile     = nothing,      # VPM restart file to restart simulation
@@ -284,11 +290,26 @@ function run_simulation(
                             overwrite_sigma=sigma_vpm_overwrite,
                             omit_shedding=omit_shedding)
 
+        if !isnothing(shed_wake_panel)
+            # NOTE: Here I assume that the MultiBody was stored in this array
+            body = sim.vehicle.prev_data[4]
+
+            shed_wake_panel(body, Vinf, PFIELD, DT, sim.nt; t=T,
+                                unsteady_shedcrit=-1,
+                                shed_starting=false,
+                                p_per_step=p_per_step_panel,
+                                sigmafactor=sigmafactor_vpm,
+                                overwrite_sigma=isnothing(sigma_vpmpanel_overwrite) ? sigma_vpm_overwrite : sigma_vpmpanel_overwrite,
+                                omit_shedding=panel_omit_shedding
+                            )
+        end
+
         # Solve aerodynamics of the vehicle
         solve(sim, Vinf, PFIELD, wake_coupled, DT, vlm_rlx,
                 sigma_vlm_surf, sigma_rotor_surf, rho, sound_spd,
                 staticpfield, hubtiploss_correction;
                 init_sol=vlm_init, sigmafactor_vpmonvlm=sigmafactor_vpmonvlm,
+                extra_static_particles_fun=extra_static_particles_fun,
                 debug=debug)
 
         # Shed unsteady-loading wake with new solution
@@ -299,6 +320,17 @@ function run_simulation(
                         p_per_step=p_per_step, sigmafactor=sigmafactor_vpm,
                         overwrite_sigma=sigma_vpm_overwrite,
                         omit_shedding=omit_shedding)
+
+            if !isnothing(shed_wake_panel)
+                shed_wake_panel(body, Vinf, PFIELD, DT, sim.nt; t=T,
+                                    unsteady_shedcrit=unsteady_shedcrit,
+                                    shed_starting=shed_starting,
+                                    p_per_step=p_per_step_panel,
+                                    sigmafactor=sigmafactor_vpm,
+                                    overwrite_sigma=isnothing(sigma_vpmpanel_overwrite) ? sigma_vpm_overwrite : sigma_vpmpanel_overwrite,
+                                    omit_shedding=panel_omit_shedding
+                                )
+            end
         end
 
         if shed_boundarylayer
@@ -332,16 +364,23 @@ function run_simulation(
     end
 
     if vpm_surface
-        static_particles_function = generate_static_particle_fun(pfield, staticpfield,
+        vehicle_static_particles_function = generate_static_particle_fun(pfield, staticpfield,
                                     sim.vehicle, sigma_vlm_surf, sigma_rotor_surf;
                                     vlm_vortexsheet=vlm_vortexsheet,
                                     vlm_vortexsheet_overlap=vlm_vortexsheet_overlap,
                                     vlm_vortexsheet_distribution=vlm_vortexsheet_distribution,
                                     vlm_vortexsheet_sigma_tbv=vlm_vortexsheet_sigma_tbv,
                                     save_path=save_static_particles ? save_path : nothing,
+                                    extra_static_particles_fun=extra_static_particles_fun,
                                     run_name=run_name, nsteps_save=nsteps_save)
     else
-        static_particles_function = (pfield, t, dt)->nothing
+        vehicle_static_particles_function = (pfield, t, dt)->nothing
+    end
+
+    function static_particles_function(args...; optargs...)
+        vehicle_static_particles_function(args...; optargs...)
+        extra_static_particles_fun(args...; optargs...)
+        return nothing
     end
 
     ############################################################################
@@ -408,7 +447,19 @@ end
 """
 Returns the velocity induced by particle field on every position `Xs`
 """
-function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs::Array{T, 1}; static_particles_fun=(args...)->nothing, dt=0, fsgm=1) where {T}
+function Vvpm_on_Xs(pfield, Xs; optargs...)
+
+    Vvpm = [zeros(3) for i in 1:length(Xs)]
+
+    Vvpm_on_Xs!(Vvpm, pfield, Xs; optargs...)
+
+    return Vvpm
+end
+
+function Vvpm_on_Xs!(Vvpm, pfield::vpm.ParticleField, Xs; static_particles_fun=(args...)->nothing, dt=0, fsgm=1)
+
+    @assert length(Vvpm) == length(Xs) ""*
+        "Vvpm and Xs do not have the same length ($(length(Vvpm)) != $(length(Xs)))"
 
     if length(Xs)!=0 && vpm.get_np(pfield)!=0
         # Omit freestream
@@ -440,7 +491,9 @@ function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs::Array{T, 1}; static_particles
         pfield.UJ(pfield)
 
         # Retrieve velocity at probes
-        Vvpm = [Array(P.U) for P in vpm.iterator(pfield; start_i=sta_np+1)]
+        for (V, P) in zip(Vvpm, vpm.iterator(pfield; start_i=sta_np+1))
+            V .= P.U
+        end
 
         # Remove static particles and probes
         for pi in vpm.get_np(pfield):-1:(org_np+1)
@@ -457,10 +510,15 @@ function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs::Array{T, 1}; static_particles
         # Restore freestream
         pfield.Uinf = Uinf
     else
-        Vvpm = [zeros(3) for i in 1:length(Xs)]
+        for V in Vvpm
+            V .= 0
+        end
     end
 
     return Vvpm
 end
+#
+# add_probe(pfield::vpm.ParticleField, X) = vpm.add_particle(pfield, X, zeros(3), 1e-6; vol=0)
 
-add_probe(pfield::vpm.ParticleField, X) = vpm.add_particle(pfield, X, zeros(3), 1e-6; vol=0)
+const zeros3 = zeros(3)
+add_probe(pfield::vpm.ParticleField, X) = vpm.add_particle(pfield, X, zeros3, 1e-12; vol=0)

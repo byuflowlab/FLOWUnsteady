@@ -33,6 +33,7 @@ import GeometricTools
 import FLOWVPM
 import FLOWVLM
 import VSPGeom
+import FLOWPanel
 import FLOWNoise
 import BPM
 
@@ -41,6 +42,7 @@ const gt    = GeometricTools
 const vpm   = FLOWVPM
 const vlm   = FLOWVLM
 const vsp   = VSPGeom
+const pnl   = FLOWPanel
 const noise = FLOWNoise
 
 # ------------ GLOBAL VARIABLES ------------------------------------------------
@@ -58,7 +60,7 @@ for header_name in ["vehicle", "vehicle_vlm",
                     "simulation_types", "simulation", "utils",
                     "processing", "processing_force", "monitors",
                     "noise_wopwop", "noise_bpm", "postprocessing",
-                    "openvsp"]
+                    "openvsp","panel"]
 
     include("FLOWUnsteady_"*header_name*".jl")
 
