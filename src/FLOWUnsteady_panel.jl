@@ -54,7 +54,7 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
     Das, Dbs = nothing, nothing
     Xsheddings, prev_Xsheddings, Xs = nothing, nothing, nothing
     allrotors = nothing
-    Us, Ugradmus, Fs = nothing, nothing, nothing
+    Us, Ugradmus, Ugradmus_cell, Ugradmus_node, Fs = nothing, nothing, nothing, nothing, nothing
     areas, Cps = nothing, nothing
 
     solverprealloc = nothing
@@ -119,6 +119,8 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
             if Xs == nothing; Xs = zeros(3, ncells + 2*nsheddings); end;
             if Us == nothing; Us = zeros(3, ncells); end;
             if Ugradmus == nothing; Ugradmus = zeros(3, ncells); end;
+            if Ugradmus_cell == nothing; Ugradmus_cell = zeros(3, ncells); end;
+            if Ugradmus_node == nothing; Ugradmus_node = zeros(3, ncells); end;
             if Fs == nothing; Fs = zeros(3, ncells); end;
             if areas == nothing; areas = zeros(ncells); end;
             if Cps == nothing; Cps = zeros(ncells); end;
@@ -415,7 +417,10 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
 
         # Calculate surface velocity U_∇μ due to the gradient of the doublet strength
         Ugradmus .= 0
-        pnl.calcfield_Ugradmu!(Ugradmus, panelbody, areas, normals, controlpoints)
+        Ugradmus_cell .= 0
+        Ugradmus_node .= 0
+        pnl.calcfield_Ugradmu!(Ugradmus, Ugradmus_cell, Ugradmus_node,
+                                panelbody, areas, normals, controlpoints; force_cellTE=false)
 
         # Add both velocities together
         pnl.addfields(panelbody, "Ugradmu", "U")
