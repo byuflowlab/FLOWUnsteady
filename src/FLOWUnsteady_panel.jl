@@ -45,7 +45,9 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
                                 rlx=-1,
                                 offset_U=0,                  # Offset CPs by this amount in U calc
                                 save_path=nothing,
-                                run_name=run_name)
+                                run_name=run_name,
+                                userdefined_postprocessing=(args...; optargs...)->nothing
+                                )
 
     normals, normalscorr = nothing, nothing
     controlpoints, prev_controlpoints, off_controlpoints = nothing, nothing, nothing
@@ -431,7 +433,7 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
 
         # Calculate the force of each panel (based on Cp)
         Fs .= 0
-        pnl.calcfield_F!(Fs, panelbody, areas, normalscorr, Us, ref_magVinf, ref_rho)
+        pnl.calcfield_F!(Fs, panelbody, areas, normalscorr, Cps, ref_magVinf, ref_rho)
 
         # Restore fields erased by solve
         bodyi = 1
@@ -448,6 +450,10 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
         end
         applytobottom(restore_Xsheddings_field, panelbody)
 
+        # Call user-defined postprocessing function
+        userdefined_postprocessing(panelbody, areas, normals, controlpoints)
+
+        # Output VTK files
         if save_path != nothing
             pnl.save(panelbody, run_name; path=save_path, num=sim.nt,
                                                 out_wake=true,
