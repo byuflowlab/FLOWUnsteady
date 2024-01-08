@@ -1,4 +1,4 @@
-# [Aerodynamic Solution](@id blownwingaero)
+# [Wing-on-Prop Interactions](@id blownwingaero)
 
 ```@raw html
 <div style="position:relative;padding-top:50%;">
@@ -9,6 +9,17 @@
         allowfullscreen></iframe>
 </div>
 ```
+
+In this example we show mount propellers on a swept wing.
+The wing is modeled using the actuator line model that represents the wing
+as a lifting line.
+This wing model is accurate for capturing wing-on-prop interactions.
+For instance, the rotor will experience an unsteady blade loading (and
+increased tonal noise) caused by the turning of the flow ahead of the wing
+leading edge.
+However, this simple wing model is not adecuate for capturing
+prop-on-wing interactions (see [the next two sections](@ref asm) to
+accurately predict prop-on-wing interactions).
 
 
 ```julia
@@ -199,8 +210,8 @@ for ri in 1:nrotors
 
     # Account for angle of attack of wing
     nrm = sqrt(x^2 + z^2)
-    x = nrm*cosd(AOAwing)
-    z = -nrm*sind(AOAwing)
+    x = (x==0 ? 1 : sign(x))*nrm*cosd(AOAwing)
+    z = -(z==0 ? 1 : sign(z))*nrm*sind(AOAwing)
 
     # Translate rotor to its position along wing
     O = [x, y, z]                                       # New position
