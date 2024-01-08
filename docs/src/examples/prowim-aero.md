@@ -1,7 +1,7 @@
-# [Rotor-on-Wing Interactions](@id prowimaero)
+# [Prop-on-Wing Interactions](@id prowimaero)
 
 In this example we use the [actuator surface model](@ref asm) (ASM) to
-accurately predict the effects of props blowing on a wing.
+more accurately predict the effects of props blowing on a wing.
 This case simulates the PROWIM experiment in
 [Leo Veldhuis' dissertation](https://repository.tudelft.nl/islandora/object/uuid%3A8ffbde9c-b483-40de-90e0-97095202fbe3)
 (2005), and reproduces the validation study published in
@@ -27,19 +27,19 @@ following parameters:
 * ``^\dag``*None:* `vpm_SFS = vpm.SFS_none`
 * ``^\ddag``*Dynamic:* `vpm_SFS = vpm.SFS_Cd_twolevel_nobackscatter`
 
-(Mid-low fidelity settings may be inadequate for capturing rotor-on-wing interactions, unless using `p_per_step=5`)
+(Mid-low fidelity settings may be inadequate for capturing prop-on-wing interactions, unless using `p_per_step=5`)
 
 
 
 ```julia
 #=##############################################################################
 # DESCRIPTION
-    Validation of prop-wing interactions with twin props mounted mid span
+    Validation of prop-on-wing interactions with twin props mounted mid span
     blowing on a wing. This case simulates the PROWIM experiment in Leo
     Veldhuis' dissertation (2005), “Propeller Wing Aerodynamic Interference.”
 
     In this simulation we use the actuator surface model for the wing in order
-    to accurately capture rotor-on-wing interactional effects. The rotors still
+    to accurately capture prop-on-wing interactional effects. The rotors still
     use the actuator line model.
 
     The high-fidelity settings replicate the results presented in Alvarez &
@@ -648,9 +648,9 @@ end
 ```
 
 The favorable comparison with the experiment at $\alpha=0^\circ$ and
-$4^\circ$ confirms that ASM accurately predicts propeller-wing
+$4^\circ$ confirms that ASM accurately predicts prop-on-wing
 interactions up to a moderate angle of attack. At $\alpha=10^\circ$ we suspect
-that the wing is mildly stalled, leading to a larger discrepancy (further
+that the wing is mildly stalled in the experiment, leading to a larger discrepancy (further
 discussed in [Alvarez' Dissertation](https://scholarsarchive.byu.edu/etd/9589)[^1]
 and
 [Alvarez & Ning, 2023](https://arc.aiaa.org/doi/abs/10.2514/1.C037279)[^2]).

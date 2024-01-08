@@ -1,4 +1,4 @@
-# [Wing-on-Rotor Interactions](@id blownwingaero)
+# [Wing-on-Prop Interactions](@id blownwingaero)
 
 ```@raw html
 <div style="position:relative;padding-top:50%;">
@@ -13,13 +13,13 @@
 In this example we show mount propellers on a swept wing.
 The wing is modeled using the actuator line model that represents the wing
 as a lifting line.
-This wing model is accurate for capturing wing-on-rotor interactions.
+This wing model is accurate for capturing wing-on-prop interactions.
 For instance, the rotor will experience an unsteady blade loading (and
 increased tonal noise) caused by the turning of the flow ahead of the wing
 leading edge.
 However, this simple wing model is not adecuate for capturing
-rotor-on-wing interactions (see [the next two sections](@ref asm) to
-accurately predict rotor-on-wing interactions).
+prop-on-wing interactions (see [the next two sections](@ref asm) to
+accurately predict prop-on-wing interactions).
 
 
 ```julia

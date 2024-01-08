@@ -1,11 +1,11 @@
 #=##############################################################################
 # DESCRIPTION
-    Validation of prop-wing interactions with twin props mounted mid span
+    Validation of prop-on-wing interactions with twin props mounted mid span
     blowing on a wing. This case simulates the PROWIM experiment in Leo
     Veldhuis' dissertation (2005), “Propeller Wing Aerodynamic Interference.”
 
     In this simulation we use the actuator surface model for the wing in order
-    to accurately capture rotor-on-wing interactional effects. The rotors still
+    to accurately capture prop-on-wing interactional effects. The rotors still
     use the actuator line model.
 
     The high-fidelity settings replicate the results presented in Alvarez &
