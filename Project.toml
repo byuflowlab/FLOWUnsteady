@@ -1,7 +1,7 @@
 name = "FLOWUnsteady"
 uuid = "b491798d-ac6e-455f-a27c-49c10bb0a666"
 authors = ["Eduardo J. Alvarez <Edo.AlvarezR@gmail.com> and contributors"]
-version = "3.2.1"
+version = "3.3.0"
 
 [deps]
 PyPlot = "d330b81b-6aea-500a-939a-2ce795aea3ee"
@@ -18,13 +18,14 @@ FLOWVLM = "1a3ff0be-0410-4572-aa62-b496bdd1f33b"
 FLOWPanel = "6be8c882-484d-4309-b349-d23112750151"
 FLOWNoise = "d27480ee-285d-533b-ae3d-5018956ae0bc"
 BPM = "f91b385c-3ede-44c9-92c8-2a04f762ef2f"
+VSPGeom = "9b3f6a95-fce2-4bc5-94a2-f99b39986ea6"
 
 [compat]
 julia = "1.6"
 GeometricTools = "2.1.6"
 FLOWVPM = "3.0.1"
 FLOWVLM = "2.1.2"
-FLOWNoise = "2.3.1"
+FLOWNoise = "2.3.2"
 BPM = "2.0.1"
 
 [extras]

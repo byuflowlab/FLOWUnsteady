@@ -55,8 +55,9 @@ makedocs(
                                                         "examples/vahana-vehicle.md",
                                                         "examples/vahana-maneuver.md",
                                                         "examples/vahana-monitor.md",
-                                                        "examples/vahana-run.md",
+                                                        "examples/vahana-run.md"
                                                         ],
+                                    "examples/openvsp-aircraft.md"
                                     ],
                 "Visualization" => "visualization.md",
                 "Theory"        => [
@@ -69,7 +70,8 @@ makedocs(
                                     "(1) Vehicle Definition" => [
                                                                 "api/flowunsteady-vehicle-types.md",
                                                                 "api/flowunsteady-vehicle-components.md",
-                                                                "api/flowunsteady-vehicle-asm.md"
+                                                                "api/flowunsteady-vehicle-asm.md",
+                                                                "api/flowunsteady-openvsp.md"
                                                                 ],
                                     "api/flowunsteady-maneuver.md",
                                     "api/flowunsteady-simulation.md",

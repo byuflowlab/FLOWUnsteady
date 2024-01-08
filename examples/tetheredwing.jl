@@ -320,6 +320,8 @@ dt = ttot / nsteps              # (s) time step
 
 for i in 0:nsteps
 
+    global X
+
     uns.gt.generateVTK(run_name*"-tether", [Xground, X]; lines=[[0, 1]],
                                                     num=i, path=save_path)
 

@@ -16,8 +16,11 @@ FLOWUnsteady.
 
 ## Julia
 
-* Download and install Julia: [julialang.org](https://julialang.org/downloads) (we
-  recommend using v1.6.7 LTS or the latest stable release)
+* Download and install Julia: [julialang.org](https://julialang.org/downloads)
+  (currently we are only supporting up to Julia v1.8.5, so we recommend using
+    [v1.8.5](https://julialang.org/downloads/oldreleases/) or
+    [v1.6.7 LTS](https://julialang.org/downloads/#long_term_support_release)
+    )
 * Add Julia to user-level `bin` folder
   ```bash
   sudo ln -s /[user-specific-path/Julia-1.x.x]/bin/julia /usr/local/bin/julia
@@ -192,9 +195,8 @@ If you run into any issues, please try the following:
 * Mac users, take a look at this thread: [LINK](https://github.com/byuflowlab/FLOWUnsteady/issues/26)
 * Instructions for BYU Fulton supercomputer: [LINK](https://nbviewer.jupyter.org/url/edoalvar2.groups.et.byu.net/LabNotebook/202108/FLOWVPMSuperComputer.ipynb)
 
-If issues persist, please check the resolved issues in [the FLOWExaFMM repo](https://github.com/byuflowlab/FLOWExaFMM.jl/issues)
-and feel free to open a new issue.
-
+If issues persist, please check the resolved issues in [the FLOWExaFMM repo](https://github.com/byuflowlab/FLOWExaFMM.jl/issues?q=), the discussion forum in [the FLOWUnsteady repo](https://github.com/byuflowlab/FLOWUnsteady/discussions?discussions_q=),
+and feel free to open a new issue or discussion for help.
 
 ## Other Packages
 Run the following commands in the Julia REPL to add some dependencies that are not
@@ -205,7 +207,7 @@ import Pkg
 url = "https://github.com/byuflowlab/"
 
 packages = (("AirfoilPrep.jl", "v2.1.2"), ("FLOWVLM", "v2.1.2"),
-            ("BPM.jl", "v2.0.1"), ("FLOWNoise", "v2.3.1"))
+            ("BPM.jl", "v2.0.1"), ("FLOWNoise", "v2.3.2"), ("VSPGeom.jl", nothing))
 
 Pkg.add([ Pkg.PackageSpec(; url=url*name, rev=v) for (name, v) in packages ])
 ```
