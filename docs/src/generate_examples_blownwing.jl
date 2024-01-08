@@ -216,7 +216,7 @@ open(joinpath(output_path, output_name*"-asm.md"), "w") do fout
     add_unsteadyforce           = false         # Whether to add the unsteady force to Ftot or to simply output it
 
     include_parasiticdrag       = true          # Include parasitic-drag force
-    add_skinfriction            = true          # If false, the parasitic drag is purely parasitic, meaning no skin friction
+    add_skinfriction            = true          # If false, the parasitic drag is purely form, meaning no skin friction
     calc_cd_from_cl             = false         # Whether to calculate cd from cl or effective AOA
     wing_polar_file             = "xf-rae101-il-1000000.csv"    # Airfoil polar for parasitic drag
     ```
@@ -230,7 +230,7 @@ open(joinpath(output_path, output_name*"-asm.md"), "w") do fout
     forces = []
 
     # Calculate Kutta-Joukowski force
-    kuttajoukowski = uns.generate_calc_aerodynamicforce_kuttajoukowski(KJforce_type,
+    kuttajoukowski = uns.generate_aerodynamicforce_kuttajoukowski(KJforce_type,
                                     sigma_vlm_surf, sigma_rotor_surf,
                                     vlm_vortexsheet, vlm_vortexsheet_overlap,
                                     vlm_vortexsheet_distribution,
