@@ -236,6 +236,7 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
     end
 
     if verbose; println("\t"^v_lvl*"Generating FLOWVLM Rotor..."); end;
+
     propeller = vlm.Rotor(CW, r, chord, theta, LE_x, LE_z, B, airfoils, turbine_flag)
 
     vlm.initialize(propeller, n; r_lat=blade_r, verif=plot_disc,

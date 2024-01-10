@@ -5,6 +5,7 @@ docs/site/
 .DS_Store
 *Manifest.toml
 *-example/
+*.mem
 
 examples/rotornoise/singlerotor-*
 docs/resources/images/sponsors/*.png

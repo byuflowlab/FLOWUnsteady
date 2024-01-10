@@ -182,6 +182,7 @@ Alias for [`FLOWUnsteady.g_linear`](@ref).
 """
 const g_piecewiselinear = g_linear
 
+
 function generate_static_particle_fun(pfield::vpm.ParticleField, pfield_static::vpm.ParticleField,
                                         self::VLMVehicle,
                                         sigma_vlm::Real, sigma_rotor::Real;
@@ -189,6 +190,7 @@ function generate_static_particle_fun(pfield::vpm.ParticleField, pfield_static::
                                         vlm_vortexsheet_overlap=2.125,
                                         vlm_vortexsheet_distribution=g_pressure,
                                         vlm_vortexsheet_sigma_tbv=nothing,
+                                        mirror=false, mirror_point=zeros(3), mirror_normal=[0,0,1.0],
                                         save_path=nothing, run_name="", suff="_staticpfield",
                                         extra_static_particles_fun=(args...; optargs...) -> nothing,
                                         nsteps_save=1)
@@ -222,6 +224,46 @@ function generate_static_particle_fun(pfield::vpm.ParticleField, pfield_static::
             for rotor in rotors
                 _static_particles(pfield, rotor, sigma_rotor)
                 if flag; _static_particles(pfield_static, rotor, sigma_rotor); end;
+            end
+        end
+
+        # method of images
+        if mirror
+            np = pfield.np
+            mpx, mpy, mpz = mirror_point
+            Gamma = zeros(eltype(pfield),3)
+            X = zeros(eltype(pfield),3)
+
+            # add mirror particles
+            for ip in 1:np
+                # get particle
+                p = pfield.particles[ip]
+                
+                # mirror position and strength
+                px, py, pz = p.X
+                dx = (px - mpx) * mirror_normal[1] +
+                    (py - mpy) * mirror_normal[2] +
+                    (pz - mpz) * mirror_normal[3]
+
+                X[1] = px - 2*dx*mirror_normal[1]
+                X[2] = py - 2*dx*mirror_normal[2]
+                X[3] = pz - 2*dx*mirror_normal[3]
+                
+                Gx, Gy, Gz = p.Gamma
+                Gamma_norm = sqrt(Gx^2 + Gy^2 + Gz^2)
+                Gamma[1] = 2/Gamma_norm * ( mirror_normal[1] * Gx + mirror_normal[2] * Gy + mirror_normal[3] * Gz ) * p.Gamma[1] - p.Gamma[1]
+                Gamma[2] = 2/Gamma_norm * ( mirror_normal[1] * Gx + mirror_normal[2] * Gy + mirror_normal[3] * Gz ) * p.Gamma[2] - p.Gamma[2]
+                Gamma[3] = 2/Gamma_norm * ( mirror_normal[1] * Gx + mirror_normal[2] * Gy + mirror_normal[3] * Gz ) * p.Gamma[3] - p.Gamma[3]
+
+                # create mirror particle
+                vpm.add_particle(pfield, X, Gamma, p.sigma;
+                vol=p.vol, circulation=p.circulation,
+                C=p.C, static=true)
+                if flag
+                    vpm.add_particle(pfield_static, X, Gamma, p.sigma;
+                vol=p.vol, circulation=p.circulation,
+                C=p.C, static=true)
+                end
             end
         end
 

@@ -391,7 +391,7 @@ function _extraVinf1(i, t; wing=nothing)
 end
 function _extraVinf2(i, t; wing=nothing)
     if wing==nothing; error("Logic error!"); end;
-    return wing.sol["Vvpm"][i] + wing.sol["Vkin"][i]
+    return wing.sol["Vvpm"][i] + wing.sol["Vkin"][i] + wing.sol["Vother"][i]
 end
 function _extraVinf3(i, t; wing=nothing)
     if wing==nothing; error("Logic error!"); end;

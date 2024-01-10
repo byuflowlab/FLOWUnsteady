@@ -167,6 +167,8 @@ function run_simulation(
             sigma_vpmpanel_overwrite = nothing, # Overwrite core size of panel wake to this value (ignoring `sigmafactor_vpm`)
 
             extra_static_particles_fun = (args...; optargs...) -> nothing,
+            mirror              = false, mirror_point = zeros(3), mirror_normal = [0,0,1.0],
+            Vother_on_Xs_fun = default_Vother_on_Xs,
             shed_wake_panel = nothing,
 
             # -------- RESTART OPTIONS -----------------------------------------
@@ -248,10 +250,10 @@ function run_simulation(
                     (:fmm, vpm_fmm),
                  ]
     Xdummy = zeros(3)
-    pfield = vpm.ParticleField(max_particles; Uinf=t->Vinf(Xdummy, t),
+    pfield = vpm.ParticleField(max_particles*2^mirror; Uinf=t->Vinf(Xdummy, t),
                                                                   vpm_solver...)
 
-    max_staticp = max_static_particles==nothing ? 3*_get_m_static(sim.vehicle) : max_static_particles
+    max_staticp = max_static_particles==nothing ? 3*_get_m_static(sim.vehicle) + max_particles*mirror : max_static_particles
     staticpfield = vpm.ParticleField(max_staticp; Uinf=t->Vinf(Xdummy, t),
                                                                   vpm_solver...)
 
@@ -310,6 +312,7 @@ function run_simulation(
                 staticpfield, hubtiploss_correction;
                 init_sol=vlm_init, sigmafactor_vpmonvlm=sigmafactor_vpmonvlm,
                 extra_static_particles_fun=extra_static_particles_fun,
+                Vother_on_Xs=Vother_on_Xs_fun,
                 debug=debug)
 
         # Shed unsteady-loading wake with new solution
@@ -370,6 +373,7 @@ function run_simulation(
                                     vlm_vortexsheet_overlap=vlm_vortexsheet_overlap,
                                     vlm_vortexsheet_distribution=vlm_vortexsheet_distribution,
                                     vlm_vortexsheet_sigma_tbv=vlm_vortexsheet_sigma_tbv,
+                                    mirror, mirror_point, mirror_normal,
                                     save_path=save_static_particles ? save_path : nothing,
                                     extra_static_particles_fun=extra_static_particles_fun,
                                     run_name=run_name, nsteps_save=nsteps_save)
@@ -403,9 +407,6 @@ function run_simulation(
 
     return pfield
 end
-
-
-
 
 
 function add_particle(pfield::vpm.ParticleField{TVPM,<:Any,<:Any,<:Any,<:Any,<:Any,<:Any}, X::Array{Float64, 1},
@@ -442,6 +443,11 @@ function add_particle(pfield::vpm.ParticleField{TVPM,<:Any,<:Any,<:Any,<:Any,<:A
         vpm.add_particle(pfield, X + i*dX - dX/2, Gamma/pps, sigmap;
                             vol=vol/pps, circulation=circulation)
     end
+end
+
+function default_Vother_on_Xs(Xs)
+    Vother = [zeros(eltype(eltype(Xs)),3) for _ in 1:length(Xs)]
+    return Vother
 end
 
 """

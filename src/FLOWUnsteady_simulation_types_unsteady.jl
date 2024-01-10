@@ -15,6 +15,7 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
                 hubtiploss_correction;
                 init_sol::Bool=false, sigmafactor_vpmonvlm=1,
                 extra_static_particles_fun = (args...; optargs...) -> nothing,
+                Vother_on_Xs = (Xs) -> nothing,
                 debug=false
                 ) where {V<:UVLMVehicle, M<:AbstractManeuver, R}
 
@@ -145,12 +146,17 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
         static_particles_fun2(pfield, args...) = _static_particles(pfield, allrotors, sigma_rotor)
 
         # Evaluate Rotor-on-VLM induced velocity
-        Vrotor_on_wing = Vvpm_on_Xs(staticpfield, vcat(Xs_cp_vlm, Xs_ApA_AB_BBp_vlm);
+        Xs_wing = vcat(Xs_cp_vlm, Xs_ApA_AB_BBp_vlm)
+        Vrotor_on_wing = Vvpm_on_Xs(staticpfield, Xs_wing;
                                     static_particles_fun=static_particles_fun2, dt=dt, fsgm=sigmafactor_vpmonvlm)
+
+        Vother_on_wing = Vother_on_Xs(Xs_wing)
 
         # Add and save VPM-on-VLM and Rotor-on-VLM induced velocity
         vlm._addsolution(vhcl.vlm_system, "Vvpm",
                                          Vvpm_cp_vlm + Vrotor_on_wing[1:m]; t=t)
+        # vlm._addsolution(vhcl.vlm_system, "Vother",
+        #                                  Vother_on_wing; t=t)
         vlm._addsolution(vhcl.vlm_system, "Vvpm_ApA",
                         Vvpm_ApA_AB_BBp_vlm[1:m] + Vrotor_on_wing[m+1:2*m]; t=t)
         vlm._addsolution(vhcl.vlm_system, "Vvpm_AB",
@@ -174,8 +180,11 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
         Vvlmrotor_on_rotor = Vvpm_on_Xs(staticpfield, Xs_rotors;
                               static_particles_fun=static_particles_fun3, dt=dt, fsgm=sigmafactor_vpmonvlm)
 
+        # evaluate other induced velocity
+        Vother_on_rotor = Vother_on_Xs(Xs_rotors)
+
         # Add VPM-on-Rotor, VLM-on-Rotor, and Rotor-on-Rotor induced velocity
-        Vinds = Vvpm_rotors + Vvlmrotor_on_rotor
+        Vinds = Vvpm_rotors + Vvlmrotor_on_rotor + Vother_on_rotor
 
         # ---------- 5) Solve VLM system -----------------------------------
         # Wake-coupled solution
