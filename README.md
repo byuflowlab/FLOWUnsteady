@@ -183,7 +183,7 @@ See the following publications for an in-depth dive into the theory and validati
 <p align="center"> <a href="https://www.youtube.com/watch?v=GfS3NoVrFfU&hd=1"> <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/youtube-rotorwing.png" alt="youtube.com/watch?v=GfS3NoVrFfU" style="width:70%"> </a> </p>
 
 
-**Ducted Fan:** [[Paper](https://scholarsarchive.byu.edu/cgi/viewcontent.cgi?article=7676&context=facpub)]
+**Ducted Fan:** [[Slides](http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/alvarez_2023-SLIDES-VPM_for_EDF_in_Non_Axisymmetric_Flow.pdf)]
 
 <p align="center"> <a href="https://www.youtube.com/watch?v=BQpar3A0X-w&hd=1"> <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/youtube-edf.png" alt="youtube.com/watch?v=BQpar3A0X-w" style="width:70%"> </a> </p>
 
