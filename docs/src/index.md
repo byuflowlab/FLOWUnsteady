@@ -161,7 +161,7 @@ the different stages of design.
   > **Limitations:**
   > *Viscous drag and separation is only captured through airfoil lookup tables, without attempting to shed separation wakes*
   > *• Incompressible flow only (though wave drag can be captured through airfoil lookup tables)*
-  > *• CPU parallelization through OpenMP without support for distributed memory (no MPI, i.e., only single-node* runs)
+  > *• CPU parallelization through OpenMP without support for distributed memory (no MPI, i.e., only single-node runs)*
   >
   > *Coded in [the Julia language](https://www.infoworld.com/article/3284380/what-is-julia-a-fresh-approach-to-numerical-computing.html) for Linux, MacOS, and Windows WSL.*
 
@@ -186,14 +186,14 @@ More about the models inside FLOWUnsteady:
 See the following publications for an in-depth dive into the theory and validation:
 
 * E. J. Alvarez, J. Mehr, & A. Ning (2022), "FLOWUnsteady: An Interactional Aerodynamics Solver for Multirotor Aircraft and Wind Energy," *AIAA AVIATION Forum*. [**[VIDEO]**](https://youtu.be/SFW2X8Lbsdw) [**[PDF]**](https://scholarsarchive.byu.edu/facpub/5830/)
-* E. J. Alvarez & A. Ning (2022), "Reviving the Vortex Particle Method: A Stable Formulation for Meshless Large Eddy Simulation," *(accepted in AIAAJ)*. [**[PDF]**](https://arxiv.org/pdf/2206.03658.pdf)
 * E. J. Alvarez (2022), "Reformulated Vortex Particle Method and Meshless Large Eddy Simulation of Multirotor Aircraft.," *Doctoral Dissertation, Brigham Young University*. [**[VIDEO]**](https://www.nas.nasa.gov/pubs/ams/2022/08-09-22.html) [**[PDF]**](https://scholarsarchive.byu.edu/etd/9589/)
+* E. J. Alvarez & A. Ning (2023), "Stable Vortex Particle Method Formulation for Meshless Large-Eddy Simulation," *AIAA Journal*. [**[PDF]**](https://arc.aiaa.org/doi/epdf/10.2514/1.J063045)
 
 ```@raw html
 <p><br></p>
 ```
 
-### Examples
+### Examples and Tutorials
 
 **Propeller:** [[Tutorial](https://flow.byu.edu/FLOWUnsteady/examples/propeller-J040)] [[Validation](https://flow.byu.edu/FLOWUnsteady/theory/validation/#Propeller)]
 
@@ -226,14 +226,30 @@ See the following publications for an in-depth dive into the theory and validati
 **Blown Wing:** [[Tutorial](https://flow.byu.edu/FLOWUnsteady/examples/blownwing-aero)] [[Validation](https://flow.byu.edu/FLOWUnsteady/theory/validation/#Rotor-Wing-Interactions)]
 
 ```@raw html
-<p align="center">
-  <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/prowimhtp-wvol34-cropped00.jpg" alt="img" style="width:100%">
-</p>
+<div style="position:relative;padding-top:50%;">
+    <iframe style="position:absolute;left:0;top:0;height:80%;width:71.0%;"
+        src="https://www.youtube.com/embed/GfS3NoVrFfU?hd=1"
+        title="YouTube video player" frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowfullscreen></iframe>
+</div>
 ```
 
+
+
+**Ducted Fan:** [[Paper](https://scholarsarchive.byu.edu/cgi/viewcontent.cgi?article=7676&context=facpub)]
+
 ```@raw html
-<p><br></p>
+<div style="position:relative;padding-top:50%;">
+    <iframe style="position:absolute;left:0;top:0;height:80%;width:71.0%;"
+        src="https://www.youtube.com/embed/BQpar3A0X-w?hd=1"
+        title="YouTube video player" frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowfullscreen></iframe>
+</div>
 ```
+
+
 
 **Airborne-Wind-Energy Aircraft:** [[Video](https://www.youtube.com/watch?v=iFM3B4_N2Ls)]
 
@@ -274,12 +290,6 @@ High-fidelity
 **Aeroacoustic Noise:** [[Tutorial](https://flow.byu.edu/FLOWUnsteady/examples/rotorhover-acoustics)] [[Validation](https://flow.byu.edu/FLOWUnsteady/theory/validation/#Rotor)]
 
 ```@raw html
-<p align="center">
-  <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/cfdnoise_ningdji_multi_005D_03_20.gif" alt="Vid" style="width:60%"/>
-</p>
-```
-
-```@raw html
 <div style="position:relative;padding-top:50%;">
     <iframe style="position:absolute;left:0;top:0;height:80%;width:71.0%;"
         src="https://www.youtube.com/embed/ntQjP6KbZDk?hd=1"
@@ -287,6 +297,13 @@ High-fidelity
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         allowfullscreen></iframe>
 </div>
+```
+
+
+```@raw html
+<p align="center">
+  <img src="http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/cfdnoise_ningdji_multi_005D_03_20.gif" alt="Vid" style="width:60%"/>
+</p>
 ```
 
 
@@ -319,9 +336,9 @@ If you were to encounter any issues or have questions, please first read through
 [the documentation](https://flow.byu.edu/FLOWUnsteady/), [open/closed
 issues](https://github.com/byuflowlab/FLOWUnsteady/issues?q=is%3Aissue+is%3Aclosed),
 and [the discussion forum](https://github.com/byuflowlab/FLOWUnsteady/discussions?discussions_q=).
-If the issue still persists, please
-[open a new issue](https://github.com/byuflowlab/FLOWUnsteady/issues) and/or
-participate in [the discussion forum](https://github.com/byuflowlab/FLOWUnsteady/discussions?discussions_q=).
+If the issue still persists, please participate in
+[the discussion forum](https://github.com/byuflowlab/FLOWUnsteady/discussions?discussions_q=)
+and/or [open a new issue](https://github.com/byuflowlab/FLOWUnsteady/issues).
 
   * Developers/contributors : [Eduardo J. Alvarez](https://www.edoalvarez.com/) (main), [Cibin Joseph](https://github.com/cibinjoseph), [Judd Mehr](https://www.juddmehr.com/), [Ryan Anderson](https://flow.byu.edu/people/), [Eric Green](https://flow.byu.edu/people/)
   * Created           : Sep 2017
