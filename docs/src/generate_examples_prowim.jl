@@ -10,6 +10,14 @@ open(joinpath(output_path, output_name*"-aero.md"), "w") do fout
     println(fout, """
     # [Prop-on-Wing Interactions](@id prowimaero)
 
+    ```@raw html
+      <img src="$(remote_url)/veldhuis2004-expsetup01.png" alt="Pic here" style="width: 49%;"/>
+    ```
+
+    ```@raw html
+    <br><br>
+    ```
+
     In this example we use the [actuator surface model](@ref asm) (ASM) to
     more accurately predict the effects of props blowing on a wing.
     This case simulates the PROWIM experiment in
@@ -20,25 +28,38 @@ open(joinpath(output_path, output_name*"-aero.md"), "w") do fout
     In this example you can vary the fidelity of the simulation setting the
     following parameters:
 
-    | Parameter | Mid-low fidelity | Mid-high fidelity | High fidelity | Description |
-    | :-------: | :--------------: | :---------------: | :-----------: | :---------- |
-    | `n_wing` | `50` | `50` | `100` | Number of wing elements per semispan |
-    | `n_rotor` | `12` | `20` | `50` | Number of blade elements per blade |
-    | `nsteps_per_rev` | `36` | `36` | `72` | Time steps per revolution |
-    | `p_per_step` | `2` | `5` | `5` | Particle sheds per time step |
-    | `shed_starting` | `false` | `false` | `true` | Whether to shed starting vortex |
-    | `shed_unsteady` | `false` | `false` | `true` | Whether to shed vorticity from unsteady loading |
-    | `treat_wake` | `true` | `true` | `false` | Treat wake to avoid instabilities |
-    | `vlm_vortexsheet_overlap` | `2.125/10` | `2.125/10` | `2.125` | Particle overlap in ASM vortex sheet |
-    | `vpm_integration` | `vpm.euler` | RK3``^\\star`` | RK3``^\\star`` | VPM time integration scheme |
-    | `vpm_SFS` | None``^\\dag`` | Dynamic``^\\ddag`` | Dynamic``^\\ddag`` | VPM LES subfilter-scale model |
+    | Parameter | Low fidelity | Mid-low fidelity | Mid-high fidelity | High fidelity | Description |
+    | :-------: | :----------: | :--------------: | :---------------: | :-----------: | :---------- |
+    | `n_wing` | `50` | `50` | `50` | `100` | Number of wing elements per semispan |
+    | `n_rotor` | `12` | `12` | `20` | `50` | Number of blade elements per blade |
+    | `nsteps_per_rev` | `36` | `36` | `36` | `72` | Time steps per revolution |
+    | `p_per_step` | `2` | `5` | `5` | `5` | Particle sheds per time step |
+    | `shed_starting` | `false` | `false` | `false` | `true` | Whether to shed starting vortex |
+    | `shed_unsteady` | `false` | `false` | `false` | `true` | Whether to shed vorticity from unsteady loading |
+    | `treat_wake` | `true` | `true` | `true` | `false` | Treat wake to avoid instabilities |
+    | `vlm_vortexsheet_overlap` | `2.125/10` | `2.125/10` | `2.125/10` | `2.125` | Particle overlap in ASM vortex sheet |
+    | `vpm_integration` | `vpm.euler` | `vpm.euler` | RK3``^\\star`` | RK3``^\\star`` | VPM time integration scheme |
+    | `vpm_SFS` | None``^\\dag`` | None``^\\dag`` | Dynamic``^\\ddag`` | Dynamic``^\\ddag`` | VPM LES subfilter-scale model |
 
     * ``^\\star``*RK3:* `vpm_integration = vpm.rungekutta3`
     * ``^\\dag``*None:* `vpm_SFS = vpm.SFS_none`
     * ``^\\ddag``*Dynamic:* `vpm_SFS = vpm.SFS_Cd_twolevel_nobackscatter`
 
-    (Mid-low fidelity settings may be inadequate for capturing prop-on-wing interactions, unless using `p_per_step=5`)
+    (Low fidelity settings may be inadequate for accurately capturing
+    prop-on-wing interactions, but mid-low or higher should do well)
 
+    As a reference, high-fidelity looks like this (except that the video shows
+    a tip-mounted configuration with ailerons):
+
+    ```@raw html
+    <div style="position:relative;padding-top:50%;">
+        <iframe style="position:absolute;left:0;top:0;height:80%;width:72%;"
+            src="https://www.youtube.com/embed/GfS3NoVrFfU?hd=1"
+            title="YouTube video player" frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowfullscreen></iframe>
+    </div>
+    ```
 
     """)
 
@@ -73,7 +94,8 @@ open(joinpath(output_path, output_name*"-aero.md"), "w") do fout
     println(fout, """
     ```@raw html
     <span style="font-size: 0.9em; color:gray;"><i>
-        Mid-low fidelity run time: 13 minutes a Dell Precision 7760 laptop. <br>
+        Low fidelity run time: 13 minutes a Dell Precision 7760 laptop. <br>
+        Mid-low fidelity run time: 25 minutes a Dell Precision 7760 laptop. <br>
         Mid-high fidelity run time: 70 minutes a Dell Precision 7760 laptop. <br>
         High fidelity runtime: ~2 days on a 16-core AMD EPYC 7302 processor.
     </i></span>
