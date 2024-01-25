@@ -155,7 +155,7 @@ function precalculations(self::AbstractVLMVehicle, Vinf::Function,
             wing = vlm.get_wing(self.wake_system, i)
             prev_wing = vlm.get_wing(_get_prev_wake_system(self), i)
 
-            if typeof(prev_wing) != vlm.Rotor
+            if !(typeof(prev_wing) <: vlm.Rotor)
                 sol = deepcopy(prev_wing.sol["Gamma"])
             else
                 sol = deepcopy(prev_wing._wingsystem.sol["Gamma"])
@@ -167,7 +167,7 @@ function precalculations(self::AbstractVLMVehicle, Vinf::Function,
             wing = vlm.get_wing(self.vlm_system, i)
             prev_wing = vlm.get_wing(_get_prev_vlm_system(self), i)
 
-            if typeof(prev_wing) != vlm.Rotor
+            if !(typeof(prev_wing) <: vlm.Rotor)
                 sol = deepcopy(prev_wing.sol["Gamma"])
             else
                 sol = deepcopy(prev_wing._wingsystem.sol["Gamma"])
