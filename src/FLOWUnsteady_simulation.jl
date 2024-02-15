@@ -168,6 +168,7 @@ function run_simulation(
 
             # -------- OUTPUT OPTIONS ------------------------------------------
             save_path       = nothing,          # Where to save simulation
+			toggle_save_vtk = true,				# Whether to save vtk output files
             run_name        = "flowunsteadysim",# Suffix of output files
             create_savepath = true,             # Whether to create `save_path`
             prompt          = true,             # Whether to prompt the user
@@ -316,7 +317,7 @@ function run_simulation(
         breakflag = extra_runtime_function(sim, PFIELD, T, DT; vprintln=vprintln)
 
         # Output vtks
-        if save_path!=nothing && PFIELD.nt%nsteps_save==0
+        if toggle_save_vtk && save_path!=nothing && PFIELD.nt%nsteps_save==0
             strn = save_vtk(sim, run_name; path=save_path,
                             save_horseshoes=save_horseshoes,
                             save_wopwopin=save_wopwopin)
@@ -348,8 +349,9 @@ function run_simulation(
     # RUN SIMULATION
     ############################################################################
     # Here it uses the VPM-time-stepping to run the simulation
+	
     vpm.run_vpm!(pfield, dt, nsteps;
-                      save_path=save_path, run_name=run_name*"_pfield",
+                      save_path=toggle_save_vtk ? save_path : nothing, run_name=run_name*"_pfield",
                       verbose=verbose, verbose_nsteps=verbose_nsteps,
                       v_lvl=v_lvl,
                       create_savepath=create_savepath,
