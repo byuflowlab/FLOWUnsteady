@@ -244,7 +244,7 @@ function run_simulation(
     pfield = vpm.ParticleField(max_particles; Uinf=t->Vinf(Xdummy, t),
                                                                   vpm_solver...)
 
-    max_staticp = max_static_particles==nothing ? 3*_get_m_static(sim.vehicle) : max_static_particles
+    max_staticp = max_static_particles==nothing ? 2 * (3*_get_m_static(sim.vehicle)) : max_static_particles
     staticpfield = vpm.ParticleField(max_staticp; Uinf=t->Vinf(Xdummy, t),
                                                                   vpm_solver...)
 
@@ -406,9 +406,9 @@ end
 """
 Returns the velocity induced by particle field on every position `Xs`
 """
-function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs::Array{T, 1}; static_particles_fun=(args...)->nothing, dt=0, fsgm=1) where {T}
+function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs::Array{T, 1}; static_particles_fun=nothing, dt=0, fsgm=1) where {T}
 
-    if length(Xs)!=0 && vpm.get_np(pfield)!=0
+    if length(Xs)!=0 && (vpm.get_np(pfield)!=0 || !isnothing(static_particles_fun))
         # Omit freestream
         Uinf = pfield.Uinf
         pfield.Uinf = (t)->zeros(3)
@@ -425,7 +425,9 @@ function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs::Array{T, 1}; static_particles
         end
 
         # Add static particles
-        static_particles_fun(pfield, pfield.t, dt)
+        if !isnothing(static_particles_fun)
+            static_particles_fun(pfield, pfield.t, dt)
+        end
 
         sta_np = vpm.get_np(pfield)             # Original + static particles
 
