@@ -99,6 +99,7 @@ max_particles   = ((2*n+1)*B)*nsteps*p_per_step + 1 # Maximum number of particle
 
 # Regularization
 sigma_rotor_surf= R/40                      # Rotor-on-VPM smoothing radius
+sigma_rotor_self= R/3                       # Rotor-on-Rotor smoothing radius
 lambda_vpm      = 2.125                     # VPM core overlap
                                             # VPM smoothing radius
 sigma_vpm_overwrite = lambda_vpm * 2*pi*R/(nsteps_per_rev*p_per_step)
@@ -235,6 +236,7 @@ uns.run_simulation(simulation, nsteps;
                     vpm_viscous=vpm_viscous,
                     sigma_vlm_surf=sigma_rotor_surf,
                     sigma_rotor_surf=sigma_rotor_surf,
+                    sigma_rotor_self=sigma_rotor_self,
                     sigma_vpm_overwrite=sigma_vpm_overwrite,
                     vlm_rlx=vlm_rlx,
                     hubtiploss_correction=hubtiploss_correction,

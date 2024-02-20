@@ -13,7 +13,8 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
                 dt::Real, rlx::Real, sigma_vlm::Real, sigma_rotor::Real,
                 rho::Real, speedofsound, staticpfield::vpm.ParticleField,
                 hubtiploss_correction;
-                init_sol::Bool=false, sigmafactor_vpmonvlm=1, debug=false
+                init_sol::Bool=false, sigmafactor_vpmonvlm=1, debug=false,
+                optargs...
                 ) where {V<:QVLMVehicle, M<:AbstractManeuver, R}
 
 
