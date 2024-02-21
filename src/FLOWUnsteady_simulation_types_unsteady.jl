@@ -14,9 +14,9 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
                 rho::Real, speedofsound, staticpfield::vpm.ParticleField,
                 hubtiploss_correction;
                 init_sol::Bool=false, sigmafactor_vpmonvlm=1,
-                extra_static_particles_fun = (args...; optargs...) -> nothing,
                 Vother_on_Xs = (Xs) -> nothing,
-                debug=false
+                debug=false,
+                sigma_rotor_self=-1,
                 ) where {V<:UVLMVehicle, M<:AbstractManeuver, R}
 
 
@@ -121,8 +121,7 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
 
         # Calculate VPM velocity on all points (VLM and rotors)
         Vvpm = Vvpm_on_Xs(pfield, vcat(Xs_cp_vlm, Xs_ApA_AB_BBp_vlm, Xs_rotors);
-                            dt=dt, fsgm=sigmafactor_vpmonvlm,
-                            static_particles_fun=extra_static_particles_fun)
+                            dt=dt, fsgm=sigmafactor_vpmonvlm)
 
         Vvpm_cp_vlm = Vvpm[1:m]
         Vvpm_ApA_AB_BBp_vlm = Vvpm[m+1:4*m]
@@ -142,7 +141,7 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
             end
         end
 
-        # Particles for Rotor-on-VLM induced velocity (and Rotor-on-Rotor)
+        # Particles for Rotor-on-VLM induced velocity
         static_particles_fun2(pfield, args...) = _static_particles(pfield, allrotors, sigma_rotor)
 
         # Evaluate Rotor-on-VLM induced velocity
@@ -164,21 +163,30 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
         vlm._addsolution(vhcl.vlm_system, "Vvpm_BBp",
                         Vvpm_ApA_AB_BBp_vlm[2*m+1:3*m] + Vrotor_on_wing[3*m+1:4*m]; t=t)
 
+
+
+        # Particles for Rotor-on-Rotor induced velocity
+        if sigma_rotor_self > 0
+            static_particles_fun3(pfield, args...) = _static_particles(pfield, allrotors, sigma_rotor_self)
+        else
+            static_particles_fun3 = static_particles_fun2
+        end
+
         # Calculate induced velocities to use in rotor solver
         ## Particles for VLM-on-Rotor induced velocity
         # NOTE: If I keep the rotor particles wouldn't I be double-counting
         # the blade induced velocity and make the solution unstable?
         # ANSWER: We are never double-accounting for the blade induced velocity
-        function static_particles_fun3(pfield, args...)
+        function static_particles_fun4(pfield, args...)
             # Rotor static particles
-            static_particles_fun2(pfield, args...)
+            static_particles_fun3(pfield, args...)
             # VLM static particles
             _static_particles(pfield, vhcl.vlm_system, sigma_vlm)
         end
 
         ## Evaluate VLM-on-Rotor and Rotor-on-Rotor induced velocity
         Vvlmrotor_on_rotor = Vvpm_on_Xs(staticpfield, Xs_rotors;
-                              static_particles_fun=static_particles_fun3, dt=dt, fsgm=sigmafactor_vpmonvlm)
+                              static_particles_fun=static_particles_fun4, dt=dt, fsgm=sigmafactor_vpmonvlm)
 
         # evaluate other induced velocity
         Vother_on_rotor = Vother_on_Xs(Xs_rotors)

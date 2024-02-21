@@ -161,12 +161,12 @@ function run_simulation(
             sigma_vlm_solver    = -1,           # Regularization of VLM solver (internal VLM-on-VLM)
             sigma_vlm_surf      = -1,           # (REQUIRED!) Size of embedded particles in ASM/ALM wing surfaces (for VLM-on-VPM and VLM-on-Rotor)
             sigma_rotor_surf    = -1,           # (REQUIRED!) Size of embedded particles in ALM blade surfaces (for Rotor-on-VPM, Rotor-on-VLM, and Rotor-on-Rotor)
+            sigma_rotor_self    = -1,           # Overwrite size of embedded particles for Rotor-on-Rotor velocity
             sigmafactor_vpm     = 1.0,          # Core overlap of wake particles
             sigmafactor_vpmonvlm = 1,           # (experimental) shrinks the particles by this factor when calculating VPM-on-VLM/Rotor induced velocities
             sigma_vpm_overwrite = nothing,      # Overwrite core size of wake to this value (ignoring `sigmafactor_vpm`)
             sigma_vpmpanel_overwrite = nothing, # Overwrite core size of panel wake to this value (ignoring `sigmafactor_vpm`)
 
-            extra_static_particles_fun = (args...; optargs...) -> nothing,
             mirror              = false, mirror_point = zeros(3), mirror_normal = [0,0,1.0],
             Vother_on_Xs_fun = default_Vother_on_Xs,
             shed_wake_panel = nothing,
@@ -253,7 +253,7 @@ function run_simulation(
     pfield = vpm.ParticleField(max_particles*2^mirror; Uinf=t->Vinf(Xdummy, t),
                                                                   vpm_solver...)
 
-    max_staticp = max_static_particles==nothing ? 3*_get_m_static(sim.vehicle) + max_particles*mirror : max_static_particles
+    max_staticp = max_static_particles==nothing ? 3*_get_m_static(sim.vehicle) + max_particles*mirror : max_static_particles # multiply by 2?
     staticpfield = vpm.ParticleField(max_staticp; Uinf=t->Vinf(Xdummy, t),
                                                                   vpm_solver...)
 
@@ -311,8 +311,8 @@ function run_simulation(
                 sigma_vlm_surf, sigma_rotor_surf, rho, sound_spd,
                 staticpfield, hubtiploss_correction;
                 init_sol=vlm_init, sigmafactor_vpmonvlm=sigmafactor_vpmonvlm,
-                extra_static_particles_fun=extra_static_particles_fun,
                 Vother_on_Xs=Vother_on_Xs_fun,
+                sigma_rotor_self=sigma_rotor_self,
                 debug=debug)
 
         # Shed unsteady-loading wake with new solution
@@ -375,7 +375,6 @@ function run_simulation(
                                     vlm_vortexsheet_sigma_tbv=vlm_vortexsheet_sigma_tbv,
                                     mirror, mirror_point, mirror_normal,
                                     save_path=save_static_particles ? save_path : nothing,
-                                    extra_static_particles_fun=extra_static_particles_fun,
                                     run_name=run_name, nsteps_save=nsteps_save)
     else
         vehicle_static_particles_function = (pfield, t, dt)->nothing
@@ -383,7 +382,6 @@ function run_simulation(
 
     function static_particles_function(args...; optargs...)
         vehicle_static_particles_function(args...; optargs...)
-        extra_static_particles_fun(args...; optargs...)
         return nothing
     end
 
@@ -453,21 +451,10 @@ end
 """
 Returns the velocity induced by particle field on every position `Xs`
 """
-function Vvpm_on_Xs(pfield, Xs; optargs...)
-
+function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs; static_particles_fun=nothing, dt=0, fsgm=1) where {T}
     Vvpm = [zeros(3) for i in 1:length(Xs)]
-
-    Vvpm_on_Xs!(Vvpm, pfield, Xs; optargs...)
-
-    return Vvpm
-end
-
-function Vvpm_on_Xs!(Vvpm, pfield::vpm.ParticleField, Xs; static_particles_fun=(args...)->nothing, dt=0, fsgm=1)
-
-    @assert length(Vvpm) == length(Xs) ""*
-        "Vvpm and Xs do not have the same length ($(length(Vvpm)) != $(length(Xs)))"
-
-    if length(Xs)!=0 && vpm.get_np(pfield)!=0
+    
+    if length(Xs)!=0 && (vpm.get_np(pfield)!=0 || !isnothing(static_particles_fun))
         # Omit freestream
         Uinf = pfield.Uinf
         pfield.Uinf = (t)->zeros(3)
@@ -484,7 +471,9 @@ function Vvpm_on_Xs!(Vvpm, pfield::vpm.ParticleField, Xs; static_particles_fun=(
         end
 
         # Add static particles
-        static_particles_fun(pfield, pfield.t, dt)
+        if !isnothing(static_particles_fun)
+            static_particles_fun(pfield, pfield.t, dt)
+        end
 
         sta_np = vpm.get_np(pfield)             # Original + static particles
 
