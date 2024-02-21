@@ -253,7 +253,7 @@ function run_simulation(
     pfield = vpm.ParticleField(max_particles*2^mirror; Uinf=t->Vinf(Xdummy, t),
                                                                   vpm_solver...)
 
-    max_staticp = max_static_particles==nothing ? 3*_get_m_static(sim.vehicle) + max_particles*mirror : max_static_particles # multiply by 2?
+    max_staticp = max_static_particles==nothing ? 2*3*_get_m_static(sim.vehicle) + max_particles*mirror : max_static_particles # multiply by 2?
     staticpfield = vpm.ParticleField(max_staticp; Uinf=t->Vinf(Xdummy, t),
                                                                   vpm_solver...)
 
