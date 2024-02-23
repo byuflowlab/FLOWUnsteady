@@ -190,6 +190,7 @@ function run_simulation(
             save_horseshoes = false,            # Whether to output VLM horseshoes in VTKs
             save_static_particles = true,       # Whether to save ASM/ALM embedded particles
             save_wopwopin   = false,            # Generate input files for PSU-WOPWOP
+            save_every_vinduced = 72,
 
         )
 
@@ -284,7 +285,7 @@ function run_simulation(
 
         # Solver-specific pre-calculations
         precalculations(sim, Vinf, PFIELD, T, DT)
-
+        
         # Shed semi-infinite wake
         shed_wake(sim.vehicle, Vinf, PFIELD, DT, sim.nt; t=T,
                             unsteady_shedcrit=-1,
@@ -308,12 +309,12 @@ function run_simulation(
 
         # Solve aerodynamics of the vehicle
         solve(sim, Vinf, PFIELD, wake_coupled, DT, vlm_rlx,
-                sigma_vlm_surf, sigma_rotor_surf, rho, sound_spd,
-                staticpfield, hubtiploss_correction;
-                init_sol=vlm_init, sigmafactor_vpmonvlm=sigmafactor_vpmonvlm,
-                Vother_on_Xs=Vother_on_Xs_fun,
-                sigma_rotor_self=sigma_rotor_self,
-                debug=debug)
+            sigma_vlm_surf, sigma_rotor_surf, rho, sound_spd,
+            staticpfield, hubtiploss_correction;
+            init_sol=vlm_init, sigmafactor_vpmonvlm=sigmafactor_vpmonvlm,
+            Vother_on_Xs=Vother_on_Xs_fun,
+            sigma_rotor_self=sigma_rotor_self,
+            debug=debug, save_path, run_name, save_every_vinduced)
 
         # Shed unsteady-loading wake with new solution
         if shed_unsteady
@@ -335,6 +336,7 @@ function run_simulation(
                                 )
             end
         end
+
 
         if shed_boundarylayer
             shed_wake(sim.vehicle, Vinf, PFIELD, DT, sim.nt; t=T,
@@ -362,7 +364,6 @@ function run_simulation(
         if breakflag2
             vprintln("Quitting time $(tquit) (s) has been reached. Simulation will now end.")
         end
-
         return breakflag || breakflag2
     end
 

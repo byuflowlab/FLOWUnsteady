@@ -17,6 +17,7 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
                 Vother_on_Xs = (Xs) -> nothing,
                 debug=false,
                 sigma_rotor_self=-1,
+                save_path=nothing, run_name="default_runname", save_every_vinduced=72
                 ) where {V<:UVLMVehicle, M<:AbstractManeuver, R}
 
 
@@ -121,7 +122,7 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
 
         # Calculate VPM velocity on all points (VLM and rotors)
         Vvpm = Vvpm_on_Xs(pfield, vcat(Xs_cp_vlm, Xs_ApA_AB_BBp_vlm, Xs_rotors);
-                            dt=dt, fsgm=sigmafactor_vpmonvlm)
+            dt=dt, fsgm=sigmafactor_vpmonvlm)
 
         Vvpm_cp_vlm = Vvpm[1:m]
         Vvpm_ApA_AB_BBp_vlm = Vvpm[m+1:4*m]
@@ -140,7 +141,6 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
                                 prev_rotor_systems[si][ri]._wingsystem.sol["Gamma"])
             end
         end
-
         # Particles for Rotor-on-VLM induced velocity
         static_particles_fun2(pfield, args...) = _static_particles(pfield, allrotors, sigma_rotor)
 
@@ -162,7 +162,6 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
                         Vvpm_ApA_AB_BBp_vlm[m+1:2*m] + Vrotor_on_wing[2*m+1:3*m]; t=t)
         vlm._addsolution(vhcl.vlm_system, "Vvpm_BBp",
                         Vvpm_ApA_AB_BBp_vlm[2*m+1:3*m] + Vrotor_on_wing[3*m+1:4*m]; t=t)
-
 
 
         # Particles for Rotor-on-Rotor induced velocity
@@ -187,12 +186,24 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
         ## Evaluate VLM-on-Rotor and Rotor-on-Rotor induced velocity
         Vvlmrotor_on_rotor = Vvpm_on_Xs(staticpfield, Xs_rotors;
                               static_particles_fun=static_particles_fun4, dt=dt, fsgm=sigmafactor_vpmonvlm)
-
         # evaluate other induced velocity
         Vother_on_rotor = Vother_on_Xs(Xs_rotors)
 
         # Add VPM-on-Rotor, VLM-on-Rotor, and Rotor-on-Rotor induced velocity
         Vinds = Vvpm_rotors + Vvlmrotor_on_rotor + Vother_on_rotor
+
+        if save_path != nothing && (self.nt == 1 || self.nt % save_every_vinduced == 0)
+            open(joinpath(save_path, run_name*"_vinduced.$(self.nt).txt"), "w") do io
+                write(io, "Vinds:\n")
+                write(io, string(Vinds), "\n")
+                write(io, "Vvpm_rotors:\n")
+                write(io, string(Vvpm_rotors), "\n")
+                write(io, "Vvlmrotor_on_rotor:\nt")
+                write(io, string(Vvlmrotor_on_rotor), "\n")
+                write(io, "Vother_on_rotor:\n")
+                write(io, string(Vother_on_rotor), "\n")
+            end
+        end
 
         # ---------- 5) Solve VLM system -----------------------------------
         # Wake-coupled solution
@@ -211,7 +222,6 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
                                 (1-rlx)*_get_prev_vlm_system(vhcl).sol["Gamma"]
             vlm._addsolution(vhcl.vlm_system, "Gamma", rlxd_Gamma)
         end
-
         # ---------- 5) Solve Rotor system ---------------------------------
 
         # Solve Rotors
@@ -243,7 +253,6 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
                 end
             end
         end
-
         # Rotate rotors
         # NOTE: this means that the rotational velocity hadn't been included in
         # the kinematic velocities up to this point
