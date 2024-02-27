@@ -17,6 +17,7 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
                 Vother_on_Xs = (Xs) -> nothing,
                 debug=false,
                 sigma_rotor_self=-1,
+                mirror=false, mirror_point=zeros(3), mirror_normal=[0,0,1.0],
                 save_path=nothing, run_name="default_runname", save_every_vinduced=72
                 ) where {V<:UVLMVehicle, M<:AbstractManeuver, R}
 
@@ -69,7 +70,9 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
         static_particles_fun(pfield, args...) = _static_particles(pfield, vhcl.vlm_system, sigma_vlm)
 
         ## Evaluate VPM-on-Rotor induced velocity + static particles
-        Vinds = Vvpm_on_Xs(pfield, Xs; static_particles_fun=static_particles_fun, dt=dt, fsgm=sigmafactor_vpmonvlm)
+        Vinds = Vvpm_on_Xs(pfield, Xs; static_particles_fun=static_particles_fun, dt=dt, fsgm=sigmafactor_vpmonvlm,
+            mirror, mirror_point, mirror_normal
+        )
 
         # Solve Rotors
         for (si, rotors) in enumerate(vhcl.rotor_systems)
@@ -122,7 +125,7 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
 
         # Calculate VPM velocity on all points (VLM and rotors)
         Vvpm = Vvpm_on_Xs(pfield, vcat(Xs_cp_vlm, Xs_ApA_AB_BBp_vlm, Xs_rotors);
-            dt=dt, fsgm=sigmafactor_vpmonvlm)
+            dt=dt, fsgm=sigmafactor_vpmonvlm, mirror, mirror_point, mirror_normal)
 
         Vvpm_cp_vlm = Vvpm[1:m]
         Vvpm_ApA_AB_BBp_vlm = Vvpm[m+1:4*m]

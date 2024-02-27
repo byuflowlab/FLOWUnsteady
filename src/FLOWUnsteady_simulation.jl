@@ -452,7 +452,9 @@ end
 """
 Returns the velocity induced by particle field on every position `Xs`
 """
-function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs; static_particles_fun=nothing, dt=0, fsgm=1) where {T}
+function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs; static_particles_fun=nothing, dt=0, fsgm=1,
+    mirror = false, mirror_point = zeros(3), mirror_normal = [0,0,1.0],
+) where {T}
     Vvpm = [zeros(3) for i in 1:length(Xs)]
     
     if length(Xs)!=0 && (vpm.get_np(pfield)!=0 || !isnothing(static_particles_fun))
@@ -461,6 +463,11 @@ function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs; static_particles_fun=nothing,
         pfield.Uinf = (t)->zeros(3)
 
         org_np = vpm.get_np(pfield)             # Original particles
+
+        # add mirror particles
+        if mirror
+            mirror_particles!(pfield; mirror_point, mirror_normal)
+        end
 
         # Singularize particles to correct tip loss
         # NOTE: This doesn't include static particles, but there shouldn't be

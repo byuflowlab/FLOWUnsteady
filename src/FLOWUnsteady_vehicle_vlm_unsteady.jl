@@ -182,6 +182,44 @@ Alias for [`FLOWUnsteady.g_linear`](@ref).
 """
 const g_piecewiselinear = g_linear
 
+function mirror_particles!(pfield::vpm.ParticleField; static_pfield=nothing, flag=false, mirror_point=zeros(3), mirror_normal=[0,0,1.0])
+    np = pfield.np
+    mpx, mpy, mpz = mirror_point
+    Gamma = zeros(eltype(pfield),3)
+    X = zeros(eltype(pfield),3)
+
+    # add mirror particles
+    for ip in 1:np
+        # get particle
+        p = pfield.particles[ip]
+        
+        # mirror position and strength
+        px, py, pz = p.X
+        dx = (px - mpx) * mirror_normal[1] +
+            (py - mpy) * mirror_normal[2] +
+            (pz - mpz) * mirror_normal[3]
+
+        X[1] = px - 2*dx*mirror_normal[1]
+        X[2] = py - 2*dx*mirror_normal[2]
+        X[3] = pz - 2*dx*mirror_normal[3]
+        
+        Gx, Gy, Gz = p.Gamma
+        Gamma_norm = sqrt(Gx^2 + Gy^2 + Gz^2)
+        Gamma[1] = 2/Gamma_norm * ( mirror_normal[1] * Gx + mirror_normal[2] * Gy + mirror_normal[3] * Gz ) * p.Gamma[1] - p.Gamma[1]
+        Gamma[2] = 2/Gamma_norm * ( mirror_normal[1] * Gx + mirror_normal[2] * Gy + mirror_normal[3] * Gz ) * p.Gamma[2] - p.Gamma[2]
+        Gamma[3] = 2/Gamma_norm * ( mirror_normal[1] * Gx + mirror_normal[2] * Gy + mirror_normal[3] * Gz ) * p.Gamma[3] - p.Gamma[3]
+
+        # create mirror particle
+        vpm.add_particle(pfield, X, Gamma, p.sigma;
+        vol=p.vol, circulation=p.circulation,
+        C=p.C, static=true)
+        if flag
+            vpm.add_particle(static_pfield, X, Gamma, p.sigma;
+        vol=p.vol, circulation=p.circulation,
+        C=p.C, static=true)
+        end
+    end
+end
 
 function generate_static_particle_fun(pfield::vpm.ParticleField, pfield_static::vpm.ParticleField,
                                         self::VLMVehicle,
@@ -229,42 +267,7 @@ function generate_static_particle_fun(pfield::vpm.ParticleField, pfield_static::
 
         # method of images
         if mirror
-            np = pfield.np
-            mpx, mpy, mpz = mirror_point
-            Gamma = zeros(eltype(pfield),3)
-            X = zeros(eltype(pfield),3)
-
-            # add mirror particles
-            for ip in 1:np
-                # get particle
-                p = pfield.particles[ip]
-                
-                # mirror position and strength
-                px, py, pz = p.X
-                dx = (px - mpx) * mirror_normal[1] +
-                    (py - mpy) * mirror_normal[2] +
-                    (pz - mpz) * mirror_normal[3]
-
-                X[1] = px - 2*dx*mirror_normal[1]
-                X[2] = py - 2*dx*mirror_normal[2]
-                X[3] = pz - 2*dx*mirror_normal[3]
-                
-                Gx, Gy, Gz = p.Gamma
-                Gamma_norm = sqrt(Gx^2 + Gy^2 + Gz^2)
-                Gamma[1] = 2/Gamma_norm * ( mirror_normal[1] * Gx + mirror_normal[2] * Gy + mirror_normal[3] * Gz ) * p.Gamma[1] - p.Gamma[1]
-                Gamma[2] = 2/Gamma_norm * ( mirror_normal[1] * Gx + mirror_normal[2] * Gy + mirror_normal[3] * Gz ) * p.Gamma[2] - p.Gamma[2]
-                Gamma[3] = 2/Gamma_norm * ( mirror_normal[1] * Gx + mirror_normal[2] * Gy + mirror_normal[3] * Gz ) * p.Gamma[3] - p.Gamma[3]
-
-                # create mirror particle
-                vpm.add_particle(pfield, X, Gamma, p.sigma;
-                vol=p.vol, circulation=p.circulation,
-                C=p.C, static=true)
-                if flag
-                    vpm.add_particle(pfield_static, X, Gamma, p.sigma;
-                vol=p.vol, circulation=p.circulation,
-                C=p.C, static=true)
-                end
-            end
+            mirror_particles!(pfield; static_pfield=pfield_static, flag, mirror_point, mirror_normal)
         end
 
         # Save vtk with static particles
