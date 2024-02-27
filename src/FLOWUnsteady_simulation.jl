@@ -312,6 +312,7 @@ function run_simulation(
             sigma_vlm_surf, sigma_rotor_surf, rho, sound_spd,
             staticpfield, hubtiploss_correction;
             init_sol=vlm_init, sigmafactor_vpmonvlm=sigmafactor_vpmonvlm,
+            mirror, mirror_point, mirror_normal,
             Vother_on_Xs=Vother_on_Xs_fun,
             sigma_rotor_self=sigma_rotor_self,
             debug=debug, save_path, run_name, save_every_vinduced)
