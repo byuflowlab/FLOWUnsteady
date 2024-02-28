@@ -56,10 +56,13 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
         if init_sol
             # NOTE: Here I use the semi-infinite wake for the first step, which
             # may lead to some unphysical results when shedding unsteady loading wake
-            vlm.solve(vhcl.vlm_system, Vinf; t=t, keep_sol=true)
+            vlm.solve(vhcl.vlm_system, Vinf; t=t, keep_sol=true,
+                mirror, mirror_point, mirror_normal
+            )
         else
             vlm.solve(vhcl.vlm_system, Vinf; t=t, keep_sol=true,
-                                                    vortexsheet=(X,t)->zeros(3))
+                mirror, mirror_point, mirror_normal,
+                vortexsheet=(X,t)->zeros(3))
         end
 
         # Calculate induced velocities to use in rotor solver
@@ -150,13 +153,14 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
         # Evaluate Rotor-on-VLM induced velocity
         Xs_wing = vcat(Xs_cp_vlm, Xs_ApA_AB_BBp_vlm)
         Vrotor_on_wing = Vvpm_on_Xs(staticpfield, Xs_wing;
-                                    static_particles_fun=static_particles_fun2, dt=dt, fsgm=sigmafactor_vpmonvlm)
+            mirror, mirror_point, mirror_normal,
+            static_particles_fun=static_particles_fun2, dt=dt, fsgm=sigmafactor_vpmonvlm)
 
         Vother_on_wing = Vother_on_Xs(Xs_wing)
 
         # Add and save VPM-on-VLM and Rotor-on-VLM induced velocity
         vlm._addsolution(vhcl.vlm_system, "Vvpm",
-                                         Vvpm_cp_vlm + Vrotor_on_wing[1:m]; t=t)
+                                         Vvpm_cp_vlm + Vrotor_on_wing[1:m] + Vother_on_wing; t=t)
         # vlm._addsolution(vhcl.vlm_system, "Vother",
         #                                  Vother_on_wing; t=t)
         vlm._addsolution(vhcl.vlm_system, "Vvpm_ApA",
@@ -188,7 +192,8 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
 
         ## Evaluate VLM-on-Rotor and Rotor-on-Rotor induced velocity
         Vvlmrotor_on_rotor = Vvpm_on_Xs(staticpfield, Xs_rotors;
-                              static_particles_fun=static_particles_fun4, dt=dt, fsgm=sigmafactor_vpmonvlm)
+                              static_particles_fun=static_particles_fun4, dt=dt, fsgm=sigmafactor_vpmonvlm,
+                              mirror, mirror_point, mirror_normal)
         # evaluate other induced velocity
         Vother_on_rotor = Vother_on_Xs(Xs_rotors)
 
@@ -212,7 +217,8 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
         # Wake-coupled solution
         if wake_coupled
             vlm.solve(vhcl.vlm_system, Vinf; t=t, extraVinf=_extraVinf2,
-                                    keep_sol=true, vortexsheet=(X,t)->zeros(3))
+                mirror, mirror_point, mirror_normal,
+                keep_sol=true, vortexsheet=(X,t)->zeros(3))
         # Wake-decoupled solution
         else
             vlm.solve(vhcl.vlm_system, Vinf; t=t, extraVinf=_extraVinf1,
