@@ -159,7 +159,7 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
             elprescribe = calc_elprescribe(panelbody)
             solverprealloc = pnl.allocate_solver(panelbody, elprescribe, Float64)
 
-            Gamma, Gammals, G, Gred, Gls, RHS, RHSls = solverprealloc
+            (; Gamma, Gammals, G, Gred, tGred, gpuGred, Gls, RHS, RHSls) = solverprealloc
             if mbp == nothing; mbp = similar(RHS); end;
             if prevGammals == nothing
                 prevGammals = similar(Gammals)
@@ -172,14 +172,14 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
                 Vtot .= 0         # Set Vinfs = 0 so then RHS becomes simply -bp
 
                 pnl._G_U_RHS_leastsquares!(panelbody,
-                                            G, Gred, Gls, RHS, RHSls,
+                                            G, Gred, tGred, gpuGred, Gls, RHS, RHSls,
                                             Vtot, controlpoints, normals,
                                             Das, Dbs,
                                             elprescribe;
                                             omit_wake=true
                                             )
                 mbp .= RHS
-                tGred = transpose(Gred)
+                # tGred = transpose(Gred)
             end
             println("$(t) seconds")
 
@@ -230,7 +230,7 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
             this_Xsheddings = pnl.get_field(body, "Xsheddings")["field_data"]
 
             grid = body.grid
-            nodes = grid.orggrid.nodes
+            nodes = grid._nodes
 
             tricoor, quadcoor, lin, ndivscells, cin = gt.generate_getcellt_args(grid)
 
@@ -346,7 +346,7 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
         # ------------- Panel solver -------------------------------
         # solve(panelbody, Vtot, Das, Dbs; omit_wake=true)
 
-        Gamma, Gammals, G, Gred, Gls, RHS, RHSls = solverprealloc
+        (; Gamma, Gammals, G, Gred, Gls, RHS, RHSls) = solverprealloc
 
         # Calculate normal velocity of freestream for boundary condition (RHS = -b)
         pnl.calc_bc_noflowthrough!(RHS, Vtot, normals)
@@ -523,7 +523,7 @@ function shed_wake_panel(body::pnl.RigidWakeBody, Vinf::Function,
     end
 
     grid = body.grid
-    nodes = grid.orggrid.nodes
+    nodes = grid._nodes
     npanels = body.ncells
 
     # Pre-allocate memory
@@ -850,7 +850,7 @@ function panel_static_particles(body::pnl.RigidWakeBody, pfield, sigma::Number;
                                                             p_per_filament=1)
 
     grid = body.grid
-    nodes = grid.orggrid.nodes
+    nodes = grid._nodes
     npanels = body.ncells
 
     # Pre-allocate memory
