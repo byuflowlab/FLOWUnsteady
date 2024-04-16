@@ -198,6 +198,19 @@ If you run into any issues, please try the following:
 If issues persist, please check the resolved issues in [the FLOWExaFMM repo](https://github.com/byuflowlab/FLOWExaFMM.jl/issues?q=), the discussion forum in [the FLOWUnsteady repo](https://github.com/byuflowlab/FLOWUnsteady/discussions?discussions_q=),
 and feel free to open a new issue or discussion for help.
 
+## VSPGeom
+FLOWUnsteady can import geometry created in [OpenVSP](https://openvsp.org/) using [VSPGeom.jl](https://github.com/byuflowlab/VSPGeom.jl).
+
+* Add VSPgeom:
+  ```julia
+  ] add VSPGeom
+  ```
+
+* *[Optional]* Test VSPGeom:
+  ```julia
+  ] test VSPGeom
+  ```
+
 ## Other Packages
 Run the following commands in the Julia REPL to add some dependencies that are not
 in the official Julia registry:
