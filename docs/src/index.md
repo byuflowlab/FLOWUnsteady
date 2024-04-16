@@ -237,8 +237,7 @@ See the following publications for an in-depth dive into the theory and validati
 
 
 
-**Ducted Fan:** [[Slides](http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/alvarez_2023-SLIDES-VPM_for_EDF_in_Non_Axisymmetric_Flow.pdf
-)]
+**Ducted Fan:** [[Slides](http://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/alvarez_2023-SLIDES-VPM_for_EDF_in_Non_Axisymmetric_Flow.pdf)]
 
 ```@raw html
 <div style="position:relative;padding-top:50%;">
