@@ -17,8 +17,8 @@ FLOWUnsteady.
 ## Julia
 
 * Download and install Julia: [julialang.org](https://julialang.org/downloads)
-  (currently we are only supporting up to Julia v1.8.5, so we recommend using
-    [v1.8.5](https://julialang.org/downloads/oldreleases/) or
+  (currently we are supporting up to Julia v1.10, so we recommend using
+    [v1.10.2](https://julialang.org/downloads) or
     [v1.6.7 LTS](https://julialang.org/downloads/#long_term_support_release)
     )
 * Add Julia to user-level `bin` folder
@@ -28,7 +28,7 @@ FLOWUnsteady.
   Replace `/[user-specific-path/Julia-1.x.x]/` with the path where Julia got
   installed.
   For instance, in MacOS the full path looks like this:
-  `/Applications/Julia-1.8.app/Contents/Resources/julia/bin/julia`
+  `/Applications/Julia-1.10.app/Contents/Resources/julia/bin/julia`
 
 If you were successfull, typing the following in the terminal will launch the
 Julia REPL:
@@ -47,7 +47,7 @@ julia
   Replace `/[user-specific-path/ParaView-5.x.x]/` with the path where ParaView got
   installed.
   For instance, in MacOS the full path looks like this:
-  `/Applications/ParaView-5.11.0.app/Contents/MacOS/paraview`
+  `/Applications/ParaView-5.12.0.app/Contents/MacOS/paraview`
 
 If you were successfull, typing the following in the terminal will launch the
 ParaView:
@@ -136,7 +136,7 @@ first you will have to install FLOWExaFMM and compile ExaFMM, as follows.
 * *[Julia REPL]* Install CxxWrap:
   ```julia
   import Pkg
-  Pkg.add(name="CxxWrap", version="0.11.2")
+  Pkg.add(name="CxxWrap", version="0.15.0")
   ```
 
 * *[Terminal]* Clone FLOWExaFMM:
@@ -175,7 +175,7 @@ add FLOWVPM:
   ```julia
   ] test FLOWExaFMM
   ```
-  This will return a heart-warming "Hello world!" if ExaFMM was correctly compiled.
+  If ExaFMM was correctly compiled, this will return a heart-warming "Hello world!"
 
 
 * Add FLOWVPM:
@@ -219,8 +219,8 @@ import Pkg
 
 url = "https://github.com/byuflowlab/"
 
-packages = (("AirfoilPrep.jl", "v2.1.2"), ("FLOWVLM", "v2.1.2"),
-            ("BPM.jl", "v2.0.1"), ("FLOWNoise", "v2.3.2"))
+packages = [ ("AirfoilPrep.jl", "v2.1.2"), ("FLOWVLM", "v2.1.2"),
+             ("FLOWNoise", "v2.3.3"),      ("BPM.jl", "v2.0.1")  ]
 
 Pkg.add([ Pkg.PackageSpec(; url=url*name, rev=v) for (name, v) in packages ])
 ```
