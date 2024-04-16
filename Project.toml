@@ -26,7 +26,7 @@ GeometricTools = "2.2"
 FLOWVPM = "3.0"
 FLOWVLM = "2.1.2"
 FLOWPanel = "1.1"
-FLOWNoise = "2.3.2"
+FLOWNoise = "2.3.3"
 BPM = "2.0.1"
 
 [extras]
