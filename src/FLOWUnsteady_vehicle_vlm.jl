@@ -24,6 +24,7 @@ fields:
 * `rotor_systems::NTuple{M, Array{vlm.Rotor, 1}}`
 * `vlm_system::vlm.WingSystem`
 * `wake_system::vlm.WingSystem`
+* `panel_system::pnl.MultiBody`
 * `grids::Array{gt.GridTypes, 1}`
 
 # Internal properties
@@ -186,8 +187,10 @@ function save_vtk_base(self::AbstractVLMVehicle, filename; path=nothing,
     strn = vlm.save(self.system, filename; path=path, num=num,
                                     infinite_vortex=infinite_vortex, optargs...)
 
-    for (i, grid) in enumerate(self.grids)
-        strn *= gt.save(grid, filename*"_Grid$i"; format="vtk", path=path, num=num)
+    for (i, (grid, save)) in enumerate(zip(self.grids, self.grid_save))
+        if save
+            strn *= gt.save(grid, filename*"_Grid$i"; format="vtk", path=path, num=num)
+        end
     end
 
     # Generate inputs for PSU-WOPWOP

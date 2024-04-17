@@ -290,8 +290,8 @@ function run_simulation(
                             omit_shedding=omit_shedding)
 
         if !isnothing(shed_wake_panel)
-            # NOTE: Here I assume that the MultiBody was stored in this array
-            body = sim.vehicle.prev_data[4]
+
+            body = sim.vehicle.panel_system
 
             shed_wake_panel(body, Vinf, PFIELD, DT, sim.nt; t=T,
                                 unsteady_shedcrit=-1,

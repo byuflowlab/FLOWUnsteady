@@ -40,6 +40,7 @@ struct QVLMVehicle{N, M, R} <: AbstractVLMVehicle{N, M, R}
     rotor_systems::NTuple{M, Array{vlm.Rotor, 1}}
     vlm_system::vlm.WingSystem
     wake_system::vlm.WingSystem
+    panel_system::pnl.MultiBody
     grids::Array{gt.GridTypes, 1}
 
     # Internal properties
@@ -47,6 +48,7 @@ struct QVLMVehicle{N, M, R} <: AbstractVLMVehicle{N, M, R}
     W::Array{R, 1}                          # Current vehicle angular velocity
     prev_data::Array{Any, 1}                # Information about previous step
     grid_O::Array{Array{R, 1}, 1}           # Origin of every grid
+    grid_save::Array{Bool, 1}               # Whether to save VTKs of the grid
 
 
     QVLMVehicle{N, M, R}(
@@ -55,21 +57,25 @@ struct QVLMVehicle{N, M, R} <: AbstractVLMVehicle{N, M, R}
                     rotor_systems=NTuple{0, Array{vlm.Rotor, 1}}(),
                     vlm_system=vlm.WingSystem(),
                     wake_system=vlm.WingSystem(),
+                    panel_system=pnl.MultiBody(),
                     grids=Array{gt.GridTypes, 1}(),
                     V=zeros(3), W=zeros(3),
                     prev_data=[deepcopy(vlm_system), deepcopy(wake_system),
                                                     deepcopy(rotor_systems)],
-                    grid_O=Array{Array{Float64, 1}, 1}(),
+                    grid_O=Array{Float64, 1}[zeros(3) for i in 1:length(grids)],
+                    grid_save=Bool[true for i in 1:length(grids)],
                 ) where {N, M, R} = new(
                     system,
                     tilting_systems,
                     rotor_systems,
                     vlm_system,
                     wake_system,
+                    panel_system,
                     grids,
                     V, W,
                     prev_data,
                     grid_O,
+                    grid_save
                 )
 end
 
@@ -82,14 +88,16 @@ QVLMVehicle(system::vlm.WingSystem;
         V::Array{R, 1}=zeros(3), W::Array{R, 1}=zeros(3),
         tilting_systems::NTuple{N, vlm.WingSystem}=NTuple{0, vlm.WingSystem}(),
         rotor_systems::NTuple{M, Array{vlm.Rotor, 1}}=NTuple{0, Array{vlm.Rotor, 1}}(),
+        panel_system=pnl.MultiBody(),
         grids=Array{gt.GridTypes, 1}(),
         optargs...
         ) where {N, M, R} = QVLMVehicle{N, M, R}( system;
                                 V=V, W=W,
                                 tilting_systems=tilting_systems,
                                 rotor_systems=rotor_systems,
+                                panel_system=panel_system,
                                 grids=Array{gt.GridTypes, 1}(grids),
-                                grid_O=[zeros(R, 3) for i in 1:length(grids)],
+                                grid_O=Array{Float64, 1}[zeros(R, 3) for i in 1:length(grids)],
                                 optargs...)
 
 

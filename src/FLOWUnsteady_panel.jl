@@ -27,13 +27,7 @@ The solver function must first be initialized by the user calling it as
 being passed to the simulation as
 `run_simulation(...; panel_solver=panel_solver, ...)`
 
-NOTE 1: This function assumes that the paneled body to solve is stored under
-        `vehicle.prev_data[4]`.
-NOTE 2: This has not yet been tested with `MultiBody`.
-NOTE 3: The solver has currently been hardcoded to use the least-square
-        formulation for watertight bodies. Verify that it also applies to
-        open bodies (void elprescribe), or revisit.
-NOTE 4: `panel_solver()` currently pre-computes the LU decomposition of the
+NOTE: `panel_solver()` currently pre-computes the LU decomposition of the
         left-hand-side of the system of equations, which is valid as long as the
         position and orientation of all panels relative to each other is
         constant (meaning, it is ok if the paneled bodies are moving and
@@ -76,7 +70,7 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
         vhcl      = sim.vehicle
 
         # Fetch panel body, VLMs, and rotors
-        panelbody = vhcl.prev_data[4]
+        panelbody = vhcl.panel_system
         allvlms   = vhcl.vlm_system
 
         ncells = panelbody.ncells
@@ -208,6 +202,12 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
                 pnl._G_Uvortexring!(panelbody, Gpanelo, off_controlpoints, obliques, Das, Dbs; omit_wake=true)
             end
             println("$(t) seconds")
+
+            # Add body grids to the vehicle's array of grids for the vehicle
+            # to translate and rotate the panel body along with it
+            applytobottom(b -> push!(vhcl.grids, b.grid), panelbody)
+            applytobottom(b -> push!(vhcl.grid_O, zeros(3)), panelbody)
+            applytobottom(b -> push!(vhcl.grid_save, false), panelbody)
 
             return false
         end
