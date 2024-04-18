@@ -113,17 +113,21 @@ function nextstep_kinematic(self::AbstractVLMVehicle, dt::Real)
     vlm.setcoordsystem(self.system, O, Oaxis)
 
     # Translation and rotation of every grid
-    for i in 1:length(self.grids)
-        self.grid_O[i] .+= dX
+    if !prod( -1e1*eps() .< dX .< 1e1*eps() ) || !prod( -1e1*eps() .< dA .< 1e1*eps() )
 
-        # Translation
-        gt.lintransform!(self.grids[i], Array(1.0I, 3, 3) , dX)
+        for i in 1:length(self.grids)
+            self.grid_O[i] .+= dX
 
-        # Brings the grid back to the global origin
-        gt.lintransform!(self.grids[i], Array(1.0I, 3, 3) , -self.grid_O[i])
+            # Translation
+            gt.lintransform!(self.grids[i], Array(1.0I, 3, 3) , dX)
 
-        # Rotation and brings the grid back to its position
-        gt.lintransform!(self.grids[i], M, self.grid_O[i])
+            # Brings the grid back to the global origin
+            gt.lintransform!(self.grids[i], Array(1.0I, 3, 3) , -self.grid_O[i])
+
+            # Rotation and brings the grid back to its position
+            gt.lintransform!(self.grids[i], M, self.grid_O[i])
+        end
+
     end
 
     return nothing

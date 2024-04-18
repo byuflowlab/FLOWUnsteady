@@ -166,7 +166,7 @@ function run_simulation(
             sigma_vpmpanel_overwrite = nothing, # Overwrite core size of panel wake to this value (ignoring `sigmafactor_vpm`)
 
             extra_static_particles_fun = (args...; optargs...) -> nothing,
-            shed_wake_panel = nothing,
+            shed_wake_panel = shed_wake_panel,
 
             # -------- RESTART OPTIONS -----------------------------------------
             restart_vpmfile     = nothing,      # VPM restart file to restart simulation
@@ -282,26 +282,22 @@ function run_simulation(
         # Solver-specific pre-calculations
         precalculations(sim, Vinf, PFIELD, T, DT)
 
-        # Shed semi-infinite wake
+        # Shed trailing-circulation wake from VLMs and rotors
         shed_wake(sim.vehicle, Vinf, PFIELD, DT, sim.nt; t=T,
                             unsteady_shedcrit=-1,
                             p_per_step=p_per_step, sigmafactor=sigmafactor_vpm,
                             overwrite_sigma=sigma_vpm_overwrite,
                             omit_shedding=omit_shedding)
 
-        if !isnothing(shed_wake_panel)
-
-            body = sim.vehicle.panel_system
-
-            shed_wake_panel(body, Vinf, PFIELD, DT, sim.nt; t=T,
-                                unsteady_shedcrit=-1,
-                                shed_starting=false,
-                                p_per_step=p_per_step_panel,
-                                sigmafactor=sigmafactor_vpm,
-                                overwrite_sigma=isnothing(sigma_vpmpanel_overwrite) ? sigma_vpm_overwrite : sigma_vpmpanel_overwrite,
-                                omit_shedding=panel_omit_shedding
-                            )
-        end
+        # Shed trailing-circulation wake from panels
+        shed_wake_panel(sim.vehicle.panel_system, Vinf, PFIELD, DT, sim.nt; t=T,
+                            unsteady_shedcrit=-1,
+                            shed_starting=false,
+                            p_per_step=p_per_step_panel,
+                            sigmafactor=sigmafactor_vpm,
+                            overwrite_sigma=isnothing(sigma_vpmpanel_overwrite) ? sigma_vpm_overwrite : sigma_vpmpanel_overwrite,
+                            omit_shedding=panel_omit_shedding
+                        )
 
         # Solve aerodynamics of the vehicle
         solve(sim, Vinf, PFIELD, wake_coupled, DT, vlm_rlx,
@@ -313,6 +309,7 @@ function run_simulation(
 
         # Shed unsteady-loading wake with new solution
         if shed_unsteady
+            # Shed from VLMs and rotors
             shed_wake(sim.vehicle, Vinf, PFIELD, DT, sim.nt; t=T,
                         unsteady_shedcrit=unsteady_shedcrit,
                         shed_starting=shed_starting,
@@ -320,16 +317,15 @@ function run_simulation(
                         overwrite_sigma=sigma_vpm_overwrite,
                         omit_shedding=omit_shedding)
 
-            if !isnothing(shed_wake_panel)
-                shed_wake_panel(body, Vinf, PFIELD, DT, sim.nt; t=T,
-                                    unsteady_shedcrit=unsteady_shedcrit,
-                                    shed_starting=shed_starting,
-                                    p_per_step=p_per_step_panel,
-                                    sigmafactor=sigmafactor_vpm,
-                                    overwrite_sigma=isnothing(sigma_vpmpanel_overwrite) ? sigma_vpm_overwrite : sigma_vpmpanel_overwrite,
-                                    omit_shedding=panel_omit_shedding
-                                )
-            end
+            # Shed from panels
+            shed_wake_panel(sim.vehicle.panel_system, Vinf, PFIELD, DT, sim.nt; t=T,
+                                unsteady_shedcrit=unsteady_shedcrit,
+                                shed_starting=shed_starting,
+                                p_per_step=p_per_step_panel,
+                                sigmafactor=sigmafactor_vpm,
+                                overwrite_sigma=isnothing(sigma_vpmpanel_overwrite) ? sigma_vpm_overwrite : sigma_vpmpanel_overwrite,
+                                omit_shedding=panel_omit_shedding
+                            )
         end
 
         if shed_boundarylayer

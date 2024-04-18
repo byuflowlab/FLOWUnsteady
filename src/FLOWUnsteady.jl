@@ -56,11 +56,11 @@ const Im = Array(1.0I, 3, 3)
 
 # ------------ HEADERS ---------------------------------------------------------
 for header_name in ["vehicle", "vehicle_vlm",
-                    "maneuver", "rotor",
+                    "maneuver", "rotor", "panel",
                     "simulation_types", "simulation", "utils",
                     "processing", "processing_force", "monitors",
                     "noise_wopwop", "noise_bpm", "postprocessing",
-                    "panel", "openvsp"]
+                    "openvsp"]
 
     include("FLOWUnsteady_"*header_name*".jl")
 
