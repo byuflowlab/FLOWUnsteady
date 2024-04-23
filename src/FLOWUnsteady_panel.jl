@@ -40,6 +40,7 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
                                 offset_U=0,                  # Offset CPs by this amount in U calc
                                 save_path=nothing,
                                 run_name=run_name,
+                                clip_Cp=nothing,
                                 userdefined_postprocessing=(args...; optargs...)->nothing
                                 )
 
@@ -429,7 +430,7 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
 
         # Calculate pressure coefficient (based on U + U_∇μ)
         Cps .= 0
-        pnl.calcfield_Cp!(Cps, panelbody, Us, ref_magVinf)
+        pnl.calcfield_Cp!(Cps, panelbody, Us, ref_magVinf; clip=clip_Cp)
 
         # Calculate the force of each panel (based on Cp)
         Fs .= 0
