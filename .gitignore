@@ -6,6 +6,7 @@ docs/site/
 *Manifest.toml
 *-example/
 *.mem
+*.swp
 
 examples/rotornoise/singlerotor-*
 docs/resources/images/sponsors/*.png
