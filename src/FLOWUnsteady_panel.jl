@@ -38,10 +38,13 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
                                 calc_elprescribe=pnl.calc_elprescribe,
                                 rlx=-1,
                                 offset_U=0,                  # Offset CPs by this amount in U calc
+                                clip_Cp=nothing,
+                                userdefined_postprocessing=(args...; optargs...)->nothing,
+                                debug=false,
+                                verbose=true,
+                                v_lvl=0,
                                 save_path=nothing,
                                 run_name=run_name,
-                                clip_Cp=nothing,
-                                userdefined_postprocessing=(args...; optargs...)->nothing
                                 )
 
     normals, normalscorr = nothing, nothing
@@ -161,7 +164,7 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
                 prevGammals .= NaN
             end
 
-            print("Precomputing G matrix... ")
+            if verbose; print("\t"^v_lvl*"Precomputing G matrix... "); end;
             t = @elapsed begin
                 # Compute Gred, Gls=Gred'*Gred, and -bp
                 Vtot .= 0         # Set Vinfs = 0 so then RHS becomes simply -bp
@@ -176,9 +179,9 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
                 mbp .= RHS
                 # tGred = transpose(Gred)
             end
-            println("$(t) seconds")
+            if verbose; println("$(round(t, digits=1)) seconds"); end;
 
-            print("Precomputing LU decomposition... ")
+            if verbose; print("\t"^v_lvl*"Precomputing LU decomposition... "); end;
             t = @elapsed begin
 
                 # Precompute LU decomposition
@@ -193,16 +196,16 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
                 end
 
             end
-            println("$(t) seconds")
+            if verbose; println("$(round(t, digits=1)) seconds"); end;
 
-            print("Precomputing self-induced velocity coeffs... ")
+            if verbose; print("\t"^v_lvl*"Precomputing self-induced velocity coeffs... "); end;
             t = @elapsed begin
                 # Precompute coefficients of self-induced velocity
                 pnl._G_Uvortexring!(panelbody, Gpanelt, off_controlpoints, tangents, Das, Dbs; omit_wake=true)
                 pnl._G_Uvortexring!(panelbody, Gpaneln, off_controlpoints, normals,  Das, Dbs; omit_wake=true)
                 pnl._G_Uvortexring!(panelbody, Gpanelo, off_controlpoints, obliques, Das, Dbs; omit_wake=true)
             end
-            println("$(t) seconds")
+            if verbose; println("$(round(t, digits=1)) seconds"); end;
 
             # Add body grids to the vehicle's array of grids for the vehicle
             # to translate and rotate the panel body along with it
@@ -457,9 +460,9 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
         # Output VTK files
         if save_path != nothing
             pnl.save(panelbody, run_name; path=save_path, num=sim.nt,
-                                                out_wake=true,
+                                                out_wake=debug,
                                                 wake_panel=false,
-                                                debug=false,
+                                                debug=debug,
                                                 suffix="_panel")
         end
 
