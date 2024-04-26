@@ -62,7 +62,7 @@ Dynamic state of a rigid body. Could contain nested rigid bodies with fixed conn
 
 * `position::Vector`: x, y, and z coordinates of the center of mass of the body frame in the parent frame coordinates
 * `velocity::Vector`: x, y, and z components of the translational velocity of the body frame in the parent frame coordinates
-* `orientation::Matrix`: 3x3 matrix whose columns describe the unit vectors of the body frame in the parent frame coordinates
+* `orientation::Quaternion`: quaternion describing the rotational deviation of the body frame from its parent frame
 * `angular_velocity::Vector`: x, y, and z components of the angular velocity of the body frame in the parent frame coordinates
 * `mass::Float64`: mass of the rigid body, including its substates
 * `inertia::Matrix`: the inertial tensor ''I_{ij}'' about the center of mass in the body frame
@@ -70,9 +70,10 @@ Dynamic state of a rigid body. Could contain nested rigid bodies with fixed conn
 
 """
 struct RigidBodyState{TF} <: AbstractDynamicState
-    position::SVector{3,TF}
+    center_of_mass::SVector{3,TF}
+    center_of_rotation::SVector{3,TF}
     velocity::SVector{3,TF}
-    orientation::SMatrix{3,3,TF,9}
+    orientation::Quaternion{TF}
     angular_velocity::SVector{3,TF}
     mass::TF
     inertia::SMatrix{3,3,TF,9}
@@ -80,15 +81,30 @@ struct RigidBodyState{TF} <: AbstractDynamicState
 end
 
 function RigidBodyState(TF=Float64;
-    position = zero(SVector{3,TF}),
-    velocity = zero(SVector{3,TF}),
-    orientation = zero(SMatrix{3,3,TF,9}),
-    angular_velocity = zero(SVector{3,TF}),
-    mass = zero(TF),
-    inertia = zero(SMatrix{3,3,TF,9}),
-    substates = RigidBodyState{TF}[]
-)
+        position = zero(SVector{3,TF}),
+        velocity = zero(SVector{3,TF}),
+        orientation = Quaternion{TF}(zero(TF),zero(SVector{3,TF})),
+        angular_velocity = zero(SVector{3,TF}),
+        mass = zero(TF),
+        inertia = zero(SMatrix{3,3,TF,9}),
+        substates = RigidBodyState{TF}[]
+    )
 
     return RigidBodyState{TF}(position, velocity, orientation, angular_velocity, mass, inertia, substates)
 end
 
+struct RigidBodyDelta{TF} <: AbstractDynamicDelta
+    translation::SVector{3,TF}
+    center_of_rotation::SVector{3,TF}
+    rotation::Quaternion{TF}
+    subdeltas::Vector{RigidBodyDelta{TF}}
+end
+
+function RigidBodyDelta(TF=Float64;
+        translation = zero(SVector{3,TF}),
+        center_of_rotation = zero(SVector{3,TF}),
+        rotation = Quaternion{TF}(zero(TF), zero(SVector{3,TF}))
+    )
+
+    return RigidBodyDelta{TF}(translation, center_of_rotation, rotation)
+end

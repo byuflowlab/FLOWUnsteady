@@ -27,3 +27,18 @@ function PrescribedKinematics(maintain_state::RigidBodyState)
 
     return PrescribedKinematics(sf)
 end
+
+struct LQRController{TF}
+end
+
+struct EnergyState{TF}
+    state::RigidBodyState{TF}
+    energy::TF
+    power::TF
+end
+
+struct ControlInput{TF}
+    deltas::RigidBodyDelta{TF}
+    state::RigidBodyState{TF}
+    forces::ForceMoment{TF}
+end
