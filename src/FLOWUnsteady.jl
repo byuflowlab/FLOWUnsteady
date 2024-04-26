@@ -18,7 +18,8 @@ using StaticArrays
 
 # NOTE: Unregistered packages available at https://github.com/byuflowlab
 using FastMultipole
-import FLOWVPM
+import VortexLattice as vlm
+import FLOWVPM as vpm
 import VSPGeom
 # import FLOWPanel
 

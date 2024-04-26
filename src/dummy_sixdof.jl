@@ -1,17 +1,35 @@
+#--- quaternion math for easy rotations ---#
+
 struct Quaternion{TF}
     real::TF
     pure::SVector{3,TF}
 end
 
-function rotate(v, q::Quaternion)
+function rotate(v::AbstractVector, q::Quaternion)
     t = 2*cross(q.pure, v)
     return v + q.real*t + cross(q.pure,t)
 end
 
 "perform the reverse rotation"
-function antirotate(v, q::Quaternion)
+function antirotate(v::AbstractVector, q::Quaternion)
     q = Quaternion(q.real, -q.pure)
     return rotate(v, q)
+end
+
+function rotate(m::AbstractMatrix, q::Quaternion)
+    t1 = 2*cross(q.pure, SVector{3}(m[1,1],m[2,1],m[3,1]))
+    t1 = v + q.real*t2 + cross(q.pure,t1)
+    t2 = 2*cross(q.pure, SVector{3}(m[1,2],m[2,2],m[3,2]))
+    t2 = v + q.real*t2 + cross(q.pure,t2)
+    t3 = 2*cross(q.pure, SVector{3}(m[1,3],m[2,3],m[3,3]))
+    t3 = v + q.real*t3 + cross(q.pure,t3)
+    return hcat(t1,t2,t3)
+end
+
+"perform the reverse rotation"
+function antirotate(m::AbstractMatrix, q::Quaternion)
+    q = Quaternion(q.real, -q.pure)
+    return rotate(m, q)
 end
 
 function get_quaternion(axis, angle)
@@ -31,6 +49,8 @@ function antirotate(v, axis, angle)
     return rotate(v, get_quaternion(axis, -angle))
 end
 
+#--- dynamic state objects ---#
+
 abstract type AbstractDynamicState end
 
 """
@@ -40,13 +60,13 @@ Dynamic state of a rigid body. Could contain nested rigid bodies with fixed conn
 
 # Fields
 
-* `position::Vector`: x, y, and z coordinates of the center of mass in the global frame
-* `velocity::Vector`: x, y, and z components of the translational velocity in the _ frame
-* `orientation::Matrix`: 3x3 matrix whose columns describe the unit vectors of the _ frame in global coordinates
-* `angular_velocity::Vector`: x, y, and z components of the angular velocity in the _ frame
+* `position::Vector`: x, y, and z coordinates of the center of mass of the body frame in the parent frame coordinates
+* `velocity::Vector`: x, y, and z components of the translational velocity of the body frame in the parent frame coordinates
+* `orientation::Matrix`: 3x3 matrix whose columns describe the unit vectors of the body frame in the parent frame coordinates
+* `angular_velocity::Vector`: x, y, and z components of the angular velocity of the body frame in the parent frame coordinates
 * `mass::Float64`: mass of the rigid body, including its substates
-* `inertia::Matrix`: the inertial matrix ''I_{ij}'' about the center of mass in the body frame
-* `substates::Vector{RigidBodyState}`: vector of substates describing rigid bodies attached at fixed points
+* `inertia::Matrix`: the inertial tensor ''I_{ij}'' about the center of mass in the body frame
+* `substates::Vector{RigidBodyState}`: vector of substates describing rigid bodies attached to this one 
 
 """
 struct RigidBodyState{TF} <: AbstractDynamicState
