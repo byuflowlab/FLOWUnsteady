@@ -34,17 +34,22 @@ NOTE: `panel_solver()` currently pre-computes the LU decomposition of the
         rotating throughout the simulation as long as they all do so together).
 """
 function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
+                                # ---------- Solver Settings -------------------
                                 sigmafactor_vpmonpanel=1.0,
                                 calc_elprescribe=pnl.calc_elprescribe,
                                 rlx=-1,
                                 offset_U=0,                  # Offset CPs by this amount in U calc
                                 clip_Cp=nothing,
                                 userdefined_postprocessing=(args...; optargs...)->nothing,
+                                # ---------- Outputs ---------------------------
                                 debug=false,
                                 verbose=true,
                                 v_lvl=0,
                                 save_path=nothing,
-                                run_name=run_name,
+                                run_name="flowunsteadysim",
+                                # ---------- Restart Options -------------------
+                                restart_save_file=nothing,
+                                restart_read_file=nothing
                                 )
 
     normals, normalscorr = nothing, nothing
@@ -81,6 +86,8 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
         nsheddings = panelbody.nsheddings
 
         if initialize
+
+            # Collect all rotors
             allrotors = vlm.WingSystem()
 
             for (si, rotors) in enumerate(vhcl.rotor_systems)
@@ -89,48 +96,11 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
                 end
             end
 
-            # Precompute normals and control points
-            if normals == nothing; normals = pnl.calc_normals(panelbody); end;
-            if normalscorr == nothing; normalscorr = pnl.calc_normals(panelbody; flipbyCPoffset=true); end;
-            if controlpoints == nothing; controlpoints = pnl.calc_controlpoints(panelbody, normals); end;
-
-            # Precompute unit vectors and offset control points for U calc
-            if tangents == nothing; tangents = pnl.calc_tangents(panelbody); end;
-            if obliques == nothing; obliques = pnl.calc_obliques(panelbody); end;
-            if off_controlpoints == nothing
-                off_controlpoints = pnl.calc_controlpoints(panelbody, normals; off=offset_U)
-            end
-
-            # Initialize storage
-            # if normals == nothing; normals = zeros(3, ncells); end;
-            # if controlpoints == nothing; controlpoints = zeros(3, ncells); end;
-            # if prev_controlpoints == nothing; prev_controlpoints = zeros(3, ncells); end;
-            # if off_controlpoints == nothing; off_controlpoints = zeros(3, ncells); end;
-            if prev_controlpoints == nothing; prev_controlpoints = similar(controlpoints); end;
-            # if off_controlpoints == nothing; off_controlpoints = similar(controlpoints); end;
-            if Vkin == nothing; Vkin = zeros(3, ncells); end;
-            if Vtot == nothing; Vtot = zeros(3, ncells); end;
-            if Vas == nothing; Vas = zeros(3, nsheddings); end;
-            if Vbs == nothing; Vbs = zeros(3, nsheddings); end;
-            if Das == nothing; Das = zeros(3, nsheddings); end;
-            if Dbs == nothing; Dbs = zeros(3, nsheddings); end;
-            if Xsheddings == nothing; Xsheddings = zeros(3, 2*nsheddings); end;
-            if prev_Xsheddings == nothing; prev_Xsheddings = zeros(3, 2*nsheddings); end;
-            if Xs == nothing; Xs = zeros(3, ncells + 2*nsheddings); end;
-            if Us == nothing; Us = zeros(3, ncells); end;
-            if Ugradmus == nothing; Ugradmus = zeros(3, ncells); end;
-            if Ugradmus_cell == nothing; Ugradmus_cell = zeros(3, ncells); end;
-            if Ugradmus_node == nothing; Ugradmus_node = zeros(3, ncells); end;
-            if Fs == nothing; Fs = zeros(3, ncells); end;
-            if areas == nothing; areas = zeros(ncells); end;
-            if Cps == nothing; Cps = zeros(ncells); end;
-            if Vind == nothing; Vind = [zeros(3) for i in 1:(ncells+2*nsheddings)]; end;
-            if Gpanelt == nothing; Gpanelt = zeros(ncells, ncells); end;
-            if Gpaneln == nothing; Gpaneln = zeros(ncells, ncells); end;
-            if Gpanelo == nothing; Gpanelo = zeros(ncells, ncells); end;
-            if Vpanelt == nothing; Vpanelt = zeros(ncells); end;
-            if Vpaneln == nothing; Vpaneln = zeros(ncells); end;
-            if Vpanelo == nothing; Vpanelo = zeros(ncells); end;
+            # Add body grids to the vehicle's array of grids for the vehicle
+            # to translate and rotate the panel body along with it
+            applytobottom(b -> push!(vhcl.grids, b.grid), panelbody)
+            applytobottom(b -> push!(vhcl.grid_O, zeros(3)), panelbody)
+            applytobottom(b -> push!(vhcl.grid_save, false), panelbody)
 
             # Add Xsheddings storage space to body
             function create_Xsheddings_field(body::pnl.RigidWakeBody)
@@ -153,65 +123,191 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
             end
             applytobottom(create_Xsheddings_field, panelbody)
 
-            # Pre-allocate solver memory
-            elprescribe = calc_elprescribe(panelbody)
-            solverprealloc = pnl.allocate_solver(panelbody, elprescribe, Float64)
+            # Pre-allocate memory and perform pre-computation
+            if isnothing(restart_read_file)
 
-            (; Gamma, Gammals, G, Gred, tGred, gpuGred, Gls, RHS, RHSls) = solverprealloc
-            if mbp == nothing; mbp = similar(RHS); end;
-            if prevGammals == nothing
-                prevGammals = similar(Gammals)
-                prevGammals .= NaN
-            end
+                # Precompute normals and control points
+                if normals == nothing; normals = pnl.calc_normals(panelbody); end;
+                if normalscorr == nothing; normalscorr = pnl.calc_normals(panelbody; flipbyCPoffset=true); end;
+                if controlpoints == nothing; controlpoints = pnl.calc_controlpoints(panelbody, normals); end;
 
-            if verbose; print("\t"^v_lvl*"Precomputing G matrix... "); end;
-            t = @elapsed begin
-                # Compute Gred, Gls=Gred'*Gred, and -bp
-                Vtot .= 0         # Set Vinfs = 0 so then RHS becomes simply -bp
-
-                pnl._G_U_RHS_leastsquares!(panelbody,
-                                            G, Gred, tGred, gpuGred, Gls, RHS, RHSls,
-                                            Vtot, controlpoints, normals,
-                                            Das, Dbs,
-                                            elprescribe;
-                                            omit_wake=true
-                                            )
-                mbp .= RHS
-                # tGred = transpose(Gred)
-            end
-            if verbose; println("$(round(t, digits=1)) seconds"); end;
-
-            if verbose; print("\t"^v_lvl*"Precomputing LU decomposition... "); end;
-            t = @elapsed begin
-
-                # Precompute LU decomposition
-                if length(elprescribe)==0
-                    # Case of direct solver
-                    Glu = pnl.calc_Alu!(G)
-                    tGred = I
-                    Gls .= G
-                else
-                    # Case of least-square solver
-                    Glu = pnl.calc_Alu!(Gls)
+                # Precompute unit vectors and offset control points for U calc
+                if tangents == nothing; tangents = pnl.calc_tangents(panelbody); end;
+                if obliques == nothing; obliques = pnl.calc_obliques(panelbody); end;
+                if off_controlpoints == nothing
+                    off_controlpoints = pnl.calc_controlpoints(panelbody, normals; off=offset_U)
                 end
 
-            end
-            if verbose; println("$(round(t, digits=1)) seconds"); end;
+                # Initialize storage
+                # if normals == nothing; normals = zeros(3, ncells); end;
+                # if controlpoints == nothing; controlpoints = zeros(3, ncells); end;
+                # if prev_controlpoints == nothing; prev_controlpoints = zeros(3, ncells); end;
+                # if off_controlpoints == nothing; off_controlpoints = zeros(3, ncells); end;
+                if prev_controlpoints == nothing; prev_controlpoints = similar(controlpoints); end;
+                # if off_controlpoints == nothing; off_controlpoints = similar(controlpoints); end;
+                if Vkin == nothing; Vkin = zeros(3, ncells); end;
+                if Vtot == nothing; Vtot = zeros(3, ncells); end;
+                if Vas == nothing; Vas = zeros(3, nsheddings); end;
+                if Vbs == nothing; Vbs = zeros(3, nsheddings); end;
+                if Das == nothing; Das = zeros(3, nsheddings); end;
+                if Dbs == nothing; Dbs = zeros(3, nsheddings); end;
+                if Xsheddings == nothing; Xsheddings = zeros(3, 2*nsheddings); end;
+                if prev_Xsheddings == nothing; prev_Xsheddings = zeros(3, 2*nsheddings); end;
+                if Xs == nothing; Xs = zeros(3, ncells + 2*nsheddings); end;
+                if Us == nothing; Us = zeros(3, ncells); end;
+                if Ugradmus == nothing; Ugradmus = zeros(3, ncells); end;
+                if Ugradmus_cell == nothing; Ugradmus_cell = zeros(3, ncells); end;
+                if Ugradmus_node == nothing; Ugradmus_node = zeros(3, ncells); end;
+                if Fs == nothing; Fs = zeros(3, ncells); end;
+                if areas == nothing; areas = zeros(ncells); end;
+                if Cps == nothing; Cps = zeros(ncells); end;
+                if Vind == nothing; Vind = [zeros(3) for i in 1:(ncells+2*nsheddings)]; end;
+                if Gpanelt == nothing; Gpanelt = zeros(ncells, ncells); end;
+                if Gpaneln == nothing; Gpaneln = zeros(ncells, ncells); end;
+                if Gpanelo == nothing; Gpanelo = zeros(ncells, ncells); end;
+                if Vpanelt == nothing; Vpanelt = zeros(ncells); end;
+                if Vpaneln == nothing; Vpaneln = zeros(ncells); end;
+                if Vpanelo == nothing; Vpanelo = zeros(ncells); end;
 
-            if verbose; print("\t"^v_lvl*"Precomputing self-induced velocity coeffs... "); end;
-            t = @elapsed begin
-                # Precompute coefficients of self-induced velocity
-                pnl._G_Uvortexring!(panelbody, Gpanelt, off_controlpoints, tangents, Das, Dbs; omit_wake=true)
-                pnl._G_Uvortexring!(panelbody, Gpaneln, off_controlpoints, normals,  Das, Dbs; omit_wake=true)
-                pnl._G_Uvortexring!(panelbody, Gpanelo, off_controlpoints, obliques, Das, Dbs; omit_wake=true)
-            end
-            if verbose; println("$(round(t, digits=1)) seconds"); end;
+                # Pre-allocate solver memory
+                elprescribe = calc_elprescribe(panelbody)
+                solverprealloc = pnl.allocate_solver(panelbody, elprescribe, Float64)
 
-            # Add body grids to the vehicle's array of grids for the vehicle
-            # to translate and rotate the panel body along with it
-            applytobottom(b -> push!(vhcl.grids, b.grid), panelbody)
-            applytobottom(b -> push!(vhcl.grid_O, zeros(3)), panelbody)
-            applytobottom(b -> push!(vhcl.grid_save, false), panelbody)
+                (; Gamma, Gammals, G, Gred, tGred, gpuGred, Gls, RHS, RHSls) = solverprealloc
+                if mbp == nothing; mbp = similar(RHS); end;
+                if prevGammals == nothing
+                    prevGammals = similar(Gammals)
+                    prevGammals .= NaN
+                end
+
+                if verbose; print("\t"^v_lvl*"Precomputing G matrix... "); end;
+                t = @elapsed begin
+                    # Compute Gred, Gls=Gred'*Gred, and -bp
+                    Vtot .= 0         # Set Vinfs = 0 so then RHS becomes simply -bp
+
+                    pnl._G_U_RHS_leastsquares!(panelbody,
+                                                G, Gred, tGred, gpuGred, Gls, RHS, RHSls,
+                                                Vtot, controlpoints, normals,
+                                                Das, Dbs,
+                                                elprescribe;
+                                                omit_wake=true
+                                                )
+                    mbp .= RHS
+                    # tGred = transpose(Gred)
+                end
+                if verbose; println("$(round(t, digits=1)) seconds"); end;
+
+                if verbose; print("\t"^v_lvl*"Precomputing LU decomposition... "); end;
+                t = @elapsed begin
+
+                    # Precompute LU decomposition
+                    if length(elprescribe)==0
+                        # Case of direct solver
+                        Glu = pnl.calc_Alu!(G)
+                        tGred = I
+                        Gls .= G
+                    else
+                        # Case of least-square solver
+                        Glu = pnl.calc_Alu!(Gls)
+                    end
+
+                end
+                if verbose; println("$(round(t, digits=1)) seconds"); end;
+
+                if verbose; print("\t"^v_lvl*"Precomputing self-induced velocity coeffs... "); end;
+                t = @elapsed begin
+                    # Precompute coefficients of self-induced velocity
+                    pnl._G_Uvortexring!(panelbody, Gpanelt, off_controlpoints, tangents, Das, Dbs; omit_wake=true)
+                    pnl._G_Uvortexring!(panelbody, Gpaneln, off_controlpoints, normals,  Das, Dbs; omit_wake=true)
+                    pnl._G_Uvortexring!(panelbody, Gpanelo, off_controlpoints, obliques, Das, Dbs; omit_wake=true)
+                end
+                if verbose; println("$(round(t, digits=1)) seconds"); end;
+
+            else
+
+                if verbose; print("\t"^v_lvl*"Reading restart file... "); end;
+                t = @elapsed begin
+
+                    file = restart_read_file * (splitext(restart_read_file)[2]==".jld" ? "" : ".jld")
+
+                    (
+                                normals, normalscorr,
+                                controlpoints, prev_controlpoints, off_controlpoints,
+                                Vkin, Vtot,
+                                Vas, Vbs,
+                                Das, Dbs,
+                                Xsheddings, prev_Xsheddings, Xs,
+                                # allrotors,
+                                Us, Ugradmus, Ugradmus_cell, Ugradmus_node, Fs,
+                                areas, Cps,
+                                solverprealloc,
+                                elprescribe,
+                                mbp, Glu, tGred,
+                                prevGammals,
+                                Vind,
+                                Gpanelt, Gpaneln, Gpanelo,
+                                Vpanelt, Vpaneln, Vpanelo,
+                                tangents, obliques,
+                                # Xsheddingss, prev_Xsheddingss, oldstrengthss
+                    ) = JLD.load(file,
+                                "normals", "normalscorr",
+                                "controlpoints", "prev_controlpoints", "off_controlpoints",
+                                "Vkin", "Vtot",
+                                "Vas", "Vbs",
+                                "Das", "Dbs",
+                                "Xsheddings", "prev_Xsheddings", "Xs",
+                                # "allrotors",
+                                "Us", "Ugradmus", "Ugradmus_cell", "Ugradmus_node", "Fs",
+                                "areas", "Cps",
+                                "solverprealloc",
+                                "elprescribe",
+                                "mbp", "Glu", "tGred",
+                                "prevGammals",
+                                "Vind",
+                                "Gpanelt", "Gpaneln", "Gpanelo",
+                                "Vpanelt", "Vpaneln", "Vpanelo",
+                                "tangents", "obliques",
+                                # "Xsheddingss", "prev_Xsheddingss", "oldstrengthss"
+                                )
+
+                end
+                if verbose; println("$(round(t, digits=1)) seconds"); end;
+
+            end
+
+            # Generate restart file
+            if !isnothing(restart_save_file)
+
+                if verbose; print("\t"^v_lvl*"Saving restart file... "); end;
+                t = @elapsed begin
+
+                    file = restart_save_file * (splitext(restart_save_file)[2]==".jld" ? "" : ".jld")
+                    JLD.save(file,
+                                "normals", normals, "normalscorr", normalscorr,
+                                "controlpoints", controlpoints, "prev_controlpoints", prev_controlpoints, "off_controlpoints", off_controlpoints,
+                                "Vkin", Vkin, "Vtot", Vtot,
+                                "Vas", Vas, "Vbs", Vbs,
+                                "Das", Das, "Dbs", Dbs,
+                                "Xsheddings", Xsheddings, "prev_Xsheddings", prev_Xsheddings, "Xs", Xs,
+                                # "allrotors", allrotors,
+                                "Us", Us, "Ugradmus", Ugradmus, "Ugradmus_cell", Ugradmus_cell, "Ugradmus_node", Ugradmus_node, "Fs", Fs,
+                                "areas", areas, "Cps", Cps,
+                                "solverprealloc", solverprealloc,
+                                "elprescribe", elprescribe,
+                                "mbp", mbp, "Glu", Glu, "tGred", tGred,
+                                "prevGammals", prevGammals,
+                                "Vind", Vind,
+                                "Gpanelt", Gpanelt, "Gpaneln", Gpaneln, "Gpanelo", Gpanelo,
+                                "Vpanelt", Vpanelt, "Vpaneln", Vpaneln, "Vpanelo", Vpanelo,
+                                "tangents", tangents, "obliques", obliques,
+                                # "Xsheddingss", Xsheddingss, "prev_Xsheddingss", prev_Xsheddingss, "oldstrengthss", oldstrengthss
+                                ; compress=true
+                                )
+
+                end
+                if verbose; println("$(round(t, digits=1)) seconds"); end;
+
+            end
 
             return false
         end
