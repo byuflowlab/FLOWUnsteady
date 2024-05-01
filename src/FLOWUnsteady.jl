@@ -22,6 +22,9 @@ import JLD
 import Dates
 import PyPlot as plt
 
+import LinearAlgebra
+import LinearAlgebra as LA
+
 using PyPlot: @L_str
 using LinearAlgebra: I
 using Printf: @printf
@@ -66,8 +69,8 @@ for header_name in ["vehicle", "vehicle_vlm",
 
 end
 
-# Format PyPlot
-formatpyplot()
+# # Format PyPlot
+# formatpyplot()
 
 # VPM utilities
 include(joinpath(vpm.utilities_path, "utilities_fluiddomain.jl"))
