@@ -41,6 +41,7 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
                                 offset_U=0,                  # Offset CPs by this amount in U calc
                                 clip_Cp=nothing,
                                 userdefined_postprocessing=(args...; optargs...)->nothing,
+                                calcfield_Cp_optargs=(; ),
                                 # ---------- Outputs ---------------------------
                                 debug=false,
                                 verbose=true,
@@ -529,11 +530,11 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
 
         # Calculate pressure coefficient (based on U + U_∇μ)
         Cps .= 0
-        pnl.calcfield_Cp!(Cps, panelbody, Us, ref_magVinf; clip=clip_Cp)
+        pnl.calcfield_Cp!(Cps, panelbody, Us, ref_magVinf; clip=clip_Cp, calcfield_Cp_optargs...)
 
         # Calculate the force of each panel (based on Cp)
         Fs .= 0
-        pnl.calcfield_F!(Fs, panelbody, areas, normalscorr, Cps, ref_magVinf, ref_rho)
+        pnl.calcfield_F!(Fs, panelbody, areas, normalscorr, Cps, ref_magVinf, ref_rho; calcfield_Cp_optargs...)
 
         # Restore fields erased by solve
         bodyi = 1
