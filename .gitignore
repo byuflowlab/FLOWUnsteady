@@ -7,6 +7,9 @@ docs/site/
 *-example/
 *.mem
 *.swp
+*.vts
+*.vtk
+*.vtu
 
 examples/rotornoise/singlerotor-*
 docs/resources/images/sponsors/*.png

@@ -7,38 +7,33 @@ Controller used to fix the kinematics of a vehicle.
 
 # Fields
 
-* `state_function::Function`: a function called with the syntax 
-        state::AbstractDynamicState = state_function(time::Float)
+* `actuate!::Function`: function with the signature `actuate!(plant, u)`; applies control vector `u::AbstractVector` to `plant` by updating time derivative state information in-place
+* `state_function::Function`: function with the signature `state = state_function(t)`, where `state` is of the same type as the `vehicle.state`
 
 """
-struct PrescribedKinematics{TSF} <: AbstractController
-    state_function::TSF 
+struct PrescribedKinematics{TA,TS} <: AbstractController
+    actuate!::TA
+    state_function::TS
 end
 
-function PrescribedKinematics(maintain_state::RigidBodyState)
-    
-    function sf(time) let state = maintain_state
-           position = state.position + state.velocity * time
-           orientation = rotate(state.orientation, state.angular_velocity/norm(state.angular_velocity), norm(state.angular_velocity))
-           new_state = RigidBodyState(position, state.velocity, orientation, state.angular_velocity, state.mass, state.inertia, state.substates)
-           return new_state
-       end
+"Convenience constructor for a controller that maintains constant translational and rotational velocity."
+function PrescribedKinematics(state_function::Function)
+
+    function actuate!()
+        return nothing
     end
 
-    return PrescribedKinematics(sf)
+    return PrescribedKinematics(actuate!, state_function)
 end
 
-struct LQRController{TF}
+function control!(controller::PrescribedKinematics, vehicle, current_time, next_time)
+
+    # get state and state derivative at current time
+    state_dot = controller.state_function(time)
+
+    # construct control input, which completely defines the kinematic state and its derivative
+    control_input = SVector{9}(state_dot.center_of_mass..., state_dot.velocity..., state_dot.angular_velocity...)
+
+    return control_input
 end
 
-struct EnergyState{TF}
-    state::RigidBodyState{TF}
-    energy::TF
-    power::TF
-end
-
-struct ControlInput{TF}
-    deltas::RigidBodyDelta{TF}
-    state::RigidBodyState{TF}
-    forces::ForceMoment{TF}
-end

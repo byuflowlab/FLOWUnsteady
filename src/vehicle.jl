@@ -1,75 +1,131 @@
-abstract type AbstractVehicle end
+#------- abstract types -------#
 
-#--- Vortex Lattice Vehicle ---#
+"""
+    <:AbstractVehicle{Dynamic}
 
-struct VLMVehicle{TF,Formulation,ViscousScheme,SubFilterScale,TKernel,TUJ,Tintegration}
-    vlm_system::vlm.System{TF}
-    dynamic_state_map::
-    wake_system::vpm.ParticleField{TF,Formulation,ViscousScheme,SubFilterScale,TKernel,TUJ,Tintegration}
+Vehicle type definition. All `<:AbstractVehicle` objects should contain the following fields:
+
+* `state<:AbstractState`: representation of the high-level state(s) to be modeled and controlled
+* `model<:AbstractModel`: lower level model to be used, e.g. a vortex lattice representation
+
+"""
+abstract type AbstractVehicle{Dynamic} end
+
+"""
+    kinematic_velocity(vehicle::AbstractVehicle)
+
+Converts the kinematic velocity of the vehicle as defined by its `state` to an observed fluid velocity in its `model`.
+
+"""
+function kinematic_velocity!(vehicle::AbstractVehicle)
+    kinematic_velocity!(vehicle.model, vehicle.state)
 end
 
-struct DynamicStateMap
-    surface_indices::Vector{Int}
-    substate_maps::Vector{DynamicStateMap}
+"""
+    transform!(vehicle, dt)
+
+Transform states of `vehicle.state` and `vehicle.model` according to state time derivatives using a forward Euler step of length `dt`. Second time derivative states such as `velocity_dot` and `angular_velocity_dot` are not modified.
+
+# Arguments
+
+* `vehicle::AbstractVehicle`: the vehicle to be transformed
+* `dt::Number`: length of this timestep
+
+"""
+function transform!(vehicle::AbstractVehicle, dt)
+    transform!(vehicle.model, vehicle.state, dt)
 end
 
-@inline function vlm.rotate(panel::vlm.SurfacePanel, Q::Quaternion, r = (@SVector zeros(3)))
+#------- RigidBodyVehicle -------#
 
-    rtl = rotate(panel.rtl - r, Q) + r
-    rtc = rotate(panel.rtc - r, Q) + r
-    rtr = rotate(panel.rtr - r, Q) + r
-    rbl = rotate(panel.rbl - r, Q) + r
-    rbc = rotate(panel.rbc - r, Q) + r
-    rbr = rotate(panel.rbr - r, Q) + r
-    rcp = rotate(panel.rcp - r, Q) + r
-    ncp = rotate(panel.ncp, Q)
-    core_size = panel.core_size
-    chord = panel.chord
+"""
+    RigidBodyVehicle <: AbstractVehicle
 
-    return SurfacePanel(rtl, rtc, rtr, rbl, rbc, rbr, rcp, ncp, core_size, chord)
+Vehicle defined by a system of rigid bodies and an `<:AbstractModel`.
+
+# Fields
+
+* `state::Array{<:RigidBodyState,0}`: recursive system of high-level rigid body states defining the vehicle
+* `model::AbstractModel`: lower level model defining vehicle behavior
+
+"""
+struct RigidBodyVehicle{TF,TMap,TM,Dynamic} <: AbstractVehicle{Dynamic}
+    state::Array{RigidBodyState{TF,TMap},0}
+    model::TM
 end
 
-function convert!(vehicle::VLMVehicle, delta_state::RigidBodyDelta, state::RigidBodyState)
-    dynamic_state_map = vehicle.dynamic_state_map
-    for 
+"""
+    RigidBodyVehicle(model; kwargs...)
+
+Constructor for `RigidBodyVehicle`.
+
+# Arguments
+
+* `model::AbstractModel`: the model to be used by the vehicle
+
+# Keyword Arguments
+
+* `dynamic::Bool=true`: whether or not 6-DOF dynamic equations of motion should be used to calculate state rates during simulation
+* `initial_state_args::NamedTuple`: keyword arguments used to construct the initial `DynamicState` of the vehicle
+* `initial_state_derivative_args::NamedTuple`: keyword arguments used to construct the initial `DynamicState` time derivative of the vehicle
+
+"""
+function RigidBodyVehicle(model::AbstractModel{TF,<:Any};
+        full_vehicle_state_name="full_vehicle",
+        dynamic=true, # whether or not to include forces in state propagation between timesteps
+        initial_state_args=(),
+        initial_state_derivative_args=(),
+    ) where TF
+
+    # initial state
+    initial_state = DynamicState(TF; initial_state_args...)
+
+    # initial state derivative
+    initial_state_derivative = DynamicStateDerivative(TF; initial_state_derivative_args...)
+
+    # state map
+    full_vehicle_map = map_all(model)
+    TM = typeof(full_vehicle_map)
+
+    # empty vector of substates
+    substates = RigidBodyState{TF,TM}[]
+
+    # full vehicle state
+    state = Array{RigidBodyState{TF,TM},0}(undef)
+    state[] = RigidBodyState{TF,TM}(full_vehicle_state_name, full_vehicle_map, initial_state, initial_state_derivative, substates)
+
+    # construct vehicle object
+    return RigidBodyVehicle{TF,TM,typeof(model),dynamic}(state, model)
 end
 
-function convert!(system::vlm.System, state_map::DynamicStateMap, translation, center_of_rotation, rotation)
-    # apply translation and rotation to the current state surfaces 
-    for surface_index in state_map.surface_indices
-        # translate position
-        vlm.translate!(system.surfaces[surface_index], translation)
+"""
+    add_substate!(vehicle, parent_state_index, new_state_name, model_map, dynamic_state, dynamic_state_derivative)
 
-        # rotate position
-        ## set center of rotation as the origin
-        vlm.translate!(system.surfaces[surface_index], -center_of_rotation)
+Adds a substate to the state indicated by `parent_state_index`.
 
-        ## rotate points
+# Arguments
 
-    end
+* `vehicle::RigidBodyVehicle{TF,TM,<:Bool}`: vehicle to which a new substate is to be added
+* `parent_state_index::NTuple{N,TF}`: index of the recursive `vehicle.state` which is to receive a new substate; e.g., `parent_state_index=(1,3,2)` indicates the 2nd substate of the 3rd substate of the 1st substate of `vehicle.state[]`, while `state_index=()` indicates `vehicle.state[]` itself
+* `new_state_name::String`: name of the new substate
+* `model_map::TM`: designates which part of `vehicle.model` the new substate refers to
 
-    # recurse over substates
-    for substate_map in state_map.substate_maps
-        convert!(system, substate_map, translation, center_of_rotation, axis, angle)
-    end
-end
+# Optional Arguments
 
-function convert!(system::vlm.System, delta_state::RigidBodyDelta, state::RigidBodyState, state_map::DynamicStateMap)
-    
-    # ensure substates are consistent
-    @assert length(delta_state.substates) == length(state.substates) == length(state_map.substate_maps) "length of substates is not consistent: got length(delta_state.substates) = $(length(delta_state.substates)), length(state.substates) = $(length(state.substates)), length(state_map.substate_maps) = $(length(state_map.substate_maps))"
-    
-    # recurse this function over substates, noting that each is expressed in its parent frame, and
-    # therefore implicitly inherits all of its parent's changes
-    for (ds, s, sm) in zip(delta_state.substates, state.substates, state_map.substate_maps)
-        convert!(system, ds, s, sm)
-    end
-    
-    # convert dynamic state to the VLM system
-    convert!(system, state_map, translation, center_of_rotation, axis, angle)
-end
+* `state_args::NamedTuple`: keyword arguments used to construct the initial `DynamicState` of the new substate
+* `state_derivative_args::NamedTuple`: keyword arguments used to construct the initial time derivative of the `DynamicState` of the new substate
+"""
+function add_substate!(vehicle::RigidBodyVehicle{TF,TM,<:Bool}, parent_state_index::NTuple{N,Int64}, new_state_name, model_map::TM;
+        state_args=(), state_derivative_args=()
+    ) where {TF,TM,N}
 
-function solve!(vehicle::VLMVehicle)
-    nothing  
+    parent_state = get_substate(vehicle.state[], parent_state_index)
+    push!(parent_state.substates, RigidBodyState{TF,TM}(
+                new_state_name,
+                model_map,
+                DynamicState(TF; state_args...),
+                DynamicState(TF; state_derivative_args...)
+            )
+        )
 end
 

@@ -9,6 +9,8 @@ FastMultipole = "ce07d0d3-2b9f-49ba-89eb-12c800257c85"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 VSPGeom = "9b3f6a95-fce2-4bc5-94a2-f99b39986ea6"
+VortexLattice = "7a09bdf8-3785-11e9-0bdd-57d0ec69af3f"
+WriteVTK = "64499a7a-5c06-52f2-abe2-ccb03c286192"
 
 [compat]
 FLOWVPM = "3.0.1"
