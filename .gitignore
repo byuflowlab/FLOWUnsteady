@@ -10,6 +10,11 @@ docs/site/
 *.vts
 *.vtk
 *.vtu
+*.vtp
+*.vtm
+*.bson
+*.xmf
+*.h5
 
 examples/rotornoise/singlerotor-*
 docs/resources/images/sponsors/*.png

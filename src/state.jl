@@ -4,8 +4,20 @@ function kinematic_velocity!(model::AbstractModel, state::AbstractState)
     @error "kinematic_velocity! not yet defined for $(typeof(state))"
 end
 
+function solve!(model::AbstractModel, state, dt)
+    @error "solve! not defined for $(typeof(state))"
+end
+
 function transform!(model::AbstractModel, state, dt)
     @error "transform! not yet defined for $(typeof(state))"
+end
+
+function forces!(model::AbstractModel, state)
+    @error "forces! not yet defined for $(typeof(state))"
+end
+
+function initialize_history(state::AbstractState, save_steps)
+    @error "initialize_history not defined for $(typeof(state))"
 end
 
 #------- RigidBodyState -------#
@@ -420,7 +432,7 @@ Apply a `force` vector at the specified `location` in the frame of the specified
 # Arguments
 
 * `state::Array{<:RigidBodyState,0}`: the state to which a force is to be applied
-* `state_index::NTuple{N,Int64}`: the index of the substate in which the `force` vector and its `location` are expressed; e.g., `substate_index = (1,)` indicates the frame of `state[]`, `substate_index = (1,2)` indicates the second substate of the `state[]` frame, and `substate_index = ()` indicates the inertial frame
+* `state_index::NTuple{N,Int64}`: the index of the substate in which the `force` vector and its `location` are expressed; e.g., `substate_index = (1,)` indicates the frame of `state[]`, `substate_index = (1,2)` indicates the second substate of the `state[]` frame, and `state_index = ()` indicates the inertial frame
 * `force::AbstractVector`: the force vector to be applied
 * `location::AbstractVector`: the location in `state` frame coordinates at which the force is to be applied
 
@@ -428,7 +440,7 @@ Apply a `force` vector at the specified `location` in the frame of the specified
 function apply_force!(state::Array{<:RigidBodyState,0}, state_index::NTuple{<:Any,Int64}, force::AbstractVector, location::AbstractVector)
 
     # transform into inertial frame
-    location_inertial_frame = transform_parent_2_top(state[], state_index, location)
+    location_inertial_frame = transform_parent_2_top(location, state[], state_index)
     force_inertial_frame = rotate_frame(force, quaternion_frame_2_top(state[], state_index))
 
     # apply induced moment
@@ -436,7 +448,7 @@ function apply_force!(state::Array{<:RigidBodyState,0}, state_index::NTuple{<:An
     apply_moment!(state, (), moment_inertial_frame)
 
     # express force in terms of dynamic state derivatives
-    velocity_dot = force_inertial_frame / state[].mass
+    velocity_dot = force_inertial_frame / state[].state.mass
 
     # form new state derivative
     new_dynamic_state_derivative = DynamicStateDerivative(
@@ -481,17 +493,17 @@ function apply_moment!(state::Array{<:RigidBodyState,0}, state_index::NTuple{N,I
     # express moment in terms of dynamic state derivatives
     angular_velocity_body_frame = rotate(state[].state.angular_velocity, state[].state.orientation)
     angular_velocity_dot_body_frame = state[].state.inertia \ (moment_body_frame -
-            state[].state_derivative.inertia * angular_velocity_body_frame -
+            state[].state_derivative.inertia_dot * angular_velocity_body_frame -
             cross(angular_velocity_body_frame, state[].state.inertia * angular_velocity_body_frame)
         )
     angular_velocity_dot_inertial_frame = rotate_frame(angular_velocity_dot_body_frame, state[].state.orientation)
 
     # form new state derivative
     new_dynamic_state_derivative = DynamicStateDerivative(
-            old_state_derivative.orientation,
-            old_state_derivative.angular_velocity + angular_velocity_dot_inertial_frame,
-            old_state_derivative.mass,
-            old_state_derivative.inertia
+            state[].state_derivative.velocity_dot,
+            state[].state_derivative.angular_velocity_dot + angular_velocity_dot_inertial_frame,
+            state[].state_derivative.mass_dot,
+            state[].state_derivative.inertia_dot
         )
 
     # update top level state derivative
@@ -507,9 +519,9 @@ function apply_moment!(state::Array{<:RigidBodyState,0}, state_index::NTuple{N,I
 end
 
 """
-    kinematic_velocity(model, state)
+    kinematic_velocity!(model, state)
 
-Applies the kinematic velocity due to `state` to the `model`.
+Dispatch of `kinematic_velocity!` for a `<:RigidBodyState`.
 
 # Arguments
 
@@ -525,13 +537,14 @@ function kinematic_velocity!(model::AbstractModel, state::RigidBodyState, substa
 
     # calculate the kinematic velocity
     this_substate = get_substate(state, substate_index)
-    velocity = this_state.state.velocity
-    angular_velocity = this_state.state.angular_velocity
-    center_of_rotation = this_state.state.position
+    velocity = this_substate.state.velocity
+    angular_velocity = this_substate.state.angular_velocity
+    center_of_rotation = this_substate.state.position
 
     # rotate/transform into the global frame
-    velocity = rotate_2_top(velocity, state, substate_index)
-    angular_velocity = rotate_2_top(angular_velocity, state, substate_index)
+    q = quaternion_frame_2_top(state, substate_index[1:end-1])
+    velocity = rotate_frame(velocity, q)
+    angular_velocity = rotate_frame(angular_velocity, q)
     center_of_rotation = transform_parent_2_top(center_of_rotation, state, substate_index)
 
     # apply to corresponding parts of the model
@@ -545,6 +558,10 @@ function kinematic_velocity!(model::AbstractModel, state::RigidBodyState, substa
         kinematic_velocity!(model, state, new_substate_index)
     end
 
+end
+
+function solve!(model::AbstractModel, state::Array{<:RigidBodyState,0}, dt)
+    solve!(state, dt)
 end
 
 function transform!(model::AbstractModel, state::Array{<:RigidBodyState,0}, dt)
@@ -617,6 +634,24 @@ function transform!(model, state::AbstractArray{<:RigidBodyState}, state_index::
     end
 end
 
+"""
+    forces!(state, model)
+
+Dispatches `forces!` for a `::RigidBodyState`.
+
+# Arguments
+
+* `state::Array{<:RigidBodyState,0}`: the state to which forces are to be applied
+* `model::AbstractModel`: the model used to calculate forces
+
+"""
+function forces!(state::Array{<:RigidBodyState,0}, model)
+    center = state[].state.position
+    f, m = force!(model, map_all(model), center)
+    apply_force!(state, (), f, center)
+    apply_moment!(state, (), m)
+end
+
 #--- visualize using VTK files ---#
 
 function count_states(state::RigidBodyState)
@@ -660,7 +695,11 @@ function update_grid!(origin_grid::AbstractArray, xhat_grid, yhat_grid, zhat_gri
     return grid_i
 end
 
-function vtk(filename::AbstractString, state::RigidBodyState)
+function visualize(state::Array{<:RigidBodyState,0}, args...; kwargs...)
+    visualize(state[], args...; kwargs...)
+end
+
+function visualize(state::RigidBodyState, i::Union{Nothing,Int}=nothing, t::Union{Nothing,Float64}=nothing; name_prefix="default_", path="./")
 
     # preallocate containers
     n_datums = count_states(state)
@@ -675,13 +714,81 @@ function vtk(filename::AbstractString, state::RigidBodyState)
     update_grid!(grid, xhat_grid, yhat_grid, zhat_grid, level_grid, inverse_level_grid, 1, state, ())
 
     # write vtk file
-    vtk_grid(filename, grid) do vtk
+    vtk_grid(joinpath(path, name_prefix*"state.vts"), grid) do vtk
         vtk["xhat"] = xhat_grid
         vtk["yhat"] = yhat_grid
         vtk["zhat"] = zhat_grid
         vtk["level"] = level_grid
         vtk["inverse_level"] = inverse_level_grid
+        if !isnothing(i)
+            vtk["i"] = i
+        end
+        if !isnothing(t)
+            vtk["t"] = t
+        end
     end
+end
 
-    return grid, xhat_grid, yhat_grid, zhat_grid, level_grid, inverse_level_grid
+function initialize_history(state::Array{<:RigidBodyState,0}, save_steps)
+    return initialize_history(state[], save_steps)
+end
+
+function initialize_history(state::RigidBodyState, save_steps)
+    n_states = count_states(state)
+
+    # tracking origin, orientation, velocity, and angular velocity for all states
+    origin_history = zeros(3, n_states, length(save_steps))
+    velocity_history = zeros(3, n_states, length(save_steps))
+    angular_velocity_history = zeros(3, n_states, length(save_steps))
+
+    # tracking mass, inertia, velocity_dot, and angular_velocity_dot for the top level state
+    mass_history = zeros(length(save_steps))
+    inertia_history = zeros(9, length(save_steps))
+    velocity_dot_history = zeros(3, length(save_steps))
+    angular_velocity_dot_history = zeros(3, length(save_steps))
+
+    # assemble output
+    history = (
+        origin = origin_history,
+        velocity = velocity_history,
+        angular_velocity = angular_velocity_history,
+        mass = mass_history,
+        inertia = inertia_history,
+        top_velocity_dot = velocity_dot_history,
+        top_angular_velocity_dot = angular_velocity_dot_history
+    )
+
+    fields = (:origin, :velocity, :angular_velocity, :mass, :inertia, :top_velocity_dot, :top_angular_velocity_dot)
+
+    return history, fields
+end
+
+function update_history!(history, state::Array{<:RigidBodyState,0}, i_step)
+    # save values for all substates
+    update_substate_history!(history, state, 1, i_step, (1,))
+
+    # save values for top state
+    history[:mass][i_step] = state[].state.mass
+    history[:inertia][:,i_step] .= vec(state[].state.inertia)
+    history[:top_velocity_dot][:,i_step] .= state[].state_derivative.velocity_dot
+    history[:top_angular_velocity_dot][:,i_step] .= state[].state_derivative.angular_velocity_dot
+
+end
+
+function update_substate_history!(history, state::Array{<:RigidBodyState,0}, i_substate, i_step, state_index)
+
+    # extract substate
+    substate = get_state(state, state_index)
+
+    # update history
+    history[:origin][:, i_substate, i_step] .= transform_2_top(substate.state.position, state, state_index[1:end-1])
+    q = quaternion_frame_2_top(state, state_index[1:end-1]) # from parent frame
+    history[:velocity][:, i_substate, i_step] .= rotate_frame(substate.state.velocity, q)
+    history[:angular_velocity][:, i_substate, i_step] .= rotate_frame(substate.state.angular_velocity, q)
+
+    # recurse over substates
+    for i in eachindex(substate.substates)
+        new_state_index = (state_index..., i)
+        i_substate = update_substate_history!(history, state, i_substate+1, i_step, new_state_index)
+    end
 end

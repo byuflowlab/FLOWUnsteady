@@ -170,7 +170,7 @@ vi3 = FLOWUnsteady.transform_parent_2_top(vb, state_arr[], (1,1))
 #--- rotate a reference frame ---#
 
 # visualize all frames first
-grid, xhat, yhat, zhat, level, inverse_level = vtk("test_rigidbodystate.vts", state_arr[])
+# visualize(state_arr[]; name_prefix="test_")
 
 # now lets say we have a very simple model containing a single vector at a point
 struct SimpleModel{TF} <: AbstractModel{TF,false}
@@ -223,7 +223,11 @@ FLOWUnsteady.transform!(sm, state_arr, dt)
 
 end
 
-# function build_vlm()
+function build_vlm(;
+        orientation=Quaternion(SVector{3}(1.0,0,0),0),
+        dynamic=false,
+    )
+
     # Unsteady Wing and Tail
     ns_multiplier = 1
     nc_multiplier = 1
@@ -303,7 +307,41 @@ end
     surface_id = [1, 2, 3]
 
     system = vlm.System(Float64, surfaces)
+    for i in eachindex(surfaces)
+        system.surfaces[i] .= surfaces[i]
+    end
 
-    model = VortexLatticeModel(system, false)
+    model = VortexLatticeModel(system, false; max_timesteps=10)
 
-    vehicle = RigidBodyVehicle(model)
+    vehicle = RigidBodyVehicle(model; dynamic, orientation, model_coordinates=Aerodynamics(), vehicle_coordinates=FlightDynamics())
+
+    return vehicle
+end
+
+function create_sim(;
+        dynamic=false,
+        orientation=Quaternion(SVector{3}(1.0,0,0),0),
+        time_range=range(0,stop=0.1,length=10),
+        freestream=SimpleFreestream(SVector{3}(-1.0,0,0)),
+        controller=PrescribedKinematics(),
+        integrator=ForwardEuler(),
+        preprocessor=DefaultPreprocessor(),
+        save_steps = 1:10
+    )
+
+    # create vehicle
+    vehicle = build_vlm(; dynamic, orientation)
+    history = History(vehicle, controller, time_range; save_steps)
+    paraview = ParaviewOutput(save_steps, "test1", "")
+    postprocessor = MultiPostprocessor((history, paraview))
+
+    # create simulation object
+    sim = Simulation(vehicle, time_range;
+            freestream, controller, preprocessor, integrator, postprocessor
+        )
+    return sim, time_range
+end
+
+sim, time_range = create_sim()
+
+simulate!(sim, time_range)

@@ -1,39 +1,60 @@
 abstract type AbstractController end
 
+function initialize_verbose(controller::AbstractController, v_lvl)
+    println("\t"^v_lvl, "Controller: \t", typeof(controller))
+end
+
+"""
+    initialize_history(controller, save_steps)
+
+Used to initialize a `History` object.
+
+# Arguments
+
+* `controller::AbstractController`: the controller used in the simulation
+* `save_steps`: iterable of timestep indices at which we desire to save the history
+
+# Returns
+
+* `control_history`: the preallocated control history
+
+"""
+function initialize_history(controller::AbstractController, save_steps)
+    @error "initialize_history not defined for $(typeof(controller))"
+end
+
+"""
+    update_history!(history, controller, i_step)
+
+Updates the history relevant to `controller`.
+
+# Arguments
+
+* `history::NamedTuple`: the history to be updated
+* `i_step::Int`: the timestep at which the history is to be updated
+
+"""
+function update_history!(history, controller::AbstractController, i_step)
+    @error "update_history! not defined for $(typeof(controller))"
+end
+
 """
     PrescribedKinematics <: AbstractController
 
 Controller used to fix the kinematics of a vehicle.
 
-# Fields
-
-* `actuate!::Function`: function with the signature `actuate!(plant, u)`; applies control vector `u::AbstractVector` to `plant` by updating time derivative state information in-place
-* `state_function::Function`: function with the signature `state = state_function(t)`, where `state` is of the same type as the `vehicle.state`
-
 """
-struct PrescribedKinematics{TA,TS} <: AbstractController
-    actuate!::TA
-    state_function::TS
+struct PrescribedKinematics <: AbstractController end
+
+function control!(vehicle, ::PrescribedKinematics, current_time, next_time)
+    @assert typeof(vehicle) <: AbstractVehicle{false} "dynamic vehicle is incompatible with a PrescribedKinematics controller; set `AbstractVehicle{false}`"
+    return nothing
 end
 
-"Convenience constructor for a controller that maintains constant translational and rotational velocity."
-function PrescribedKinematics(state_function::Function)
-
-    function actuate!()
-        return nothing
-    end
-
-    return PrescribedKinematics(actuate!, state_function)
+function initialize_history(controller::PrescribedKinematics, save_steps)
+    return (), () # no control performed for PrescribedKinematics
 end
 
-function control!(controller::PrescribedKinematics, vehicle, current_time, next_time)
-
-    # get state and state derivative at current time
-    state_dot = controller.state_function(time)
-
-    # construct control input, which completely defines the kinematic state and its derivative
-    control_input = SVector{9}(state_dot.center_of_mass..., state_dot.velocity..., state_dot.angular_velocity...)
-
-    return control_input
+function update_history!(history, controller::PrescribedKinematics, i_step)
+    return nothing
 end
-
