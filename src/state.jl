@@ -4,15 +4,15 @@ function kinematic_velocity!(model::AbstractModel, state::AbstractState)
     @error "kinematic_velocity! not yet defined for $(typeof(state))"
 end
 
-function solve!(model::AbstractModel, state, dt)
+function solve!(model::AbstractModel, state::AbstractState, dt)
     @error "solve! not defined for $(typeof(state))"
 end
 
-function transform!(model::AbstractModel, state, dt)
+function transform!(model::AbstractModel, state::AbstractState, dt)
     @error "transform! not yet defined for $(typeof(state))"
 end
 
-function forces!(model::AbstractModel, state)
+function forces!(model::AbstractModel, state::AbstractState)
     @error "forces! not yet defined for $(typeof(state))"
 end
 
@@ -667,7 +667,7 @@ function count_substates(state::RigidBodyState)
     return n_substates
 end
 
-function update_grid!(origin_grid::AbstractArray, xhat_grid, yhat_grid, zhat_grid, level_grid, inverse_level_grid, grid_i::Int, state::RigidBodyState, substate_index::NTuple)
+function update_grid!(origin_grid::AbstractArray, xhat_grid, yhat_grid, zhat_grid, level_grid, inverse_level_grid, velocity_grid, angular_velocity_grid, grid_i::Int, state::RigidBodyState, substate_index::NTuple)
     substate = get_substate(state, substate_index)
 
     # get origin
@@ -680,16 +680,23 @@ function update_grid!(origin_grid::AbstractArray, xhat_grid, yhat_grid, zhat_gri
     yhat = rotate_frame(SVector{3}(0,1.0,0), q)
     zhat = rotate_frame(SVector{3}(0,0,1.0), q)
 
+    # velocity and angular velocity
+    q_parent = quaternion_frame_2_top(state, substate_index[1:end-1])
+    velocity = rotate_frame(substate.state.velocity, q_parent)
+    angular_velocity = rotate_frame(substate.state.angular_velocity, q_parent)
+
     xhat_grid[grid_i] = xhat
     yhat_grid[grid_i] = yhat
     zhat_grid[grid_i] = zhat
     level_grid[grid_i] = length(substate_index) + 1
     inverse_level_grid[grid_i] = 1/(length(substate_index) + 1)
+    velocity_grid[grid_i] = velocity
+    angular_velocity_grid[grid_i] = angular_velocity
 
     # recurse over substates
     for i in eachindex(substate.substates)
         new_substate_index = (substate_index...,i)
-        grid_i = update_grid!(origin_grid, xhat_grid, yhat_grid, zhat_grid, level_grid, inverse_level_grid, grid_i + 1, state, new_substate_index)
+        grid_i = update_grid!(origin_grid, xhat_grid, yhat_grid, zhat_grid, level_grid, inverse_level_grid, velocity_grid, angular_velocity_grid, grid_i + 1, state, new_substate_index)
     end
 
     return grid_i
@@ -699,7 +706,11 @@ function visualize(state::Array{<:RigidBodyState,0}, args...; kwargs...)
     visualize(state[], args...; kwargs...)
 end
 
-function visualize(state::RigidBodyState, i::Union{Nothing,Int}=nothing, t::Union{Nothing,Float64}=nothing; name_prefix="default_", path="./")
+function visualize(state::RigidBodyState, i=nothing, t=nothing; name_prefix="default", path="./")
+
+    # file name
+    name_suffix = "_state"
+    file_name = name_prefix * name_suffix
 
     # preallocate containers
     n_datums = count_states(state)
@@ -709,24 +720,35 @@ function visualize(state::RigidBodyState, i::Union{Nothing,Int}=nothing, t::Unio
     zhat_grid = zeros(SVector{3,Float64},n_datums,1,1)
     level_grid = zeros(n_datums, 1, 1)
     inverse_level_grid = zeros(n_datums, 1, 1)
+    velocity_grid = zeros(SVector{3,Float64},n_datums,1,1)
+    angular_velocity_grid = zeros(SVector{3,Float64},n_datums,1,1)
 
     # update with origin and coordinate systems
-    update_grid!(grid, xhat_grid, yhat_grid, zhat_grid, level_grid, inverse_level_grid, 1, state, ())
+    update_grid!(grid, xhat_grid, yhat_grid, zhat_grid, level_grid, inverse_level_grid, velocity_grid, angular_velocity_grid, 1, state, ())
+
+    # paraview collection file for timestepping
+    !isnothing(t) && (pvd = WriteVTK.paraview_collection(joinpath(path,file_name); append=true))
+    !isnothing(i) && (file_name = string(file_name, ".", i))
 
     # write vtk file
-    vtk_grid(joinpath(path, name_prefix*"state.vts"), grid) do vtk
+    vtk_grid(file_name*".vts", grid) do vtk
         vtk["xhat"] = xhat_grid
         vtk["yhat"] = yhat_grid
         vtk["zhat"] = zhat_grid
         vtk["level"] = level_grid
         vtk["inverse_level"] = inverse_level_grid
+        vtk["velocity"] = velocity_grid
+        vtk["angular velocity"] = angular_velocity_grid
         if !isnothing(i)
             vtk["i"] = i
         end
         if !isnothing(t)
-            vtk["t"] = t
+            vtk["TimeValue"] = t
+            pvd[t] = vtk
         end
     end
+
+    !isnothing(t) && WriteVTK.vtk_save(pvd)
 end
 
 function initialize_history(state::Array{<:RigidBodyState,0}, save_steps)

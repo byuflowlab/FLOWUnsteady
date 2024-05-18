@@ -62,8 +62,12 @@ Transform states of `vehicle.state` and `vehicle.model` according to state time 
 * `dt::Number`: length of this timestep
 
 """
-function transform!(vehicle::AbstractVehicle, dt)
+function transform!(vehicle::AbstractVehicle, dt, i_step)
+    # transform states and the corresponding models
     transform!(vehicle.model, vehicle.state, dt)
+
+    # transform the rest of the model (e.g. the wake)
+    transform!(vehicle.model, dt, i_step)
 end
 
 """

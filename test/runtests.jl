@@ -224,7 +224,9 @@ FLOWUnsteady.transform!(sm, state_arr, dt)
 end
 
 function build_vlm(;
+        Quasisteady=false,
         orientation=Quaternion(SVector{3}(1.0,0,0),0),
+        velocity=SVector{3,Float64}(10.0,0,0),
         dynamic=false,
     )
 
@@ -311,9 +313,10 @@ function build_vlm(;
         system.surfaces[i] .= surfaces[i]
     end
 
-    model = VortexLatticeModel(system, false; max_timesteps=10)
+    model = VortexLatticeModel(system; Quasisteady, max_timesteps=10)
+    @show typeof(model)
 
-    vehicle = RigidBodyVehicle(model; dynamic, orientation, model_coordinates=Aerodynamics(), vehicle_coordinates=FlightDynamics())
+    vehicle = RigidBodyVehicle(model; dynamic, orientation, velocity, model_coordinates=Aerodynamics(), vehicle_coordinates=FlightDynamics())
 
     return vehicle
 end
@@ -321,6 +324,7 @@ end
 function create_sim(;
         dynamic=false,
         orientation=Quaternion(SVector{3}(1.0,0,0),0),
+        velocity=SVector{3,Float64}(10.0,0,0),
         time_range=range(0,stop=0.1,length=10),
         freestream=SimpleFreestream(SVector{3}(-1.0,0,0)),
         controller=PrescribedKinematics(),
@@ -330,7 +334,7 @@ function create_sim(;
     )
 
     # create vehicle
-    vehicle = build_vlm(; dynamic, orientation)
+    vehicle = build_vlm(; dynamic, orientation, velocity)
     history = History(vehicle, controller, time_range; save_steps)
     paraview = ParaviewOutput(save_steps, "test1", "")
     postprocessor = MultiPostprocessor((history, paraview))

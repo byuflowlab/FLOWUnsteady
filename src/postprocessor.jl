@@ -56,17 +56,17 @@ function History(vehicle::AbstractVehicle, controller::AbstractController, time_
     return History(time_range[save_steps], save_steps, name_prefix, path, bson_every, history, fields)
 end
 
-function (postprocessor::History)(vehicle, controller, time, i_step)
-    if i_step in postprocessor.save_steps
+function (history::History)(vehicle, controller, time, i_step)
+    if i_step in history.save_steps
 
         # update history
-        i = indexin(i_step, postprocessor.save_steps)[]
-        update_history!(postprocessor.history, vehicle, i)
-        update_history!(postprocessor.history, controller, i)
+        i = indexin(i_step, history.save_steps)[]
+        update_history!(history.history, vehicle, i)
+        update_history!(history.history, controller, i)
 
         # save bson files
-        if i % postprocessor.bson_every == 0
-            BSON.@save joinpath(postprocessor.path, postprocessor.name_prefix * "history.$(i_step).bson") postprocessor
+        if i % history.bson_every == 0
+            BSON.@save joinpath(history.path, history.name_prefix * "_history.$(i_step).bson") history
         end
     end
 end

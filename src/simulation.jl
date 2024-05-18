@@ -16,7 +16,9 @@ Default initialization object does nothing.
 """
 struct DefaultInitializer <: AbstractInitializer end
 
-(::DefaultInitializer)(vehicle, time) = nothing
+function (::DefaultInitializer)(vehicle, controller, postprocessor, time, i_step)
+    postprocessor(vehicle, controller, time, i_step)
+end
 
 #------- preprocessor -------#
 
@@ -61,6 +63,7 @@ struct Simulation{TV<:AbstractVehicle, TF<:AbstractFreestream, TC<:AbstractContr
     preprocessor::TPR
     integrator::TI
     postprocessor::TPO
+    i_step::Array{Int,0}
 end
 
 function Simulation(vehicle, time_range;
@@ -70,8 +73,11 @@ function Simulation(vehicle, time_range;
             preprocessor=DefaultPreprocessor(),
             integrator=ForwardEuler(),
             postprocessor=DefaultPostprocessor(vehicle, time_range),
+            i_step=0
         )
-    return Simulation(vehicle, freestream, controller, initializer, preprocessor, integrator, postprocessor)
+    i_step_container = Array{Int,0}(undef)
+    i_step_container[] = i_step
+    return Simulation(vehicle, freestream, controller, initializer, preprocessor, integrator, postprocessor, i_step_container)
 end
 
 function initialize_verbose(simulation::Simulation, time_range, run_name, path)
@@ -124,10 +130,10 @@ function finalize_verbose(run_name, path, time_beginning)
     hrs, mins, secs = timeformat(time_beginning, time_end)
     line1 = "*"^73
     line3 = "-"^73
-    println(line1)
-    println("\n", line3)
+    println("\n", line1)
+    println(line3)
     println("\n\tEND $(joinpath(path,run_name))")
-    println("\n\t\t","ELAPSED TIME: $hrs hours $mins minutes $secs seconds")
+    println("\n\t\t","ELAPSED TIME: $hrs hours $mins minutes $secs seconds\n")
     println(line3)
     println(line1)
 
@@ -148,17 +154,23 @@ function simulate!(simulation::Simulation, time_range;
     preprocessor = simulation.preprocessor
     integrator = simulation.integrator
     postprocessor = simulation.postprocessor
+    i_step = simulation.i_step[]
 
     #--- initialize ---#
 
-    state = initializer(vehicle, time_range[1])
+    state = initializer(vehicle, controller, postprocessor, time_range[1], i_step)
 
     verbose && (time_beginning = initialize_verbose(simulation, time_range, run_name, path))
 
     #--- loop over time ---#
 
     current_time = time_range[1]
-    for (i_step, next_time) in enumerate(time_range[2:end])
+
+    for next_time in time_range[2:end]
+
+        #--- increment step ---#
+
+        i_step += 1
 
         #--- preprocessing ---#
 
@@ -168,7 +180,7 @@ function simulate!(simulation::Simulation, time_range;
 
         integrate_time!(vehicle, freestream, controller, postprocessor, current_time, next_time, i_step, integrator)
 
-        #--- update current_time ---#
+        #--- increment time ---#
 
         current_time = next_time
 
@@ -177,6 +189,10 @@ function simulate!(simulation::Simulation, time_range;
         verbose && verbose_print(i_step, current_time)
 
     end
+
+    #--- update simulation ---#
+
+    simulation.i_step[] = i_step
 
     verbose && (finalize_verbose(run_name, path, time_beginning))
 
