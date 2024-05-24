@@ -1,5 +1,13 @@
 abstract type AbstractState end
 
+function Base.isnan(state::AbstractState)
+    @error "isnan not defined for $(typeof(state))"
+end
+
+function reset!(state::AbstractState)
+    @error "reset! not defined for $(typeof(state))"
+end
+
 function kinematic_velocity!(model::AbstractModel, state::AbstractState)
     @error "kinematic_velocity! not yet defined for $(typeof(state))"
 end
@@ -12,12 +20,16 @@ function transform!(model::AbstractModel, state::AbstractState, dt)
     @error "transform! not yet defined for $(typeof(state))"
 end
 
-function forces!(model::AbstractModel, state::AbstractState)
+function forces!(model::AbstractModel, state::AbstractState, dynamic::Bool)
     @error "forces! not yet defined for $(typeof(state))"
 end
 
 function initialize_history(state::AbstractState, save_steps)
     @error "initialize_history not defined for $(typeof(state))"
+end
+
+function (initializer::DefaultInitializer)(state::AbstractState, time, i_step)
+    @error "initializer::DefaultInitializer not defined for $(typeof(state))"
 end
 
 #------- RigidBodyState -------#
@@ -42,6 +54,21 @@ struct RigidBodyState{TF,TM} <: AbstractState
     state::DynamicState{TF}
     state_derivative::DynamicStateDerivative{TF}
     substates::Vector{RigidBodyState{TF,TM}}
+end
+
+function Base.isnan(state::Array{<:RigidBodyState,0})
+    return isnan(state[])
+end
+
+function Base.isnan(state::RigidBodyState)
+    flag = false
+    for substate in state.substates
+        if isnan(substate)
+            flag = true
+            throw("nan in RigidBodyState")
+        end
+    end
+    return flag || isnan(state.state) || isnan(state.state_derivative)
 end
 
 """
@@ -518,6 +545,27 @@ function apply_moment!(state::Array{<:RigidBodyState,0}, state_index::NTuple{N,I
     return nothing
 end
 
+function reset!(state::Array{RigidBodyState{TF,TM},0}) where {TF,TM}
+
+    # form new state derivative
+    new_dynamic_state_derivative = DynamicStateDerivative(
+            zero(SVector{3,TF}),
+            zero(SVector{3,TF}),
+            state[].state_derivative.mass_dot,
+            state[].state_derivative.inertia_dot
+        )
+
+    # update top level state derivative
+    state[] = RigidBodyState(
+            state[].name,
+            state[].map,
+            state[].state,
+            new_dynamic_state_derivative,
+            state[].substates
+        )
+
+end
+
 """
     kinematic_velocity!(model, state)
 
@@ -635,7 +683,7 @@ function transform!(model, state::AbstractArray{<:RigidBodyState}, state_index::
 end
 
 """
-    forces!(state, model)
+    forces!(state, model, dynamic)
 
 Dispatches `forces!` for a `::RigidBodyState`.
 
@@ -643,13 +691,16 @@ Dispatches `forces!` for a `::RigidBodyState`.
 
 * `state::Array{<:RigidBodyState,0}`: the state to which forces are to be applied
 * `model::AbstractModel`: the model used to calculate forces
+* `dynamic::Bool`: determines whether to apply forces and moments to the dynamic states
 
 """
-function forces!(state::Array{<:RigidBodyState,0}, model)
+function forces!(state::Array{<:RigidBodyState,0}, model, dynamic)
     center = state[].state.position
     f, m = force!(model, map_all(model), center)
-    apply_force!(state, (), f, center)
-    apply_moment!(state, (), m)
+    if dynamic
+        apply_force!(state, (), f, center)
+        apply_moment!(state, (), m)
+    end
 end
 
 #--- visualize using VTK files ---#
@@ -731,7 +782,7 @@ function visualize(state::RigidBodyState, i=nothing, t=nothing; name_prefix="def
     !isnothing(i) && (file_name = string(file_name, ".", i))
 
     # write vtk file
-    vtk_grid(file_name*".vts", grid) do vtk
+    vtk_grid(joinpath(path,file_name*".vts"), grid) do vtk
         vtk["xhat"] = xhat_grid
         vtk["yhat"] = yhat_grid
         vtk["zhat"] = zhat_grid
@@ -813,4 +864,12 @@ function update_substate_history!(history, state::Array{<:RigidBodyState,0}, i_s
         new_state_index = (state_index..., i)
         i_substate = update_substate_history!(history, state, i_substate+1, i_step, new_state_index)
     end
+end
+
+function (initializer::DefaultInitializer)(state::Array{<:RigidBodyState,0}, time, i_step)
+    initializer(state[], time, i_step)
+end
+
+function (initializer::DefaultInitializer)(state::RigidBodyState, time, i_step)
+    return nothing
 end

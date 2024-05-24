@@ -12,6 +12,39 @@ Vehicle type definition. All `<:AbstractVehicle` objects should contain the foll
 abstract type AbstractVehicle{Dynamic, Frame} end
 
 """
+    isnan(vehicle)
+
+Debugging tool determines if there are NaN inside of `vehicle`.
+
+# Arguments
+
+* `vehicle::AbstractVehicle`: the vehicle to be checked
+
+# Returns
+
+* `flag::Bool`: whether or not the `vehicle` contains NaN
+
+"""
+function Base.isnan(vehicle::AbstractVehicle)
+    return isnan(vehicle.state) || isnan(vehicle.model)
+end
+
+"""
+    reset!(vehicle::AbstractVehicle)
+
+Reset the induced force, potential, velocity, gradient, etc. stored in the `vehicle`.
+
+# Arguments
+
+* `vehicle::AbstractVehicle`: the `vehicle` to be reset
+
+"""
+function reset!(vehicle::AbstractVehicle)
+    reset!(vehicle.state)
+    reset!(vehicle.model)
+end
+
+"""
     kinematic_velocity(vehicle::AbstractVehicle)
 
 Converts the kinematic velocity of the vehicle as defined by its `state` to an observed fluid velocity in its `model`.
@@ -37,7 +70,7 @@ function apply!(vehicle::AbstractVehicle, freestream::SimpleFreestream, current_
 end
 
 """
-    solve!(vehicle, dt)
+    solve!(vehicle, dt, i_step)
 
 Solves `vehicle.model` for a duration of `dt`.
 
@@ -45,10 +78,11 @@ Solves `vehicle.model` for a duration of `dt`.
 
 * `vehicle::AbstractVehicle`: the vehicle to be solved
 * `dt::Float64`: the duration of this timestep (useful for determining wake shed locations)
+* `i_step::Int64`: the index of this timestep
 
 """
-function solve!(vehicle::AbstractVehicle, dt)
-    solve!(vehicle.model, dt)
+function solve!(vehicle::AbstractVehicle, dt, i_step)
+    solve!(vehicle.model, dt, i_step)
 end
 
 """
@@ -71,17 +105,17 @@ function transform!(vehicle::AbstractVehicle, dt, i_step)
 end
 
 """
-    forces!(vehicle)
+    forces!(vehicle::AbstractVehicle{Dynamics,Frame})
 
-Apply forces computed in `vehicle.model` to `vehicle.state` by modifying the time derivatives.
+If `Dynamics==true`, apply forces computed in `vehicle.model` to `vehicle.state` by modifying the time derivatives. Otherwise, do nothing.
 
 # Arguments
 
 * `vehicle::AbstractVehicle`: the vehicle whose forces are to be applied
 
 """
-function forces!(vehicle::AbstractVehicle)
-    forces!(vehicle.state, vehicle.model)
+function forces!(vehicle::AbstractVehicle{Dynamic,<:Any}) where Dynamic
+    forces!(vehicle.state, vehicle.model, Dynamic)
 end
 
 """
@@ -123,6 +157,9 @@ function update_history!(history, vehicle::AbstractVehicle, i_step)
     update_history!(history, vehicle.model, i_step)
 end
 
+function (initializer::DefaultInitializer)(vehicle::AbstractVehicle, time, i_step)
+    @error "initializer::DefaultInitializer not defined for $(typeof(vehicle))"
+end
 
 #------- Coordinate Systems -------#
 
@@ -301,5 +338,10 @@ function add_substate!(vehicle::RigidBodyVehicle{TF,TM,<:Bool}, parent_state_ind
                 DynamicState(TF; state_derivative_args...)
             )
         )
+end
+
+function (initializer::DefaultInitializer)(vehicle::RigidBodyVehicle, time, i_step)
+    initializer(vehicle.state, time, i_step)
+    initializer(vehicle.model, time, i_step)
 end
 

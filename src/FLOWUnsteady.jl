@@ -43,6 +43,9 @@ DEBUG[] = false
 include("dummy_sixdof.jl")
 export Quaternion, rotate, rotate_frame, DynamicState, DynamicStateDerivative
 
+include("initializer.jl")
+export AbstractInitializer, DefaultInitializer
+
 include("dummy_flowtrajectories.jl")
 export AbstractController, PrescribedKinematics, control!
 

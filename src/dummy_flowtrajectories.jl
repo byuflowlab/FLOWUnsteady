@@ -58,3 +58,12 @@ end
 function update_history!(history, controller::PrescribedKinematics, i_step)
     return nothing
 end
+
+function (initializer::DefaultInitializer)(controller::AbstractController, time, i_step)
+    @error "initializer::DefaultInitializer not defined for $(typeof(controller))"
+end
+
+
+function (initializer::DefaultInitializer)(controller::PrescribedKinematics, time, i_step)
+    return nothing
+end

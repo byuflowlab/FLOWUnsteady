@@ -228,6 +228,9 @@ function build_vlm(;
         orientation=Quaternion(SVector{3}(1.0,0,0),0),
         velocity=SVector{3,Float64}(10.0,0,0),
         dynamic=false,
+        max_timesteps=10,
+        shed_starting=true,
+        model_kwargs...
     )
 
     # Unsteady Wing and Tail
@@ -313,30 +316,43 @@ function build_vlm(;
         system.surfaces[i] .= surfaces[i]
     end
 
-    model = VortexLatticeModel(system; Quasisteady, max_timesteps=10)
-    @show typeof(model)
+    for properties in system.properties
+        for i in eachindex(properties)
+            properties[i] = eltype(properties)(0.0, zero(SVector{3,Float64}), zero(SVector{3,Float64}), zero(SVector{3,Float64}), zero(SVector{3,Float64}))
+        end
+    end
+    for dproperties in system.dproperties
+        for properties in dproperties
+            for i in eachindex(properties)
+                properties[i] = eltype(properties)(0.0, zero(SVector{3,Float64}), zero(SVector{3,Float64}), zero(SVector{3,Float64}), zero(SVector{3,Float64}))
+            end
+        end
+    end
 
+    model = VortexLatticeModel(system; Quasisteady, max_timesteps, shed_starting, model_kwargs...)
     vehicle = RigidBodyVehicle(model; dynamic, orientation, velocity, model_coordinates=Aerodynamics(), vehicle_coordinates=FlightDynamics())
 
     return vehicle
 end
 
-function create_sim(;
+function create_sim(alpha=5.0*pi/180;
         dynamic=false,
         orientation=Quaternion(SVector{3}(1.0,0,0),0),
-        velocity=SVector{3,Float64}(10.0,0,0),
-        time_range=range(0,stop=0.1,length=10),
-        freestream=SimpleFreestream(SVector{3}(-1.0,0,0)),
+        velocity=SVector{3,Float64}(0.0,0,0),
+        time_range=range(0,stop=1.0,length=101),
+        freestream=SimpleFreestream(10.0*SVector{3}(-cos(alpha),0,-sin(alpha))),
         controller=PrescribedKinematics(),
         integrator=ForwardEuler(),
         preprocessor=DefaultPreprocessor(),
-        save_steps = 1:10
+        model_kwargs...
     )
 
+    save_steps = 0:length(time_range)-1
+
     # create vehicle
-    vehicle = build_vlm(; dynamic, orientation, velocity)
-    history = History(vehicle, controller, time_range; save_steps)
-    paraview = ParaviewOutput(save_steps, "test1", "")
+    vehicle = build_vlm(; dynamic, orientation, velocity, max_timesteps=length(time_range), model_kwargs...)
+    history = History(vehicle, controller, save_steps)
+    paraview = ParaviewOutput(save_steps)
     postprocessor = MultiPostprocessor((history, paraview))
 
     # create simulation object
@@ -346,6 +362,9 @@ function create_sim(;
     return sim, time_range
 end
 
-sim, time_range = create_sim()
+model_kwargs = ()#(threshold_unsteady_gamma_max=0.0,)
+sim, time_range = create_sim(;
+        time_range=range(0,stop=1.0,length=401), model_kwargs...
+    )
 
-simulate!(sim, time_range)
+simulate!(sim, time_range; run_name="test_20240524_2_unsteady_pedrizzetti", path="test_20240524_2_unsteady_pedrizzetti")

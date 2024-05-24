@@ -15,20 +15,16 @@ Saves relevant fields specific to the `vehicle` and `controller`.
 
 # Fields
 
-* `time_range`: the range of timesteps simulated
-* `save_steps`: collection of timestep indices for which data should be saved
-* `name_prefix::String`: name prefix used when saving `.bson` files
-* `path::String`: path to which `.bson` files are saved
+* `time_range`: the range of timesteps saved
+* `save_steps`: collection of timestep indices for which data should be saved"
 * `bson_every::Int`: save `.bson` files every `bson_every` steps
 * `history::NamedTuple`: history of values relevant to the `vehicle` and `controller`
 * `fields::Vector{Symbol}`: names of fields found in `history`
 
 """
-struct History{TT,TS,TH,N} <: AbstractPostprocessor
-    time_range::TT
+struct History{TS,TH,N} <: AbstractPostprocessor
+    time_range::Vector{Float64}
     save_steps::TS
-    name_prefix::String
-    path::String
     bson_every::Int
     history::TH
     fields::NTuple{N,Symbol}
@@ -41,11 +37,8 @@ function merge_histories(history1, field1, history2, field2)
     return history, fields
 end
 
-function History(vehicle::AbstractVehicle, controller::AbstractController, time_range;
-        name_prefix="default_",
-        path="",
+function History(vehicle::AbstractVehicle, controller::AbstractController, save_steps;
         bson_every=1,
-        save_steps=1:length(time_range)
     )
 
     vehicle_history, vehicle_fields = initialize_history(vehicle, save_steps)
@@ -53,20 +46,23 @@ function History(vehicle::AbstractVehicle, controller::AbstractController, time_
 
     history, fields = merge_histories(vehicle_history, vehicle_fields, control_history, control_fields)
 
-    return History(time_range[save_steps], save_steps, name_prefix, path, bson_every, history, fields)
+    time_range = zeros(Float64, length(save_steps))
+
+    return History(time_range, save_steps, bson_every, history, fields)
 end
 
-function (history::History)(vehicle, controller, time, i_step)
+function (history::History)(vehicle, controller, time, i_step, run_name, path)
     if i_step in history.save_steps
 
         # update history
         i = indexin(i_step, history.save_steps)[]
+        history.time_range[i] = time
         update_history!(history.history, vehicle, i)
         update_history!(history.history, controller, i)
 
         # save bson files
         if i % history.bson_every == 0
-            BSON.@save joinpath(history.path, history.name_prefix * "_history.$(i_step).bson") history
+            BSON.@save joinpath(path, run_name * "_history.bson") history
         end
     end
 end
@@ -81,20 +77,16 @@ Functor used to trigger generation of output files for visualization in paraview
 # Fields
 
 * `save_steps`: collection of timestep indices for which output files should be saved
-* `name_prefix::String`: name prefix for output files
-* `path::String`: path where output files will be saved
 
 """
 struct ParaviewOutput{TS} <: AbstractPostprocessor
     save_steps::TS
-    name_prefix::String
-    path::String
 end
 
-function (postprocessor::ParaviewOutput)(vehicle, controller, time, i_step)
+function (postprocessor::ParaviewOutput)(vehicle, controller, time, i_step, run_name, path)
     if i_step in postprocessor.save_steps
         i = indexin(i_step, postprocessor.save_steps)[]
-        visualize(vehicle, i_step, time; name_prefix=postprocessor.name_prefix, path=postprocessor.path)
+        visualize(vehicle, i_step, time; name_prefix=run_name, path)
     end
 end
 
@@ -114,8 +106,8 @@ struct MultiPostprocessor{TP} <: AbstractPostprocessor
     postprocessors::TP
 end
 
-function (postprocessor::MultiPostprocessor)(vehicle, controller, time, i_step)
+function (postprocessor::MultiPostprocessor)(vehicle, controller, time, i_step, run_name, path)
     for p in postprocessor.postprocessors
-        p(vehicle, controller, time, i_step)
+        p(vehicle, controller, time, i_step, run_name, path)
     end
 end

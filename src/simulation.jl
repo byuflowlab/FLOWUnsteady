@@ -1,25 +1,3 @@
-#------- initializer -------#
-
-"""
-    AbstractInitializer
-
-Objects inheriting from `AbstractInitializer` are functors that initialize an `<:AbstractVehicle` as `myinitializer(vehicle::AbstractVehicle, time_zero)`.
-
-"""
-abstract type AbstractInitializer end
-
-"""
-    DefaultInitializer
-
-Default initialization object does nothing.
-
-"""
-struct DefaultInitializer <: AbstractInitializer end
-
-function (::DefaultInitializer)(vehicle, controller, postprocessor, time, i_step)
-    postprocessor(vehicle, controller, time, i_step)
-end
-
 #------- preprocessor -------#
 
 """
@@ -38,7 +16,7 @@ Default preprocessing object does nothing.
 """
 struct DefaultPreprocessor <: AbstractPreprocessor end
 
-(::DefaultPreprocessor)(simulate, time) = nothing
+(::DefaultPreprocessor)(simulate, time, run_name, path) = nothing
 
 """
     Simulation
@@ -78,6 +56,73 @@ function Simulation(vehicle, time_range;
     i_step_container = Array{Int,0}(undef)
     i_step_container[] = i_step
     return Simulation(vehicle, freestream, controller, initializer, preprocessor, integrator, postprocessor, i_step_container)
+end
+
+function simulate!(simulation::Simulation, time_range;
+        run_name="FLOWUnsteady_default",
+        path="", overwrite_path=true,
+        verbose=true,
+    )
+
+    #--- unpack simulation ---#
+
+    vehicle = simulation.vehicle
+    freestream = simulation.freestream
+    controller = simulation.controller
+    initializer = simulation.initializer
+    preprocessor = simulation.preprocessor
+    integrator = simulation.integrator
+    postprocessor = simulation.postprocessor
+    i_step = simulation.i_step[]
+
+    #--- prepare save path ---#
+
+    if splitdir(path)[2] != ""
+        isdir(path) && overwrite_path && rm(path; force=true, recursive=true)
+        !isdir(path) && mkdir(path)
+    end
+
+    #--- initialize ---#
+
+    initializer(simulation, time_range[1], i_step)
+
+    verbose && (time_beginning = initialize_verbose(simulation, time_range, run_name, path))
+
+    #--- loop over time ---#
+
+    current_time = time_range[1]
+
+    for next_time in time_range[2:end]
+
+        #--- preprocessing ---#
+
+        preprocessor(simulation, current_time, run_name, path)
+
+        #--- time integration scheme and postprocessing after solving, before advancing the timestep ---#
+
+        integrate_time!(vehicle, freestream, controller, postprocessor, current_time, next_time, i_step, run_name, path, integrator)
+
+        #--- increment time ---#
+
+        current_time = next_time
+        i_step += 1
+
+        #--- verbose output ---#
+
+        verbose && verbose_print(i_step, current_time)
+
+    end
+
+    # postprocessing after the last timestep
+    postprocessor(vehicle, controller, time_range[end], i_step, run_name, path)
+
+    #--- update simulation ---#
+
+    simulation.i_step[] = i_step
+
+    verbose && (finalize_verbose(run_name, path, time_beginning))
+
+    return nothing
 end
 
 function initialize_verbose(simulation::Simulation, time_range, run_name, path)
@@ -137,66 +182,6 @@ function finalize_verbose(run_name, path, time_beginning)
     println(line3)
     println(line1)
 
-end
-
-function simulate!(simulation::Simulation, time_range;
-        run_name="FLOWUnsteady_default",
-        path="",
-        verbose=true,
-    )
-
-    #--- unpack simulation ---#
-
-    vehicle = simulation.vehicle
-    freestream = simulation.freestream
-    controller = simulation.controller
-    initializer = simulation.initializer
-    preprocessor = simulation.preprocessor
-    integrator = simulation.integrator
-    postprocessor = simulation.postprocessor
-    i_step = simulation.i_step[]
-
-    #--- initialize ---#
-
-    state = initializer(vehicle, controller, postprocessor, time_range[1], i_step)
-
-    verbose && (time_beginning = initialize_verbose(simulation, time_range, run_name, path))
-
-    #--- loop over time ---#
-
-    current_time = time_range[1]
-
-    for next_time in time_range[2:end]
-
-        #--- increment step ---#
-
-        i_step += 1
-
-        #--- preprocessing ---#
-
-        preprocessor(simulation, current_time)
-
-        #--- time integration scheme and postprocessing after solving, before advancing the timestep ---#
-
-        integrate_time!(vehicle, freestream, controller, postprocessor, current_time, next_time, i_step, integrator)
-
-        #--- increment time ---#
-
-        current_time = next_time
-
-        #--- verbose output ---#
-
-        verbose && verbose_print(i_step, current_time)
-
-    end
-
-    #--- update simulation ---#
-
-    simulation.i_step[] = i_step
-
-    verbose && (finalize_verbose(run_name, path, time_beginning))
-
-    return nothing
 end
 
 function visualize(sim::Simulation, i::Union{Nothing,Int}=nothing; name_prefix="default", path="")

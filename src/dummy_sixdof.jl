@@ -198,6 +198,41 @@ function DynamicState(TF=Float64;
     return DynamicState{TF}(position, velocity, orientation, angular_velocity, mass, inertia)
 end
 
+function Base.isnan(state::DynamicState)
+    for v in state.position
+        if isnan(v)
+            return true
+        end
+    end
+    for v in state.velocity
+        if isnan(v)
+            return true
+        end
+    end
+    for v in state.orientation.pure
+        if isnan(v)
+            return true
+        end
+    end
+    if isnan(state.orientation.real)
+        return true
+    end
+    for v in state.angular_velocity
+        if isnan(v)
+            flag = true
+        end
+    end
+    if isnan(state.mass)
+        return true
+    end
+    for v in state.inertia
+        if isnan(v)
+            return true
+        end
+    end
+    return false
+end
+
 function -(state1::DynamicState{TF1}, state2::DynamicState{TF2}) where {TF1,TF2}
     TF = promote_type(TF1,TF2)
     difference = DynamicState{TF}(
@@ -288,5 +323,27 @@ function state_derivative(state::DynamicState{TF1}, force::AbstractVector{TF2}, 
     mass_dot = zero(TF)
 
     return DynamicStateDerivative(TF; velocity_dot, angular_velocity_dot, mass_dot, inertia_dot)
+end
+
+function Base.isnan(state::DynamicStateDerivative)
+    for v in state.velocity_dot
+        if isnan(v)
+            return true
+        end
+    end
+    for v in state.angular_velocity_dot
+        if isnan(v)
+            flag = true
+        end
+    end
+    if isnan(state.mass_dot)
+        return true
+    end
+    for v in state.inertia_dot
+        if isnan(v)
+            return true
+        end
+    end
+    return false
 end
 
