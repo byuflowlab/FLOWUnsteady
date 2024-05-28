@@ -56,6 +56,14 @@ struct RigidBodyState{TF,TM} <: AbstractState
     substates::Vector{RigidBodyState{TF,TM}}
 end
 
+function Base.zero(::Type{RigidBodyState{TF,TM}}, name="", map=Int[]) where {TF,TM}
+    @assert typeof(map) <: TM "requested map doesn't match requested map type"
+    state = zero(DynamicState{TF})
+    state_derivative = zero(DynamicStateDerivative{TF})
+    substates = Vector{RigidBodyState{TF,TM}}(undef,0)
+    return RigidBodyState{TF,TM}(name, map, state, state_derivative, substates)
+end
+
 function Base.isnan(state::Array{<:RigidBodyState,0})
     return isnan(state[])
 end
@@ -802,67 +810,106 @@ function visualize(state::RigidBodyState, i=nothing, t=nothing; name_prefix="def
     !isnothing(t) && WriteVTK.vtk_save(pvd)
 end
 
-function initialize_history(state::Array{<:RigidBodyState,0}, save_steps)
-    return initialize_history(state[], save_steps)
+function initialize_history(state::Array{<:RigidBodyState,0}, save_steps, omit_fields)
+    return initialize_history(state[], save_steps, omit_fields)
 end
 
-function initialize_history(state::RigidBodyState, save_steps)
-    n_states = count_states(state)
+function initialize_history(state::RigidBodyState{<:Any,TM}, save_steps, omit_fields) where TM
+    if !(:state in omit_fields)
+        # tracking the entire state history is as easy as saving the whole state
+        state_history = zeros(RigidBodyState{Float64,TM}, length(save_steps))
 
-    # tracking origin, orientation, velocity, and angular velocity for all states
-    origin_history = zeros(3, n_states, length(save_steps))
-    velocity_history = zeros(3, n_states, length(save_steps))
-    angular_velocity_history = zeros(3, n_states, length(save_steps))
+        # assemble output
+        history = (
+            state = state_history,
+        )
 
-    # tracking mass, inertia, velocity_dot, and angular_velocity_dot for the top level state
-    mass_history = zeros(length(save_steps))
-    inertia_history = zeros(9, length(save_steps))
-    velocity_dot_history = zeros(3, length(save_steps))
-    angular_velocity_dot_history = zeros(3, length(save_steps))
-
-    # assemble output
-    history = (
-        origin = origin_history,
-        velocity = velocity_history,
-        angular_velocity = angular_velocity_history,
-        mass = mass_history,
-        inertia = inertia_history,
-        top_velocity_dot = velocity_dot_history,
-        top_angular_velocity_dot = angular_velocity_dot_history
-    )
-
-    fields = (:origin, :velocity, :angular_velocity, :mass, :inertia, :top_velocity_dot, :top_angular_velocity_dot)
+        fields = (:state,)
+    else
+        history = NamedTuple()
+        fields = ()
+    end
 
     return history, fields
 end
 
-function update_history!(history, state::Array{<:RigidBodyState,0}, i_step)
-    # save values for all substates
-    update_substate_history!(history, state, 1, i_step, (1,))
-
-    # save values for top state
-    history[:mass][i_step] = state[].state.mass
-    history[:inertia][:,i_step] .= vec(state[].state.inertia)
-    history[:top_velocity_dot][:,i_step] .= state[].state_derivative.velocity_dot
-    history[:top_angular_velocity_dot][:,i_step] .= state[].state_derivative.angular_velocity_dot
-
+function convert_history(::Type{TF}, v::TF0) where {TF<:Number,TF0<:Number}
+    if TF0 <: ForwardDiff.Dual
+        return TF(ForwardDiff.value(v))
+    else
+        return TF(v)
+    end
 end
 
-function update_substate_history!(history, state::Array{<:RigidBodyState,0}, i_substate, i_step, state_index)
+function convert_history(::Type{SVector{3,TF}}, v::SVector{3,TF0}) where {TF,TF0}
+    if TF0 <: ForwardDiff.Dual
+        return SVector{3,TF}(ForwardDiff.value(v[1]), ForwardDiff.value(v[2]), ForwardDiff.value(v[3]))
+    else
+        return SVector{3,TF}(v)
+    end
+end
 
-    # extract substate
-    substate = get_state(state, state_index)
+function convert_history(::Type{SMatrix{3,3,TF,9}}, m::SMatrix{3,3,TF0,9}) where {TF,TF0}
+    if TF0 <: ForwardDiff.Dual
+        return SMatrix{3,3,TF,9}(ForwardDiff.value(m[i]) for i in 1:9)
+    else
+        return SMatrix{3,3,TF,9}(m)
+    end
+end
 
-    # update history
-    history[:origin][:, i_substate, i_step] .= transform_2_top(substate.state.position, state, state_index[1:end-1])
-    q = quaternion_frame_2_top(state, state_index[1:end-1]) # from parent frame
-    history[:velocity][:, i_substate, i_step] .= rotate_frame(substate.state.velocity, q)
-    history[:angular_velocity][:, i_substate, i_step] .= rotate_frame(substate.state.angular_velocity, q)
+function convert_history(::Type{Quaternion{TF}}, q::Quaternion{TF0}) where {TF,TF0}
 
-    # recurse over substates
-    for i in eachindex(substate.substates)
-        new_state_index = (state_index..., i)
-        i_substate = update_substate_history!(history, state, i_substate+1, i_step, new_state_index)
+    # real part
+    real = convert_history(TF, q.real)
+
+    # pure part
+    pure = convert_history(SVector{3,TF}, q.pure)
+
+    # assemble quaternion
+    return Quaternion(real, pure)
+end
+
+function convert_history(::Type{DynamicState{TF}}, state::DynamicState{TF0}) where {TF,TF0}
+    position = convert_history(SVector{3,TF}, state.position)
+    velocity = convert_history(SVector{3,TF}, state.velocity)
+    orientation = convert_history(Quaternion{TF}, state.orientation)
+    angular_velocity = convert_history(SVector{3,TF}, state.angular_velocity)
+    mass = convert_history(TF, state.mass)
+    inertia = convert_history(SMatrix{3,3,TF,9}, state.inertia)
+    return DynamicState{TF}(position, velocity, orientation, angular_velocity, mass, inertia)
+end
+
+function convert_history(::Type{DynamicStateDerivative{TF}}, state::DynamicStateDerivative{TF0}) where {TF,TF0}
+    velocity_dot = convert_history(SVector{3,TF}, state.velocity_dot)
+    angular_velocity_dot = convert_history(SVector{3,TF}, state.angular_velocity_dot)
+    mass_dot = convert_history(TF, state.mass_dot)
+    inertia_dot = convert_history(SMatrix{3,3,TF,9}, state.inertia_dot)
+    return DynamicStateDerivative{TF}(velocity_dot, angular_velocity_dot, mass_dot, inertia_dot)
+end
+
+function convert_history(::Type{RigidBodyState{TF,TM}}, state::RigidBodyState) where {TF,TM}
+    name = state.name
+    map = TM(state.map)
+    dynamic_state = convert_history(DynamicState{TF}, state.state)
+    dynamic_state_derivative = convert_history(DynamicStateDerivative{TF}, state.state_derivative)
+    substates = Vector{RigidBodyState{TF,TM}}(undef,length(state.substates))
+    for i_substate in eachindex(state.substates)
+        substates[i_substate] = convert_history(RigidBodyState{TF,TM},state.substates[i_substate])
+    end
+    return RigidBodyState(name, map, dynamic_state, dynamic_state_derivative, substates)
+end
+
+function update_history!(history, state::Array{<:RigidBodyState,0}, i_step)
+    update_history!(history, state[], i_step)
+end
+
+function update_history!(history, state::RigidBodyState{TF,TM}, i_step) where {TF,TM}
+    if :state in keys(history)
+        # convert type if necessary
+        state_copy = convert_history(RigidBodyState{Float64,TM}, state)
+
+        # update history vector
+        history[:state][i_step] = state_copy
     end
 end
 

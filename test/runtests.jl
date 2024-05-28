@@ -1,6 +1,7 @@
 using Pkg
 this_dir = @__DIR__
-Pkg.activate(normpath(joinpath(this_dir,"..")))
+FLOWUnsteady_dir = normpath(joinpath(this_dir,".."))
+Pkg.activate(FLOWUnsteady_dir)
 
 using FLOWUnsteady
 import FLOWUnsteady.vlm as vlm
@@ -329,29 +330,36 @@ function build_vlm(;
         end
     end
 
+    # set freestream
+    system.freestream[] = eltype(system.freestream)(0.0,0.0,0.0,SVector{3,eltype(eltype(system.freestream))}(0.0,0,0),1.0)
+
+    # set reference
+    system.reference[] = eltype(system.reference)(1.0,1.0,1.0,SVector{3,eltype(eltype(system.reference))}(0.0,0,0),1.0)
+
     model = VortexLatticeModel(system; Quasisteady, max_timesteps, shed_starting, model_kwargs...)
     vehicle = RigidBodyVehicle(model; dynamic, orientation, velocity, model_coordinates=Aerodynamics(), vehicle_coordinates=FlightDynamics())
 
     return vehicle
 end
 
-function create_sim(alpha=5.0*pi/180;
+function create_sim(time_range=range(0,stop=1.0,length=101), alpha=5.0*pi/180;
         dynamic=false,
         orientation=Quaternion(SVector{3}(1.0,0,0),0),
         velocity=SVector{3,Float64}(0.0,0,0),
-        time_range=range(0,stop=1.0,length=101),
         freestream=SimpleFreestream(10.0*SVector{3}(-cos(alpha),0,-sin(alpha))),
         controller=PrescribedKinematics(),
         integrator=ForwardEuler(),
         preprocessor=DefaultPreprocessor(),
-        model_kwargs...
+        save_steps = 0:length(time_range)-1,
+        omit_fields=(),
+        model_kwargs=(),
+        omit_fields=(),
     )
 
-    save_steps = 0:length(time_range)-1
 
     # create vehicle
     vehicle = build_vlm(; dynamic, orientation, velocity, max_timesteps=length(time_range), model_kwargs...)
-    history = History(vehicle, controller, save_steps)
+    history = History(vehicle, controller, save_steps, omit_fields)
     paraview = ParaviewOutput(save_steps)
     postprocessor = MultiPostprocessor((history, paraview))
 
@@ -359,12 +367,28 @@ function create_sim(alpha=5.0*pi/180;
     sim = Simulation(vehicle, time_range;
             freestream, controller, preprocessor, integrator, postprocessor
         )
-    return sim, time_range
+    return sim
 end
 
-model_kwargs = ()#(threshold_unsteady_gamma_max=0.0,)
-sim, time_range = create_sim(;
-        time_range=range(0,stop=1.0,length=401), model_kwargs...
+model_kwargs = (threshold_unsteady_gamma_max=0.0, overlap_trailing=1.0)
+omit_fields=()
+time_range=range(0,stop=0.5,length=201)
+alpha = 5*pi/180
+sim = create_sim(time_range, alpha;
+        omit_fields,
+        model_kwargs, omit_fields
     )
 
-simulate!(sim, time_range; run_name="test_20240524_2_unsteady_pedrizzetti", path="test_20240524_2_unsteady_pedrizzetti")
+run_name = "20240525_3"
+path = "20240525_2_timestep_0_000625"
+simulate!(sim, time_range; run_name, path)
+
+FLOWUnsteady.BSON.@load joinpath(FLOWUnsteady_dir,path,run_name*"_history.bson") history
+
+using PythonPlot
+
+#cla()
+plot(history.time_range[3:end], history.history[:vehicle_force][3,3:end])
+ylabel("downward force, Newtons")
+xlabel("time, seconds")
+legend(["dt=0.0025, no unsteady particles, overlap=0.6", "dt=0.0025, no unsteady particles, overlap=1.0"])

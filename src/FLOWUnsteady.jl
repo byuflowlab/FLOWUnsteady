@@ -21,6 +21,7 @@ import BSON
 import Dates
 import FastMultipole as fmm
 import FLOWVPM as vpm
+import ForwardDiff
 import VortexLattice as vlm
 import VSPGeom as vsp
 using WriteVTK

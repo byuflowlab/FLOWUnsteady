@@ -19,7 +19,7 @@ Used to initialize a `History` object.
 * `control_history`: the preallocated control history
 
 """
-function initialize_history(controller::AbstractController, save_steps)
+function initialize_history(controller::AbstractController, save_steps, omit_fields)
     @error "initialize_history not defined for $(typeof(controller))"
 end
 
@@ -51,7 +51,7 @@ function control!(vehicle, ::PrescribedKinematics, current_time, next_time)
     return nothing
 end
 
-function initialize_history(controller::PrescribedKinematics, save_steps)
+function initialize_history(controller::PrescribedKinematics, save_steps, omit_fields)
     return (), () # no control performed for PrescribedKinematics
 end
 

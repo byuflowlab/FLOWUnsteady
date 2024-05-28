@@ -75,7 +75,7 @@ function solve!(model::AbstractModel, dt, i_step)
     @error "solve! not yet implemented for models of type $(typeof(model))"
 end
 
-function initialize_history(model::AbstractModel, save_steps)
+function initialize_history(model::AbstractModel, save_steps, omit_fields)
     @error "initialize_history not defined for $(typeof(model))"
 end
 
@@ -253,7 +253,7 @@ function solve!(model::AbstractBoundaryElementModel{<:Any,false}, dt, i_step)
     if isnan(model)
         throw("found nan: before prepare_wake_on_all")
     end
-    prepare_wake_on_all!(model, dt)
+    prepare_wake_on_all!(model, dt, i_step)
     if isnan(model)
         throw("found nan: after prepare_wake_on_all")
     end
@@ -286,12 +286,12 @@ function solve!(model::AbstractBoundaryElementModel{<:Any,false}, dt, i_step)
         throw("found nan: after surface_on_all")
     end
 
-    #--- shed wake for this timestep ---#
+    # #--- shed wake for this timestep ---# THIS IS NOW PERFORMED IN prepare_wake_on_all!
 
-    shed_wake!(model, dt, i_step)
-    if isnan(model)
-        throw("found nan: after shed_wake")
-    end
+    # shed_wake!(model, dt, i_step)
+    # if isnan(model)
+    #     throw("found nan: after shed_wake")
+    # end
 
     #--- compute forces ---#
 
@@ -406,7 +406,7 @@ Model defining vortex lattice surfaces.
 * `vlm_system::VortexLattice.System`: the vortex lattice system
 * `surface_forces::Vector{SVector{3,Float64}}`: the `i` th element is the force experienced by the `i` th surface in `vlm_system`
 * `surface_moments::Vector{SVector{3,Float64}}`: the `i` th element is the moment experienced by the `i` th surface in `vlm_system`
-* `new_particle_probes::FastMultipole.ProbeSystem`: probes placed at the new particle shed locations to inform their velocity and velocity gradient
+* `trailing_edge_probes::FastMultipole.ProbeSystem`: probes placed at the trailing edge and convected with the velocity field each timestep; used to determine new wake particle locations
 * `wake <: AbstractWake`: model used to describe the wake
 * `toggle_wake::Vector{Bool}`: determines whether the corresponding surfaces in `vlm_system` should shed wakes
 * `eta_wake::Float64`: when using an unsteady wake, new wake filaments are shed with a length of `V * dt * deta_wake[i_surface]`
@@ -423,8 +423,8 @@ struct VortexLatticeModel{TF,Quasisteady,TW<:AbstractWake{TF,Quasisteady},FMM} <
     surface_forces::Vector{SVector{3,TF}}
     surface_moments::Vector{SVector{3,TF}}
 
-    # where and how to shed new particles
-    new_particle_probes::fmm.ProbeSystem{TF, Nothing, Nothing, Vector{SVector{3,TF}}, Vector{SMatrix{3,3,TF,9}}}
+    # trailing edge points convected with the velocity field to determine particle shedding locations
+    trailing_edge_probes::fmm.ProbeSystem{TF, Nothing, Nothing, Vector{SVector{3,TF}}, Vector{SMatrix{3,3,TF,9}}}
 
     # wake
     wake::TW
@@ -478,13 +478,13 @@ function VortexLatticeModel(system::vlm.System{TF};
 
     # assertions
     for trailing_vortex in system.trailing_vortices
-        @assert trailing_vortex == Quasisteady "semi-infinite vortex horseshoes " * (quasisteady ? "required" : "not supported") * " for `VortexLatticeModel{<:Any,<:Any,$(quasisteady)}`; set system.trailing_vortices .= $(quasisteady)"
+        @assert trailing_vortex == Quasisteady "semi-infinite vortex horseshoes " * (Quasisteady ? "required" : "not supported") * " for `VortexLatticeModel{<:Any,<:Any,$(Quasisteady)}`; set system.trailing_vortices .= $(Quasisteady)"
     end
 
     # update fmm_probes
     surfaces = system.surfaces
     fmm_velocity_probes = system.fmm_velocity_probes
-    n_control_points, n_surface_filaments, n_trailing_edge_points = count_probes(surfaces)
+    n_control_points, n_surface_filaments, n_trailing_edge_corners = count_probes(surfaces)
     vlm.update_n_probes!(fmm_velocity_probes, n_control_points + n_surface_filaments)
     vlm.update_probes!(fmm_velocity_probes, surfaces, 0) # control points and filament centers
 
@@ -495,19 +495,17 @@ function VortexLatticeModel(system::vlm.System{TF};
     # wake
     if isnothing(wake)
 
-        # new particle probes
-        n_new_particles = 0
-        for surface in system.surfaces
-            ns = size(surface,2)
-            n_new_particles += ns * p_per_step_unsteady # unsteady loading
-            n_new_particles += (ns + 1) * p_per_step_trailing # trailing vortex
-        end
-        new_particle_probes = fmm.ProbeSystem(n_new_particles; velocity=true, velocity_gradient=true)
-        vlm.update_n_probes!(new_particle_probes, n_trailing_edge_points)
-        update_probes_te!(new_particle_probes, surfaces, 0) # trailing edge corners and midpoints
+        # trailing edge probes
+        trailing_edge_probes = fmm.ProbeSystem(n_trailing_edge_corners; velocity=true, velocity_gradient=true)
+        update_probes_te!(trailing_edge_probes, surfaces, 0)
 
         # max number of particles
-        max_particles = n_new_particles * max_timesteps
+        n_trailing_edge_midpoints = 0
+        for surface in surfaces
+            n_trailing_edge_midpoints += size(surface,2)
+        end
+
+        max_particles = (n_trailing_edge_corners + n_trailing_edge_midpoints) * max_timesteps
         particle_field = vpm.ParticleField(max_particles, TF; vpm_options...)
 
         # build vortex particle wake
@@ -531,7 +529,7 @@ function VortexLatticeModel(system::vlm.System{TF};
     system.reference[] = eltype(system.reference)(1.0, 1.0, 1.0, center_of_mass, 1.0)
 
     # construct model
-    model = VortexLatticeModel{TF,Quasisteady,typeof(wake),FMM}(system, surface_forces, surface_moments, new_particle_probes, wake, toggle_wake, eta_wake, expansion_order, leaf_size, multipole_threshold)
+    model = VortexLatticeModel{TF,Quasisteady,typeof(wake),FMM}(system, surface_forces, surface_moments, trailing_edge_probes, wake, toggle_wake, eta_wake, expansion_order, leaf_size, multipole_threshold)
 
     # zero fields
     reset && reset!(model)
@@ -564,8 +562,8 @@ function Base.isnan(model::VortexLatticeModel)
         throw("nan in wake")
         return true
     end
-    if isnan(model.new_particle_probes)
-        throw("nan in new_particle_probes")
+    if isnan(model.trailing_edge_probes)
+        throw("nan in trailing_edge_probes")
     end
 
     return false
@@ -684,8 +682,8 @@ function reset!(model::VortexLatticeModel)
         model.surface_moments[i] = zero(eltype(model.surface_moments))
     end
 
-    # reset new particle probes
-    fmm.reset!(model.new_particle_probes)
+    # reset trailing edge corner probes
+    fmm.reset!(model.trailing_edge_probes)
 
     # reset wake
     reset!(model.wake)
@@ -694,9 +692,9 @@ end
 function (initializer::DefaultInitializer)(model::VortexLatticeModel, time, i_step)
 
     # preallocate fmm velocity probes
-    n_control_points, n_surface_filaments, n_trailing_edge_points = count_probes(model.vlm_system.surfaces)
+    n_control_points, n_surface_filaments, n_trailing_edge_corners = count_probes(model.vlm_system.surfaces)
     vlm.update_n_probes!(model.vlm_system.fmm_velocity_probes, n_control_points + n_surface_filaments)
-    vlm.update_n_probes!(model.new_particle_probes, n_trailing_edge_points)
+    vlm.update_n_probes!(model.trailing_edge_probes, n_trailing_edge_corners)
 
     # initialize wake
     initializer(model.wake, time, i_step)
@@ -752,13 +750,13 @@ end
 
     #--- count probes at trailing edge corners (to inform the wake shedding locations for next timestep) ---#
 
-    n_trailing_edge_points = 0
+    n_trailing_edge_corners = 0
     for surface in surfaces
         ns = size(surface,2)
-        n_trailing_edge_points += 2*ns+1
+        n_trailing_edge_corners += ns+1 # just corners, not midpoints
     end
 
-    return n_control_points, n_surface_filaments, n_trailing_edge_points
+    return n_control_points, n_surface_filaments, n_trailing_edge_corners
 end
 
 #--- solve! subfunctions ---#
@@ -771,18 +769,22 @@ function prepare_wake_on_all!(wake::VortexParticleModel, model::VortexLatticeMod
 
 end
 
-function prepare_wake_on_all!(model::VortexLatticeModel, dt; reset=true)
+function prepare_wake_on_all!(model::VortexLatticeModel, dt, i_step; reset=true)
 
     #--- unpack model ---#
 
     fmm_velocity_probes = model.vlm_system.fmm_velocity_probes
-    new_particle_probes = model.new_particle_probes
+    trailing_edge_probes = model.trailing_edge_probes
     surfaces = model.vlm_system.surfaces
+
+    #--- place new wake particles ---#
+
+    shed_wake!(model, dt, i_step)
 
     #--- update probes ---#
 
     vlm.update_probes!(fmm_velocity_probes, surfaces, 0) # control points and filament centers
-    update_probes_te!(new_particle_probes, surfaces, 0) # trailing edge corners and midpoints
+    update_probes_te!(trailing_edge_probes, surfaces, 0) # trailing edge corners
 
     #--- prepare wake ---#
 
@@ -794,9 +796,11 @@ function wake_on_all!(model::VortexLatticeModel{<:Any,<:Any,<:VortexParticleMode
 
     #--- all elements ---#
 
-    all = (model.vlm_system.fmm_velocity_probes, model.new_particle_probes, model.wake.particle_field)
+    all = (model.vlm_system.fmm_velocity_probes, model.trailing_edge_probes, model.wake.particle_field)
 
     #--- solve N-body problem ---#
+
+    scalar_potential, vector_potential, velocity, velocity_gradient = requires_potential(all)
 
     if FMM
 
@@ -806,7 +810,6 @@ function wake_on_all!(model::VortexLatticeModel{<:Any,<:Any,<:VortexParticleMode
                        multipole_threshold=model.wake.particle_field.fmm.theta
                       )
 
-        scalar_potential, vector_potential, velocity, velocity_gradient = requires_potential(all)
         fmm.fmm!(all, model.wake.particle_field; scalar_potential, vector_potential, velocity, velocity_gradient, fmm_options...)
 
     else
@@ -815,6 +818,55 @@ function wake_on_all!(model::VortexLatticeModel{<:Any,<:Any,<:VortexParticleMode
 
     end
 
+    #--- add influence of trailing edge vortex ---#
+
+    # note that this is a temporary fix; I'll want to add actual vortex filaments eventually
+    # this function assumes that model.vlm_system.Γ contains the last timesteps circulation strength
+    trailing_edge_vortex_influence!(all, model.vlm_system.surfaces, model.vlm_system.Γ, model.toggle_wake)
+
+end
+
+function trailing_edge_vortex_influence!(all, surfaces, Γ::Vector{TF}, toggle_wake) where TF
+    for target_system in all
+        for i_target in 1:fmm.get_n_bodies(target_system)
+            x_target = target_system[i_target, fmm.POSITION]
+            vx0, vy0, vz0 = target_system[i_target, fmm.VELOCITY]
+            v0 = SVector{3,TF}(vx0, vy0, vz0)
+            vg0_11, vg0_21, vg0_31, vg0_12, vg0_22, vg0_32, vg0_13, vg0_23, vg0_33 = target_system[i_target, fmm.VELOCITY_GRADIENT]
+            vg0 = SMatrix{3,3,TF,9}(vg0_11, vg0_21, vg0_31, vg0_12, vg0_22, vg0_32, vg0_13, vg0_23, vg0_33)
+            i_Γ = 0
+            for (surface, toggle) in zip(surfaces, toggle_wake)
+                nc, ns = size(surface)
+                if toggle
+                    for i_s in 1:ns
+                        # strength of the filament
+                        i_Γ += nc
+                        Γ_filament = Γ[i_Γ]
+
+                        # endpoints
+                        panel = surface[nc,i_s]
+                        x1 = panel.rbl
+                        x2 = panel.rbr
+
+                        # influence
+                        finite_core = true
+                        core_size = 1e-2
+
+                        r1 = x_target - x1
+                        r2 = x_target - x2
+                        v0 += vlm.bound_induced_velocity_fmm(r1, r2, finite_core, core_size)
+                        vg0 += vlm.bound_velocity_gradient(r1, r2, finite_core, core_size)
+                    end
+                else
+                    i_Γ += nc*ns
+                end
+            end
+
+            # update target system
+            target_system[i_target, fmm.VELOCITY] = v0
+            target_system[i_target, fmm.VELOCITY_GRADIENT] = vg0
+        end
+    end
 end
 
 function solve_boundary!(model::VortexLatticeModel, dt)
@@ -858,7 +910,7 @@ function solve_boundary!(model::VortexLatticeModel, dt)
             # wake_shedding_locations = wake_shedding_locations, # stop using the transition panels
             surface_id = surface_id, # in vanilla VortexLattice, determines when to use the
                                      # finite core model (we always use the finite core model
-                                     # in FLOWUnsteady so this parameter is irrelevant)
+                                     # in FLOWUnsteady so this parameter shouldn't have any duplicate indices)
             trailing_vortices = trailing_vortices, # ::Vector{Bool} tells which surfaces should use semiinfinite horseshoes
             xhat = xhat                            # only used if semi-infinite horseshoes are used
         )
@@ -911,8 +963,7 @@ function prepare_surface_on_all!(model::VortexLatticeModel)
     vlm.update_fmm_panels!(fmm_panels, surfaces, wake_shedding_locations, Γ, transition_panels=false)
 
 end
-const COUNTER = Array{Int,0}(undef)
-COUNTER[] = 0
+
 function surface_on_all!(model::VortexLatticeModel{<:Any,<:Any,<:VortexParticleModel,FMM}) where FMM
 
     #--- all elements ---#
@@ -950,7 +1001,7 @@ function shed_wake!(model::VortexLatticeModel{TF,<:Any,<:VortexParticleModel,<:A
     #--- unpack model ---#
 
     toggle_wake = model.toggle_wake
-    new_particle_probes = model.new_particle_probes
+    trailing_edge_probes = model.trailing_edge_probes
     shed_starting = model.wake.shed_starting
     threshold_trailing_gamma_max = model.wake.threshold_trailing_gamma_max
     threshold_trailing_gamma_min = model.wake.threshold_trailing_gamma_min
@@ -961,52 +1012,60 @@ function shed_wake!(model::VortexLatticeModel{TF,<:Any,<:VortexParticleModel,<:A
     p_per_step_trailing = model.wake.p_per_step_trailing
     p_per_step_unsteady = model.wake.p_per_step_unsteady
     surfaces = model.vlm_system.surfaces
-    wake_shedding_locations = model.vlm_system.wake_shedding_locations
     Γ = model.vlm_system.Γ
     dΓdt = model.vlm_system.dΓdt
     wake = model.wake
 
-    trailing_args = (dt, overlap_trailing, threshold_trailing_gamma_max, threshold_trailing_gamma_min)
+    trailing_args = (overlap_trailing, threshold_trailing_gamma_max, threshold_trailing_gamma_min)
     unsteady_args = (overlap_unsteady, threshold_unsteady_gamma_max, threshold_unsteady_gamma_min)
 
     #--- get first probe index ---#
 
-    n_control_points, n_surface_filaments, n_trailing_edge_points = count_probes(surfaces)
+    n_control_points, n_surface_filaments, n_trailing_edge_corners = count_probes(surfaces)
 
     #--- shed particles ---#
 
-    if i_step > 1 || shed_starting
-        i_last_probe = 0
-        iΓ = 0
-        for (surface, toggle) in zip(surfaces, toggle_wake)
-            if toggle
-                nc, ns = size(surface)
-                Γ_last = zero(TF)
+    i_last_probe = 0
+    iΓ = 0
+    for (surface, toggle) in zip(surfaces, toggle_wake)
+        nc, ns = size(surface)
+        if toggle
+            Γ_last = zero(TF)
 
-                for i_te in 1:ns
-                    # trailing edge panel
-                    panel = surface[nc,i_te]
+            for i_te in 1:ns
+                # trailing edge panel
+                panel = surface[nc,i_te]
 
-                    # circulation magnitude of this wake panel
-                    iΓ += nc
-                    Γ_magnitude = Γ[iΓ]
-                    dΓdt_magnitude = dΓdt[iΓ]
+                # circulation magnitude of this wake panel
+                iΓ += nc
+                Γ_magnitude = Γ[iΓ]
+                dΓdt_magnitude = dΓdt[iΓ]
 
-                    # left trailing vortex
-                    i_last_probe = add_trailing_particle!(wake.particle_field, new_particle_probes, i_last_probe, Γ_magnitude - Γ_last, trailing_args...)
+                # left trailing vortex
+                i_last_probe += 1
+                x1 = trailing_edge_probes.position[i_last_probe]
+                x2 = panel.rbl
+                add_line!(wake.particle_field, x1, x2, p_per_step_trailing, Γ_magnitude - Γ_last, trailing_args...)
 
-                    # unsteady loading
-                    i_last_probe = add_unsteady_particle!(wake.particle_field, new_particle_probes, i_last_probe, panel.rtl, panel.rtr, dΓdt_magnitude * dt, unsteady_args...)
-
-                    # recurse
-                    Γ_last = Γ_magnitude
+                # unsteady loading
+                if i_step > 1 || shed_starting
+                    x2 = x1
+                    x1 = trailing_edge_probes.position[i_last_probe+1]
+                    add_line!(wake.particle_field, x1, x2, p_per_step_unsteady, dΓdt_magnitude * dt, unsteady_args...)
                 end
 
-                # rightmost trailing vortex
-                panel = surface[nc,end]
-                i_last_probe = add_trailing_particle!(wake.particle_field, new_particle_probes, i_last_probe, Γ_last, trailing_args...)
-
+                # recurse
+                Γ_last = Γ_magnitude
             end
+
+            # rightmost trailing vortex
+            panel = surface[nc,end]
+            x1 = panel.rbr
+            i_last_probe += 1
+            x2 = trailing_edge_probes.position[i_last_probe]
+            add_line!(wake.particle_field, x1, x2, p_per_step_trailing, Γ_last, trailing_args...)
+        else
+            i_last_probe += ns + 1
         end
     end
 end
@@ -1050,19 +1109,59 @@ end
 
 #--- auxiliary functions for VortexLatticeModel ---#
 
+"""
+    add_line!(wake, probes, x1, x2, n_particles, Γ_magnitude, overlap, gamma_max, gamma_min)
+
+Replace the vortex filament defined by `x1` and `x2` with evenly spaced vortex particles with strengths that conserve circulation.
+
+# Arguments
+
+* `wake::FLOWVPM.ParticleField`: particle field to receive the new particles
+* `x1::SVector{3,Float64}`: position of the first point defining the vortex filament
+* `x2::SVector{3,Float64}`: position of the second point defining the vortex filament
+* `n_particles::Int`: number of particles desired
+* `Γ_magnitude::Float64`: circulation strength of the vortex filament
+* `overlap::Float64`: determines the core radius of particles as ''\\sigma = \\frac{\\Delta x}{2n} \\times ''`overlap` where ''\\Delta x'' is the distance partitioned for a single particle; e.g. `overlap=0` means particle radii barely touch
+* `gamma_max::Float64`: if the requested particle has a strength magnitude greater than or equal to `gamma_max`, it is omitted
+* `gamma_min::Float64`: if the requested particle has a strength magnitude less than or equal to `gamma_min`, it is omitted
+
+"""
+@inline function add_line!(wake::vpm.ParticleField, x1, x2, n_particles::Int, Γ_magnitude, overlap, gamma_max, gamma_min)
+
+    # strength and radius
+    Δx = (x2 - x1) / n_particles # distance vector spanned by a single particle
+    Δx_norm = norm(Δx)
+    σ = Δx_norm / 2 * (1 + overlap) # divide by 2 to get a radius rather than a diameter
+    Γ = Γ_magnitude * Δx # strength of a single particle
+
+    # shed particles
+    X = x1 + Δx/2
+    for _ in 1:n_particles
+        if gamma_min < abs(Δx_norm * Γ_magnitude) < gamma_max
+
+            # add particle
+            vpm.add_particle(wake, X, Γ, σ; vol=0, circulation=1, C=0)
+            # vpm.set_U(wake, vpm.get_np(wake), U)
+            # vpm.set_J(wake, vpm.get_np(wake), vec(∇U))
+
+        end
+        X += Δx
+    end
+
+end
+
 # """
-#     add_line!(wake, probes, x1, x2, i_last, n_particles, Γ_magnitude, overlap, gamma_max, gamma_min)
+#     add_unsteady_particle!(wake, probes, i_last, Γ_magnitude, dt, overlap, gamma_max, gamma_min)
 #
-# Replace the vortex filament defined by `x1` and `x2` with vortex particles at coincident with the next `n_particles` probes in `probes`, inheriting the position, velocity, and velocity gradient of the probes.
+# Add a line of vortex particles starting at the `i_last + 1` th probe, inheriting the position and velocity.
 #
 # # Arguments
 #
 # * `wake::FLOWVPM.ParticleField`: particle field to receive the new particles
-# * `probes::FastMultipole.ProbeSystem`: contains colinear probes to be converted into particles
-# * `x1::SVector{3,Float64}`: position of the first point defining the vortex filament
-# * `x2::SVector{3,Float64}`: position of the second point defining the vortex filament
+# * `probes::FastMultipole.ProbeSystem`: contains the probe indicating the first particle location
 # * `i_last::Int`: index of the last probe before the current probes
-# * `n_particles::Int`: number of particles desired
+# * `x1::SVector{3,Float64}`: the left vertex of the vortex filament this particle will represent
+# * `x2::SVector{3,Float64}`: the right vertex of the vortex filament this particle will represent
 # * `Γ_magnitude::Float64`: circulation strength of the vortex filament
 # * `overlap::Float64`: determines the core radius of particles as ''\\sigma = \\frac{\\Delta x}{2n} \\times ''`overlap` where ''\\Delta x'' is the distance partitioned for a single particle; e.g. `overlap=0` means particle radii barely touch
 # * `gamma_max::Float64`: if the requested particle has a strength magnitude greater than or equal to `gamma_max`, it is omitted
@@ -1073,130 +1172,76 @@ end
 # * `i_last::Int`: the index of the last probe used
 #
 # """
-# @inline function add_line!(wake::vpm.ParticleField, probes::fmm.ProbeSystem, x1, x2, i_last::Int, n_particles::Int, Γ_magnitude, overlap, gamma_max, gamma_min)
+# @inline function add_unsteady_particle!(wake::vpm.ParticleField, probes::fmm.ProbeSystem, i_last::Int, x1, x2, Γ_magnitude, overlap, gamma_max, gamma_min)
 #
-#     # strength and radius
-#     Γ = x2 - x1 # strength is aligned with the line
-#     Δx = norm(Γ) / n_particles # distance spanned by a single particle
-#     σ = Δx / 2 * (1 + overlap) # divide by 2 to get a radius rather than a diameter
-#     Γ *= Γ_magnitude / n_particles # divide strength by the number of particles in the line
+#     if gamma_min < Γ_magnitude < gamma_max
 #
-#     # shed particles
-#     i_particle = 0
-#     for _ in 1:n_particles
-#         i_particle += 1
-#         if gamma_min < abs(Γ_magnitude) < gamma_max
-#             X = probes.position[i_particle + i_last]
-#             U = probes.velocity[i_particle + i_last]
-#             # ∇U = probes.velocity_gradient[i_particle + i_last]
+#         # strength and radius
+#         U = probes.velocity[i_last+1]
+#         J = probes.velocity_gradient[i_last+1]
+#         X = probes.position[i_last+1]
+#         Δx = x1 - x2
+#         Γ = Δx * Γ_magnitude
+#         σ = norm(Δx) * (1 + overlap) / 2 # divide by 2 to get a radius
+#         #vol = 4/3*pi*σ^3
 #
-#             # ensure probes are colinear
-#             @assert isapprox(abs(dot(Γ, X-x1)), norm(Γ) * norm(X-x1); atol=1e-10) "probes used for particle shedding are not colinear; x1=$x1, x2=$x2, X=$X, Γ_magnitude=$Γ_magnitude, n_particles=$n_particles, overlap=$overlap, check=$(abs(dot(Γ,X-x1)) - norm(Γ)*norm(X-x1))"
+#         # add particle
+#         vpm.add_particle(wake, X, Γ, σ; vol=0, circulation=1, C=0)
+#         vpm.set_U(wake, vpm.get_np(wake), U)
+#         vpm.set_J(wake, vpm.get_np(wake), vec(J))
 #
-#             # add particle
-#             vpm.add_particle(wake, X, Γ, σ; vol=0, circulation=1, C=0)
-#             vpm.set_U(wake, vpm.get_np(wake), U)
-#             # vpm.set_J(wake, vpm.get_np(wake), vec(∇U))
-#
-#         end
 #     end
 #
-#     # return the index of the last probe used
-#     return i_particle + i_last
+#     # return next probe index
+#     return i_last + 1
+# end
+#
+# """
+#     add_trailing_particle!(wake, probes, i_last, Γ_magnitude, dt, overlap, gamma_max, gamma_min)
+#
+# Add a line of vortex particles starting at the `i_last + 1` th probe, inheriting the position and velocity.
+#
+# # Arguments
+#
+# * `wake::FLOWVPM.ParticleField`: particle field to receive the new particles
+# * `probes::FastMultipole.ProbeSystem`: contains the probe indicating the first particle location
+# * `i_last::Int`: index of the last probe before the current probes
+# * `Γ_magnitude::Float64`: circulation strength of the vortex filament
+# * `dt::Float64`: the timestep of this particle shed
+# * `overlap::Float64`: determines the core radius of particles as ''\\sigma = \\frac{\\Delta x}{2n} \\times ''`overlap` where ''\\Delta x'' is the distance partitioned for a single particle; e.g. `overlap=0` means particle radii barely touch
+# * `gamma_max::Float64`: if the requested particle has a strength magnitude greater than or equal to `gamma_max`, it is omitted
+# * `gamma_min::Float64`: if the requested particle has a strength magnitude less than or equal to `gamma_min`, it is omitted
+#
+# # Output
+#
+# * `i_last::Int`: the index of the last probe used
+#
+# """
+# @inline function add_trailing_particle!(wake::vpm.ParticleField, probes::fmm.ProbeSystem, i_last::Int, Γ_magnitude, dt, overlap, gamma_max, gamma_min)
+#     if gamma_min < abs(Γ_magnitude) < gamma_max
+#
+#         # strength and radius
+#         U = probes.velocity[i_last+1]
+#         J = probes.velocity_gradient[i_last+1]
+#         X = probes.position[i_last+1]
+#         Δx = U*dt
+#         Γ = Δx * Γ_magnitude
+#         σ = norm(Δx) * (1 + overlap)
+#         #vol = 4/3*pi*σ^3
+#
+#         # add particle
+#         vpm.add_particle(wake, X, Γ, σ; vol=0, circulation=1, C=0)
+#         vpm.set_U(wake, vpm.get_np(wake), U)
+#         vpm.set_J(wake, vpm.get_np(wake), vec(J))
+#
+#     end
+#
+#     # return next probe index
+#     return i_last + 1
 # end
 
-"""
-    add_unsteady_particle!(wake, probes, i_last, Γ_magnitude, dt, overlap, gamma_max, gamma_min)
-
-Add a line of vortex particles starting at the `i_last + 1` th probe, inheriting the position and velocity.
-
-# Arguments
-
-* `wake::FLOWVPM.ParticleField`: particle field to receive the new particles
-* `probes::FastMultipole.ProbeSystem`: contains the probe indicating the first particle location
-* `i_last::Int`: index of the last probe before the current probes
-* `x1::SVector{3,Float64}`: the left vertex of the vortex filament this particle will represent
-* `x2::SVector{3,Float64}`: the right vertex of the vortex filament this particle will represent
-* `Γ_magnitude::Float64`: circulation strength of the vortex filament
-* `overlap::Float64`: determines the core radius of particles as ''\\sigma = \\frac{\\Delta x}{2n} \\times ''`overlap` where ''\\Delta x'' is the distance partitioned for a single particle; e.g. `overlap=0` means particle radii barely touch
-* `gamma_max::Float64`: if the requested particle has a strength magnitude greater than or equal to `gamma_max`, it is omitted
-* `gamma_min::Float64`: if the requested particle has a strength magnitude less than or equal to `gamma_min`, it is omitted
-
-# Output
-
-* `i_last::Int`: the index of the last probe used
-
-"""
-@inline function add_unsteady_particle!(wake::vpm.ParticleField, probes::fmm.ProbeSystem, i_last::Int, x1, x2, Γ_magnitude, overlap, gamma_max, gamma_min)
-
-    if gamma_min < Γ_magnitude < gamma_max
-
-        # strength and radius
-        U = probes.velocity[i_last+1]
-        J = probes.velocity_gradient[i_last+1]
-        X = probes.position[i_last+1]
-        Δx = x1 - x2
-        Γ = Δx * Γ_magnitude
-        σ = norm(Δx) * (1 + overlap) / 2 # divide by 2 to get a radius
-        #vol = 4/3*pi*σ^3
-
-        # add particle
-        vpm.add_particle(wake, X, Γ, σ; vol=0, circulation=1, C=0)
-        vpm.set_U(wake, vpm.get_np(wake), U)
-        vpm.set_J(wake, vpm.get_np(wake), vec(J))
-
-    end
-
-    # return next probe index
-    return i_last + 1
-end
-
-"""
-    add_trailing_particle!(wake, probes, i_last, Γ_magnitude, dt, overlap, gamma_max, gamma_min)
-
-Add a line of vortex particles starting at the `i_last + 1` th probe, inheriting the position and velocity.
-
-# Arguments
-
-* `wake::FLOWVPM.ParticleField`: particle field to receive the new particles
-* `probes::FastMultipole.ProbeSystem`: contains the probe indicating the first particle location
-* `i_last::Int`: index of the last probe before the current probes
-* `Γ_magnitude::Float64`: circulation strength of the vortex filament
-* `dt::Float64`: the timestep of this particle shed
-* `overlap::Float64`: determines the core radius of particles as ''\\sigma = \\frac{\\Delta x}{2n} \\times ''`overlap` where ''\\Delta x'' is the distance partitioned for a single particle; e.g. `overlap=0` means particle radii barely touch
-* `gamma_max::Float64`: if the requested particle has a strength magnitude greater than or equal to `gamma_max`, it is omitted
-* `gamma_min::Float64`: if the requested particle has a strength magnitude less than or equal to `gamma_min`, it is omitted
-
-# Output
-
-* `i_last::Int`: the index of the last probe used
-
-"""
-@inline function add_trailing_particle!(wake::vpm.ParticleField, probes::fmm.ProbeSystem, i_last::Int, Γ_magnitude, dt, overlap, gamma_max, gamma_min)
-    if gamma_min < abs(Γ_magnitude) < gamma_max
-
-        # strength and radius
-        U = probes.velocity[i_last+1]
-        J = probes.velocity_gradient[i_last+1]
-        X = probes.position[i_last+1]
-        Δx = U*dt
-        Γ = Δx * Γ_magnitude
-        σ = norm(Δx) * (1 + overlap)
-        #vol = 4/3*pi*σ^3
-
-        # add particle
-        vpm.add_particle(wake, X, Γ, σ; vol=0, circulation=1, C=0)
-        vpm.set_U(wake, vpm.get_np(wake), U)
-        vpm.set_J(wake, vpm.get_np(wake), vec(J))
-
-    end
-
-    # return next probe index
-    return i_last + 1
-end
-
 # """
-#     update_new_particle_probes!(probes::ProbeSystem, surfaces::Vector{Matrix{<:SurfacePanel}}, wake_shedding_locations::Vector{Vector{<:Vector}}, i_start::Int)
+#     update_trailing_edge_probes!(probes::ProbeSystem, surfaces::Vector{Matrix{<:SurfacePanel}}, wake_shedding_locations::Vector{Vector{<:Vector}}, i_start::Int)
 #
 # Places probes at the new shed locations, which are at the trailing edge panel corners and their midpoints.
 #
@@ -1311,9 +1356,9 @@ function update_probes_te!(probes::fmm.ProbeSystem, surfaces, i_last)
             i += 1
             probes.position[i + i_last] = panel.rbl
 
-            # bottom midpoint
-            i += 1
-            probes.position[i + i_last] = (panel.rbl + panel.rbr) / 2
+            ## bottom midpoint
+            #i += 1
+            #probes.position[i + i_last] = (panel.rbl + panel.rbr) / 2
         end
 
         # bottom right-most corner
@@ -1557,8 +1602,8 @@ function apply!(model::VortexLatticeModel, freestream::SimpleFreestream)
     # apply to vlm
     apply!(model.vlm_system, freestream)
 
-    # apply to new_particle_probes
-    apply!(model.new_particle_probes, freestream)
+    # apply to trailing_edge_probes
+    apply!(model.trailing_edge_probes, freestream)
 
     # apply to wake
     apply!(model.wake, freestream)
@@ -1580,7 +1625,14 @@ function transform!(model::VortexLatticeModel, map::AbstractVector{Int}, transla
 end
 
 function transform!(model::VortexLatticeModel, dt, i_step::Int)
+    transform!(model.trailing_edge_probes, dt, i_step)
     transform!(model.wake, dt, i_step)
+end
+
+function transform!(probes::fmm.ProbeSystem, dt, i_step)
+    for (i,v) in enumerate(probes.velocity)
+        probes.position[i] = probes.position[i] + v * dt
+    end
 end
 
 function transform!(wake::VortexParticleModel, dt, i_step::Int)
@@ -1702,41 +1754,106 @@ function visualize(model::VortexLatticeModel, i::Union{Nothing,Int}=nothing, t::
     visualize(model.wake, i, t; name_prefix, path)
 end
 
-function initialize_history(model::VortexLatticeModel, save_steps)
+function initialize_history(model::VortexLatticeModel, save_steps, omit_fields)
     n_steps = length(save_steps)
 
-    # save net force, net moment, force for each surface, moment for each surface
-    force_history = zeros(3, n_steps)
-    moment_history = zeros(3, n_steps)
+    # save net force and net moment on the entire vehicle
+    vehicle_force_history = zeros(3, n_steps)
+    vehicle_moment_history = zeros(3, n_steps)
 
+    # save net force and moment on each surface
     n_surfaces = length(model.vlm_system.surfaces)
-    surface_force_history = zeros(3, n_surfaces, n_steps)
-    surface_moment_history = zeros(3, n_surfaces, n_steps)
+    net_surface_force_history = zeros(3, n_surfaces, n_steps)
+    net_surface_moment_history = zeros(3, n_surfaces, n_steps)
+
+    # save force distributions on each surface
+    surface_force_top_history = Tuple(zeros(3, size(surface)..., n_steps) for surface in model.vlm_system.surfaces)
+    surface_force_vertical_history = Tuple(zeros(3, size(surface,1), size(surface,2)+1, n_steps) for surface in model.vlm_system.surfaces)
+    surface_x_top_history = Tuple(zeros(3, size(surface)..., n_steps) for surface in model.vlm_system.surfaces)
+    surface_x_vertical_history = Tuple(zeros(3, size(surface)..., n_steps) for surface in model.vlm_system.surfaces)
 
     # assemble output
     history = (
-        force = force_history,
-        moment = moment_history,
-        surface_force = surface_force_history,
-        surface_moment = surface_moment_history
+        vehicle_force = vehicle_force_history,
+        vehicle_moment = vehicle_moment_history,
+        net_surface_force = net_surface_force_history,
+        net_surface_moment = net_surface_moment_history,
+        surface_force_top = surface_force_top_history,
+        surface_force_vertical = surface_force_vertical_history,
+        surface_x_top = surface_x_top_history,
+        surface_x_vertical = surface_x_vertical_history,
     )
 
-    fields = (:force, :moment, :surface_force, :surface_moment)
+    fields = (:vehicle_force, :vehicle_moment, :net_surface_force, :net_surface_moment, :surface_force_top, :surface_force_vertical, :surface_x_top, :surface_x_vertical)
 
     return history, fields
 end
 
 function update_history!(history, model::VortexLatticeModel, i_step)
-    # surface forces
+
+    # net surface forces
     n_surfaces = length(model.vlm_system.surfaces)
     for i in 1:n_surfaces
-        history[:surface_force][:,i,i_step] .= model.surface_forces[i]
-        history[:surface_moment][:,i,i_step] .= model.surface_moments[i]
+        history[:net_surface_force][:,i,i_step] .= model.surface_forces[i]
+        history[:net_surface_moment][:,i,i_step] .= model.surface_moments[i]
     end
 
     # top level forces
     for i in 1:3
-        history[:force][i,i_step] = sum(view(history[:surface_force],i,:,i_step))
-        history[:moment][i,i_step] = sum(view(history[:surface_moment],i,:,i_step))
+        history[:vehicle_force][i,i_step] = sum(view(history[:net_surface_force],i,:,i_step))
+        history[:vehicle_moment][i,i_step] = sum(view(history[:net_surface_moment],i,:,i_step))
     end
+
+    # sectional top forces
+    for (i_surface, surface) in enumerate(model.vlm_system.properties)
+        for j in 1:size(surface,2)
+            for i in 1:size(surface,1)
+
+                # bound vortex
+                history[:surface_force_top][i_surface][:,i,j,i_step] .= surface[i,j].cfb
+            end
+        end
+    end
+
+    # sectional vertical forces
+    for (i_surface, surface) in enumerate(model.vlm_system.properties)
+        for j in 1:size(surface,2)
+            for i in 1:size(surface,1)
+                # left vortex
+                history[:surface_force_vertical][i_surface][:,i,j,i_step] .= surface[i,j].cfl
+            end
+        end
+    end
+    for (i_surface, surface) in enumerate(model.vlm_system.properties)
+        for j in 1:size(surface,2)
+            for i in 1:size(surface,1)
+                # right vortex
+                history[:surface_force_vertical][i_surface][:,i,j+1,i_step] .= surface[i,j].cfr
+            end
+        end
+    end
+
+    # sectional top positions
+    for (i_surface, surface) in enumerate(model.vlm_system.surfaces)
+        for j in 1:size(surface,2)
+            for i in 1:size(surface,1)
+                # bound vortex
+                history[:surface_x_top][i_surface][:,i,j,i_step] .= surface[i,j].rtc
+            end
+        end
+    end
+
+    # sectional vertical positions
+    for (i_surface, surface) in enumerate(model.vlm_system.surfaces)
+        for j in 1:size(surface,2)
+            for i in 1:size(surface,1)
+                # left vortex
+                history[:surface_x_vertical][i_surface][:,i,j,i_step] .= (surface[i,j].rtl + surface[i,j].rbl)/2
+            end
+        end
+        for i in 1:size(surface,1)
+            history[:surface_x_vertical][i_surface][:,i,end,i_step] .= (surface[i,end].rtr + surface[i,end].rbr)/2
+        end
+    end
+
 end

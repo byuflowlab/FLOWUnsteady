@@ -145,9 +145,9 @@ function initialize_verbose(vehicle::AbstractVehicle, v_lvl)
     println("\t"^v_lvl, "state: \t", typeof(vehicle.state))
 end
 
-function initialize_history(vehicle::AbstractVehicle, save_steps)
-    state_history, state_fields = initialize_history(vehicle.state, save_steps)
-    model_history, model_fields = initialize_history(vehicle.model, save_steps)
+function initialize_history(vehicle::AbstractVehicle, save_steps, omit_fields)
+    state_history, state_fields = initialize_history(vehicle.state, save_steps, omit_fields)
+    model_history, model_fields = initialize_history(vehicle.model, save_steps, omit_fields)
 
     return merge_histories(state_history, state_fields, model_history, model_fields)
 end

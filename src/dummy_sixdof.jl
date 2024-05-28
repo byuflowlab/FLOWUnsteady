@@ -198,6 +198,16 @@ function DynamicState(TF=Float64;
     return DynamicState{TF}(position, velocity, orientation, angular_velocity, mass, inertia)
 end
 
+function Base.zero(::Type{DynamicState{TF}}) where TF
+    position = zero(SVector{3,TF})
+    velocity = zero(SVector{3,TF})
+    orientation = zero(Quaternion{TF})
+    angular_velocity = zero(SVector{3,TF})
+    mass = zero(TF)
+    inertia = zero(SMatrix{3,3,TF,9})
+    return DynamicState{TF}(position, velocity, orientation, angular_velocity, mass, inertia)
+end
+
 function Base.isnan(state::DynamicState)
     for v in state.position
         if isnan(v)
@@ -285,6 +295,14 @@ function DynamicStateDerivative(TF=Float64;
         mass_dot = zero(TF),
         inertia_dot = zero(SMatrix{3,3,TF,9})
     )
+    return DynamicStateDerivative{TF}(velocity_dot, angular_velocity_dot, mass_dot, inertia_dot)
+end
+
+function Base.zero(::Type{DynamicStateDerivative{TF}}) where TF
+    velocity_dot = zero(SVector{3,TF})
+    angular_velocity_dot = zero(SVector{3,TF})
+    mass_dot = zero(TF)
+    inertia_dot = zero(SMatrix{3,3,TF,9})
     return DynamicStateDerivative{TF}(velocity_dot, angular_velocity_dot, mass_dot, inertia_dot)
 end
 

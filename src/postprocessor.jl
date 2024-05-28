@@ -39,10 +39,11 @@ end
 
 function History(vehicle::AbstractVehicle, controller::AbstractController, save_steps;
         bson_every=1,
+        omit_fields=()
     )
 
-    vehicle_history, vehicle_fields = initialize_history(vehicle, save_steps)
-    control_history, control_fields = initialize_history(controller, save_steps)
+    vehicle_history, vehicle_fields = initialize_history(vehicle, save_steps, omit_fields)
+    control_history, control_fields = initialize_history(controller, save_steps, omit_fields)
 
     history, fields = merge_histories(vehicle_history, vehicle_fields, control_history, control_fields)
 
