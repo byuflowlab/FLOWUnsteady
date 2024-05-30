@@ -81,6 +81,7 @@ function generate_svs_grid(slices_path;
                             offset=zeros(3),
                             rotation::Meshes.Rotation=one(Meshes.QuatRotation),
                             scaling=1.0,
+                            offsetcentroids=(slice, closed)->zeros(3),
                             file_pref="slice", file_ext=".vtu",
                             NDIVS_section=200, NDIVS_path=100,
                             verify_splines=true,
@@ -131,21 +132,40 @@ function generate_svs_grid(slices_path;
         # Map ending points to a cell index
         meshconnectivity2 = Dict((cell[2], ci) for (ci, cell) in enumerate(cells))
 
-        # Sort points to be contiguous
-        points_sorted = zeros(size(points, 1), size(points, 2)+1)
+        # Check if the slice is a closed contour
+        closed = true
+        startpointi = 1
+        npoints = size(points, 2)
 
-        pointi = 1
+        for pi in keys(meshconnectivity1)
+            # Case that a starting point is no one's ending point
+            if !haskey(meshconnectivity2, pi)
+                closed = false
+                startpointi = pi
+                break
+            end
+        end
+
+        # Sort points to be contiguous
+        points_sorted = zeros(size(points, 1), npoints+1*closed)
+
+        pointi = startpointi
         counteri = 1
-        while pointi != 1 || counteri == 1
+        while pointi != startpointi || counteri == 1
 
             # Store this point
             points_sorted[:, counteri] .= points[:, pointi]
+
+            # Exit criterion if slice contour is open and encountered last point
+            if !closed && counteri==npoints
+                break
+            end
 
             # Find the cell that starts with this point
             celli = meshconnectivity1[pointi]
 
             # Case that unstructured grid is locally circular: shake the box
-            if pointi == cells[meshconnectivity1[cells[celli][2]]][2]
+            if (closed || counteri!=npoints-1) && pointi == cells[meshconnectivity1[cells[celli][2]]][2]
 
                 # Find the cell that end with this point
                 celli = meshconnectivity2[pointi]
@@ -165,7 +185,9 @@ function generate_svs_grid(slices_path;
         end
 
         # Close the contour
-        points_sorted[:, end] .= points_sorted[:, 1]
+        if closed
+            points_sorted[:, end] .= points_sorted[:, 1]
+        end
 
         # Convert mesh to Meshes.jl object
         vertices = [tuple(point...) for point in eachcol(points_sorted)]
@@ -183,15 +205,21 @@ function generate_svs_grid(slices_path;
         end
 
         # Collect the slices
-        push!(slices, final_points)
+        push!(slices, (final_points, closed))
 
     end
 
     # Calculate the centroid of each slice
-    centroids = [vcat(mean(slice[1, :]), gt.centroid(slice[2:3, :])...) for slice in slices]
+    centroids = [vcat(
+                        mean(slice[1, :]),
+                        (closed ? gt.centroid(slice[2:3, :]) : (mean(slice[2, :]), mean(slice[3, :])) )...
+                    ) for (slice, closed) in slices ]
+
+    # Offset centroids
+    centroids .+= [offsetcentroids(slice, closed) for (slice, closed) in slices]
 
     # Estimate the normal of each slice
-    normals = [cross(slice[:, 1]-C, slice[:, 2]-C) for (slice, C) in zip(slices, centroids)]
+    normals = [cross(slice[:, 1]-C, slice[:, 2]-C) for ((slice, closed), C) in zip(slices, centroids)]
     normals ./= norm.(normals)
 
     # Center the slices around the origin
@@ -202,7 +230,7 @@ function generate_svs_grid(slices_path;
         ax.set_title("Centered")
     end
 
-    for (centroid, slice) in zip(centroids, slices)
+    for (centroid, (slice, closed)) in zip(centroids, slices)
 
         slice .-= centroid
 
@@ -218,7 +246,7 @@ function generate_svs_grid(slices_path;
                     (
                         (centroid[1] - xmin)/(xmax - xmin),
                         collect(slice[2:3, :]')
-                    ) for (centroid, slice) in zip(centroids, slices)
+                    ) for (centroid, (slice, closed)) in zip(centroids, slices)
                 ]
 
     # Sort sections by increasing x position
@@ -228,7 +256,7 @@ function generate_svs_grid(slices_path;
     # @show [mean(getindex.(centroids, i)) for i in 1:3]
 
 
-    # ------------ Define loft path ------------------------------------------------
+    # ------------ Define loft path --------------------------------------------
 
     # Points along path
     path_Xs = deepcopy(centroids)
@@ -237,10 +265,47 @@ function generate_svs_grid(slices_path;
     path_normals = deepcopy(normals)
 
     # Twist of section contours along path
-    path_twists = [0 for X in path_Xs]
+    path_twists = [0.0 for X in path_Xs]
 
     # Collect the path
     path = collect(zip(path_Xs, path_normals, path_twists))
+
+
+    # ------------ Pre-processing of open sections -----------------------------
+    for (si, (centroid, section)) in enumerate(sections)
+
+        closed = slices[si][2]
+
+        if !closed
+
+            # @show "pre", section[1, :]
+            # @show atand(section[1, 1], section[1, 2])
+            # @show atand(section[2, 1], section[2, 2])
+
+            # Calculate twist of section relative to first point
+            twist = atand(section[1, 1], section[1, 2]) - 179.9999
+
+            # Untwist the section
+            for i in 1:size(section, 1)
+                y = section[i, 1]
+                z = section[i, 2]
+
+                y, z = y*cosd(-twist) + z*sind(-twist), -y*sind(-twist) + z*cosd(-twist)
+
+                section[i, 1] = y
+                section[i, 2] = z
+            end
+
+            # @show "post", section[1, :]
+            # @show atand(section[1, 1], section[1, 2])
+            # @show atand(section[2, 1], section[2, 2])
+
+            # Twist the path to undo the untwisting later on
+            path[si] = (path[si][1], path[si][2], path[si][3] + twist)
+
+        end
+
+    end
 
 
     # ------------ Generate lofted surface grid --------------------------------
