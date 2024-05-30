@@ -1,6 +1,6 @@
 #=##############################################################################
 # DESCRIPTION
-    Prototyping integration of FLOWPanel
+    Integration of FLOWPanel
 
 # ABOUT
   * Created   : Apr 2023
@@ -8,7 +8,7 @@
 
 
 # TODO
-* [ ] Validate solver with MultiBody
+* [x] Validate solver with MultiBody
 * [x] Verify that least-square solver in `panel_solver` also applies to open
         bodies or revisit
 * [x] Avoid shedding at interface of contiguous bodies
@@ -82,6 +82,7 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
         # Fetch panel body, VLMs, and rotors
         panelbody = vhcl.panel_system
         allvlms   = vhcl.vlm_system
+        propulsion_systems = vhcl.propulsion_systems
 
         ncells = panelbody.ncells
         nsheddings = panelbody.nsheddings
@@ -383,6 +384,11 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
             # VLM static particles
             _static_particles(pfield, allvlms, sigma_vlm)
 
+            # Propulsion static particles
+            for propulsion in propulsion_systems
+                _static_particles(pfield, propulsion)
+            end
+
         end
 
         Xs[:, 1:ncells] = controlpoints
@@ -557,7 +563,7 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
         # Output VTK files
         if save_path != nothing
             pnl.save(panelbody, run_name; path=save_path, num=sim.nt,
-                                                out_wake=debug,
+                                                out_wake=debug || sim.nt==0,
                                                 wake_panel=false,
                                                 debug=debug,
                                                 suffix="_panel")

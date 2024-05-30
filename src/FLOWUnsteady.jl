@@ -22,6 +22,9 @@ import JLD
 import Dates
 import PyPlot as plt
 
+import ReadVTK
+import DataStructures: SortedDict
+
 import LinearAlgebra
 import LinearAlgebra as LA
 
@@ -31,6 +34,7 @@ using Printf: @printf
 
 # ------------ FLOW CODES ------------------------------------------------------
 import GeometricTools
+import GeometricTools: Meshes
 
 # NOTE: Unregistered packages available at https://github.com/byuflowlab
 import FLOWVPM
@@ -58,7 +62,8 @@ const examples_path  = joinpath(module_path, "..", "examples") # Path to example
 const Im = Array(1.0I, 3, 3)
 
 # ------------ HEADERS ---------------------------------------------------------
-for header_name in ["vehicle", "vehicle_vlm",
+for header_name in ["actuatordisk",
+                    "vehicle", "vehicle_vlm",
                     "maneuver", "rotor", "panel",
                     "simulation_types", "simulation", "utils",
                     "processing", "processing_force", "monitors",

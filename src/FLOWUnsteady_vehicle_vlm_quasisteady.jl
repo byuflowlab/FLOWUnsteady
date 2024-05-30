@@ -17,7 +17,7 @@
 # QUASI-STEADY VLM VEHICLE TYPE
 ################################################################################
 """
-    QVLMVehicle{N, M, R}(system; optargs...)
+    QVLMVehicle{N, M, L, R}(system; optargs...)
 
 Same than [`FLOWUnsteady.UVLMVehicle`](@ref) but replacing the VPM wake with
 a semi-infinite rigid VLM wake, making the simulation quasi-ssteady.
@@ -30,7 +30,7 @@ Otherwise, blades will generate a wake going straight out of every blade
 trailing edge pointing oposite to the direction of rotation instead of
 generating a streamtube.
 """
-struct QVLMVehicle{N, M, R} <: AbstractVLMVehicle{N, M, R}
+struct QVLMVehicle{N, M, L, R} <: AbstractVLMVehicle{N, M, L, R}
 
     # Required inputs
     system::vlm.WingSystem
@@ -38,6 +38,7 @@ struct QVLMVehicle{N, M, R} <: AbstractVLMVehicle{N, M, R}
     # Optional inputs
     tilting_systems::NTuple{N, vlm.WingSystem}
     rotor_systems::NTuple{M, Array{vlm.Rotor, 1}}
+    propulsion_systems::NTuple{L, PropulsionSystem}
     vlm_system::vlm.WingSystem
     wake_system::vlm.WingSystem
     panel_system::pnl.MultiBody
@@ -51,10 +52,11 @@ struct QVLMVehicle{N, M, R} <: AbstractVLMVehicle{N, M, R}
     grid_save::Array{Bool, 1}               # Whether to save VTKs of the grid
 
 
-    QVLMVehicle{N, M, R}(
+    QVLMVehicle{N, M, L, R}(
                     system;
                     tilting_systems=NTuple{0, vlm.WingSystem}(),
                     rotor_systems=NTuple{0, Array{vlm.Rotor, 1}}(),
+                    propulsion_systems=NTuple{0, PropulsionSystem}(),
                     vlm_system=vlm.WingSystem(),
                     wake_system=vlm.WingSystem(),
                     panel_system=pnl.MultiBody(),
@@ -64,7 +66,7 @@ struct QVLMVehicle{N, M, R} <: AbstractVLMVehicle{N, M, R}
                                                     deepcopy(rotor_systems)],
                     grid_O=Array{Float64, 1}[zeros(3) for i in 1:length(grids)],
                     grid_save=Bool[true for i in 1:length(grids)],
-                ) where {N, M, R} = new(
+                ) where {N, M, L, R} = new(
                     system,
                     tilting_systems,
                     rotor_systems,
@@ -88,13 +90,15 @@ QVLMVehicle(system::vlm.WingSystem;
         V::Array{R, 1}=zeros(3), W::Array{R, 1}=zeros(3),
         tilting_systems::NTuple{N, vlm.WingSystem}=NTuple{0, vlm.WingSystem}(),
         rotor_systems::NTuple{M, Array{vlm.Rotor, 1}}=NTuple{0, Array{vlm.Rotor, 1}}(),
+        propulsion_systems::NTuple{L, PropulsionSystem}=NTuple{0, PropulsionSystem}(),
         panel_system=pnl.MultiBody(),
         grids=Array{gt.GridTypes, 1}(),
         optargs...
-        ) where {N, M, R} = QVLMVehicle{N, M, R}( system;
+        ) where {N, M, L, R} = QVLMVehicle{N, M, L, R}( system;
                                 V=V, W=W,
                                 tilting_systems=tilting_systems,
                                 rotor_systems=rotor_systems,
+                                propulsion_systems=propulsion_systems,
                                 panel_system=panel_system,
                                 grids=Array{gt.GridTypes, 1}(grids),
                                 grid_O=Array{Float64, 1}[zeros(R, 3) for i in 1:length(grids)],

@@ -11,10 +11,10 @@
 # ABSTRACT MANEUVER TYPE
 ################################################################################
 """
-    `AbstractManeuver{N, M}`
+    `AbstractManeuver{N, M, L}`
 
-`N` indicates the number of tilting systems in this maneuver, while and `M`
-indicates the number of rotor systems.
+`N` indicates the number of tilting systems in this maneuver, while `M`
+indicates the number of rotor systems and `L` the number of propulsion systems.
 
 Every implementation of `AbstractManeuver` must have the properties:
 
@@ -22,10 +22,15 @@ Every implementation of `AbstractManeuver` must have the properties:
         i-th tilting system at time `t` (t is nondimensionalized by the total
         time of the maneuver, from 0 to 1, beginning to end).
  * `RPM::NTuple{M, Function}` where `RPM[i](t)` returns the normalized RPM of
-        the i-th rotor system at time `t`. This RPM values are normalized by the
+        the i-th rotor system at time `t`. These RPM values are normalized by the
         an arbitrary RPM value (usually RPM in hover or cruise).
+ * `deltaVjet::NTuple{L, Function}` where `deltaVjet[i](t)` returns the
+        normalized relative jet velocity (total jet velocity minus induced,
+        kinematic, and freestream velocity) of the i-th propulsion system at
+        time `t`. These deltaVjet values are normalized by the
+        an arbitrary velocity (usually jet velocity in hover or cruise).
 """
-abstract type AbstractManeuver{N, M} end
+abstract type AbstractManeuver{N, M, L} end
 
 ##### FUNCTIONS REQUIRED IN IMPLEMENTATIONS ####################################
 """
@@ -66,6 +71,11 @@ get_ntltsys(self::AbstractManeuver) = typeof(self).parameters[1]
 Return number of rotor systems.
 """
 get_nrtrsys(self::AbstractManeuver) = typeof(self).parameters[2]
+"""
+    `get_npropsys(self::AbstractManeuver)`
+Return number of propulsion systems.
+"""
+get_npropsys(self::AbstractManeuver) = typeof(self).parameters[3]
 
 """
     `get_angle(maneuver::AbstractManeuver, i::Int, t::Real)`
@@ -115,6 +125,30 @@ t.
 """
 get_RPMs(self::AbstractManeuver, t::Real) = Tuple(rpm(t) for rpm in self.RPM)
 
+"""
+    `get_deltaVjet(maneuver::AbstractManeuver, i::Int, t::Real)`
+
+Returns the normalized deltaVjet of the i-th propulsion system at the
+non-dimensional time t.
+"""
+function get_deltaVjet(self::AbstractManeuver, i::Int, t::Real)
+    if i<=0 || i>get_npropsys(self)
+        error("Invalid propulsion system #$i (max is $(get_npropsys(self))).")
+    end
+    if t<0 || t>1
+        @warn("Got non-dimensionalized time $(t).")
+    end
+    return self.deltaVjet[i](t)
+end
+
+"""
+    `get_deltaVjets(maneuver::AbstractManeuver, t::Real)`
+
+Returns the normalized deltaVjet of every propulsion system at the
+non-dimensional time t.
+"""
+get_deltaVjets(self::AbstractManeuver, t::Real) = Tuple(Vjet(t) for Vjet in self.deltaVjet)
+
 
 ##### COMMON INTERNAL FUNCTIONS  ###############################################
 
@@ -133,12 +167,12 @@ get_RPMs(self::AbstractManeuver, t::Real) = Tuple(rpm(t) for rpm in self.RPM)
 # KINEMATIC MANEUVER TYPE
 ################################################################################
 """
-    KinematicManeuver{N, M}(angle, RPM, Vvehicle, anglevehicle)
+    KinematicManeuver{N, M, L}(angle, RPM, deltaVjet, Vvehicle, anglevehicle)
 
 A vehicle maneuver that prescribes the kinematics of the vehicle through the
-functions `Vvehicle` and `anglevehicle`. Control inputs to each tilting and
-rotor systems are given by the collection of functions `angle` and `RPM`,
-respectively.
+functions `Vvehicle` and `anglevehicle`. Control inputs to each tilting, rotor,
+and propulsion systems are given by the collection of functions `angle`, `RPM`,
+`deltaVjet`, respectively.
 
 # ARGUMENTS
 * `angle::NTuple{N, Function}` where `angle[i](t)` returns the angles
@@ -148,6 +182,11 @@ respectively.
 * `RPM::NTuple{M, Function}` where `RPM[i](t)` returns the normalized RPM of
         the i-th rotor system at time `t`. These RPM values are normalized by
         an arbitrary RPM value (usually RPM in hover or cruise).
+ * `deltaVjet::NTuple{L, Function}` where `deltaVjet[i](t)` returns the
+        normalized relative jet velocity (total jet velocity minus induced,
+        kinematic, and freestream velocity) of the i-th propulsion system at
+        time `t`. These deltaVjet values are normalized by the
+        an arbitrary velocity (usually jet velocity in hover or cruise).
 * `Vvehicle::Function` where `Vvehicle(t)` returns the normalized vehicle
         velocity `[Vx, Vy, Vz]` at the normalized time `t`. The velocity is
         normalized by a reference velocity (typically, cruise velocity).
@@ -155,17 +194,20 @@ respectively.
         `[Ax, Ay, Az]` (in degrees) of the vehicle relative to the global
         coordinate system at the normalized time `t`.
 """
-struct KinematicManeuver{N, M} <: AbstractManeuver{N, M}
+struct KinematicManeuver{N, M, L} <: AbstractManeuver{N, M, L}
     angle::NTuple{N, Function}
     RPM::NTuple{M, Function}
+    deltaVjet::NTuple{L, Function}
     Vvehicle::Function
     anglevehicle::Function
 end
 
-# # Implicit N and M constructor
-# KinematicManeuver(a::NTuple{N, Function}, b::NTuple{M, Function},
-#                     c::Function, d::Function
-#                  ) where {N, M} = KinematicManeuver{N, M}(a, b, c, d)
+function KinematicManeuver(angle::NTuple{N, Function}, RPM::NTuple{M, Function},
+                            Vvehicle::Function, anglevehicle::Function;
+                            deltaVjet::NTuple{L, Function}=NTuple{0, Function}(),
+                            ) where {N, M, L}
+     return KinematicManeuver{N, M, L}(angle, RPM, deltaVjet, Vvehicle, anglevehicle)
+ end
 
 
 ##### FUNCTIONS  ###############################################################
@@ -199,7 +241,7 @@ end
 # KINEMATIC MANEUVER TYPE
 ################################################################################
 """
-    DynamicManeuver{N, M}(angle, RPM)
+    DynamicManeuver{N, M, L}(angle, RPM)
 
 A vehicle maneuver that automatically couples the kinematics of the vehicle
 with the forces and moments, resulting in a fully dynamic simulation. Control
@@ -208,9 +250,10 @@ functions `angle` and `RPM`, respectively.
 
 > **NOTE:** This methods has not been implemented yet, but it may be developed in future versions of FLOWunsteady.
 """
-struct DynamicManeuver{N, M} <: AbstractManeuver{N, M}
+struct DynamicManeuver{N, M, L} <: AbstractManeuver{N, M, L}
     angle::NTuple{N, Function}
     RPM::NTuple{M, Function}
+    deltaVjet::NTuple{L, Function}
 end
 
 # # Implicit N and M constructor

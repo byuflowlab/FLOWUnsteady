@@ -11,7 +11,7 @@
 # ABSTRACT VLM VEHICLE TYPE
 ################################################################################
 """
-    `AbstractVLMVehicle{N, M, R} <: AbstractVehicle{N, M, R}`
+    `AbstractVLMVehicle{N, M, L, R} <: AbstractVehicle{N, M, L, R}`
 
 Implementations of `AbstractUVLMVehicle` are expected to have the following
 fields:
@@ -22,6 +22,7 @@ fields:
 # Optional inputs
 * `tilting_systems::NTuple{N, vlm.WingSystem}`
 * `rotor_systems::NTuple{M, Array{vlm.Rotor, 1}}`
+* `Propulsion_systems::NTuple{L, PropulsionSystem}`
 * `vlm_system::vlm.WingSystem`
 * `wake_system::vlm.WingSystem`
 * `panel_system::pnl.MultiBody`
@@ -47,7 +48,7 @@ the components of `wake_system` are also components of either `vlm_system` or
 `rotor_systems`, and that none of the components of `rotor_systems` are also
 components of `vlm_system`.
 """
-abstract type AbstractVLMVehicle{N, M, R} <: AbstractVehicle{N, M, R} end
+abstract type AbstractVLMVehicle{N, M, L, R} <: AbstractVehicle{N, M, L, R} end
 
 # Implementations
 for header_name in ["unsteady", "quasisteady"]
@@ -59,6 +60,8 @@ end
 get_ntltsys(self::AbstractVLMVehicle) = typeof(self).parameters[1]
 
 get_nrtrsys(self::AbstractVLMVehicle) = typeof(self).parameters[2]
+
+get_npropsys(self::AbstractVLMVehicle) = typeof(self).parameters[3]
 
 
 function add_dV(self::AbstractVLMVehicle, dV)
@@ -81,8 +84,8 @@ function set_W(self::AbstractVLMVehicle, W)
     return nothing
 end
 
-function tilt_systems(self::AbstractVLMVehicle{N,M,R}, angles::NTuple{N, Array{R2, 1}}
-                                                    ) where{N, M, R, R2<:Real}
+function tilt_systems(self::AbstractVLMVehicle{N,M,L,R}, angles::NTuple{N, Array{R2, 1}}
+                                                    ) where{N, M, L, R, R2<:Real}
     # Iterate over tilting system
     for i in 1:get_ntltsys(self)
         sys = self.tilting_systems[i]
@@ -91,7 +94,7 @@ function tilt_systems(self::AbstractVLMVehicle{N,M,R}, angles::NTuple{N, Array{R
     end
     return nothing
 end
-function tilt_systems(self::AbstractVLMVehicle{0,M,R}, angles::Tuple{})  where{M, R}
+function tilt_systems(self::AbstractVLMVehicle{0,M,L,R}, angles::Tuple{})  where{M, L, R}
     return nothing
 end
 
@@ -256,6 +259,11 @@ function _get_m_static(self::AbstractVLMVehicle)
         for rotor in rotors
             m += vlm.get_m(rotor)
         end
+    end
+
+    for propulsion_system in self.propulsion_systems
+
+        m += _get_m_static(propulsion_system)
     end
 
     return m

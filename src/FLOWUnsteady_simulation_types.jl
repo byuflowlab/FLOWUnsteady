@@ -40,6 +40,7 @@ mutable struct Simulation{V<:AbstractVehicle, M<:AbstractManeuver, R<:Real}
     maneuver::M             # Maneuver to be performed
     Vref::R                 # Reference velocity in this maneuver
     RPMref::R               # Reference RPM in this maneuver
+    deltaVjetref::R         # Reference deltaVjet in this maneuver
     ttot::R                 # Total time in which to perform the maneuver
 
     # OPTION USER INPUTS
@@ -53,13 +54,21 @@ mutable struct Simulation{V<:AbstractVehicle, M<:AbstractManeuver, R<:Real}
 
     Simulation{V, M, R}(
                             vehicle, maneuver, Vref, RPMref, ttot;
+                            deltaVjetref=one(R),
                             Vinit=nothing, Winit=nothing,
                             t=zero(R), nt=-1
                         ) where {V, M, R} = _check(vehicle, maneuver) ? new(
-                            vehicle, maneuver, Vref, RPMref, ttot,
+                            vehicle, maneuver, Vref, RPMref, deltaVjetref, ttot,
                             Vinit, Winit,
                             t, nt
                         ) : nothing
+
+    Simulation{V, M, R}(
+                            vehicle, maneuver, Vref, RPMref, deltaVjetref, ttot;
+                            optargs...
+                        ) where {V, M, R} = Simulation{V, M, R}(
+                            vehicle, maneuver, Vref, RPMref, ttot;
+                            deltaVjetref=deltaVjetref, optargs...)
 end
 
 
@@ -122,6 +131,13 @@ function nextstep_kinematic(self::Simulation, dt::Real)
         tilt_systems(self.vehicle, angles)
 
         self.t += dt
+    end
+
+    # Update propulsion systems
+    for (pi, propulsion) in enumerate(self.vehicle.propulsion_systems)
+        deltaVjet = get_deltaVjet(self.maneuver, pi, self.t/self.ttot)
+        deltaVjet *= self.deltaVjetref
+        update(propulsion, deltaVjet)
     end
 
     self.nt += 1
@@ -203,6 +219,7 @@ function _check(vehicle::AbstractVehicle, maneuver::AbstractManeuver;
                                                             raise_error=true)
     res = get_ntltsys(vehicle)==get_ntltsys(maneuver)
     res *= get_nrtrsys(vehicle)==get_nrtrsys(maneuver)
+    res *= get_npropsys(vehicle)==get_npropsys(maneuver)
 
     if raise_error && res==false
         error("Encountered incompatible Vehicle and Maneuver!")

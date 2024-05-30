@@ -13,8 +13,9 @@
 # UNSTEADY VLM VEHICLE TYPE
 ################################################################################
 """
-    UVLMVehicle{N, M, R}(system; tilting_systems, rotors_systems,
-                                            vlm_system, wake_system, grids)
+    UVLMVehicle{N, M, L, R}(system; tilting_systems, rotors_systems,
+                                    propulsion_systems, vlm_system, wake_system,
+                                    grids)
 
 Type handling all geometries and subsystems that define a vehicle made
 out of FLOWVLM components (Wing, WingSystem, Rotor).
@@ -32,6 +33,8 @@ out of FLOWVLM components (Wing, WingSystem, Rotor).
                                     surfaces and rotors that tilt together.
 * `rotors_systems::NTuple{M, Array{vlm.Rotor}}`:   Tuple of groups of Rotors
                                     that share a common RPM.
+* `propulsion_systems::NTuple{L, PropulsionSystem}`:   Tuple of propulsion
+                                    systems.
 * `vlm_system::FLOWVLM.WingSystem`:    System of all FLOWVLM objects to be solved
                                     through the VLM solver.
 * `wake_system::FLOWVLM.WingSystem`:   System of all FLOWVLM objects that will
@@ -47,7 +50,7 @@ out of FLOWVLM components (Wing, WingSystem, Rotor).
 * `prev_data::Array{Any}`       : Information about previous step
 * `grid_O::Vector{Vector}`       : Origin of every grid
 """
-struct UVLMVehicle{N, M, R} <: AbstractVLMVehicle{N, M, R}
+struct UVLMVehicle{N, M, L, R} <: AbstractVLMVehicle{N, M, L, R}
 
     # Required inputs
     system::vlm.WingSystem
@@ -55,6 +58,7 @@ struct UVLMVehicle{N, M, R} <: AbstractVLMVehicle{N, M, R}
     # Optional inputs
     tilting_systems::NTuple{N, vlm.WingSystem}
     rotor_systems::NTuple{M, Array{vlm.Rotor, 1}}
+    propulsion_systems::NTuple{L, PropulsionSystem}
     vlm_system::vlm.WingSystem
     wake_system::vlm.WingSystem
     panel_system::pnl.MultiBody
@@ -68,10 +72,11 @@ struct UVLMVehicle{N, M, R} <: AbstractVLMVehicle{N, M, R}
     grid_save::Array{Bool, 1}               # Whether to save VTKs of the grid
 
 
-    UVLMVehicle{N, M, R}(
+    UVLMVehicle{N, M, L, R}(
                     system;
                     tilting_systems=NTuple{0, vlm.WingSystem}(),
                     rotor_systems=NTuple{0, Array{vlm.Rotor, 1}}(),
+                    propulsion_systems=NTuple{0, PropulsionSystem}(),
                     vlm_system=vlm.WingSystem(),
                     wake_system=vlm.WingSystem(),
                     panel_system=pnl.MultiBody(),
@@ -81,10 +86,11 @@ struct UVLMVehicle{N, M, R} <: AbstractVLMVehicle{N, M, R}
                                                     deepcopy(rotor_systems)],
                     grid_O=Array{Float64, 1}[zeros(3) for i in 1:length(grids)],
                     grid_save=Bool[true for i in 1:length(grids)],
-                ) where {N, M, R} = new(
+                ) where {N, M, L, R} = new(
                     system,
                     tilting_systems,
                     rotor_systems,
+                    propulsion_systems,
                     vlm_system,
                     wake_system,
                     panel_system,
@@ -105,13 +111,15 @@ UVLMVehicle(system::vlm.WingSystem;
         V::Array{R, 1}=zeros(3), W::Array{R, 1}=zeros(3),
         tilting_systems::NTuple{N, vlm.WingSystem}=NTuple{0, vlm.WingSystem}(),
         rotor_systems::NTuple{M, Array{vlm.Rotor, 1}}=NTuple{0, Array{vlm.Rotor, 1}}(),
+        propulsion_systems::NTuple{L, PropulsionSystem}=NTuple{0, PropulsionSystem}(),
         panel_system=pnl.MultiBody(),
         grids=Array{gt.GridTypes, 1}(),
         optargs...
-        ) where {N, M, R} = UVLMVehicle{N, M, R}( system;
+        ) where {N, M, L, R} = UVLMVehicle{N, M, L, R}( system;
                                 V=V, W=W,
                                 tilting_systems=tilting_systems,
                                 rotor_systems=rotor_systems,
+                                propulsion_systems=propulsion_systems,
                                 panel_system=panel_system,
                                 grids=Array{gt.GridTypes, 1}(grids),
                                 grid_O=Array{Float64, 1}[zeros(3) for i in 1:length(grids)],
@@ -233,6 +241,12 @@ function generate_static_particle_fun(pfield::vpm.ParticleField, pfield_static::
                 _static_particles(pfield, rotor, sigma_rotor)
                 if flag; _static_particles(pfield_static, rotor, sigma_rotor); end;
             end
+        end
+
+        # Particles from propulsion systems
+        for propulsion in self.propulsion_systems
+            _static_particles(pfield, propulsion)
+            if flag; _static_particles(pfield_static, propulsion); end;
         end
 
         # Save vtk with static particles

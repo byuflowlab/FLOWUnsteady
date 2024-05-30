@@ -11,12 +11,13 @@
 # ABSTRACT VEHICLE TYPE
 ################################################################################
 """
-    `AbstractVehicle{N, M, R}`
+    `AbstractVehicle{N, M, L, R}`
 
 Type handling all geometries and subsystems that define a flight vehicle.
 
 `N` indicates the number of tilting systems in this vehicle, while and `M`
-indicates the number of rotor systems. `R` is a Real type.
+indicates the number of rotor systems and `L` the number of propulsion systems.
+`R` is a Real type.
 
 Implementations must have the following properties:
     * `V::Array{R, 1}`          : Current velocity vector of the vehicle in the
@@ -24,7 +25,7 @@ Implementations must have the following properties:
     * `W::Array{R, 1}`          : Current angular velocity vector of the vehicle
                                     in the global coordinate system.
 """
-abstract type AbstractVehicle{N, M, R} end
+abstract type AbstractVehicle{N, M, L, R} end
 
 ##### FUNCTIONS REQUIRED IN IMPLEMENTATIONS ####################################
 """
