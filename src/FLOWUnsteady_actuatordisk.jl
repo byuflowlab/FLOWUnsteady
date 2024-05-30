@@ -332,7 +332,7 @@ function add_static_particles!(pfield::vpm.ParticleField,
             pathnormal ./= norm(pathnormal)
 
             # Tangent vector
-            cross!(t, normal, pathnormal)
+            cross!(t, pathnormal, normal)
             t ./= norm(t)
 
             # Cumulative values
