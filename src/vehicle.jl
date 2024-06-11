@@ -118,6 +118,10 @@ function forces!(vehicle::AbstractVehicle{Dynamic,<:Any}) where Dynamic
     forces!(vehicle.state, vehicle.model, Dynamic)
 end
 
+function shed_wake!(vehicle::AbstractVehicle, dt, i_step)
+    shed_wake!(vehicle.model, dt, i_step)
+end
+
 """
     visualize(vehicle, i, t; name_prefix, path)
 

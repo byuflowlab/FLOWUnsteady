@@ -5,7 +5,7 @@
 
 Model type definition for float type `TF`. If `Quasisteady==true`, the solution of the model is independent of its time history. For every `<:AbstractModel` type, the following functions should be overloaded:
 
-* `solve!(model::AbstractModel, dt, i_step)`: solves the lower-level model used in the simulation
+* `solve!(model::AbstractModel, freestream::AbstractFreestream, dt, i_step)`: solves the lower-level model used in the simulation
 
 """
 abstract type AbstractModel{TF,Quasisteady} end
@@ -16,6 +16,10 @@ end
 
 function kinematic_velocity!(model::AbstractModel, map, velocity, angular_velocity, center_of_rotation)
     @error "kinematic_velocity! not defined for $(typeof(model))"
+end
+
+function kinematic_velocity_top!(model::AbstractModel, orientation::Quaternion, velocity, angular_velocity, center_of_rotation)
+    @error "kinematic_velocity_top! not defined for $(typeof(model))"
 end
 
 function apply!(model::AbstractModel, freestream)
@@ -246,13 +250,14 @@ Solves an `<:AbstractBoundaryElementModel` object in-place over a timestep of `d
 * `i_step::Int64`: the timestep index of this solve
 
 """
-function solve!(model::AbstractBoundaryElementModel{<:Any,false}, dt, i_step)
-
-    #--- prepare wake-on-all calculation velocity ---#
+function solve!(model::AbstractBoundaryElementModel{<:Any,<:Any,<:Any}, dt, i_step)
 
     if isnan(model)
         throw("found nan: before prepare_wake_on_all")
     end
+
+    #--- prepare wake-on-all calculation velocity ---#
+
     prepare_wake_on_all!(model, dt, i_step)
     if isnan(model)
         throw("found nan: after prepare_wake_on_all")
@@ -274,7 +279,7 @@ function solve!(model::AbstractBoundaryElementModel{<:Any,false}, dt, i_step)
 
     #--- prepare surface-on-all induced velocity ---#
 
-    all, surface, fmm_options = prepare_surface_on_all!(model)
+    prepare_surface_on_all!(model)
     if isnan(model)
         throw("found nan: after prepare_surface_on_all")
     end
@@ -285,13 +290,6 @@ function solve!(model::AbstractBoundaryElementModel{<:Any,false}, dt, i_step)
     if isnan(model)
         throw("found nan: after surface_on_all")
     end
-
-    # #--- shed wake for this timestep ---# THIS IS NOW PERFORMED IN prepare_wake_on_all!
-
-    # shed_wake!(model, dt, i_step)
-    # if isnan(model)
-    #     throw("found nan: after shed_wake")
-    # end
 
     #--- compute forces ---#
 
@@ -392,8 +390,6 @@ function (initializer::DefaultInitializer)(model::VortexParticleModel, time, i_s
     return nothing
 end
 
-struct RigidWake{TF} <: AbstractWake{TF,true} end
-
 #------- Vortex Lattice Model -------#
 
 """
@@ -406,7 +402,7 @@ Model defining vortex lattice surfaces.
 * `vlm_system::VortexLattice.System`: the vortex lattice system
 * `surface_forces::Vector{SVector{3,Float64}}`: the `i` th element is the force experienced by the `i` th surface in `vlm_system`
 * `surface_moments::Vector{SVector{3,Float64}}`: the `i` th element is the moment experienced by the `i` th surface in `vlm_system`
-* `trailing_edge_probes::FastMultipole.ProbeSystem`: probes placed at the trailing edge and convected with the velocity field each timestep; used to determine new wake particle locations
+* `trailing_edge_wake_filaments::Vector{vlm.VortexFilament{Float64}}`: wake filaments composing the wake generated at the trailing edge
 * `wake <: AbstractWake`: model used to describe the wake
 * `toggle_wake::Vector{Bool}`: determines whether the corresponding surfaces in `vlm_system` should shed wakes
 * `eta_wake::Float64`: when using an unsteady wake, new wake filaments are shed with a length of `V * dt * deta_wake[i_surface]`
@@ -415,7 +411,7 @@ Model defining vortex lattice surfaces.
 * `multipole_threshold::Float64`: value between 0 and 1 determines when multipole expansions should be used; 0 means they are never used, and 1 means they are always used
 
 """
-struct VortexLatticeModel{TF,Quasisteady,TW<:AbstractWake{TF,Quasisteady},FMM} <: AbstractBoundaryElementModel{TF,Quasisteady,FMM}
+struct VortexLatticeModel{TF,Quasisteady,TW,FMM} <: AbstractBoundaryElementModel{TF,Quasisteady,FMM}
     # vlm
     vlm_system::vlm.System{TF}
 
@@ -423,10 +419,8 @@ struct VortexLatticeModel{TF,Quasisteady,TW<:AbstractWake{TF,Quasisteady},FMM} <
     surface_forces::Vector{SVector{3,TF}}
     surface_moments::Vector{SVector{3,TF}}
 
-    # trailing edge points convected with the velocity field to determine particle shedding locations
-    trailing_edge_probes::fmm.ProbeSystem{TF, Nothing, Nothing, Vector{SVector{3,TF}}, Vector{SMatrix{3,3,TF,9}}}
-
     # wake
+    trailing_edge_wake_filaments::Vector{vlm.VortexFilament{TF}}
     wake::TW
     toggle_wake::Vector{Bool} # which surfaces should shed wake particles
     eta_wake::TF # shed the next wake filament V * dt * eta_wake[i_surface]
@@ -466,6 +460,7 @@ function VortexLatticeModel(system::vlm.System{TF};
         overlap_unsteady=0.3,
         p_per_step_trailing=1,
         p_per_step_unsteady=1,
+        max_particles_override=nothing,
 
         # options for the surface-on-all call to the FMM
     	expansion_order = 4, # expansion order of multipole expansions
@@ -477,27 +472,38 @@ function VortexLatticeModel(system::vlm.System{TF};
     ) where TF
 
     # assertions
-    for trailing_vortex in system.trailing_vortices
-        @assert trailing_vortex == Quasisteady "semi-infinite vortex horseshoes " * (Quasisteady ? "required" : "not supported") * " for `VortexLatticeModel{<:Any,<:Any,$(Quasisteady)}`; set system.trailing_vortices .= $(Quasisteady)"
+    for i in eachindex(system.trailing_vortices)
+        # @assert trailing_vortex == Quasisteady "semi-infinite vortex horseshoes " * (Quasisteady ? "required" : "not supported") * " for `VortexLatticeModel{<:Any,<:Any,$(Quasisteady)}`; set system.trailing_vortices .= $(Quasisteady)"
+        if system.trailing_vortices[i] != Quasisteady
+            @warn "Quasisteady = $Quasisteady but trailing_vortex = $(system.trailing_vortices[i]); setting trailing_vortex = $Quasisteady"
+            system.trailing_vortices[i] = Quasisteady
+        end
     end
 
     # update fmm_probes
     surfaces = system.surfaces
-    fmm_velocity_probes = system.fmm_velocity_probes
     n_control_points, n_surface_filaments, n_trailing_edge_corners = count_probes(surfaces)
-    vlm.update_n_probes!(fmm_velocity_probes, n_control_points + n_surface_filaments)
+    fmm_velocity_probes = system.fmm_velocity_probes
+    n_probes = n_control_points + n_surface_filaments + n_trailing_edge_corners
+    Quasisteady && (n_probes -= n_trailing_edge_corners) # quasisteady model doesn't need probes at the trailing edge
+    vlm.update_n_probes!(fmm_velocity_probes, n_probes)
     vlm.update_probes!(fmm_velocity_probes, surfaces, 0) # control points and filament centers
+    !Quasisteady && update_probes_te!(fmm_velocity_probes, surfaces, n_control_points + n_surface_filaments)
 
     # surface forces/moments
     surface_forces = Vector{SVector{3,TF}}(undef,length(system.surfaces))
     surface_moments = Vector{SVector{3,TF}}(undef,length(system.surfaces))
 
-    # wake
-    if isnothing(wake)
+    # trailing edge wake filaments
+    n_te = 0
+    for surface in surfaces
+        n_te += size(surface,2)
+    end
+    trailing_edge_wake_filaments = Vector{vlm.VortexFilament{TF}}(undef,n_te)
+    update_trailing_edge_wake!(trailing_edge_wake_filaments, system.surfaces, system.Γ)
 
-        # trailing edge probes
-        trailing_edge_probes = fmm.ProbeSystem(n_trailing_edge_corners; velocity=true, velocity_gradient=true)
-        update_probes_te!(trailing_edge_probes, surfaces, 0)
+    # wake
+    if isnothing(wake) && !Quasisteady
 
         # max number of particles
         n_trailing_edge_midpoints = 0
@@ -505,7 +511,8 @@ function VortexLatticeModel(system::vlm.System{TF};
             n_trailing_edge_midpoints += size(surface,2)
         end
 
-        max_particles = (n_trailing_edge_corners + n_trailing_edge_midpoints) * max_timesteps
+        max_particles = (n_trailing_edge_midpoints * p_per_step_unsteady + n_trailing_edge_corners * p_per_step_trailing) * max_timesteps
+        !isnothing(max_particles_override) && (max_particles = max_particles_override)
         particle_field = vpm.ParticleField(max_particles, TF; vpm_options...)
 
         # build vortex particle wake
@@ -526,10 +533,10 @@ function VortexLatticeModel(system::vlm.System{TF};
     # dimensionalize and set center of mass
     center_of_mass = isnothing(center_of_mass) ? system.reference[].r : center_of_mass
     ref = system.reference[]
-    system.reference[] = eltype(system.reference)(1.0, 1.0, 1.0, center_of_mass, 1.0)
+    system.reference[] = eltype(system.reference)(2.0, 1.0, 1.0, center_of_mass, 1.0)
 
     # construct model
-    model = VortexLatticeModel{TF,Quasisteady,typeof(wake),FMM}(system, surface_forces, surface_moments, trailing_edge_probes, wake, toggle_wake, eta_wake, expansion_order, leaf_size, multipole_threshold)
+    model = VortexLatticeModel{TF,Quasisteady,typeof(wake),FMM}(system, surface_forces, surface_moments, trailing_edge_wake_filaments, wake, toggle_wake, eta_wake, expansion_order, leaf_size, multipole_threshold)
 
     # zero fields
     reset && reset!(model)
@@ -562,111 +569,110 @@ function Base.isnan(model::VortexLatticeModel)
         throw("nan in wake")
         return true
     end
-    if isnan(model.trailing_edge_probes)
-        throw("nan in trailing_edge_probes")
-    end
 
     return false
 end
 
-function Base.isnan(array::AbstractArray{<:Real})
-    for v in array
-        if isnan(v)
-            return true
-        end
-    end
-    return false
-end
+Base.isnan(::Nothing) = false
 
-function Base.isnan(array::AbstractArray{<:AbstractArray})
-    for a in array
-        if isnan(a)
-            return true
-        end
-    end
-    return false
-end
-
-function Base.isnan(object, fields::NTuple{<:Any,Symbol})
-    for field in fields
-        if isnan(getfield(object,field))
-            @show getfield(object,field)
-            throw("nan in $field")
-            return true
-        end
-    end
-    return false
-end
-
-function Base.isnan(model::vlm.System)
-    for field in (:AIC,:w,:Γ,:V,:xhat,:Vcp,:Vh,:Vv,:Vte,:dΓdt)
-        if isnan(getfield(model,field))
-            throw("nan in system.$field")
-            return true
-        end
-    end
-    for dw in model.dw
-        if isnan(dw)
-            throw("nan in system.dw")
-            return true
-        end
-    end
-    for dΓ in model.dΓ
-        if isnan(dΓ)
-            throw("nan in system.dΓ")
-            return true
-        end
-    end
-    for s in model.surfaces
-        for p in s
-            if isnan(p,(:rtl, :rtc, :rtr, :rbl, :rbc, :rbr, :rcp, :ncp, :core_size, :chord))
-                throw("nan in system.surfaces")
-                return true
-            end
-        end
-    end
-    for prop in model.properties
-        for p in prop
-            if isnan(p,(:gamma,:velocity,:cfb,:cfl,:cfr))
-                throw("nan in system.properties")
-                return true
-            end
-        end
-    end
-    for w in model.wakes
-        for p in w
-            if isnan(p,(:rtl,:rtr,:rbl,:rbr,:core_size,:gamma))
-                throw("nan in system.wakes")
-                return true
-            end
-        end
-    end
-    if isnan(model.reference[],(:S,:c,:b,:r,:V))
-        return true
-    end
-    if isnan(model.freestream[],(:Vinf,:alpha,:beta,:Omega,:rho))
-        return true
-    end
-    for props in model.dproperties
-        for prop in props
-            for p in prop
-                if isnan(p,(:gamma,:velocity,:cfb,:cfl,:cfr))
-                    return true
-                end
-            end
-        end
-    end
-    for p in model.fmm_panels
-        if isnan(p,(:rtl,:rtr,:rbl,:rbr,:rcp,:ncp,:radius,:core_size,:gamma))
-            return true
-        end
-    end
-    if isnan(model.fmm_velocity_probes)
-        throw("nan in system.fmm_velocity_probes")
-        return true
-    end
-    return false
-end
+# function Base.isnan(array::AbstractArray{<:Real})
+#     for v in array
+#         if isnan(v)
+#             return true
+#         end
+#     end
+#     return false
+# end
+#
+# function Base.isnan(array::AbstractArray{<:AbstractArray})
+#     for a in array
+#         if isnan(a)
+#             return true
+#         end
+#     end
+#     return false
+# end
+#
+# function Base.isnan(object, fields::NTuple{<:Any,Symbol})
+#     for field in fields
+#         if isnan(getfield(object,field))
+#             @show getfield(object,field)
+#             throw("nan in $field")
+#             return true
+#         end
+#     end
+#     return false
+# end
+#
+# function Base.isnan(model::vlm.System)
+#     for field in (:AIC,:w,:Γ,:V,:xhat,:Vcp,:Vh,:Vv,:Vte,:dΓdt)
+#         if isnan(getfield(model,field))
+#             throw("nan in system.$field")
+#             return true
+#         end
+#     end
+#     for dw in model.dw
+#         if isnan(dw)
+#             throw("nan in system.dw")
+#             return true
+#         end
+#     end
+#     for dΓ in model.dΓ
+#         if isnan(dΓ)
+#             throw("nan in system.dΓ")
+#             return true
+#         end
+#     end
+#     for s in model.surfaces
+#         for p in s
+#             if isnan(p,(:rtl, :rtc, :rtr, :rbl, :rbc, :rbr, :rcp, :ncp, :core_size, :chord))
+#                 throw("nan in system.surfaces")
+#                 return true
+#             end
+#         end
+#     end
+#     for prop in model.properties
+#         for p in prop
+#             if isnan(p,(:gamma,:velocity,:cfb,:cfl,:cfr))
+#                 throw("nan in system.properties")
+#                 return true
+#             end
+#         end
+#     end
+#     for w in model.wakes
+#         for p in w
+#             if isnan(p,(:rtl,:rtr,:rbl,:rbr,:core_size,:gamma))
+#                 throw("nan in system.wakes")
+#                 return true
+#             end
+#         end
+#     end
+#     if isnan(model.reference[],(:S,:c,:b,:r,:V))
+#         return true
+#     end
+#     if isnan(model.freestream[],(:Vinf,:alpha,:beta,:Omega,:rho))
+#         return true
+#     end
+#     for props in model.dproperties
+#         for prop in props
+#             for p in prop
+#                 if isnan(p,(:gamma,:velocity,:cfb,:cfl,:cfr))
+#                     return true
+#                 end
+#             end
+#         end
+#     end
+#     for p in model.fmm_panels
+#         if isnan(p,(:rtl,:rtr,:rbl,:rbr,:rcp,:ncp,:radius,:core_size,:gamma))
+#             return true
+#         end
+#     end
+#     if isnan(model.fmm_velocity_probes)
+#         throw("nan in system.fmm_velocity_probes")
+#         return true
+#     end
+#     return false
+# end
 
 function reset!(model::VortexLatticeModel)
     # reset vlm system
@@ -682,25 +688,25 @@ function reset!(model::VortexLatticeModel)
         model.surface_moments[i] = zero(eltype(model.surface_moments))
     end
 
-    # reset trailing edge corner probes
-    fmm.reset!(model.trailing_edge_probes)
-
     # reset wake
     reset!(model.wake)
 end
 
-function (initializer::DefaultInitializer)(model::VortexLatticeModel, time, i_step)
+function (initializer::DefaultInitializer)(model::VortexLatticeModel{<:Any,<:Any,TW,<:Any}, time, i_step) where TW
 
     # preallocate fmm velocity probes
     n_control_points, n_surface_filaments, n_trailing_edge_corners = count_probes(model.vlm_system.surfaces)
-    vlm.update_n_probes!(model.vlm_system.fmm_velocity_probes, n_control_points + n_surface_filaments)
-    vlm.update_n_probes!(model.trailing_edge_probes, n_trailing_edge_corners)
+    vlm.update_n_probes!(model.vlm_system.fmm_velocity_probes, n_control_points + n_surface_filaments + n_trailing_edge_corners)
 
     # initialize wake
-    initializer(model.wake, time, i_step)
+    (TW != Nothing) && initializer(model.wake, time, i_step)
 
     # check for NaNs
     @assert !isnan(model) "NaN's found in VortexLatticeModel by initializer"
+end
+
+function reset!(::Nothing)
+    return nothing
 end
 
 function reset!(system::vlm.System{TF}) where TF
@@ -732,6 +738,8 @@ function reset!(system::vlm.System{TF}) where TF
         end
     end
 
+    system.xhat[] = zero(SVector{3,TF})
+
     fmm.reset!(system.fmm_velocity_probes)
 
 end
@@ -761,7 +769,7 @@ end
 
 #--- solve! subfunctions ---#
 
-function prepare_wake_on_all!(wake::VortexParticleModel, model::VortexLatticeModel; reset=true)
+function prepare_wake_on_all!(wake::VortexParticleModel, model::VortexLatticeModel{<:Any,false,<:Any,<:Any}; reset=true)
 
     #--- prepare SFS contribution to the wake ---#
 
@@ -769,34 +777,37 @@ function prepare_wake_on_all!(wake::VortexParticleModel, model::VortexLatticeMod
 
 end
 
-function prepare_wake_on_all!(model::VortexLatticeModel, dt, i_step; reset=true)
+function prepare_wake_on_all!(model::VortexLatticeModel{<:Any,Quasisteady,TW,<:Any}, dt, i_step; reset=true) where {Quasisteady,TW}
 
     #--- unpack model ---#
 
     fmm_velocity_probes = model.vlm_system.fmm_velocity_probes
-    trailing_edge_probes = model.trailing_edge_probes
+    trailing_edge_wake_filaments = model.trailing_edge_wake_filaments
     surfaces = model.vlm_system.surfaces
-
-    #--- place new wake particles ---#
-
-    shed_wake!(model, dt, i_step)
 
     #--- update probes ---#
 
+    n_control_points, n_surface_filaments, n_trailing_edge_corners = count_probes(surfaces)
     vlm.update_probes!(fmm_velocity_probes, surfaces, 0) # control points and filament centers
-    update_probes_te!(trailing_edge_probes, surfaces, 0) # trailing edge corners
+    !Quasisteady && update_probes_te!(fmm_velocity_probes, surfaces, n_control_points + n_surface_filaments) # trailing edge corners
 
     #--- prepare wake ---#
 
-    prepare_wake_on_all!(model.wake, model)
+    (TW != Nothing) && prepare_wake_on_all!(model.wake, model)
 
 end
 
-function wake_on_all!(model::VortexLatticeModel{<:Any,<:Any,<:VortexParticleModel,FMM}) where FMM
+function wake_on_all!(model::VortexLatticeModel{<:Any,true,<:Any,<:Any})
+    return nothing
+end
+
+function wake_on_all!(model::VortexLatticeModel{<:Any,false,<:VortexParticleModel,FMM}) where FMM
 
     #--- all elements ---#
 
-    all = (model.vlm_system.fmm_velocity_probes, model.trailing_edge_probes, model.wake.particle_field)
+    all = (model.vlm_system.fmm_velocity_probes, model.wake.particle_field)
+
+    wake = (model.wake.particle_field, model.trailing_edge_wake_filaments)
 
     #--- solve N-body problem ---#
 
@@ -810,19 +821,13 @@ function wake_on_all!(model::VortexLatticeModel{<:Any,<:Any,<:VortexParticleMode
                        multipole_threshold=model.wake.particle_field.fmm.theta
                       )
 
-        fmm.fmm!(all, model.wake.particle_field; scalar_potential, vector_potential, velocity, velocity_gradient, fmm_options...)
+        model.wake.particle_field.np > 0 && fmm.fmm!(all, wake; scalar_potential, vector_potential, velocity, velocity_gradient, fmm_options...)
 
     else
 
-        fmm.direct!(all, model.wake.particle_field; scalar_potential, vector_potential, velocity, velocity_gradient)
+        fmm.direct!(all, wake; scalar_potential, vector_potential, velocity, velocity_gradient)
 
     end
-
-    #--- add influence of trailing edge vortex ---#
-
-    # note that this is a temporary fix; I'll want to add actual vortex filaments eventually
-    # this function assumes that model.vlm_system.Γ contains the last timesteps circulation strength
-    trailing_edge_vortex_influence!(all, model.vlm_system.surfaces, model.vlm_system.Γ, model.toggle_wake)
 
 end
 
@@ -855,7 +860,7 @@ function trailing_edge_vortex_influence!(all, surfaces, Γ::Vector{TF}, toggle_w
                         r1 = x_target - x1
                         r2 = x_target - x2
                         v0 += vlm.bound_induced_velocity_fmm(r1, r2, finite_core, core_size)
-                        vg0 += vlm.bound_velocity_gradient(r1, r2, finite_core, core_size)
+                        # vg0 += vlm.bound_velocity_gradient(r1, r2, finite_core, core_size)
                     end
                 else
                     i_Γ += nc*ns
@@ -869,15 +874,41 @@ function trailing_edge_vortex_influence!(all, surfaces, Γ::Vector{TF}, toggle_w
     end
 end
 
-function solve_boundary!(model::VortexLatticeModel, dt)
+function solve_boundary!(model::VortexLatticeModel{<:Any,true,<:Any,<:Any}, dt)
+
+    # update influence coefficients
+    vlm.influence_coefficients!(model.vlm_system.AIC, model.vlm_system.surfaces;
+        symmetric = model.vlm_system.symmetric,
+        surface_id = model.vlm_system.surface_id,
+        trailing_vortices = model.vlm_system.trailing_vortices,
+        xhat = model.vlm_system.xhat[])
+
+    for trailing_vortex in model.vlm_system.trailing_vortices
+        @assert trailing_vortex "quasisteady model should set `vlm_system.trailing_vortices .= true`"
+    end
+
+    # evaluate right hand side
+    vlm.normal_velocity!(model.vlm_system.w, model.vlm_system.surfaces, model.vlm_system.wakes, model.vlm_system.reference[], model.vlm_system.freestream[];
+        additional_velocity = nothing,
+        Vcp = model.vlm_system.Vcp,
+        symmetric = model.vlm_system.symmetric,
+        surface_id = model.vlm_system.surface_id,
+        nwake = model.vlm_system.nwake,
+        wake_finite_core = model.vlm_system.wake_finite_core,
+        trailing_vortices = model.vlm_system.trailing_vortices,
+        xhat = model.vlm_system.xhat)
+
+    # solve for circulation distribution
+    vlm.circulation!(model.vlm_system.Γ, model.vlm_system.AIC, model.vlm_system.w)
+end
+
+function solve_boundary!(model::VortexLatticeModel{<:Any,false,<:Any,<:Any}, dt)
     #--- unpack system ---#
 
     vlm_system = model.vlm_system
-    eta = model.eta_wake # shed the next wake filament V * dt * eta
     surfaces = vlm_system.surfaces
     wakes = vlm_system.wakes
     nwake = vlm_system.nwake
-    wake_shedding_locations = vlm_system.wake_shedding_locations
     wake_finite_core = vlm_system.wake_finite_core
     AIC = vlm_system.AIC
     w = vlm_system.w
@@ -906,13 +937,13 @@ function solve_boundary!(model::VortexLatticeModel, dt)
     #--- update influence matrix ---#
 
     vlm.influence_coefficients!(AIC, surfaces;
-            symmetric = symmetric,
-            # wake_shedding_locations = wake_shedding_locations, # stop using the transition panels
-            surface_id = surface_id, # in vanilla VortexLattice, determines when to use the
+            symmetric,
+            surface_id, # in vanilla VortexLattice, determines when to use the
                                      # finite core model (we always use the finite core model
                                      # in FLOWUnsteady so this parameter shouldn't have any duplicate indices)
-            trailing_vortices = trailing_vortices, # ::Vector{Bool} tells which surfaces should use semiinfinite horseshoes
-            xhat = xhat                            # only used if semi-infinite horseshoes are used
+            trailing_vortices, # ::Vector{Bool} tells which surfaces should use semiinfinite horseshoes
+            xhat,                            # only used if semi-infinite horseshoes are used
+            trailing_edge=true
         )
 
     #--- update the influence matrix to use the new wake shedding locations ---# actually, I don't need this function
@@ -948,23 +979,48 @@ function solve_boundary!(model::VortexLatticeModel, dt)
     return nothing
 end
 
-function prepare_surface_on_all!(model::VortexLatticeModel)
+function prepare_surface_on_all!(model::VortexLatticeModel{<:Any,Quasisteady,<:Any,<:Any}) where Quasisteady
 
     #--- unpack model---#
 
-    fmm_panels = model.vlm_system.fmm_panels
+    filaments = model.vlm_system.filaments
     surfaces = model.vlm_system.surfaces
-    wake_shedding_locations = model.vlm_system.wake_shedding_locations
+    wake_shedding_locations = nothing
     Γ = model.vlm_system.Γ
+    dΓdt = model.vlm_system.dΓdt
     fmm_velocity_probes = model.vlm_system.fmm_velocity_probes
+    trailing_vortices = model.vlm_system.trailing_vortices
 
     #--- update fmm_panels ---#
 
-    vlm.update_fmm_panels!(fmm_panels, surfaces, wake_shedding_locations, Γ, transition_panels=false)
+    # trailing_edge=true doesn't change vanilla behavior, but =false prevents trailing edge influence
+    vlm.update_filaments!(filaments, surfaces, wake_shedding_locations, Γ, dΓdt; trailing_edge=!Quasisteady, trailing_vortices)
 
 end
 
-function surface_on_all!(model::VortexLatticeModel{<:Any,<:Any,<:VortexParticleModel,FMM}) where FMM
+function surface_on_all!(model::VortexLatticeModel{<:Any,true,<:Any,FMM}) where FMM
+
+    # unpack model
+    fmm_velocity_probes = model.vlm_system.fmm_velocity_probes
+    system = model.vlm_system
+    filaments = system.filaments
+    surfaces = system.surfaces
+    Γ = system.Γ
+    trailing_vortices = system.trailing_vortices
+    xhat = system.xhat[]
+    symmetric = system.symmetric
+
+    # surface panel influence on the probes
+    if FMM
+        @warn "FMM requested, but is not supported for quasisteady `::VortexLatticeModel{..,true,..,..}`"
+    end
+
+    fmm.direct!(fmm_velocity_probes, filaments; scalar_potential=false, vector_potential=false, velocity=true, velocity_gradient=false)
+
+end
+
+
+function surface_on_all!(model::VortexLatticeModel{<:Any,false,<:VortexParticleModel,FMM}) where FMM
 
     #--- all elements ---#
 
@@ -972,11 +1028,15 @@ function surface_on_all!(model::VortexLatticeModel{<:Any,<:Any,<:VortexParticleM
 
     #--- surface ---#
 
-    surface = model.vlm_system
+    surface = model.vlm_system.filaments
 
     #--- surface-on-all computation ---#
 
     scalar_potential, vector_potential, velocity, velocity_gradient = requires_potential(all)
+
+    #--- turn off velocity gradient for the particle field ---#
+
+    velocity_gradient = (velocity_gradient[1], false)
 
     if FMM
 
@@ -996,12 +1056,43 @@ function surface_on_all!(model::VortexLatticeModel{<:Any,<:Any,<:VortexParticleM
 
 end
 
-function shed_wake!(model::VortexLatticeModel{TF,<:Any,<:VortexParticleModel,<:Any}, dt, i_step) where TF
+function update_trailing_edge_wake!(trailing_edge_wake_filaments::Vector{vlm.VortexFilament{TF}}, surfaces::Vector{<:Matrix{<:vlm.SurfacePanel}}, Γ) where TF
+    i_filament = 0
+    i_Γ = 0
+    for surface in surfaces
+
+        nc, ns = size(surface)
+        for j in 1:ns
+
+            # get circulation
+            i_Γ += nc
+            γ = Γ[i_Γ]
+
+            # unpack filament
+            i_filament += 1
+            filament = trailing_edge_wake_filaments[i_filament]
+            x1 = surface[nc,j].rbl
+            x2 = surface[nc,j].rbr
+            core_size = surface[nc,j].core_size
+            trailing_edge_wake_filaments[i_filament] = vlm.VortexFilament(x1, x2, γ, zero(TF), core_size)
+
+        end
+    end
+end
+
+function shed_wake!(model::VortexLatticeModel{<:Any,true,<:Any,<:Any}, dt, i_step)
+    return nothing
+end
+
+function shed_wake!(model::VortexLatticeModel{TF,false,<:VortexParticleModel,<:Any}, dt, i_step) where TF
 
     #--- unpack model ---#
 
     toggle_wake = model.toggle_wake
-    trailing_edge_probes = model.trailing_edge_probes
+    eta_wake = model.eta_wake
+    Vte = model.vlm_system.Vte
+    fmm_velocity_probes = model.vlm_system.fmm_velocity_probes
+    trailing_edge_wake_filaments = model.trailing_edge_wake_filaments
     shed_starting = model.wake.shed_starting
     threshold_trailing_gamma_max = model.wake.threshold_trailing_gamma_max
     threshold_trailing_gamma_min = model.wake.threshold_trailing_gamma_min
@@ -1025,9 +1116,9 @@ function shed_wake!(model::VortexLatticeModel{TF,<:Any,<:VortexParticleModel,<:A
 
     #--- shed particles ---#
 
-    i_last_probe = 0
+    i_last_probe = n_control_points + n_surface_filaments
     iΓ = 0
-    for (surface, toggle) in zip(surfaces, toggle_wake)
+    for (surface, vte, toggle) in zip(surfaces, Vte, toggle_wake)
         nc, ns = size(surface)
         if toggle
             Γ_last = zero(TF)
@@ -1043,15 +1134,17 @@ function shed_wake!(model::VortexLatticeModel{TF,<:Any,<:VortexParticleModel,<:A
 
                 # left trailing vortex
                 i_last_probe += 1
-                x1 = trailing_edge_probes.position[i_last_probe]
+                x1 = panel.rbl + dt * (vte[i_te] + fmm_velocity_probes.velocity[i_last_probe]) * eta_wake
                 x2 = panel.rbl
                 add_line!(wake.particle_field, x1, x2, p_per_step_trailing, Γ_magnitude - Γ_last, trailing_args...)
 
                 # unsteady loading
                 if i_step > 1 || shed_starting
+                    # σ = norm(x2 - x1) * (1 + overlap_unsteady)
+                    σ_max = norm(x2 - x1) # don't let particles have a smoothing radius bigger than the distance to the trailing edge
                     x2 = x1
-                    x1 = trailing_edge_probes.position[i_last_probe+1]
-                    add_line!(wake.particle_field, x1, x2, p_per_step_unsteady, dΓdt_magnitude * dt, unsteady_args...)
+                    x1 = panel.rbr + dt * (vte[i_te+1] + fmm_velocity_probes.velocity[i_last_probe+1])
+                    add_line!(wake.particle_field, x1, x2, p_per_step_unsteady, dΓdt_magnitude * dt, unsteady_args...; σ_max)#; overwrite_sigma=σ)
                 end
 
                 # recurse
@@ -1060,21 +1153,28 @@ function shed_wake!(model::VortexLatticeModel{TF,<:Any,<:VortexParticleModel,<:A
 
             # rightmost trailing vortex
             panel = surface[nc,end]
-            x1 = panel.rbr
             i_last_probe += 1
-            x2 = trailing_edge_probes.position[i_last_probe]
+            x1 = panel.rbr
+            x2 = x1 + dt * (vte[ns+1] + fmm_velocity_probes.velocity[i_last_probe]) * eta_wake
             add_line!(wake.particle_field, x1, x2, p_per_step_trailing, Γ_last, trailing_args...)
         else
             i_last_probe += ns + 1
         end
+
     end
+
+    #--- place trailing edge wake vortices ---#
+
+    update_trailing_edge_wake!(trailing_edge_wake_filaments, surfaces, Γ)
+
 end
 
-function forces!(model::VortexLatticeModel)
+function forces!(model::VortexLatticeModel{<:Any,Quasisteady,<:Any}) where Quasisteady
 
     #--- unpack model ---#
 
     vlm_system = model.vlm_system
+    filaments = model.vlm_system.filaments
     surfaces = vlm_system.surfaces
     props = vlm_system.properties
     wakes = vlm_system.wakes
@@ -1092,9 +1192,9 @@ function forces!(model::VortexLatticeModel)
     nwake = vlm_system.nwake
     surface_id = vlm_system.surface_id
     wake_finite_core = vlm_system.wake_finite_core
-    wake_shedding_locations = vlm_system.wake_shedding_locations
+    wake_shedding_locations = nothing
     trailing_vortices = vlm_system.trailing_vortices
-    xhat = vlm_system.xhat
+    xhat = vlm_system.xhat[]
     vertical_segments = true
 
     #--- calculate forces ---#
@@ -1126,26 +1226,34 @@ Replace the vortex filament defined by `x1` and `x2` with evenly spaced vortex p
 * `gamma_min::Float64`: if the requested particle has a strength magnitude less than or equal to `gamma_min`, it is omitted
 
 """
-@inline function add_line!(wake::vpm.ParticleField, x1, x2, n_particles::Int, Γ_magnitude, overlap, gamma_max, gamma_min)
+@inline function add_line!(wake::vpm.ParticleField, x1, x2, n_particles::Int, Γ_magnitude, overlap, gamma_max, gamma_min; σ_max=Inf, overwrite_sigma=nothing)
 
     # strength and radius
-    Δx = (x2 - x1) / n_particles # distance vector spanned by a single particle
+    Δx = x2 - x1 # distance vector spanned by a single particle
     Δx_norm = norm(Δx)
-    σ = Δx_norm / 2 * (1 + overlap) # divide by 2 to get a radius rather than a diameter
-    Γ = Γ_magnitude * Δx # strength of a single particle
+    σ = Δx_norm * (1 + overlap) / (2 * n_particles) # divide by 2 to get a radius rather than a diameter
+    if σ > σ_max
+        n_particles = Int(ceil(Δx_norm / (2*σ_max) * (1 + overlap)))
+        σ = Δx_norm * (1 + overlap) / (2 * n_particles) # divide by 2 to get a radius rather than a diameter
+    end
+
+    # in case overwrite is provided
+    !isnothing(overwrite_sigma) && (σ = overwrite_sigma) # divide by 2 to get a radius rather than a diameter
 
     # shed particles
-    X = x1 + Δx/2
-    for _ in 1:n_particles
-        if gamma_min < abs(Δx_norm * Γ_magnitude) < gamma_max
+    if gamma_min < abs(Δx_norm * Γ_magnitude) < gamma_max
+        Γ = Γ_magnitude * Δx / n_particles # strength of a single particle
+        δ = Δx / n_particles
+        X = x1 + δ / 2
+        for _ in 1:n_particles
 
             # add particle
             vpm.add_particle(wake, X, Γ, σ; vol=0, circulation=1, C=0)
             # vpm.set_U(wake, vpm.get_np(wake), U)
             # vpm.set_J(wake, vpm.get_np(wake), vec(∇U))
+            X += δ
 
         end
-        X += Δx
     end
 
 end
@@ -1370,35 +1478,6 @@ function update_probes_te!(probes::fmm.ProbeSystem, surfaces, i_last)
     return i + i_last
 end
 
-"""
-    update_Vte!(Vte, probes, i_last)
-
-Add the probed velocity to each trailing edge point.
-
-# Arguments
-
-* `Vte::Vector{Vector{SVector{3,Float64}}}`: vector of trailing edge velocities at each surface; this is a field in `::VortexLattice.System` objects
-* `probes::FastMultipole.ProbeSystem`: probes whose velocity is to be added to the trailing edge
-* `i_last::Int`: index of the last probe in `probes` before the trailing edge probes
-
-# Output
-
-* `i_last::Int`: index of the last trailing edge probe in `probes`
-
-"""
-function update_Vte!(Vte, probes, i_last)
-    i = 0
-    for vte in Vte # loop over surfaces
-        for i_corner in eachindex(vte) # loop over corners
-            i += 1
-            vte[i_corner] += probes.velocity[i + i_last]
-        end
-    end
-
-    # return updated i_last
-    return i + i_last
-end
-
 @inline function vlm.rotate(panel::vlm.SurfacePanel, Q::Quaternion, r = (@SVector zeros(3)))
 
     rtl = rotate(panel.rtl - r, Q) + r
@@ -1428,6 +1507,11 @@ end
     return v
 end
 
+@inline function kinematic_velocity_top!(model::VortexLatticeModel, orientation::Quaternion, velocity, angular_velocity, center_of_rotation)
+    # add kinematic velocity to xhat
+    model.vlm_system.xhat[] -= velocity
+end
+
 @inline function kinematic_velocity!(system::vlm.System, map::Int, velocity, angular_velocity, center_of_rotation)
 
     # unpack surface
@@ -1435,9 +1519,10 @@ end
     Vcp = system.Vcp[map]
     Vh = system.Vh[map]
     Vv = system.Vv[map]
-    # Vte = system.Vte[map]
+    Vte = system.Vte[map]
 
-    # apply translational velocity
+    #--- apply translational velocity ---#
+
     for i in eachindex(Vcp)
         Vcp[i] -= velocity
     end
@@ -1450,11 +1535,12 @@ end
         Vv[i] -= velocity
     end
 
-    # for i in eachindex(Vte)
-    #     Vte[i] -= velocity
-    # end
+    for i in eachindex(Vte)
+        Vte[i] -= velocity
+    end
 
     #--- apply rotational velocity ---#
+
     nc, ns = size(surface)
 
     # at control points
@@ -1483,17 +1569,18 @@ end
         Vv[i,end] -= rotational_velocity(point, angular_velocity, center_of_rotation)
     end
 
-    # # at trailing edge vertices (THESE ARE USED TO DETERMINE THE NEXT WAKE SHED LOCATIONS, SO NO NEED TO INCLUDE KINEMATIC VELOCITY)
-    # for j in 1:ns
-    #     point = vlm.bottom_left(surface[end,j])
-    #     Vte[j] += rotational_velocity(point, angular_velocity, center_of_rotation)
-    # end
-    # point = vlm.bottom_right(surface[end,end])
-    # Vte[j] += rotational_velocity(point, angular_velocity, center_of_rotation)
+    # at trailing edge vertices
+    for j in 1:ns
+        point = vlm.bottom_left(surface[end,j])
+        Vte[j] += rotational_velocity(point, angular_velocity, center_of_rotation)
+    end
+    point = vlm.bottom_right(surface[end,ns])
+    Vte[ns+1] += rotational_velocity(point, angular_velocity, center_of_rotation)
+
     return nothing
 end
 
-function kinematic_velocity!(system::vlm.System, maps, velocity, angular_velocity, center_of_rotation)
+function kinematic_velocity!(system::vlm.System, maps::Vector{Int}, velocity, angular_velocity, center_of_rotation)
     for map in maps
         kinematic_velocity!(system, map, velocity, angular_velocity, center_of_rotation)
     end
@@ -1515,6 +1602,7 @@ Apply `freestream` properties to the `system`.
 
 """
 function apply!(system::vlm.System, freestream::SimpleFreestream)
+
     # unpack freestream
     velocity = freestream.velocity
     density = freestream.density
@@ -1523,36 +1611,56 @@ function apply!(system::vlm.System, freestream::SimpleFreestream)
     fs = eltype(system.freestream)(0.0, 0.0, 0.0, SVector{3}(0.0,0,0), density)
     system.freestream[] = fs
 
-    # apply freestream velocity to model control points and bound vortex centers
-    # kinematic_velocity!(system, 1:length(system.surfaces), -velocity, zero(SVector{3,Float64}), zero(SVector{3,Float64}))
+    # update xhat (for quasisteady model)
+    kinematic_velocity = system.xhat[]
+    total_velocity = kinematic_velocity + velocity
+    system.xhat[] = total_velocity / norm(total_velocity)
 
-    # apply freestream velocity to control points, bound vortex centers, and trailing edge points
-    apply!(system.fmm_velocity_probes, freestream)
-    # Vte = system.Vte
-    # for vte in Vte
-    #     for i in eachindex(vte)
-    #         vte[i] += velocity
-    #     end
-    # end
+    # control points
+    for Vcp in system.Vcp
+        for i in eachindex(Vcp)
+            Vcp[i] += velocity
+        end
+    end
 
-end
+    # horizontal bound vortices
+    for Vh in system.Vh
+        for i in eachindex(Vh)
+            Vh[i] += velocity
+        end
+    end
 
-"""
-    apply!(probes, freestream)
+    # vertical bound vortices
+    for Vv in system.Vv
+        for i in eachindex(Vv)
+            Vv[i] += velocity
+        end
+    end
 
-Apply `freestream` properties to the `probes`.
-
-# Arguments
-
-* `probes::FastMultipole.ProbeSystem`: the `probes` to which the `freestream` is to be applied
-* `freestream::SimpleFreestream`: a `FLOWUnsteady.SimpleFreestream` object
-
-"""
-function apply!(probes::fmm.ProbeSystem, freestream::SimpleFreestream)
-    for i in eachindex(probes.velocity)
-        probes.velocity[i] += freestream.velocity
+    # trailing edge corners
+    for Vte in system.Vte
+        for i in eachindex(Vte)
+            Vte[i] += velocity
+        end
     end
 end
+
+# """
+#     apply!(probes, freestream)
+#
+# Apply `freestream` properties to the `probes`.
+#
+# # Arguments
+#
+# * `probes::FastMultipole.ProbeSystem`: the `probes` to which the `freestream` is to be applied
+# * `freestream::SimpleFreestream`: a `FLOWUnsteady.SimpleFreestream` object
+#
+# """
+# function apply!(probes::fmm.ProbeSystem, freestream::SimpleFreestream)
+#     for i in eachindex(probes.velocity)
+#         probes.velocity[i] += freestream.velocity
+#     end
+# end
 
 """
     apply!(wake, freestream)
@@ -1598,15 +1706,12 @@ Apply `freestream` properties to the `model`.
 * `freestream::SimpleFreestream`: a `FLOWUnsteady.SimpleFreestream` object
 
 """
-function apply!(model::VortexLatticeModel, freestream::SimpleFreestream)
+function apply!(model::VortexLatticeModel{<:Any,<:Any,TW,<:Any}, freestream::SimpleFreestream) where TW
     # apply to vlm
     apply!(model.vlm_system, freestream)
 
-    # apply to trailing_edge_probes
-    apply!(model.trailing_edge_probes, freestream)
-
     # apply to wake
-    apply!(model.wake, freestream)
+    (TW != Nothing) && apply!(model.wake, freestream)
 
 end
 
@@ -1625,14 +1730,11 @@ function transform!(model::VortexLatticeModel, map::AbstractVector{Int}, transla
 end
 
 function transform!(model::VortexLatticeModel, dt, i_step::Int)
-    transform!(model.trailing_edge_probes, dt, i_step)
     transform!(model.wake, dt, i_step)
 end
 
-function transform!(probes::fmm.ProbeSystem, dt, i_step)
-    for (i,v) in enumerate(probes.velocity)
-        probes.position[i] = probes.position[i] + v * dt
-    end
+function transform!(::Nothing, dt, i_step)
+    return nothing
 end
 
 function transform!(wake::VortexParticleModel, dt, i_step::Int)
@@ -1742,6 +1844,10 @@ function visualize(wake::VortexParticleModel, i=nothing, t=nothing; name_prefix=
     visualize(wake.particle_field, i, t; name_prefix, path)
 end
 
+function visualize(wake::Nothing, i, t; kwargs...)
+    return nothing
+end
+
 function visualize(wake::vpm.ParticleField, i::Union{Nothing,Int}=nothing, t::Union{Nothing,Float64}=nothing; name_prefix="default", path="./")
     name_suffix = "_particlefield"
     kwargs = isnothing(i) ? () : (add_num=true, num=i)
@@ -1767,10 +1873,8 @@ function initialize_history(model::VortexLatticeModel, save_steps, omit_fields)
     net_surface_moment_history = zeros(3, n_surfaces, n_steps)
 
     # save force distributions on each surface
-    surface_force_top_history = Tuple(zeros(3, size(surface)..., n_steps) for surface in model.vlm_system.surfaces)
-    surface_force_vertical_history = Tuple(zeros(3, size(surface,1), size(surface,2)+1, n_steps) for surface in model.vlm_system.surfaces)
-    surface_x_top_history = Tuple(zeros(3, size(surface)..., n_steps) for surface in model.vlm_system.surfaces)
-    surface_x_vertical_history = Tuple(zeros(3, size(surface)..., n_steps) for surface in model.vlm_system.surfaces)
+    surface_force_history = Tuple(zeros(3, size(surface,1) * size(surface,2) * 2 + size(surface,1) + size(surface,2), n_steps) for surface in model.vlm_system.surfaces)
+    surface_x_history = Tuple(zeros(3, size(surface,1) * size(surface,2) * 2 + size(surface,1) + size(surface,2), n_steps) for surface in model.vlm_system.surfaces)
 
     # assemble output
     history = (
@@ -1778,13 +1882,11 @@ function initialize_history(model::VortexLatticeModel, save_steps, omit_fields)
         vehicle_moment = vehicle_moment_history,
         net_surface_force = net_surface_force_history,
         net_surface_moment = net_surface_moment_history,
-        surface_force_top = surface_force_top_history,
-        surface_force_vertical = surface_force_vertical_history,
-        surface_x_top = surface_x_top_history,
-        surface_x_vertical = surface_x_vertical_history,
+        surface_force = surface_force_history,
+        surface_x = surface_x_history,
     )
 
-    fields = (:vehicle_force, :vehicle_moment, :net_surface_force, :net_surface_moment, :surface_force_top, :surface_force_vertical, :surface_x_top, :surface_x_vertical)
+    fields = (:vehicle_force, :vehicle_moment, :net_surface_force, :net_surface_moment, :surface_force, :surface_x)
 
     return history, fields
 end
@@ -1804,56 +1906,19 @@ function update_history!(history, model::VortexLatticeModel, i_step)
         history[:vehicle_moment][i,i_step] = sum(view(history[:net_surface_moment],i,:,i_step))
     end
 
-    # sectional top forces
-    for (i_surface, surface) in enumerate(model.vlm_system.properties)
-        for j in 1:size(surface,2)
-            for i in 1:size(surface,1)
+    #--- sectional forces and positions ---#
 
-                # bound vortex
-                history[:surface_force_top][i_surface][:,i,j,i_step] .= surface[i,j].cfb
-            end
-        end
-    end
+    # get lifting line positions and chords
+    # rs = [get_lifting_line_rc
 
-    # sectional vertical forces
-    for (i_surface, surface) in enumerate(model.vlm_system.properties)
-        for j in 1:size(surface,2)
-            for i in 1:size(surface,1)
-                # left vortex
-                history[:surface_force_vertical][i_surface][:,i,j,i_step] .= surface[i,j].cfl
-            end
-        end
-    end
-    for (i_surface, surface) in enumerate(model.vlm_system.properties)
-        for j in 1:size(surface,2)
-            for i in 1:size(surface,1)
-                # right vortex
-                history[:surface_force_vertical][i_surface][:,i,j+1,i_step] .= surface[i,j].cfr
-            end
-        end
-    end
-
-    # sectional top positions
-    for (i_surface, surface) in enumerate(model.vlm_system.surfaces)
-        for j in 1:size(surface,2)
-            for i in 1:size(surface,1)
-                # bound vortex
-                history[:surface_x_top][i_surface][:,i,j,i_step] .= surface[i,j].rtc
-            end
-        end
-    end
-
-    # sectional vertical positions
-    for (i_surface, surface) in enumerate(model.vlm_system.surfaces)
-        for j in 1:size(surface,2)
-            for i in 1:size(surface,1)
-                # left vortex
-                history[:surface_x_vertical][i_surface][:,i,j,i_step] .= (surface[i,j].rtl + surface[i,j].rbl)/2
-            end
-        end
-        for i in 1:size(surface,1)
-            history[:surface_x_vertical][i_surface][:,i,end,i_step] .= (surface[i,end].rtr + surface[i,end].rbr)/2
-        end
-    end
+    # i_filament = 0
+    # for (i_surface, surface) in enumerate(model.vlm_system.surfaces)
+    #     nc, ns = size(surface)
+    #     for i in 1:nc*ns*2+nc+ns
+    #         i_filament += 1
+    #         history[:surface_force][i_surface][:,i,i_step] .= model.vlm_system.filament_properties[i_filament].cf
+    #         history[:surface_x][i_surface][:,i,i_step] .= model.vlm_system.filaments[i_filament].xc
+    #     end
+    # end
 
 end

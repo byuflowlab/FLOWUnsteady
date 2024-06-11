@@ -99,7 +99,6 @@ function simulate!(simulation::Simulation, time_range;
         preprocessor(simulation, current_time, run_name, path)
 
         #--- time integration scheme and postprocessing after solving, before advancing the timestep ---#
-
         integrate_time!(vehicle, freestream, controller, postprocessor, current_time, next_time, i_step, run_name, path, integrator)
 
         #--- increment time ---#

@@ -586,7 +586,18 @@ Dispatch of `kinematic_velocity!` for a `<:RigidBodyState`.
 
 """
 function kinematic_velocity!(model::AbstractModel, state::Array{<:RigidBodyState,0})
-    kinematic_velocity!(model, state[], ())
+    # calculate the kinematic velocity
+    this_substate = state[]
+    orientation = this_substate.state.orientation
+    velocity = this_substate.state.velocity
+    angular_velocity = this_substate.state.angular_velocity
+    center_of_rotation = this_substate.state.position
+
+    # apply vehicle level state to the system level of the model
+    kinematic_velocity_top!(model, orientation, velocity, angular_velocity, center_of_rotation)
+
+    # apply state and substates to each part of the model
+    kinematic_velocity!(model, this_substate, ())
 end
 
 function kinematic_velocity!(model::AbstractModel, state::RigidBodyState, substate_index::NTuple{<:Any,Int64})

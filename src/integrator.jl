@@ -19,16 +19,16 @@ function integrate_time!(vehicle, freestream, controller, postprocessor, current
         throw("Found nans! after control!")
     end
 
-    # apply freestream velocity to the model
-    apply!(vehicle, freestream, current_time)
-    if isnan(vehicle)
-        throw("Found nans! after apply!")
-    end
-
     # apply kinematic velocity to the model
     kinematic_velocity!(vehicle)
     if isnan(vehicle)
         throw("Found nans! after kinematic_velocity!")
+    end
+
+    # apply freestream velocity to the model
+    apply!(vehicle, freestream, current_time)
+    if isnan(vehicle)
+        throw("Found nans! after apply!")
     end
 
     # solve models
@@ -53,6 +53,12 @@ function integrate_time!(vehicle, freestream, controller, postprocessor, current
     transform!(vehicle, dt, i_step)
     if isnan(vehicle)
         throw("Found nans! after transform!")
+    end
+
+    # shed new wake elements for the next timestep
+    shed_wake!(vehicle, dt, i_step)
+    if isnan(vehicle)
+        throw("Found nans! after shed_wake")
     end
 
 end
