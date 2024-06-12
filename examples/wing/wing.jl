@@ -17,7 +17,7 @@
 
 using Pkg
 this_dir = @__DIR__
-FLOWUnsteady_dir = normpath(joinpath(this_dir,".."))
+FLOWUnsteady_dir = normpath(joinpath(this_dir,"../.."))
 Pkg.activate(FLOWUnsteady_dir)
 
 using FLOWUnsteady
@@ -68,7 +68,7 @@ function construct_simulation(time_range, alpha;
     freestream=SimpleFreestream(vinf * SVector{3}(-cos(alpha),0,-sin(alpha))) # in North-East-down coordinates
 
     # construct vehicle
-    vlm_system = construct_weber_vlm_system(; ns, nc)
+    vlm_system = construct_vlm_system(; ns, nc)
     model = VortexLatticeModel(vlm_system; Quasisteady, max_timesteps=length(time_range), model_kwargs...)
     vehicle = RigidBodyVehicle(model; dynamic, orientation, velocity, model_coordinates=Aerodynamics(), vehicle_coordinates=FlightDynamics())
     controller = PrescribedKinematics()
@@ -95,8 +95,8 @@ end
 save_path = normpath(joinpath(this_dir,"results"))
 !isdir(save_path) && mkdir(save_path)
 model_kwargs = (eta_wake=1.0, overlap_trailing=0.4, FMM=false, Quasisteady=false, ns=10,nc=5, p_per_step_trailing=1, p_per_step_unsteady=1, threshold_unsteady_gamma_min=0.001)
-sim = run_simulation(save_path; time_range=range(0.0,stop=0.1,length=2), run_simulations=true, model_kwargs)
-# sim = run_simulation(save_path; time_range=range(0.0,step=0.001,length=151), run_simulations=true, model_kwargs)
+# sim = run_simulation(range(0.0,stop=0.1,length=2), deg2rad(4.2), "wing", save_path; model_kwargs...)
+sim = run_simulation(range(0.0,step=0.001,length=151), deg2rad(4.2), "wing", save_path; model_kwargs...)
 
 # import FLOWUnsteady as uns
 # import FLOWVLM as vlm
