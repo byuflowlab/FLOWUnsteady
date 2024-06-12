@@ -15,6 +15,7 @@ docs/site/
 *.bson
 *.xmf
 *.h5
+*.pvd
 
 examples/rotornoise/singlerotor-*
 docs/resources/images/sponsors/*.png

@@ -95,8 +95,8 @@ end
 save_path = normpath(joinpath(this_dir,"results"))
 !isdir(save_path) && mkdir(save_path)
 model_kwargs = (eta_wake=1.0, overlap_trailing=0.4, FMM=false, Quasisteady=false, ns=10,nc=5, p_per_step_trailing=1, p_per_step_unsteady=1, threshold_unsteady_gamma_min=0.001)
-# sim = run_simulation(range(0.0,stop=0.1,length=2), deg2rad(4.2), "wing", save_path; model_kwargs...)
-sim = run_simulation(range(0.0,step=0.001,length=151), deg2rad(4.2), "wing", save_path; model_kwargs...)
+sim = run_simulation(range(0.0,stop=0.1,length=2), deg2rad(4.2), "wing", save_path; model_kwargs...)
+# sim = run_simulation(range(0.0,step=0.001,length=151), deg2rad(4.2), "wing", save_path; model_kwargs...)
 
 # import FLOWUnsteady as uns
 # import FLOWVLM as vlm
