@@ -13,6 +13,7 @@ module FLOWUnsteady
 # ------------ GENERIC MODULES -------------------------------------------------
 
 using StaticArrays
+using RecipesBase
 
 # ------------ FLOW CODES ------------------------------------------------------
 
@@ -74,4 +75,5 @@ export Simulation, AbstractPreprocessor, DefaultPreprocessor, AbstractPostproces
 # VPM utilities
 # include(joinpath(vpm.utilities_path, "utilities_fluiddomain.jl"))
 
+include("plotrecipes.jl")
 end # END OF MODULE
