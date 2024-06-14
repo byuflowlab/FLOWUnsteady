@@ -1142,9 +1142,19 @@ function shed_wake!(model::VortexLatticeModel{TF,false,<:VortexParticleModel,<:A
                 if i_step > 1 || shed_starting
                     # σ = norm(x2 - x1) * (1 + overlap_unsteady)
                     σ_max = norm(x2 - x1) # don't let particles have a smoothing radius bigger than the distance to the trailing edge
-                    x2 = x1
-                    x1 = panel.rbr + dt * (vte[i_te+1] + fmm_velocity_probes.velocity[i_last_probe+1])
-                    add_line!(wake.particle_field, x1, x2, p_per_step_unsteady, dΓdt_magnitude * dt, unsteady_args...; σ_max)#; overwrite_sigma=σ)
+
+                    c1 = x1
+                    x1 = (panel.rbr + panel.rbl)/2
+                    c2 = panel.rbr + dt * (vte[i_te+1] + fmm_velocity_probes.velocity[i_last_probe+1]) * eta_wake
+                    x2 = (c1+c2)/2
+
+                    gamma_hat = panel.rbl - panel.rbr
+                    gamma_hat /= norm(gamma_hat)
+                    add_line!(wake.particle_field, x1, x2, p_per_step_unsteady, dΓdt_magnitude * dt, unsteady_args...;gamma_hat)#; overwrite_sigma=σ)
+
+                    # x2 = x1
+                    # x1 = panel.rbr + dt * (vte[i_te+1] + fmm_velocity_probes.velocity[i_last_probe+1])
+                    # add_line!(wake.particle_field, x1, x2, p_per_step_unsteady, dΓdt_magnitude * dt, unsteady_args...; σ_max)#; overwrite_sigma=σ)
                 end
 
                 # recurse
@@ -1226,7 +1236,7 @@ Replace the vortex filament defined by `x1` and `x2` with evenly spaced vortex p
 * `gamma_min::Float64`: if the requested particle has a strength magnitude less than or equal to `gamma_min`, it is omitted
 
 """
-@inline function add_line!(wake::vpm.ParticleField, x1, x2, n_particles::Int, Γ_magnitude, overlap, gamma_max, gamma_min; σ_max=Inf, overwrite_sigma=nothing)
+@inline function add_line!(wake::vpm.ParticleField, x1, x2, n_particles::Int, Γ_magnitude, overlap, gamma_max, gamma_min; σ_max=Inf, overwrite_sigma=nothing, gamma_hat=nothing)
 
     # strength and radius
     Δx = x2 - x1 # distance vector spanned by a single particle
@@ -1243,6 +1253,7 @@ Replace the vortex filament defined by `x1` and `x2` with evenly spaced vortex p
     # shed particles
     if gamma_min < abs(Δx_norm * Γ_magnitude) < gamma_max
         Γ = Γ_magnitude * Δx / n_particles # strength of a single particle
+        !isnothing(gamma_hat) && (Γ = norm(Γ) * gamma_hat)
         δ = Δx / n_particles
         X = x1 + δ / 2
         for _ in 1:n_particles
