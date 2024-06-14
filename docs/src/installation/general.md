@@ -69,9 +69,9 @@ Optionally, you may also want to test these packages for installation issues usi
     * Make sure that things are in place in your Julia settings. Having things like Conda, HDF5, etc. on your machine doesn't necessarily mean that the Julia implementation has them as well.
 
 
-## Add FLOWUnsteady
+## FLOWUnsteady
 
-You are now ready to install the FLOWUnsteady package. Type this in the Julia REPL:
+You are now ready to install the FLOWUnsteady package. In the Julia REPL, use the Julia command:
 
 ```
 ] add https://github.com/byuflowlab/FLOWUnsteady
