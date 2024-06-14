@@ -91,6 +91,20 @@ function (postprocessor::ParaviewOutput)(vehicle, controller, time, i_step, run_
     end
 end
 
+#------- Null Postprocessor -------#
+
+"""
+    NullPostProcessor <: AbstractPostprocessor
+
+Functor used for the default postprocessor
+
+"""
+struct NullPostprocessor <: AbstractPostprocessor
+end
+
+function (postprocessor::NullPostprocessor)(vehicle, controller, time, i_step, run_name, path)
+end
+
 #------- MultiPostprocessor -------#
 
 """

@@ -50,7 +50,7 @@ function Simulation(vehicle, time_range;
             initializer=DefaultInitializer(),
             preprocessor=DefaultPreprocessor(),
             integrator=ForwardEuler(),
-            postprocessor=DefaultPostprocessor(vehicle, time_range),
+            postprocessor=NullPostprocessor(),
             i_step=0
         )
     i_step_container = Array{Int,0}(undef)
@@ -186,4 +186,3 @@ end
 function visualize(sim::Simulation, i::Union{Nothing,Int}=nothing; name_prefix="default", path="")
     visualize(sim.vehicle, i, sim.time[]; name_prefix, path)
 end
-
