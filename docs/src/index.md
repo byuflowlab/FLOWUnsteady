@@ -131,7 +131,7 @@ the different stages of design.
   > *• Maneuvering vehicle with prescribed kinematics*
   >
   > **rVPM Solver:**
-  > *Fast-multipole acceleration through [ExaFMM](https://joss.theoj.org/papers/10.21105/joss.03145)*
+  > *Fast-multipole acceleration*
   > *• CPU parallelization through OpenMP*
   > *• Second-order spatial accuracy and third-order RK time integration*
   > *• Numerically stable by reshaping particles subject to vortex stretching*

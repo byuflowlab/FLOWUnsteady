@@ -23,7 +23,7 @@ makedocs(
                 "Intro"         => "index.md",
 
                 "Installation"  => "installation/general.md",
-#                 hide("installation/windows.md"),
+                hide("installation/windows.md"),
 #
 #                 "Tutorials"     => [
 #                                     "Simple Wing" => [
@@ -59,12 +59,12 @@ makedocs(
 #                                     "examples/openvsp-aircraft.md"
 #                                     ],
 #                 "Visualization" => "visualization.md",
-#                 "Theory"        => [
-#                                     "theory/rvpm.md"
-#                                     "theory/convergence.md"
-#                                     "theory/validation.md"
-#                                     "theory/publications.md"
-#                                    ],
+                "Theory"        => [
+                                    "theory/rvpm.md"
+                                    "theory/convergence.md"
+                                    "theory/validation.md"
+                                    "theory/publications.md"
+                                   ],
 #                 "API Guide"     => [
 #                                     "(1) Vehicle Definition" => [
 #                                                                 "api/flowunsteady-vehicle-types.md",
