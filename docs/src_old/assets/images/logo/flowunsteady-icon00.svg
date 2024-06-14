@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="97mm"
+   height="97mm"
+   viewBox="0 0 96.999998 97"
+   version="1.1"
+   id="svg59133"
+   inkscape:version="1.1.2 (0a00cf5339, 2022-02-04)"
+   sodipodi:docname="flowunsteady-icon00.svg"
+   inkscape:export-filename="/home/edoalvar/Dropbox/WhisperAero/FLOWCodes/FLOWUnsteady/docs/resources/images/logo/flowunsteady-logo-stacked02.png"
+   inkscape:export-xdpi="72.05864"
+   inkscape:export-ydpi="72.05864"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview59135"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="0.5499273"
+     inkscape:cx="-136.38166"
+     inkscape:cy="176.38695"
+     inkscape:window-width="1600"
+     inkscape:window-height="873"
+     inkscape:window-x="0"
+     inkscape:window-y="27"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0" />
+  <defs
+     id="defs59130">
+    <linearGradient
+       id="linearGradient80862"
+       inkscape:swatch="solid">
+      <stop
+         style="stop-color:#e1e1e1;stop-opacity:1;"
+         offset="0"
+         id="stop80860" />
+    </linearGradient>
+    <rect
+       x="2193.3223"
+       y="2679.7756"
+       width="14423.962"
+       height="3984.3235"
+       id="rect4005-5-36" />
+    <filter
+       inkscape:label="Opacity"
+       style="color-interpolation-filters:sRGB"
+       id="filter57566"
+       x="0"
+       y="0"
+       width="1"
+       height="1">
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 5 -1 "
+         result="colormatrix"
+         id="feColorMatrix57562" />
+      <feComposite
+         in2="colormatrix"
+         operator="arithmetic"
+         k2="0.362658"
+         result="composite"
+         id="feComposite57564"
+         k1="0"
+         k3="0"
+         k4="0" />
+    </filter>
+    <filter
+       style="color-interpolation-filters:sRGB"
+       inkscape:label="Color Shift"
+       id="filter63229"
+       x="0"
+       y="0"
+       width="1"
+       height="1">
+      <feColorMatrix
+         values="1 -0.1 -0.1 0 0 -0.1 1 -0.1 0 0 -0.1 -0.1 1 0 0 0 0 0 1 0 "
+         id="feColorMatrix63227"
+         result="fbSourceGraphic" />
+      <feColorMatrix
+         result="fbSourceGraphicAlpha"
+         in="fbSourceGraphic"
+         values="0 0 0 -1 0 0 0 0 -1 0 0 0 0 -1 0 0 0 0 1 0"
+         id="feColorMatrix63963" />
+      <feColorMatrix
+         id="feColorMatrix63965"
+         type="hueRotate"
+         values="0"
+         result="color1"
+         in="fbSourceGraphic" />
+      <feColorMatrix
+         id="feColorMatrix63967"
+         type="saturate"
+         values="0.800887"
+         result="color2" />
+    </filter>
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-72.987742,83.058196)">
+    <image
+       width="59.301598"
+       height="58.313244"
+       preserveAspectRatio="none"
+       xlink:href="circularpath00.png"
+       id="image28765-3"
+       x="73.886383"
+       y="-50.732716"
+       style="filter:url(#filter63229)"
+       transform="matrix(-1.6284687,0,0,1.6284687,289.8802,-0.4415562)" />
+  </g>
+</svg>

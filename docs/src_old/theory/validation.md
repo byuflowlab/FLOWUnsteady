@@ -112,7 +112,7 @@ using FLOWUnsteady.
 NOTE: The broadband results in E. J. Alvarez, A. Schenk, T. Critchfield, and
 A. Ning, 2020[^7] contained a bug that ended up evaluating the microphone array
 in the wrong plane, which led to a large discrepancy in A-weighted
-OASPL. These results have since been updated in the tutorials.
+OASPL. For updated results, see the [Rotor in Hover tutorial](@ref rotorhovernoise).
 
 #### Forward Flight Case
 
