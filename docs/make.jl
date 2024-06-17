@@ -65,7 +65,12 @@ makedocs(
                                     "theory/validation.md"
                                     "theory/publications.md"
                                    ],
-#                 "API Guide"     => [
+                "API Guide"     => [
+                                    "api/initializer.md",
+                                    "api/state.md",
+                                    "api/integrator.md",
+                                    "api/model.md",
+                                    "api/postprocessing.md",
 #                                     "(1) Vehicle Definition" => [
 #                                                                 "api/flowunsteady-vehicle-types.md",
 #                                                                 "api/flowunsteady-vehicle-components.md",
@@ -76,11 +81,8 @@ makedocs(
 #                                     "api/flowunsteady-simulation.md",
 #                                     "api/flowunsteady-monitor.md",
 #                                     "api/flowunsteady-run.md",
-#                                     "(6) Viz and Postprocessing" => [
-#                                                                 "api/flowunsteady-postprocessing-fdom.md",
-#                                                                 "api/flowunsteady-postprocessing-noise.md",
-#                                                                 "api/flowunsteady-postprocessing-misc.md",
-#                                                                 ],
+#                                   "Viz and Postprocessing" => [
+#                                                               ],
 #                                     "Extras" => [
 #                                                 "FLOWVPM"  => [
 #                                                                 "api/flowvpm-particle.md",
@@ -92,7 +94,7 @@ makedocs(
 #                                                                 "api/flowvpm-utils.md",
 #                                                                ]
 #                                                 ]
-#                                    ],
+                                   ],
             ]
 )
 
