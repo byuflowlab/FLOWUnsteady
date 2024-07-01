@@ -26,15 +26,15 @@ const clrs = [
 
 function formatpyplot()
     # Fonts
-    plt.rc("font", family="STIXGeneral")            # Text font
-    plt.rc("mathtext", fontset="stix")              # Math font
-    plt.rc("font", size=12)          # controls default text sizes
-    plt.rc("axes", titlesize=12)     # fontsize of the axes title
-    plt.rc("axes", labelsize=14)     # fontsize of the x and y labels
-    plt.rc("xtick", labelsize=12)    # fontsize of the tick labels
-    plt.rc("ytick", labelsize=12)    # fontsize of the tick labels
-    plt.rc("legend", fontsize=12)    # legend fontsize
-    plt.rc("figure", titlesize=16)   # fontsize of the figure title
+    # plt.rc("font", family="STIXGeneral")            # Text font
+    # plt.rc("mathtext", fontset="stix")              # Math font
+    # plt.rc("font", size=12)          # controls default text sizes
+    # plt.rc("axes", titlesize=12)     # fontsize of the axes title
+    # plt.rc("axes", labelsize=14)     # fontsize of the x and y labels
+    # plt.rc("xtick", labelsize=12)    # fontsize of the tick labels
+    # plt.rc("ytick", labelsize=12)    # fontsize of the tick labels
+    # plt.rc("legend", fontsize=12)    # legend fontsize
+    # plt.rc("figure", titlesize=16)   # fontsize of the figure title
 end
 
 
