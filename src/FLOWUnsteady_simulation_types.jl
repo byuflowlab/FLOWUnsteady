@@ -121,7 +121,10 @@ function nextstep_kinematic(self::Simulation, dt)
         angles = get_angles(self.maneuver, self.t/self.ttot)
         tilt_systems(self.vehicle, angles)
 
-        self.t += dt
+	    self.t += dt
+
+        if maximum(abs.(dV)) > 10000 || maximum(abs.(dW)) > 10000 self.t = self.ttot end
+
     end
 
     self.nt += 1
