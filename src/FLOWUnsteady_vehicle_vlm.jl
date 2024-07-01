@@ -88,6 +88,14 @@ function tilt_systems(self::AbstractVLMVehicle{N,M,R}, angles::NTuple{N, Array{R
         Oaxis = gt.rotation_matrix2([-a for a in angles[i]]...)
         vlm.setcoordsystem(sys, sys.O, Oaxis)
     end
+    # for i in 1:get_ntltsys(self)
+    #     sys = self.tilting_systems[i]
+    #     Oaxis = gt.rotation_matrix2([-a for a in angles[i]]...)
+    #     for j in eachindex(sys.wings)
+    #         wing = sys.wings[j]
+    #         vlm.setcoordsystem(wing, wing.O, Oaxis)
+    #     end
+    # end
     return nothing
 end
 function tilt_systems(self::AbstractVLMVehicle{0,M,R}, angles::Tuple{})  where{M, R}
