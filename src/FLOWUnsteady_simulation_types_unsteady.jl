@@ -10,7 +10,7 @@
 
 function solve(self::Simulation{V, M, R}, Vinf::Function,
                 pfield::vpm.ParticleField, wake_coupled::Bool,
-                dt::Real, rlx::Real, sigma_vlm::Real, sigma_rotor::Real,
+                dt, rlx::Real, sigma_vlm::Real, sigma_rotor::Real,
                 rho::Real, speedofsound, staticpfield::vpm.ParticleField,
                 hubtiploss_correction;
                 init_sol::Bool=false, sigmafactor_vpmonvlm=1, debug=false
