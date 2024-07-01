@@ -36,6 +36,11 @@ import VSPGeom
 import FLOWNoise
 import BPM
 
+import DelimitedFiles as DF
+import ForwardDiff as FD
+import LinearAlgebra as LA
+import FLOWTrajectories as FT
+
 # Aliases
 const gt    = GeometricTools
 const vpm   = FLOWVPM
