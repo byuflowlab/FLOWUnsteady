@@ -30,7 +30,7 @@ vlm = FLOWUnsteady.vlm
 using Plots
 
 # construct VLM system (see VortexLattice.jl for info on VLM systems)
-function construct_vlm_system(; ns=10, nc=5)
+function construct_vlm_system(; ns=5, nc=5)
     c0 = 20*0.0254
     halfspan = 44.0/0.9 * 0.0254
     yle = [0.0, halfspan]
@@ -73,7 +73,8 @@ function construct_simulation(time_range)
 
     # postprocessor
     history = History(vehicle, controller, save_steps)
-    postprocessor = MultiPostprocessor((history,))
+    paraview = ParaviewOutput(save_steps)
+    postprocessor = MultiPostprocessor((history, paraview))
 
     # create simulation object
     sim = Simulation(vehicle, time_range;
