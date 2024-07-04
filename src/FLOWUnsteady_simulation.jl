@@ -411,8 +411,8 @@ function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs::Array{T, 1}; static_particles
 
     if length(Xs)!=0 && vpm.get_np(pfield)!=0
         # Omit freestream
-        Uinf = pfield.Uinf
-        pfield.Uinf = (t)->zeros(3)
+        # Uinf = pfield.Uinf
+        # pfield.Uinf = (t)->zeros(3) # I don't think this is used
 
         org_np = vpm.get_np(pfield)             # Original particles
 
@@ -439,7 +439,7 @@ function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs::Array{T, 1}; static_particles
         pfield.UJ(pfield)
 
         # Retrieve velocity at probes
-        Vvpm = [Array(P.U) for P in vpm.iterator(pfield; start_i=sta_np+1)]
+        Vvpm = [Array(vpm.get_U(P)) for P in vpm.iterator(pfield; start_i=sta_np+1)]
 
         # Remove static particles and probes
         for pi in vpm.get_np(pfield):-1:(org_np+1)
@@ -454,7 +454,7 @@ function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs::Array{T, 1}; static_particles
         end
 
         # Restore freestream
-        pfield.Uinf = Uinf
+        # pfield.Uinf = Uinf
     else
         Vvpm = [zeros(3) for i in 1:length(Xs)]
     end

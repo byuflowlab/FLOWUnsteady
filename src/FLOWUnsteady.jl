@@ -66,7 +66,7 @@ for header_name in ["vehicle", "vehicle_vlm",
 end
 
 # Format PyPlot
-formatpyplot()
+# formatpyplot() # run this after loading FLOWUnsteady
 
 # VPM utilities
 include(joinpath(vpm.utilities_path, "utilities_fluiddomain.jl"))

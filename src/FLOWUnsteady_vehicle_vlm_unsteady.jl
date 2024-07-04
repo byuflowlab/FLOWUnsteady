@@ -52,7 +52,7 @@ struct UVLMVehicle{N, M, R} <: AbstractVLMVehicle{N, M, R}
 
     # Optional inputs
     tilting_systems::NTuple{N, vlm.WingSystem}
-    rotor_systems::NTuple{M, Array{vlm.Rotor, 1}}
+    rotor_systems::NTuple{M, Array{vlm.Rotor{R,R}, 1}}
     vlm_system::vlm.WingSystem
     wake_system::vlm.WingSystem
     grids::Array{gt.GridTypes, 1}
@@ -62,12 +62,12 @@ struct UVLMVehicle{N, M, R} <: AbstractVLMVehicle{N, M, R}
     W::Array{R, 1}                          # Current vehicle angular velocity
     prev_data::Array{Any, 1}                # Information about previous step
     grid_O::Array{Array{R, 1}, 1}           # Origin of every grid
+end
 
-
-    UVLMVehicle{N, M, R}(
+function UVLMVehicle{N, M, R}(
                     system;
                     tilting_systems=NTuple{0, vlm.WingSystem}(),
-                    rotor_systems=NTuple{0, Array{vlm.Rotor, 1}}(),
+                    rotor_systems=NTuple{0, Array{<:vlm.Rotor, 1}}(),
                     vlm_system=vlm.WingSystem(),
                     wake_system=vlm.WingSystem(),
                     grids=Array{gt.GridTypes, 1}(),
@@ -75,17 +75,18 @@ struct UVLMVehicle{N, M, R} <: AbstractVLMVehicle{N, M, R}
                     prev_data=[deepcopy(vlm_system), deepcopy(wake_system),
                                                     deepcopy(rotor_systems)],
                     grid_O=Array{Array{R, 1}, 1}(),
-                ) where {N, M, R} = new(
-                    system,
-                    tilting_systems,
-                    rotor_systems,
-                    vlm_system,
-                    wake_system,
-                    grids,
-                    V, W,
-                    prev_data,
-                    grid_O,
-                )
+                ) where {N, M, R} 
+    return UVLMVehicle(
+        system,
+        tilting_systems,
+        rotor_systems,
+        vlm_system,
+        wake_system,
+        grids,
+        V, W,
+        prev_data,
+        grid_O,
+    )
 end
 
 """
@@ -93,19 +94,21 @@ end
 
 Constructor with implicit `N`, `M`, and `R` parameters.
 """
-UVLMVehicle(system::vlm.WingSystem;
+function UVLMVehicle(system::vlm.WingSystem;
         V::Array{R, 1}=zeros(3), W::Array{R, 1}=zeros(3),
-        tilting_systems::NTuple{N, vlm.WingSystem}=NTuple{0, vlm.WingSystem}(),
-        rotor_systems::NTuple{M, Array{vlm.Rotor, 1}}=NTuple{0, Array{vlm.Rotor, 1}}(),
+        tilting_systems::NTuple{N, <:vlm.WingSystem}=NTuple{0, <:vlm.WingSystem}(),
+        rotor_systems::NTuple{M, Array{<:vlm.Rotor, 1}}=NTuple{0, Array{<:vlm.Rotor, 1}}(),
         grids=Array{gt.GridTypes, 1}(),
         optargs...
-        ) where {N, M, R} = UVLMVehicle{N, M, R}( system;
+        ) where {N, M, R}
+        return UVLMVehicle{N, M, R}( system;
                                 V=V, W=W,
                                 tilting_systems=tilting_systems,
                                 rotor_systems=rotor_systems,
                                 grids=Array{gt.GridTypes, 1}(grids),
                                 grid_O=[zeros(R, 3) for i in 1:length(grids)],
                                 optargs...)
+end
 
 "Constructor allowing the real type to be specified."
 UVLMVehicle(system::vlm.WingSystem, R;

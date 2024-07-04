@@ -155,7 +155,7 @@ function precalculations(self::AbstractVLMVehicle, Vinf::Function,
             wing = vlm.get_wing(self.wake_system, i)
             prev_wing = vlm.get_wing(_get_prev_wake_system(self), i)
 
-            if typeof(prev_wing) != vlm.Rotor
+            if !(typeof(prev_wing) <: vlm.Rotor)
                 sol = deepcopy(prev_wing.sol["Gamma"])
             else
                 sol = deepcopy(prev_wing._wingsystem.sol["Gamma"])
@@ -167,7 +167,7 @@ function precalculations(self::AbstractVLMVehicle, Vinf::Function,
             wing = vlm.get_wing(self.vlm_system, i)
             prev_wing = vlm.get_wing(_get_prev_vlm_system(self), i)
 
-            if typeof(prev_wing) != vlm.Rotor
+            if !(typeof(prev_wing) <: vlm.Rotor)
                 sol = deepcopy(prev_wing.sol["Gamma"])
             else
                 sol = deepcopy(prev_wing._wingsystem.sol["Gamma"])
@@ -282,8 +282,8 @@ end
 Returns the local translational velocity of every midpoint in the ri-th rotor in
 the si-th system formatted as the output of `_get_midXs()`.
 """
-function _Vkinematic_rotor(rotor_systems::NTuple{M, Array{vlm.Rotor, 1}},
-                           prev_rotor_systems::NTuple{M, Array{vlm.Rotor, 1}},
+function _Vkinematic_rotor(rotor_systems::NTuple{M, Array{<:vlm.Rotor, 1}},
+                           prev_rotor_systems::NTuple{M, Array{<:vlm.Rotor, 1}},
                            si, ri, dt
                           ) where{M}
 
@@ -328,10 +328,10 @@ end
 _get_midXs(rotor::vlm.Rotor) = vcat([_get_midXs(rotor, j) for j in 1:rotor.B]...)
 
 "Returns all bound-vortex midpoints in an array of rotors"
-_get_midXs(rotors::Array{vlm.Rotor, 1}) = vcat([_get_midXs(rotor) for rotor in rotors]...)
+_get_midXs(rotors::Array{<:vlm.Rotor, 1}) = vcat([_get_midXs(rotor) for rotor in rotors]...)
 
 "Returns all bound-vortex midpoints in multiple rotor systems"
-function _get_midXs(rotor_systems::NTuple{M, Array{vlm.Rotor, 1}}) where{M}
+function _get_midXs(rotor_systems::NTuple{M, Array{<:vlm.Rotor, 1}}) where{M}
     return vcat([_get_midXs(rotors) for rotors in rotor_systems]...)
 end
 
@@ -339,7 +339,7 @@ end
 and returns the section of the array that corresponds to the ri-th rotor in the
 si-th system (formatted linearly).
 "
-function _parse_midXs(rotor_systems::NTuple{M, Array{vlm.Rotor, 1}},
+function _parse_midXs(rotor_systems::NTuple{M, Array{<:vlm.Rotor, 1}},
                         midXs::Array{Array{R, 1}}, si, ri) where{R<:Real, M}
 
     if si>length(rotor_systems) || si<=0
@@ -372,7 +372,7 @@ end
 outputs the array formatted as blades.
 """
 function _format_blades(arr::Array{Array{R, 1}, 1},
-                        rotor_systems::NTuple{M, Array{vlm.Rotor, 1}},
+                        rotor_systems::NTuple{M, Array{<:vlm.Rotor, 1}},
                         si, ri) where{R, M}
 
     rotor = rotor_systems[si][ri]
