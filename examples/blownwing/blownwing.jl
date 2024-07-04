@@ -206,8 +206,8 @@ for ri in 1:nrotors
 
     # Account for angle of attack of wing
     nrm = sqrt(x^2 + z^2)
-    x = nrm*cosd(AOAwing)
-    z = -nrm*sind(AOAwing)
+    x = (x==0 ? 1 : sign(x))*nrm*cosd(AOAwing)
+    z = -(z==0 ? 1 : sign(z))*nrm*sind(AOAwing)
 
     # Translate rotor to its position along wing
     O = [x, y, z]                                       # New position
