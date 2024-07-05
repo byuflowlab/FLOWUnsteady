@@ -25,6 +25,7 @@ import PyPlot as plt
 using PyPlot: @L_str
 using LinearAlgebra: I
 using Printf: @printf
+using StaticArrays
 
 # ------------ FLOW CODES ------------------------------------------------------
 import GeometricTools

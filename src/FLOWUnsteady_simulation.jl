@@ -145,6 +145,11 @@ function run_simulation(
             vlm_init        = false,            # Initialize the first step with the VLM semi-infinite wake solution
             hubtiploss_correction = vlm.hubtiploss_nocorrection, # Hub and tip loss correction of rotors (ignored in quasi-steady solver)
 
+            # method of images
+            mirror = false,                     # whether to mirror particles over a plane
+            mirror_X = nothing,                 # point on the plane
+            mirror_normal = nothing,            # mirror plane normal unit vector
+
             # Wake shedding
             wake_coupled        = true,         # Couple VPM wake -> VLM solution
             shed_unsteady       = true,         # Whether to shed vorticity from unsteady loading
@@ -245,7 +250,8 @@ function run_simulation(
     pfield = vpm.ParticleField(max_particles, vpm_floattype; Uinf=t->Vinf(Xdummy, t),
                                                                   vpm_solver...)
 
-    max_staticp = max_static_particles==nothing ? 3*_get_m_static(sim.vehicle) : max_static_particles
+    max_staticp = max_static_particles==nothing ? 4*_get_m_static(sim.vehicle) : max_static_particles
+    mirror && (max_staticp += max_particles)
     staticpfield = vpm.ParticleField(max_staticp, vpm_floattype; Uinf=t->Vinf(Xdummy, t),
                                                                   vpm_solver...)
 
@@ -269,7 +275,8 @@ function run_simulation(
                                     vlm_vortexsheet_distribution=vlm_vortexsheet_distribution,
                                     vlm_vortexsheet_sigma_tbv=vlm_vortexsheet_sigma_tbv,
                                     save_path=save_static_particles ? save_path : nothing,
-                                    run_name=run_name, nsteps_save=nsteps_save)
+                                    run_name=run_name, nsteps_save=nsteps_save,
+                                    mirror, mirror_X, mirror_normal)
     else
         static_particles_function = (pfield, t, dt)->nothing
     end
@@ -487,9 +494,10 @@ end
 """
 Returns the velocity induced by particle field on every position `Xs`
 """
-function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs::Array{T, 1}; static_particles_fun=(args...)->nothing, dt=0, fsgm=1) where {T}
+function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs::Array{T, 1}; static_particles_fun=(args...)->nothing, dt=0, fsgm=1,
+                    mirror=false, mirror_X=nothing, mirror_normal=nothing) where {T}
 
-    if length(Xs)!=0 && vpm.get_np(pfield)!=0
+    if length(Xs)!=0 # && vpm.get_np(pfield)!=0
         # Omit freestream
         # Uinf = pfield.Uinf
         # pfield.Uinf = (t)->zeros(3) # I don't think this is used
@@ -507,6 +515,24 @@ function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs::Array{T, 1}; static_particles
 
         # Add static particles
         static_particles_fun(pfield, pfield.t, dt)
+
+        # method of images
+        if mirror
+            mirror_np = vpm.get_np(pfield)
+            for i in 1:mirror_np
+                P = vpm.get_particle(pfield, i)
+                X = SVector{3}(get_X(P))
+                Xm = X - dot(2*(X - mirror_X), mirror_normal) * mirror_normal
+                Γ = SVector{3}(get_Gamma(P))
+                Γm = 2*dot(Γ, mirror_normal) * Γ / norm(Γ) - Γ
+                σ = get_sigma(P)[]
+                vol=get_vol(P)[]
+                circulation=get_circulation(P)[]
+                C1, C2, C3 = get_C(P)
+                static=true
+                vpm.add_particle(pfield, Xm, Γm, σ; vol, circulation, C=SVector{3}(C1,C2,C3), static)
+            end
+        end
 
         sta_np = vpm.get_np(pfield)             # Original + static particles
 
