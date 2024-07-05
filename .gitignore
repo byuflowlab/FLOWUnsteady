@@ -5,6 +5,13 @@ docs/site/
 .DS_Store
 *Manifest.toml
 *-example/
+*.h5
+*.bson
+*.xmf
+*.vts
+*.vtp
+*.vtm
+*.pvd
 
 examples/rotornoise/singlerotor-*
 docs/resources/images/sponsors/*.png
