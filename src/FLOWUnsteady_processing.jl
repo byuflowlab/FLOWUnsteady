@@ -54,8 +54,9 @@ function remove_particles_strength(minGamma2, maxGamma2; every_nsteps::Int=1)
 
             for i in vpm.get_np(PFIELD):-1:1
                 P = vpm.get_particle(PFIELD, i)
+                Gamma = vpm.get_Gamma(P)
 
-                if !(minGamma2 <= P.Gamma[1]*P.Gamma[1] + P.Gamma[2]*P.Gamma[2] + P.Gamma[3]*P.Gamma[3] <= maxGamma2)
+                if !(minGamma2 <= Gamma[1]*Gamma[1] + Gamma[2]*Gamma[2] + Gamma[3]*Gamma[3] <= maxGamma2)
                     vpm.remove_particle(PFIELD, i)
                 end
             end
@@ -97,8 +98,9 @@ function remove_particles_sigma(minsigma, maxsigma; every_nsteps::Int=1)
 
             for i in vpm.get_np(PFIELD):-1:1
                 P = vpm.get_particle(PFIELD, i)
+                sigma = vpm.get_sigma(P)
 
-                if !(minsigma <= P.sigma[1] <= maxsigma)
+                if !(minsigma <= sigma[1] <= maxsigma)
                     vpm.remove_particle(PFIELD, i)
                 end
             end
@@ -168,9 +170,10 @@ function remove_particles_sphere(Rsphere2, step::Int; Xoff=zeros(3))
 
         for i in vpm.get_np(PFIELD):-1:1
             P = vpm.get_particle(PFIELD, i)
-            X1 = P.X[1] - (Xvehicle[1] + Xoff[1])
-            X2 = P.X[2] - (Xvehicle[2] + Xoff[2])
-            X3 = P.X[3] - (Xvehicle[3] + Xoff[3])
+            X = vpm.get_X(P)
+            X1 = X[1] - (Xvehicle[1] + Xoff[1])
+            X2 = X[2] - (Xvehicle[2] + Xoff[2])
+            X3 = X[3] - (Xvehicle[3] + Xoff[3])
 
             if X1*X1 + X2*X2 + X3*X3 > Rsphere2
                 vpm.remove_particle(PFIELD, i)
