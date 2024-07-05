@@ -261,15 +261,111 @@ function run_simulation(
         vpm.read!(pfield, restart_vpmfile; overwrite=true, load_time=false)
     end
 
+    if vpm_surface
+        static_particles_function = generate_static_particle_fun(pfield, staticpfield,
+                                    sim.vehicle, sigma_vlm_surf, sigma_rotor_surf;
+                                    vlm_vortexsheet=vlm_vortexsheet,
+                                    vlm_vortexsheet_overlap=vlm_vortexsheet_overlap,
+                                    vlm_vortexsheet_distribution=vlm_vortexsheet_distribution,
+                                    vlm_vortexsheet_sigma_tbv=vlm_vortexsheet_sigma_tbv,
+                                    save_path=save_static_particles ? save_path : nothing,
+                                    run_name=run_name, nsteps_save=nsteps_save)
+    else
+        static_particles_function = (pfield, t, dt)->nothing
+    end
 
     ############################################################################
-    # SIMULATION RUNTIME FUNCTION
+    # RUN SIMULATION
     ############################################################################
+    #=
+                      # RUNTIME OPTIONS
+                      runtime_function::Function=runtime_default,
+                      static_particles_function::Function=static_particles_default,
+                      custom_UJ=nothing,
+                      # OUTPUT OPTIONS
+                      save_path::Union{Nothing, String}=nothing,
+                      save_pfield::Bool=true,
+                      create_savepath::Bool=true,
+                      run_name::String="pfield",
+                      save_code::String="",
+                      nsteps_save::Int=1, prompt::Bool=true,
+                      verbose::Bool=true, verbose_nsteps::Int=10, v_lvl::Int=0,
+                      save_time=true)
+    =#
 
-    """
-        This function gets called by `vpm.run_vpm!` at every time step.
-    """
-    function runtime_function(PFIELD, T, DT; vprintln=(args...)->nothing)
+    # extract vpm.run_vpm! function here:
+    run_name_vpm = run_name * "_pfield"
+    save_time = false
+    save_pfield = true
+    custom_UJ = nothing
+
+    # ERROR CASES
+    ## Check that viscous scheme and kernel are compatible
+    compatible_kernels = vpm._kernel_compatibility(pfield.viscous)
+
+    if !(pfield.kernel in compatible_kernels)
+        error("Kernel $(pfield.kernel) is not compatible with viscous scheme"*
+                " $(typeof(pfield.viscous).name); compatible kernels are"*
+                " $(compatible_kernels)")
+    end
+
+    if save_path!=nothing
+        # Create save path
+        if create_savepath; vpm.create_path(save_path, prompt); end;
+
+        # Save code
+        if save_code!=""
+            cp(save_code, joinpath(save_path, splitdir(save_code)[2]); force=true)
+        end
+
+        # Save settings
+        vpm.save_settings(pfield, run_name_vpm; path=save_path)
+    end
+
+    # Initialize verbose
+    runtime_function = nothing
+
+    (line1, line2, run_id, file_verbose,
+        vprintln, time_beg) = vpm.initialize_verbose(   verbose, save_path, run_name_vpm, pfield,
+                                                    dt, nsteps_save,
+                                                    runtime_function,
+                                                    static_particles_function, v_lvl)
+
+    # RUN
+    for i in 0:nsteps
+
+        if i%verbose_nsteps==0
+            vprintln("Time step $i out of $nsteps\tParticles: $(vpm.get_np(pfield))", v_lvl+1)
+        end
+
+        # Relaxation step
+        relax = pfield.relaxation != vpm.relaxation_none &&
+                pfield.relaxation.nsteps_relax >= 1 &&
+                i>0 && (i%pfield.relaxation.nsteps_relax == 0)
+
+        org_np = vpm.get_np(pfield)
+
+        # Time step
+        if i!=0
+            # Add static particles
+            remove = static_particles_function(pfield, pfield.t, dt)
+
+            # Step in time solving governing equations
+            vpm.nextstep(pfield, dt; relax=relax, custom_UJ=custom_UJ)
+
+            # Remove static particles (assumes particles remained sorted)
+            if remove==nothing || remove
+                for pi in vpm.get_np(pfield):-1:(org_np+1)
+                    vpm.remove_particle(pfield, pi)
+                end
+            end
+        end
+
+        #--- begin runtime function ---#
+        PFIELD = pfield
+        T = pfield.t
+        DT = dt
+        vprintln_vpm = (str)-> i%verbose_nsteps==0 ? vprintln(str, v_lvl+2) : nothing
 
         # Move tilting systems, and translate and rotate vehicle
         nextstep_kinematic(sim, dt)
@@ -313,7 +409,7 @@ function run_simulation(
         end
 
         # Simulation-specific postprocessing
-        breakflag = extra_runtime_function(sim, PFIELD, T, DT; vprintln=vprintln)
+        breakflag1 = extra_runtime_function(sim, PFIELD, T, DT; vprintln=vprintln_vpm)
 
         # Output vtks
         if save_path!=nothing && PFIELD.nt%nsteps_save==0
@@ -328,45 +424,29 @@ function run_simulation(
             vprintln("Quitting time $(tquit) (s) has been reached. Simulation will now end.")
         end
 
-        return breakflag || breakflag2
+        breakflag = breakflag1 || breakflag2
+
+        #--- end runtime function ---#
+
+        # Save particle field
+        if save_pfield && save_path!=nothing && (i%nsteps_save==0 || i==nsteps || breakflag) && eltype(pfield) <: AbstractFloat
+            overwrite_time = save_time ? nothing : pfield.nt
+            vpm.save(pfield, run_name_vpm; path=save_path, add_num=true,
+                                        overwrite_time=overwrite_time)
+        end
+
+        # User-indicated end of simulation
+        if breakflag
+            break
+        end
+
     end
 
-    if vpm_surface
-        static_particles_function = generate_static_particle_fun(pfield, staticpfield,
-                                    sim.vehicle, sigma_vlm_surf, sigma_rotor_surf;
-                                    vlm_vortexsheet=vlm_vortexsheet,
-                                    vlm_vortexsheet_overlap=vlm_vortexsheet_overlap,
-                                    vlm_vortexsheet_distribution=vlm_vortexsheet_distribution,
-                                    vlm_vortexsheet_sigma_tbv=vlm_vortexsheet_sigma_tbv,
-                                    save_path=save_static_particles ? save_path : nothing,
-                                    run_name=run_name, nsteps_save=nsteps_save)
-    else
-        static_particles_function = (pfield, t, dt)->nothing
-    end
-
-    ############################################################################
-    # RUN SIMULATION
-    ############################################################################
-    # Here it uses the VPM-time-stepping to run the simulation
-    vpm.run_vpm!(pfield, dt, nsteps;
-                      save_path=save_path, run_name=run_name*"_pfield",
-                      verbose=verbose, verbose_nsteps=verbose_nsteps,
-                      v_lvl=v_lvl,
-                      create_savepath=create_savepath,
-                      runtime_function=runtime_function,
-                      nsteps_save=nsteps_save,
-                      save_code=save_code,
-                      prompt=prompt,
-                      static_particles_function=static_particles_function,
-                      save_time=false
-                      )
+    # Finalize verbose
+    vpm.finalize_verbose(time_beg, line1, vprintln, run_id, v_lvl)
 
     return pfield
 end
-
-
-
-
 
 function add_particle(pfield::vpm.ParticleField{TVPM,<:Any,<:Any,<:Any,<:Any,<:Any,<:Any}, X,
                         gamma, dt,
