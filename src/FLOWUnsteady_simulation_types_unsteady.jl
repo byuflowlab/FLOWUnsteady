@@ -41,7 +41,7 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
     # On the first time step (pfield.nt==0), it only does steps (5) and (7),
     # meaning that the unsteady wake of the first time step is never shed.
     if self.nt==0
-        # NOTE: VLMs and Rotors solutions are losely coupled
+        # NOTE: VLMs and Rotors solutions are loosely coupled
 
         # Set Vinf on system to get horseshoes
         vlm.setVinf(vhcl.system, Vinf)

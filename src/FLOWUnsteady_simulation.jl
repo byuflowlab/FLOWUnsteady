@@ -145,6 +145,11 @@ function run_simulation(
             vlm_init        = false,            # Initialize the first step with the VLM semi-infinite wake solution
             hubtiploss_correction = vlm.hubtiploss_nocorrection, # Hub and tip loss correction of rotors (ignored in quasi-steady solver)
 
+            # method of images
+            mirror = false,                     # whether to mirror particles over a plane
+            mirror_X = nothing,                 # point on the plane
+            mirror_normal = nothing,            # mirror plane normal unit vector
+
             # Wake shedding
             wake_coupled        = true,         # Couple VPM wake -> VLM solution
             shed_unsteady       = true,         # Whether to shed vorticity from unsteady loading
@@ -339,7 +344,8 @@ function run_simulation(
                                     vlm_vortexsheet_distribution=vlm_vortexsheet_distribution,
                                     vlm_vortexsheet_sigma_tbv=vlm_vortexsheet_sigma_tbv,
                                     save_path=save_static_particles ? save_path : nothing,
-                                    run_name=run_name, nsteps_save=nsteps_save)
+                                    run_name=run_name, nsteps_save=nsteps_save,
+                                    mirror, mirror_X, mirror_normal)
     else
         static_particles_function = (pfield, t, dt)->nothing
     end

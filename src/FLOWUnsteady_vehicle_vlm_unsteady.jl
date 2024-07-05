@@ -75,7 +75,7 @@ function UVLMVehicle{N, M, R}(
                     prev_data=[deepcopy(vlm_system), deepcopy(wake_system),
                                                     deepcopy(rotor_systems)],
                     grid_O=Array{Array{R, 1}, 1}(),
-                ) where {N, M, R} 
+                ) where {N, M, R}
     return UVLMVehicle(
         system,
         tilting_systems,
@@ -208,7 +208,7 @@ function generate_static_particle_fun(pfield::vpm.ParticleField, pfield_static::
                                         vlm_vortexsheet_distribution=g_pressure,
                                         vlm_vortexsheet_sigma_tbv=nothing,
                                         save_path=nothing, run_name="", suff="_staticpfield",
-                                        nsteps_save=1)
+                                        nsteps_save=1, mirror=false, mirror_X=nothing, mirror_normal=nothing)
 
     if sigma_vlm<=0
         error("Invalid VLM smoothing radius $sigma_vlm.")
@@ -239,6 +239,32 @@ function generate_static_particle_fun(pfield::vpm.ParticleField, pfield_static::
             for rotor in rotors
                 _static_particles(pfield, rotor, sigma_rotor)
                 if flag; _static_particles(pfield_static, rotor, sigma_rotor); end;
+            end
+        end
+
+        # mirror
+        if mirror
+            np = vpm.get_np(pfield)
+            for i_p in 1:np
+                P = get_particle(pfield, i_p)
+                X = SVector{3}(get_X(P))
+                Xm = X - dot(2*(X - mirror_X), mirror_normal) * mirror_normal
+                Γ = SVector{3}(get_Gamma(P))
+                Γm = 2*dot(Γ, mirror_normal) * Γ / norm(Γ) - Γ
+                σ = get_sigma(P)[]
+                vol=get_vol(P)[]
+                circulation=get_circulation(P)[]
+                C1, C2, C3 = get_C(P)
+                static=true
+
+                vpm.add_particle(pfield, Xm, Γm, σ; vol, circulation, C=SVector{3}(C1,C2,C3), static)
+            end
+
+            if flag
+                for i_p in np+1:vpm.get_np(pfield)
+                    P = get_particle(pfield, i_p)
+                    vpm.add_particle(pfield_static, P)
+                end
             end
         end
 
