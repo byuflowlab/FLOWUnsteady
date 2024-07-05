@@ -166,6 +166,8 @@ function run_simulation(
             sigma_rotor_surf    = -1,           # (REQUIRED!) Size of embedded particles in ALM blade surfaces (for Rotor-on-VPM, Rotor-on-VLM, and Rotor-on-Rotor)
             sigmafactor_vpm     = 1.0,          # Core overlap of wake particles
             sigmafactor_vpmonvlm = 1,           # (experimental) shrinks the particles by this factor when calculating VPM-on-VLM/Rotor induced velocities
+            sigmafactor_rotoronvlm = 1,           # (experimental) shrinks the particles by this factor when calculating rotor-on-wing induced velocities
+            sigmafactor_vlmonrotor = 1,           # (experimental) shrinks the particles by this factor when calculating wing-on-rotor induced velocities
             sigma_vpm_overwrite = nothing,      # Overwrite core size of wake to this value (ignoring `sigmafactor_vpm`)
 
             # -------- RESTART OPTIONS -----------------------------------------
@@ -294,6 +296,7 @@ function run_simulation(
                 sigma_vlm_surf, sigma_rotor_surf, rho, sound_spd,
                 staticpfield, hubtiploss_correction;
                 init_sol=vlm_init, sigmafactor_vpmonvlm=sigmafactor_vpmonvlm,
+                sigmafactor_vlmonrotor, sigmafactor_rotoronvlm,
                 debug=debug)
 
         # Shed unsteady-loading wake with new solution
@@ -413,9 +416,10 @@ end
 """
 Returns the velocity induced by particle field on every position `Xs`
 """
-function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs::Array{T, 1}; static_particles_fun=(args...)->nothing, dt=0, fsgm=1) where {T}
+function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs::Array{T, 1}; static_particles_fun=(args...)->nothing, dt=0, fsgm=1,
+                    mirror=false, mirror_X=nothing, mirror_normal=nothing) where {T}
 
-    if length(Xs)!=0 && vpm.get_np(pfield)!=0
+    if length(Xs)!=0 # && vpm.get_np(pfield)!=0
         # Omit freestream
         # Uinf = pfield.Uinf
         # pfield.Uinf = (t)->zeros(3) # I don't think this is used
@@ -433,6 +437,24 @@ function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs::Array{T, 1}; static_particles
 
         # Add static particles
         static_particles_fun(pfield, pfield.t, dt)
+
+        # method of images
+        if mirror
+            mirror_np = vpm.get_np(pfield)
+            for i in 1:mirror_np
+                P = vpm.get_particle(pfield, i)
+                X = SVector{3}(get_X(P))
+                Xm = X - dot(2*(X - mirror_X), mirror_normal) * mirror_normal
+                Γ = SVector{3}(get_Gamma(P))
+                Γm = 2*dot(Γ, mirror_normal) * Γ / norm(Γ) - Γ
+                σ = get_sigma(P)[]
+                vol=get_vol(P)[]
+                circulation=get_circulation(P)[]
+                C1, C2, C3 = get_C(P)
+                static=true
+                vpm.add_particle(pfield, Xm, Γm, σ; vol, circulation, C=SVector{3}(C1,C2,C3), static)
+            end
+        end
 
         sta_np = vpm.get_np(pfield)             # Original + static particles
 
