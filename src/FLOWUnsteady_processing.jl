@@ -129,12 +129,13 @@ function remove_particles_box(Pmin, Pmax, step::Int)
 
             for i in vpm.get_np(PFIELD):-1:1
                 P = vpm.get_particle(PFIELD, i)
+                X = vpm.get_X(P)
 
-                if (  (P.X[1] < Pmin[1] || P.X[1] > Pmax[1])
+                if (  (X[1] < Pmin[1] || X[1] > Pmax[1])
                         ||
-                      (P.X[2] < Pmin[2] || P.X[2] > Pmax[2])
+                      (X[2] < Pmin[2] || X[2] > Pmax[2])
                         ||
-                      (P.X[3] < Pmin[3] || P.X[3] > Pmax[3])
+                      (X[3] < Pmin[3] || X[3] > Pmax[3])
                    )
                     vpm.remove_particle(PFIELD, i)
                 end
