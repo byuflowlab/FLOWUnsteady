@@ -193,32 +193,33 @@ function generate_preprocessing_fluiddomain_pfield(maxsigma, maxmagGamma; verbos
         mean_sigma, mean_Gamma = 0.0, 0.0
 
         for P in vpm.iterate(pfield; include_static=true)
-
+            sigma = vpm.get_sigma(P)
             # Check for large sigma
-            if P.sigma[1] > maxsigma
-                mean_sigma += P.sigma[1]
-                P.sigma[1] = maxsigma
+            if sigma[1] > maxsigma
+                mean_sigma += sigma[1]
+                sigma[1] = maxsigma
                 count_sigma += 1
             end
 
             # Check for Gamma with NaN value
-            nangamma = !prod(isnan.(P.Gamma) .== false)
+            Gamma = vpm.get_Gamma(P)
+            nangamma = !prod(isnan.(Gamma) .== false)
             if nangamma
-                P.Gamma .= 1e-12
+                Gamma .= 1e-12
                 count_nan += 1
             end
 
             # Check for blown-up Gamma
-            magGamma = norm(P.Gamma)
+            magGamma = norm(Gamma)
             if magGamma > maxmagGamma
-                P.Gamma *= maxmagGamma / magGamma
+                Gamma *= maxmagGamma / magGamma
                 mean_Gamma += magGamma
                 count_Gamma += 1
             end
 
             # Makes sure that the minimum Gamma is different than zero
             if magGamma < 1e-14
-                P.Gamma .+= 1e-14
+                Gamma .+= 1e-14
             end
 
             if isnan(magGamma)
