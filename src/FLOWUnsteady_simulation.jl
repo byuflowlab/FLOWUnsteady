@@ -339,6 +339,9 @@ function run_simulation(
                         dipole_d=boundarylayer_d)
         end
 
+        # Shed wake of actuator disk propulsion systems
+        shed_wake(sim.vehicle.propulsion_systems, PFIELD, DT)
+
         # Simulation-specific postprocessing
         breakflag = extra_runtime_function(sim, PFIELD, T, DT; vprintln=vprintln)
 

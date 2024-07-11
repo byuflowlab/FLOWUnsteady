@@ -463,7 +463,207 @@ _get_m_static(svs::SurfaceVortexSheet) = svs.grid.ncells
 ################################################################################
 # POWERED WAKE STRUCT
 ################################################################################
-struct PoweredWake
+mutable struct PoweredWake
+
+    # Required user inputs
+    sheddingline::Matrix                        # Shedding line
+
+    # Optional user inputs
+    gamma::Float64                              # Vortex sheet strength
+    overlap::Float64                            # Overlap between particles
+    sigma::Float64                              # Prescribed value of particle smoothing
+
+    # Properties
+    nparticles::Int
+
+    # Constructors
+    PoweredWake(
+                sheddingline;
+                nparticles=size(sheddingline, 2)-1,
+                gamma=0.0,
+                overlap=2.125,
+                sigma=-1.0
+                ) = new(
+                sheddingline,
+                gamma, overlap, sigma,
+                nparticles
+                )
+
+end
+
+
+function PoweredWake(filename::String, args...; optargs...)
+
+    sheddingline = generate_pw_line(filename, args...; optargs...)
+
+    return PoweredWake(sheddingline)
+
+end
+
+
+
+function generate_pw_line(filename::String, reader::Function, npoints::Int;
+                            read_path="",
+                            closed=false,
+                            sortingfunction=pnl.direction([0, 1, 0]),
+                            offset=zeros(3),
+                            rotation::Meshes.Rotation=one(Meshes.QuatRotation),
+                            scaling=1.0,
+                            verify_splines=true,
+                            )
+
+    # Read trailing edge
+    msh = reader(joinpath(read_path, filename))
+
+    # Transform the original mesh: Translate, rotate, and scale
+    msh = msh |> Meshes.Translate(offset...) |> Meshes.Rotate(rotation) |> Meshes.Scale(scaling)
+
+    # Format trailing edge vertices into a matrix of points
+    points = [v.coords[i] for i in 1:3, v in msh.vertices]
+
+    # Multidiscretize parameters
+    discretization = [(1.0, npoints, 1.0, true)]
+
+    # Sort points by the parameterization to make it injective
+    points = sortslices(points; dims=2, by=sortingfunction)
+
+    # Rediscretize the shedding line
+    out = []
+    new_points = gt.rediscretize_line(points, discretization;
+                                        parameterization=sortingfunction,
+                                        out=out)
+
+    # Close the contour if needed
+    len = norm(new_points[:, 1] - new_points[:, end])
+    if closed && len!=0
+        if len <= 1e2*eps()
+            new_points[:, end] .= new_points[:, 1]
+        else
+            new_points = hcat(new_points, new_points[:, 1])
+        end
+    end
+
+    # Verification plot
+    if verify_splines
+        fig = plt.figure(filename, figsize=[7, 5]*1.5)
+        ax = fig.gca()
+
+        ax.plot(points[2, :], points[3, :], ".k", label="Raw")
+        ax.plot(new_points[2, :], new_points[3, :], ".", label="Spline",
+                                                            color="dodgerblue")
+
+        ax.set_aspect("equal")
+        ax.spines["right"].set_visible(false)
+        ax.spines["top"].set_visible(false)
+        ax.legend(loc="best", frameon=false)
+    end
+
+    return new_points
+
+end
+
+function shed_particles!(pfield::vpm.ParticleField, pw::PoweredWake; optargs...)
+
+    return _shed_poweredwake_particles!(pfield, pw.sheddingline, pw.gamma;
+                                            overlap=pw.overlap,
+                                            sigma=pw.sigma <= 0 ? nothing : pw.sigma,
+                                            optargs...
+                                            )
+
+end
+
+
+function _shed_poweredwake_particles!(pfield::vpm.ParticleField,
+                                        sheddingline::Matrix, gamma::Number;
+                                        sigma::Union{Nothing, Number}=nothing,
+                                        overlap::Number=2.125,
+                                        tag0::Int=pfield.maxparticles+1,
+                                        tagoffset::Int=size(sheddingline, 2)-1)
+
+    nparticles = size(sheddingline, 2)-1
+    X = zeros(3)
+    Gamma = zeros(3)
+
+    # Fetch all particles that were shed in the previous step
+    particles = vpm.Particle[P for P in vpm.iterate(pfield)
+                                if P.circulation[1] >= tag0 + (pfield.nt-1)*tagoffset]
+
+    # Iterate over line sections and converts them into particles
+    for p in 1:nparticles
+
+        # Particle tag: Floor value + time stamp + particle index
+        tag = tag0 + pfield.nt*tagoffset + p
+
+        # Particle position
+        for i in 1:3
+            X[i]     = (sheddingline[i, p+1] + sheddingline[i, p])/2
+            Gamma[i] =  sheddingline[i, p+1] - sheddingline[i, p]
+        end
+
+        # TODO: Length of the sheet element shed in this time step
+        dz = _calc_dz_poweredwake(particles, X, Gamma,
+                                    pfield.nt, tag, tagoffset)
+
+        # Smoothing radius
+        _sigma = isnothing(sigma) ? overlap*max(norm(Gamma), dz) : sigma
+
+        # Particle strength
+        Gamma *= gamma*dz
+
+        # Particle circulation
+        # NOTE: this is actually never used inside FLOWVPM for anything,
+        #       so we will later overwrite it with `tag` and use it as a tag
+        circulation = abs(gamma*dz)
+
+        # Add particle to field
+        vpm.add_particle(pfield, X, Gamma, _sigma;
+                            # circulation=circulation,
+                            circulation=tag
+                            )
+
+    end
+
+    return nothing
+end
+
+function _calc_dz_poweredwake(particles::AbstractVector{<:vpm.Particle}, X, Gamma,
+                                nt::Int, tag::Int, tagoffset::Int)
+
+    # First step case: shed empty particles
+    if nt==0
+        dz = 1e2*eps()
+        return dz
+    end
+
+    # Tag of corresponding particle that was shed in previous step
+    prevtag = tag - tagoffset
+
+    # Find corresponding particle
+    previ = findfirst(P -> P.circulation[1]==prevtag, particles)
+
+    # Error case: no such particle exists
+    @assert !isnothing(previ) ""*
+        "Logic error: Could not find particle with tag $(prevtag)"
+
+    # Calculate displacement in between steps
+    prevX = particles[previ].X
+    # dX = prevX - X
+    dX1 = prevX[1] - X[1]
+    dX2 = prevX[2] - X[2]
+    dX3 = prevX[3] - X[3]
+
+    # Substract the distance projected in the direction of vortex strength
+    # since this is already accounted for in Gamma
+    normGamma = norm(Gamma)
+    # dX -= dot(dX, Gamma/normGamma) * (Gamma/normGamma)
+    dX1 -= (dX1*Gamma[1] + dX2*Gamma[2] + dX3*Gamma[3]) * (Gamma[1]/normGamma)
+    dX2 -= (dX1*Gamma[1] + dX2*Gamma[2] + dX3*Gamma[3]) * (Gamma[2]/normGamma)
+    dX3 -= (dX1*Gamma[1] + dX2*Gamma[2] + dX3*Gamma[3]) * (Gamma[3]/normGamma)
+
+    # Return effective displacement distance
+    dz = sqrt(dX1^2 + dX2^2 + dX3^2)
+
+    return dz
 
 end
 # ----------------- End of PoweredWake -----------------------------------------
@@ -506,7 +706,58 @@ function update(propulsion::PropulsionSystem, deltaVjet::Number)
         svs.gamma1 = deltaVjet
     end
 
+    for pw in propulsion.poweredwakes
+        pw.gamma = deltaVjet
+    end
+
+    for ad in propulsion.actuatordisks
+        # TODO
+        # ad.gamma =
+    end
+
     return nothing
+end
+
+function shed_wake(propulsion_systems::NTuple{L, PropulsionSystem},
+                    pfield::vpm.ParticleField, dt) where {L}
+
+    particles_shed_per_step = _get_pw_nparticles(propulsion_systems)
+
+    # Baseline tag used for powered-wake particles in this time step
+    # (an index higher than what the solver will automatically assign to regular
+    # particles)
+    tag0 = pfield.maxparticles + 1
+
+    for propulsion in propulsion_systems
+        for pw in propulsion.poweredwakes
+
+            shed_particles!(pfield, pw;
+                            tag0=tag0, tagoffset=particles_shed_per_step)
+
+            tag0 += _get_pw_nparticles(pw)  # Offset by pw particles shed so far
+
+        end
+    end
+
+end
+
+
+_get_pw_nparticles(pw::PoweredWake) = pw.nparticles
+
+"""
+Returns the total number of particles shed from powered wakes in a propulsion
+system at every time step.
+"""
+function _get_pw_nparticles(propulsion::PropulsionSystem)
+    return sum(_get_pw_nparticles(pw) for pw in propulsion.poweredwakes; init=0)
+end
+
+"""
+Returns the total number of particles shed from powered wakes in a system of
+propulsion systems at every time step.
+"""
+function _get_pw_nparticles(propulsion_systems::NTuple{L, PropulsionSystem}) where {L}
+    return sum(_get_pw_nparticles(p) for p in propulsion_systems; init=0)
 end
 
 
