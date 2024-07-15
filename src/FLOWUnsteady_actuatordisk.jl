@@ -535,7 +535,7 @@ function generate_pw_line(filename::String, reader::Function, npoints::Int;
                                         out=out)
 
     # Remove points close to junctions
-    tokeep = [i for (i, X) in eachcol(new_points) if junctioncriterion(X) > 0.0]
+    tokeep = [i for (i, X) in enumerate(eachcol(new_points)) if junctioncriterion(X) > 0.0]
     new_points = new_points[:, tokeep]
 
     @assert size(new_points, 2) !=0 "Junction criterion removed all points!"
