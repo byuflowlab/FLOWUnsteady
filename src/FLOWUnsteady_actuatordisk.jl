@@ -506,6 +506,7 @@ function generate_pw_line(filename::String, reader::Function, npoints::Int;
                             read_path="",
                             closed=false,
                             sortingfunction=pnl.direction([0, 1, 0]),
+                            junctioncriterion=pnl.nojunction,
                             offset=zeros(3),
                             rotation::Meshes.Rotation=one(Meshes.QuatRotation),
                             scaling=1.0,
@@ -532,6 +533,12 @@ function generate_pw_line(filename::String, reader::Function, npoints::Int;
     new_points = gt.rediscretize_line(points, discretization;
                                         parameterization=sortingfunction,
                                         out=out)
+
+    # Remove points close to junctions
+    tokeep = [i for (i, X) in eachcol(new_points) if junctioncriterion(X) > 0.0]
+    new_points = new_points[:, tokeep]
+
+    @assert size(new_points, 2) !=0 "Junction criterion removed all points!"
 
     # Close the contour if needed
     len = norm(new_points[:, 1] - new_points[:, end])
