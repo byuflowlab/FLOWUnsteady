@@ -133,13 +133,6 @@ function nextstep_kinematic(self::Simulation, dt::Real)
         self.t += dt
     end
 
-    # Update propulsion systems
-    for (pi, propulsion) in enumerate(self.vehicle.propulsion_systems)
-        deltaVjet = get_deltaVjet(self.maneuver, pi, self.t/self.ttot)
-        deltaVjet *= self.deltaVjetref
-        update(propulsion, deltaVjet)
-    end
-
     self.nt += 1
 end
 
@@ -172,6 +165,18 @@ function precalculations(self::Simulation, Vinf::Function,
     # solver, otherwise the particles shedding wouldn't see the kinematic
     # velocity due to rotor RPM
     # rotate_rotors(self, -dt)
+
+    # Update propulsion systems
+    for (pi, propulsion) in enumerate(self.vehicle.propulsion_systems)
+
+        # Get target deltaVjet from control inputs
+        deltaVjet = get_deltaVjet(self.maneuver, pi, self.t/self.ttot)
+        deltaVjet *= self.deltaVjetref
+
+        # Update propulsion system according to that target deltaVjet
+        update(propulsion, deltaVjet, pfield)
+        
+    end
 
     return nothing
 end

@@ -691,23 +691,30 @@ All actuator disks (propulsors) in a PropulsorSystem object share the same
 control inputs.
 """
 mutable struct PropulsionSystem
-    actuatordisks::Vector{ActuatorDisk}
-    surfacevortexsheets::Vector{SurfaceVortexSheet}
-    poweredwakes::Vector{PoweredWake}
-    target_deltaVjet::Float64
+    actuatordisks::Vector{ActuatorDisk}             # All actuator disks
+    surfacevortexsheets::Vector{SurfaceVortexSheet} # All surface vortex sheets
+    poweredwakes::Vector{PoweredWake}               # All powered wakes
+    target_deltaVjet::Float64                       # Target jet velocity
+    couplingstrategy::Function                      # Coupling strategy
 
     function PropulsionSystem(actuatordisks, surfacevortexsheets, poweredwakes;
-                                target_deltaVjet=1.0)
+                                target_deltaVjet=1.0, couplingstrategy=nocoupling)
 
-        return new(actuatordisks, surfacevortexsheets, poweredwakes, target_deltaVjet)
+        return new(actuatordisks, surfacevortexsheets, poweredwakes,
+                    target_deltaVjet, couplingstrategy)
 
     end
 end
 
-function update(propulsion::PropulsionSystem, deltaVjet::Number)
-    propulsion.target_deltaVjet = deltaVjet
+nocoupling(deltaVjet, args...) = deltaVjet
 
-    # TODO: Write a convergence algorithm here instead
+function update(propulsion::PropulsionSystem, target_deltaVjet::Number,
+                                                    pfield::vpm.ParticleField)
+
+    propulsion.target_deltaVjet = target_deltaVjet
+
+    deltaVjet = propulsion.couplingstrategy(target_deltaVjet, pfield)
+
     for svs in propulsion.surfacevortexsheets
         svs.gamma0 = deltaVjet
         svs.gamma1 = deltaVjet
