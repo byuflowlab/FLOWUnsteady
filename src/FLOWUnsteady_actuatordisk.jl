@@ -607,7 +607,7 @@ function _shed_poweredwake_particles!(pfield::vpm.ParticleField,
             Gamma[i] =  sheddingline[i, p+1] - sheddingline[i, p]
         end
 
-        # TODO: Length of the sheet element shed in this time step
+        # Length of the sheet element shed in this time step
         dz = _calc_dz_poweredwake(particles, X, Gamma,
                                     pfield.nt, tag, tagoffset)
 
