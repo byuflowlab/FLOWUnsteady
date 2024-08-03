@@ -246,12 +246,17 @@ function run_simulation(
                     (:relaxation, vpm_relaxation),
                     (:fmm, vpm_fmm),
                  ]
+
     Xdummy = zeros(3)
+    max_staticp = max_static_particles==nothing ? 4*_get_m_static(sim.vehicle) : max_static_particles
+    if mirror
+        max_staticp += max_particles
+        max_particles *= 2
+    end
+
     pfield = vpm.ParticleField(max_particles, vpm_floattype; Uinf=t->Vinf(Xdummy, t),
                                                                   vpm_solver...)
 
-    max_staticp = max_static_particles==nothing ? 4*_get_m_static(sim.vehicle) : max_static_particles
-    mirror && (max_staticp += max_particles)
     staticpfield = vpm.ParticleField(max_staticp, vpm_floattype; Uinf=t->Vinf(Xdummy, t),
                                                                   vpm_solver...)
 
@@ -392,6 +397,7 @@ function run_simulation(
                 sigma_vlm_surf, sigma_rotor_surf, rho, sound_spd,
                 staticpfield, hubtiploss_correction;
                 init_sol=vlm_init, sigmafactor_vpmonvlm=sigmafactor_vpmonvlm,
+                mirror, mirror_X, mirror_normal,
                 debug=debug)
 
         # Shed unsteady-loading wake with new solution
@@ -521,14 +527,14 @@ function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs::Array{T, 1}; static_particles
             mirror_np = vpm.get_np(pfield)
             for i in 1:mirror_np
                 P = vpm.get_particle(pfield, i)
-                X = SVector{3}(get_X(P))
+                X = SVector{3}(vpm.get_X(P))
                 Xm = X - dot(2*(X - mirror_X), mirror_normal) * mirror_normal
-                Γ = SVector{3}(get_Gamma(P))
+                Γ = SVector{3}(vpm.get_Gamma(P))
                 Γm = 2*dot(Γ, mirror_normal) * Γ / norm(Γ) - Γ
-                σ = get_sigma(P)[]
-                vol=get_vol(P)[]
-                circulation=get_circulation(P)[]
-                C1, C2, C3 = get_C(P)
+                σ = vpm.get_sigma(P)[]
+                vol=vpm.get_vol(P)[]
+                circulation=vpm.get_circulation(P)[]
+                C1, C2, C3 = vpm.get_C(P)
                 static=true
                 vpm.add_particle(pfield, Xm, Γm, σ; vol, circulation, C=SVector{3}(C1,C2,C3), static)
             end

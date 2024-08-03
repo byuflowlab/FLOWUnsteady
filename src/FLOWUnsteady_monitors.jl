@@ -220,6 +220,249 @@ function generate_monitor_rotors( rotors::Array{<:vlm.Rotor, 1},
     return extra_runtime_function
 end
 
+function generate_monitor_rotors( wing::vlm.WingSystem,
+                                    J_ref, rho_ref, RPM_ref, Vinf::Function,
+                                    nsteps_sim::Int;
+                                    N_dir=[0,0,1], T_dir=[1,0,0],
+                                    lencrit_f=0.5,
+                                    t_scale=1.0,                    # Time scaling factor
+                                    t_lbl="Simulation time (s)",    # Time-axis label
+                                    calc_aerodynamicforce_fun=generate_calc_aerodynamicforce(),
+                                    include_trailingboundvortex=false, debug=false,
+                                    # OUTPUT OPTIONS
+                                    out_figs=[],
+                                    out_figaxs=[],
+                                    save_path=nothing,
+                                    run_name="rotor",
+                                    figname="monitor_rotor",
+                                    disp_conv=true,
+                                    conv_suff="_convergence.csv",
+                                    save_init_plots=true,
+                                    figsize_factor=5/6,
+                                    nsteps_plot=1,
+                                    nsteps_savefig=10,
+                                    colors="rgbcmy"^100,
+                                    stls="o^*.px"^100, )
+
+    fcalls = 0                  # Number of function calls
+    prev_wing = nothing
+
+    # get meanchord
+    this_wing = wing.wings[1]
+    meanchord = 0.0
+    for i in 1:this_wing.m
+        dx = this_wing._xlwingdcr[i] - this_wing._xtwingdcr[i]
+        dz = this_wing._zlwingdcr[i] - this_wing._ztwingdcr[i]
+        c1 = sqrt(dx^2 + dz^2)
+        dx = this_wing._xlwingdcr[i+1] - this_wing._xtwingdcr[i+1]
+        dz = this_wing._zlwingdcr[i+1] - this_wing._ztwingdcr[i+1]
+        c2 = sqrt(dx^2 + dz^2)
+        dy = this_wing._ywingdcr[i+1] - this_wing._ywingdcr[i]
+        meanchord += (c1+c2)/2*dy
+    end
+    meanchord /= this_wing._ywingdcr[end]
+    lencrit = lencrit_f*meanchord/vlm.get_m(this_wing)
+
+    # Name of convergence file
+    if save_path!=nothing
+        fname = joinpath(save_path, run_name*conv_suff)
+    end
+
+    # Call figure
+    if disp_conv
+        formatpyplot()
+        fig = plt.figure(figname, figsize=[7*3, 5*2]*figsize_factor)
+        axs = fig.subplots(2, 3)
+        axs = [axs[6], axs[2], axs[4], axs[1], axs[3], axs[5]]
+
+        push!(out_figs, fig)
+        push!(out_figaxs, axs)
+    end
+
+    # Function for run_vpm! to call on each iteration
+    function extra_runtime_function(sim::Simulation{V, M, R},
+                                    PFIELD::vpm.ParticleField,
+                                    T, DT; optargs...
+                                   ) where{V<:AbstractVLMVehicle, M, R}
+
+        # rotors = vcat(sim.vehicle.rotor_systems...)
+        angle = T*360*RPM_ref/60
+        t_scaled = T*t_scale
+
+        if fcalls==0
+            # Format subplots
+            if disp_conv
+                ax = axs[1]
+                ax.set_title("Circulation distribution", color="gray")
+                ax.set_xlabel("Element index")
+                ax.set_ylabel(L"Circulation $\Gamma$ (m$^2$/s)")
+
+                ax = axs[2]
+                ax.set_title("Normal force distribution", color="gray")
+                ax.set_xlabel("Element index")
+                ax.set_ylabel(L"Normal load $N_p$ (N/m)")
+
+                ax = axs[3]
+                ax.set_title("Tangential force distribution", color="gray")
+                ax.set_xlabel("Element index")
+                ax.set_ylabel(L"Tangential load $T_p$ (N/m)")
+
+                ax = axs[4]
+                ax.set_title(L"$C_T = \frac{T}{\rho n^2 d^4}$", color="gray")
+                ax.set_xlabel(t_lbl)
+                ax.set_ylabel(L"Thrust $C_T$")
+
+                ax = axs[5]
+                ax.set_title(L"$C_Q = \frac{Q}{\rho n^2 d^5}$", color="gray")
+                ax.set_xlabel(t_lbl)
+                ax.set_ylabel(L"Torque $C_Q$")
+
+                ax = axs[6]
+                ax.set_title(L"$\eta = \frac{T u_\infty}{2\pi n Q}$", color="gray")
+                ax.set_xlabel(t_lbl)
+                ax.set_ylabel(L"Propulsive efficiency $\eta$")
+
+
+                for ax in axs
+                    ax.spines["right"].set_visible(false)
+                    ax.spines["top"].set_visible(false)
+                    # ax.grid(true, color="0.8", linestyle="--")
+                end
+
+            end
+
+            # Convergence file header
+            if save_path!=nothing
+                f = open(fname, "w")
+                print(f, "ref age (deg),T,DT")
+                print(f, ",CT,CQ,eta")
+                print(f, "\n")
+                close(f)
+            end
+
+            # Save initialization plots (including polars)
+            if save_init_plots && save_path!=nothing
+                for fi in plt.get_fignums()
+                    this_fig = plt.figure(fi)
+                    this_fig.savefig(joinpath(save_path, run_name*"_initplot$(fi).png"),
+                                                            transparent=false, dpi=300)
+                end
+            end
+        end
+
+        # Write rotor position and time on convergence file
+        if save_path!=nothing
+            f = open(fname, "a")
+            print(f, angle, ",", T, ",", DT)
+        end
+
+        # Force at each VLM element
+        t = PFIELD.t
+        if PFIELD.nt > 2
+            calc_aerodynamicforce_fun(wing, prev_wing, PFIELD, Vinf, DT,
+                                                            rho_ref; t=t,
+                                                            # spandir=cross(Lhat, Dhat),
+                                                            lencrit=lencrit,
+                                                            include_trailingboundvortex,
+                                                            debug)
+
+            # Force per unit span at each VLM element
+            calc_aerodynamicforce_fun(wing, prev_wing, PFIELD, Vinf, DT,
+                                        rho_ref; t=PFIELD.t, per_unit_span=true,
+                                        # spandir=cross(Lhat, Dhat),
+                                        lencrit=lencrit,
+                                        include_trailingboundvortex=include_trailingboundvortex,
+                                        debug=debug)
+        end
+
+        # Plot circulation and loads distributions
+        if  PFIELD.nt%nsteps_plot==0 && disp_conv
+
+            cratio = PFIELD.nt/nsteps_sim
+            cratio = cratio > 1 ? 1 : cratio
+            clr = fcalls==0 && false ? (0,0,0) : (1-cratio, 0, cratio)
+            stl = fcalls==0 && false ? "o" : "-"
+            alpha = fcalls==0 && false ? 1 : 0.5
+
+            # Circulation distribution
+            this_sol = eltype(wing.wings[1].sol["Gamma"])[]
+            for this_wing in wing.wings
+                append!(this_sol, this_wing.sol["Gamma"])
+            end
+            axs[1].plot(1:size(this_sol,1), this_sol, stl, alpha=alpha, color=clr)
+
+            if PFIELD.nt > 2
+                # force distribution
+                ftot = eltype(wing.wings[1].sol["ftot"])[]
+                i_vel = 1
+                for this_wing in wing.wings
+                    append!(ftot, this_wing.sol["ftot"])
+                    for i in i_vel:i_vel + this_wing.m-1
+                        ftot[i] = this_wing.Oaxis * ftot[i]
+                    end
+                    i_vel += this_wing.m
+                end
+
+                # Np distribution
+                axs[2].plot(1:size(ftot,1), [dot(ftot[i],N_dir) for i in eachindex(ftot)], stl, alpha=alpha, color=clr)
+
+                # Tp distribution
+                axs[3].plot(1:size(ftot,1), [dot(ftot[i], T_dir) for i in eachindex(ftot)], stl, alpha=alpha, color=clr)
+            end
+        end
+
+        if PFIELD.nt > 2
+            # Plot performance parameters
+            T = 0.0
+            Q = 0.0
+            for blade in wing.wings
+                Oaxis = blade.Oaxis
+                for i in 1:blade.m
+                    T += dot(Oaxis * blade.sol["Ftot"][i], N_dir)
+                    Q += dot(Oaxis * blade.sol["Ftot"][i], T_dir) * blade._ym[i]
+                end
+            end
+            n = RPM_ref / 60
+            D = wing.wings[1]._yn[end] * 2
+            CT = T / (rho_ref * n^2 * D^4)
+            CQ = Q / (rho_ref * n^2 * D^5)
+            eta = J_ref*CT/(2*pi*CQ)
+
+            if PFIELD.nt%nsteps_plot==0 && disp_conv
+                i = 1
+                axs[4].plot([t_scaled], [CT], "$(stls[i])", alpha=alpha, color=clr)
+                axs[5].plot([t_scaled], [CQ], "$(stls[i])", alpha=alpha, color=clr)
+                axs[6].plot([t_scaled], [eta], "$(stls[i])", alpha=alpha, color=clr)
+                fig.tight_layout()
+            end
+
+            if save_path!=nothing
+                print(f, ",", CT, ",", CQ, ",", eta)
+            end
+
+            if disp_conv
+                # Save figure
+                if PFIELD.nt%nsteps_savefig==0 && fcalls!=0 && save_path!=nothing
+                    fig.savefig(joinpath(save_path, run_name*"_convergence.png"),
+                                                        transparent=false, dpi=300)
+                end
+            end
+        end
+
+        # Close convergence file
+        if save_path!=nothing
+            print(f, "\n")
+            close(f)
+        end
+
+        fcalls += 1
+        prev_wing = deepcopy(wing)
+
+        return false
+    end
+
+    return extra_runtime_function
+end
 
 
 """

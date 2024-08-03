@@ -190,7 +190,6 @@ function generate_rotor(Rtip, Rhub, B::Int,
     LE_x = [spl_LE_x(ri) for ri in r]
     LE_z = [spl_LE_z(ri) for ri in r]
 
-
     if verbose; println("\t"^v_lvl*"Generating airfoil data..."); end;
 
     if Matip != 0 && xfoil
