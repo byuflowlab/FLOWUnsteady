@@ -515,7 +515,7 @@ function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs::Array{T, 1}; static_particles
         #       any in the field at this point anyways
         if abs(fsgm) != 1
             for P in vpm.iterator(pfield)
-                vpm.get_sigma(P)[] .*= fsgm
+                vpm.get_sigma(P)[] *= fsgm
             end
         end
 
@@ -561,7 +561,7 @@ function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs::Array{T, 1}; static_particles
         # De-singularize particles
         if abs(fsgm) != 1
             for P in vpm.iterator(pfield)
-                vpm.get_sigma(P)[] ./= fsgm
+                vpm.get_sigma(P)[] /= fsgm
             end
         end
 
