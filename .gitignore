@@ -12,6 +12,7 @@ docs/site/
 *.vtp
 *.vtm
 *.pvd
+*.swp
 
 examples/rotornoise/singlerotor-*
 docs/resources/images/sponsors/*.png
