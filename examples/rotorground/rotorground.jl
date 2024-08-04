@@ -108,6 +108,8 @@ function run_rotorground(RPM,J=0.0001;
         CW              = false,                     # Clock-wise rotation
         xfoil           = false,                     # Whether to run XFOIL
         read_polar      = vlm.ap.read_polar2,        # What polar reader to use
+        nrevs           = 10,                        # Number of revolutions in simulation
+        nsteps_per_rev  = 144,                       # Time steps per revolution
     )
     save_path       = run_name                  # Where to save this simulation
     # RPM             = 5400                      # RPM
@@ -147,8 +149,6 @@ function run_rotorground(RPM,J=0.0001;
     const_solution  = VehicleType==uns.QVLMVehicle  # Whether to assume that the
                                                     # solution is constant or not
     # Time parameters
-    nrevs           = 10                        # Number of revolutions in simulation
-    nsteps_per_rev  = 144                        # Time steps per revolution
     nsteps          = const_solution ? 2 : nrevs*nsteps_per_rev # Number of time steps
     ttot            = nsteps/nsteps_per_rev / (RPM/60)       # (s) total simulation time
 
@@ -513,7 +513,9 @@ run_rotorground(RPM,J;
         mirror          = false,
         x_ground        = 1,
         use_actuator_line = true,
-        no_tip_correction = false
+        no_tip_correction = false,
+        nrevs= 10,
+        nsteps_per_rev = 144,
     )
 
 # ------------- 6) POSTPROCESSING ----------------------------------------------
