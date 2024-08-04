@@ -506,17 +506,17 @@ if paraview
 
 end
 
-RPM = 5000.0
-J = 0.0001
-run_rotorground(RPM,J;
-        run_name = "rotorground-example-20240801-07",      # Name of this simulation
-        mirror          = false,
-        x_ground        = 1,
-        use_actuator_line = true,
-        no_tip_correction = false,
-        nrevs= 10,
-        nsteps_per_rev = 144,
-    )
+# RPM = 5000.0
+# J = 0.0001
+# run_rotorground(RPM,J;
+#         run_name = "rotorground-example-20240801-07",      # Name of this simulation
+#         mirror          = false,
+#         x_ground        = 1,
+#         use_actuator_line = true,
+#         no_tip_correction = false,
+#         nrevs= 10,
+#         nsteps_per_rev = 144,
+#     )
 
 # ------------- 6) POSTPROCESSING ----------------------------------------------
 

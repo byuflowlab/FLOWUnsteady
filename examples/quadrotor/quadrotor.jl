@@ -528,18 +528,18 @@ if paraview
 
 end
 
-RPM = 6000.0
-J = 0.0001
-run_quadrotor(RPM,J;
-        run_name = "quadrotor-example-20240803-01",      # Name of this simulation
-        mirror          = false,
-        x_ground        = 1,
-        lR              = 2.7,
-        use_actuator_line = true,
-        no_tip_correction = false,
-        nrevs= 30,
-        nsteps_per_rev = 144,
-    )
+# RPM = 6000.0
+# J = 0.0001
+# run_quadrotor(RPM,J;
+#         run_name = "quadrotor-example-20240803-01",      # Name of this simulation
+#         mirror          = false,
+#         x_ground        = 1,
+#         lR              = 2.7,
+#         use_actuator_line = true,
+#         no_tip_correction = false,
+#         nrevs= 30,
+#         nsteps_per_rev = 144,
+#     )
 
 # ------------- 6) POSTPROCESSING ----------------------------------------------
 
