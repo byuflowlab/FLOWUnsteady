@@ -1,6 +1,6 @@
 #=##############################################################################
 # DESCRIPTION
-    Simulation of a DJI 9443 rotor in hover in ground effect (two-bladed rotor, 9.4 inches
+    Simulation of a DJI 9450 rotor in hover in ground effect (two-bladed rotor, 9.4 inches
     diameter).
 
     This example replicates the experiment described in Zawodny & Boyd (2016),
@@ -17,7 +17,7 @@
 
 import Statistics: mean
 import FLOWMath: Akima
-
+const I = [1.0 0 0;0 1 0;0 0 1]
 #=
 Use the following parameters to obtain the desired fidelity
 
@@ -93,10 +93,11 @@ paraview        = false # Whether to visualize with Paraview
 # ----------------- SIMULATION PARAMETERS --------------------------------------
 
 # Operating conditions
-function run_rotorground(RPM,J=0.0001;
+function run_quadrotor(RPM=6000.0,J=0.0001;
         run_name = "rotorground-example-20240801-07",      # Name of this simulation
         mirror          = false,
         x_ground        = 1,
+        lR              = 2.7,
         use_actuator_line = true,
         no_tip_correction = false,
         n               = 40,                        # Number of blade elements per blade
@@ -271,7 +272,7 @@ function run_rotorground(RPM,J=0.0001;
 
     # Generate rotor
     if use_actuator_line
-        rotor = uns.generate_rotor(rotor_file; pitch=pitch,
+        rotor1 = uns.generate_rotor(rotor_file; pitch=pitch,
                                                 n=n, CW=CW, blade_r=r,
                                                 altReD=[RPM, J, mu/rho],
                                                 xfoil=xfoil,
@@ -280,6 +281,22 @@ function run_rotorground(RPM,J=0.0001;
                                                 verbose=true,
                                                 plot_disc=true
                                                 )
+        vlm.setcoordsystem(rotor1, [0.0, lR/2*R, lR/2*R], I; user=true)
+
+        rotor2 = uns.generate_rotor(rotor_file; pitch=pitch,
+                                                n=n, CW=!CW, blade_r=r,
+                                                altReD=[RPM, J, mu/rho],
+                                                xfoil=xfoil,
+                                                read_polar=read_polar,
+                                                data_path=data_path,
+                                                verbose=true,
+                                                plot_disc=true
+                                                )
+        vlm.setcoordsystem(rotor2, [0.0, -lR/2*R, lR/2*R], I; user=true)
+        rotor3 = deepcopy(rotor1)
+        vlm.setcoordsystem(rotor3, [0.0, -lR/2*R, -lR/2*R], I; user=true)
+        rotor4 = deepcopy(rotor2)
+        vlm.setcoordsystem(rotor4, [0.0, lR/2*R, -lR/2*R], I; user=true)
     else
         r = [0.00624, 0.011928000000000001, 0.017616, 0.023304000000000002, 0.028992, 0.03468, 0.04036800000000001, 0.04605600000000001, 0.051744000000000005, 0.057432000000000004, 0.06312, 0.068808, 0.074496, 0.08018399999999999, 0.085872, 0.09155999999999999, 0.097248, 0.102936, 0.108624, 0.11431199999999998, 0.12]
         chord = [0.015859659042058712, 0.021712836336990532, 0.026471916314454773, 0.030461073429155164, 0.0317971438150289, 0.030501994764606518, 0.02869564736260471, 0.026709524982770225, 0.02491417716322731, 0.02312146444774523, 0.02143149575711966, 0.020040817717748644, 0.018694708765967558, 0.017317579753634096, 0.01608328099021666, 0.014994713447804647, 0.014066063848378024, 0.01317730489959203, 0.012217298822173369, 0.011285945627012788, 0.005859876]
@@ -320,22 +337,27 @@ function run_rotorground(RPM,J=0.0001;
 
     # Generate vehicle
     system = vlm.WingSystem()                   # System of all FLOWVLM objects
-    vlm.addwing(system, "Rotor", rotor)
+    for (i,rotor) in enumerate((rotor1, rotor2, rotor3, rotor4))
+        vlm.addwing(system, "Rotor$i", rotor)
+    end
 
     vlm_system = vlm.WingSystem()
     if use_actuator_line
-        rotors = [rotor];                           # Defining this rotor as its own system
+        rotors = [rotor1, rotor2, rotor3, rotor4];                           # Defining this rotor as its own system
         rotor_systems = (rotors, );                 # All systems of rotors
     else
         rotor_systems = NTuple{0, Array{vlm.Rotor, 1}}()
-        rotors = rotor
-        vlm.addwing(vlm_system, "Rotor", rotor)
+        for (i,rotor) in enumerate((rotor1, rotor2, rotor3, rotor4))
+            vlm.addwing(vlm_system, "Rotor$i", rotor)
+        end
     end
 
     wake_system = vlm.WingSystem()              # System that will shed a VPM wake
                                                 # NOTE: Do NOT include rotor when using the quasi-steady solver
     if VehicleType != uns.QVLMVehicle
-        vlm.addwing(wake_system, "Rotor", rotor)
+        for (i,rotor) in enumerate((rotor1, rotor2, rotor3, rotor4))
+            vlm.addwing(wake_system, "Rotor$i", rotor)
+        end
     end
 
     vehicle = VehicleType(   system;
@@ -506,15 +528,16 @@ if paraview
 
 end
 
-RPM = 5000.0
+RPM = 6000.0
 J = 0.0001
-run_rotorground(RPM,J;
-        run_name = "rotorground-example-20240801-07",      # Name of this simulation
+run_quadrotor(RPM,J;
+        run_name = "quadrotor-example-20240803-01",      # Name of this simulation
         mirror          = false,
         x_ground        = 1,
+        lR              = 2.7,
         use_actuator_line = true,
         no_tip_correction = false,
-        nrevs= 10,
+        nrevs= 30,
         nsteps_per_rev = 144,
     )
 
