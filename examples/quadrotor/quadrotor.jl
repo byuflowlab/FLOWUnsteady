@@ -383,25 +383,25 @@ function run_quadrotor(RPM=6000.0,J=0.0001;
 
     angles = ()                                 # Angle of each tilting system (none)
     dt = ttot / nsteps
-    if use_actuator_line
+    #if use_actuator_line
         RPMs = (RPMcontrol, )                       # RPM of each rotor system
 
         # Angle of the vehicle over time
         anglevehicle(t) = zeros(3)
-    else
-        RPMs = ()
-        function anglevehicle(t)
-            t_actual = t * ttot
-            t_track = 0.0
-            i_step = Int(round(t_actual / dt))
-            angle = 0.0
-            for i in 0:i_step-1
-                rpm = RPMcontrol(i/nsteps)
-                angle += rpm * RPM * 360 / 60 * dt
-            end
-            return [-angle,0,0.0]
-        end
-    end
+    #else
+    #    RPMs = ()
+    #    function anglevehicle(t)
+    #        t_actual = t * ttot
+    #        t_track = 0.0
+    #        i_step = Int(round(t_actual / dt))
+    #        angle = 0.0
+    #        for i in 0:i_step-1
+    #            rpm = RPMcontrol(i/nsteps)
+    #            angle += rpm * RPM * 360 / 60 * dt
+    #        end
+    #        return [-angle,0,0.0]
+    #    end
+    #end
 
     maneuver = uns.KinematicManeuver(angles, RPMs, Vvehicle, anglevehicle)
 
