@@ -195,9 +195,9 @@ function generate_preprocessing_fluiddomain_pfield(maxsigma, maxmagGamma; verbos
         for P in vpm.iterate(pfield; include_static=true)
 
             # Check for large sigma
-            if P.sigma[1] > maxsigma
-                mean_sigma += P.sigma[1]
-                P.sigma[1] = maxsigma
+            if vpm.get_sigma(P)[] > maxsigma
+                mean_sigma += vpm.get_sigma(P)[]
+                vpm.get_sigma(P)[] = maxsigma
                 count_sigma += 1
             end
 
