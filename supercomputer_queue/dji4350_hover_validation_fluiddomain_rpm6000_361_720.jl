@@ -4,7 +4,7 @@ read_path = "~/scratch/rotorground-20240803-hover-validation-rpm6000"
 file_pref = "rotorground-20240803-hover-validation-rpm6000_pfield" 
 static_pfield_pref = "rotorground-20240803-hover-validation-rpm6000_staticpfield"
 nums = 361:720
-ground_xR = 
+ground_xR = 2
 save_path = joinpath(read_path, "fluid_domain")
 
 calculate_fluid_domain(read_path, file_pref, static_pfield_pref, nums, ground_xR, save_path;
