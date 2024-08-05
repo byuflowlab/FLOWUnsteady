@@ -110,6 +110,7 @@ function run_rotorground(RPM,J=0.0001;
         read_polar      = vlm.ap.read_polar2,        # What polar reader to use
         nrevs           = 10,                        # Number of revolutions in simulation
         nsteps_per_rev  = 144,                       # Time steps per revolution
+        NR_truncate     = 7,
     )
     save_path       = run_name                  # Where to save this simulation
     # RPM             = 5400                      # RPM
@@ -262,9 +263,12 @@ function run_rotorground(RPM,J=0.0001;
     end
 
     # try another method
-    Pmin = SVector{3}(-R/8, -10*R, -10*R)
-    Pmax = SVector{3}(x_ground*R, 10*R, 10*R)
+    Pmin = SVector{3}(-R/8, -NR_truncate*R, -NR_truncate*R)
+    Pmax = SVector{3}(x_ground*R, NR_truncate*R, NR_truncate*R)
     wake_treatment_box = uns.remove_particles_box(Pmin, Pmax, 1)
+
+    Rmax2 = Pmax[2]^2
+    wake_treatment_sphere = uns.remove_particles_sphere(Rmax2, 1; Xoff=[x_ground*R,0.0,0.0])
 
     # ----------------- 1) VEHICLE DEFINITION --------------------------------------
     println("Generating geometry...")
@@ -451,7 +455,7 @@ function run_rotorground(RPM,J=0.0001;
 
     # Concatenate monitors and wake treatment procedure into one runtime function
     # runtime_function = uns.concatenate(monitors, wake_treatment_supress)
-    runtime_function = mirror ? uns.concatenate(monitors, wake_treatment_box) : monitors
+    runtime_function = mirror ? uns.concatenate(monitors, wake_treatment_box, wake_treatment_sphere) : monitors
     # runtime_function = monitors
 
     # Run simulation
