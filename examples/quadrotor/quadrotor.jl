@@ -112,8 +112,9 @@ function run_quadrotor(RPM=6000.0,J=0.0001;
         nrevs           = 10,                        # Number of revolutions in simulation
         nsteps_per_rev  = 144,                       # Time steps per revolution
         NR_truncate     = 7,
+        save_dir = ".",
     )
-    save_path       = run_name                  # Where to save this simulation
+    save_path       = joinpath(save_dir,run_name)                  # Where to save this simulation
     # RPM             = 5400                      # RPM
     # J               = 0.0001                    # Advance ratio Vinf/(nD)
     AOA             = 0                         # (deg) Angle of attack (incidence angle)
