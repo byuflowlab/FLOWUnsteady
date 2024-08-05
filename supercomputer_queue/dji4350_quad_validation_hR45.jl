@@ -16,6 +16,6 @@ run_quadrotor(RPM,J;  # Cibin: Changed name
         use_actuator_line = true,
         no_tip_correction = false,
         NR_truncate = 7,
-        save_dir="~/scratch"
+        save_dir="/home/cibin/scratch"
     )
 

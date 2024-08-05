@@ -1,6 +1,6 @@
 include("rotorground_fluiddomain_20240805.jl")
 
-read_path = "~/scratch/rotorground-20240803-hover-validation-rpm6000"
+read_path = "/home/cibin/scratch/rotorground-20240803-hover-validation-rpm6000"
 file_pref = "rotorground-20240803-hover-validation-rpm6000_pfield" 
 static_pfield_pref = "rotorground-20240803-hover-validation-rpm6000_staticpfield"
 nums = 721:1080

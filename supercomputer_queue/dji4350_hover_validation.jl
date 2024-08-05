@@ -12,6 +12,6 @@ for RPM in range(3000, stop=7000, length=5)
             x_ground        = 1,
             use_actuator_line = true,
             no_tip_correction = false,
-            save_dir="~/scratch"
+            save_dir="/home/cibin/scratch"
         )
 end

@@ -1,6 +1,6 @@
 include("rotorground_fluiddomain_20240805.jl")
 
-read_path = "~/scratch/rotorground-20240803-isolated-ige-validation-NR7-xR2.0"
+read_path = "/home/cibin/scratch/rotorground-20240803-isolated-ige-validation-NR7-xR2.0"
 file_pref = "rotorground-20240803-isolated-ige-validation-NR7-xR2.0_pfield"
 static_pfield_pref = "rotorground-20240803-isolated-ige-validation-NR7-xR2.0_staticpfield"
 nums = 721:900
