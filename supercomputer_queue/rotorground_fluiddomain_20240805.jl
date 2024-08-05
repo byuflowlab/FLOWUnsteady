@@ -38,7 +38,7 @@ function calculate_fluid_domain(read_path, file_pref, static_pfield_pref, nums, 
     
     # compute fluid domain
     if !isdir(save_path)
-        mkdir(save_path)
+        mkpath(save_path)
     end
     computefluiddomain(P_min, P_max, NDIVS, max_particles, nums, read_path, file_pref;
                        origin, verbose=true, save_path, userfunction_pfield=preprocessing_pfield, f_sigma,
