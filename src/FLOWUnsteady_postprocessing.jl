@@ -202,23 +202,24 @@ function generate_preprocessing_fluiddomain_pfield(maxsigma, maxmagGamma; verbos
             end
 
             # Check for Gamma with NaN value
-            nangamma = !prod(isnan.(vpm.get_Gamma(P)) .== false)
+            Γ = vpm.get_Gamma(P)
+            nangamma = !prod(isnan.(Γ) .== false)
             if nangamma
-                vpm.get_Gamma(P) .= 1e-12
+                Γ .= 1e-12
                 count_nan += 1
             end
 
             # Check for blown-up Gamma
             magGamma = norm(vpm.get_Gamma(P))
             if magGamma > maxmagGamma
-                vpm.get_Gamma(P) *= maxmagGamma / magGamma
+                Γ *= maxmagGamma / magGamma
                 mean_Gamma += magGamma
                 count_Gamma += 1
             end
 
             # Makes sure that the minimum Gamma is different than zero
             if magGamma < 1e-14
-                vpm.get_Gamma(P) .+= 1e-14
+                Γ .+= 1e-14
             end
 
             if isnan(magGamma)
