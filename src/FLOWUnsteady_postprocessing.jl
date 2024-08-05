@@ -204,7 +204,7 @@ function generate_preprocessing_fluiddomain_pfield(maxsigma, maxmagGamma; verbos
             # Check for Gamma with NaN value
             nangamma = !prod(isnan.(vpm.get_Gamma(P)) .== false)
             if nangamma
-                P.Gamma .= 1e-12
+                vpm.get_Gamma(P) .= 1e-12
                 count_nan += 1
             end
 
