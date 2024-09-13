@@ -558,7 +558,7 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
         applytobottom(restore_Xsheddings_field, panelbody)
 
         # Call user-defined postprocessing function
-        userdefined_postprocessing(panelbody, areas, normals, controlpoints)
+        userdefined_postprocessing(panelbody, areas, normals, controlpoints, sim, PFIELD, T, DT)
 
         # Output VTK files
         if save_path != nothing
