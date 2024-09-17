@@ -50,7 +50,6 @@ makedocs(
                                                         "examples/blownwing-aero.md",
                                                         # "examples/blownwing-acoustics.md",
                                                         "examples/blownwing-asm.md",
-                                                        "examples/prowim-aero.md",
                                                     ],
                                     "eVTOL Aircraft" => [
                                                         "examples/vahana-vehicle.md",

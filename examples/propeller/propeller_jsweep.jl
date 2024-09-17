@@ -83,7 +83,6 @@ for J in Js
                         vpm_viscous=vpm_viscous,
                         sigma_vlm_surf=sigma_rotor_surf,
                         sigma_rotor_surf=sigma_rotor_surf,
-                        sigma_rotor_self=sigma_rotor_self,
                         sigma_vpm_overwrite=sigma_vpm_overwrite,
                         vlm_rlx=vlm_rlx,
                         shed_unsteady=shed_unsteady,

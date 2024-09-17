@@ -17,17 +17,13 @@ vorticity at the three-quarter chord, as shown here:
 The ALM is very accurate for isolated wings and even cases with mild wake
 interactions.
 However, for cases with stronger wake interactions (e.g., a wake directly
-impinging on the wing surface), the ALM can lead to unphysical results as
-the flow tends to cross the airfoil centerline.
-To address this, we have developed an actuator surface model
-(ASM) to embed the wing surface in the LES domain and better
-represent the physics.
-
-The ASM spreads the surface vorticity following a pressure-like
-distribution.
-This produces a velocity field at the wing surface that minimizes the mass
-flow that crosses the airfoil centerline, thus better representing a solid
-surface:
+impinging on the wing surface), we have developed an actuator surface model
+(ASM) that introduces the surface vorticity into the LES domain that better
+represents the physics.
+This is done by spreading the surface vorticity following a pressure-like
+distribution, which ends up producing a velocity field at the wing surface
+that minimizes the flow that crosses the airfoil centerline, thus better
+representing a solid surface:
 
 ```@raw html
 <center>
@@ -36,11 +32,9 @@ surface:
 </center>
 <br>
 ```
-For an in-depth discussion of the actuator models implemented in
-FLOWUnsteady, see Chapter 6 in
-[Alvarez' Dissertation](https://scholarsarchive.byu.edu/etd/9589)[^2]
-(also published in
-[Alvarez & Ning, 2023](https://arc.aiaa.org/doi/abs/10.2514/1.C037279)[^3]).
+For an in-depth discussion of the actuator line and surface models
+implemented in FLOWUnsteady, see Chapter 6 in
+[Alvarez' Dissertation](https://scholarsarchive.byu.edu/etd/9589).[^2]
 
 
 [^2]: E. J. Alvarez (2022), "Reformulated Vortex Particle Method and
@@ -48,10 +42,6 @@ FLOWUnsteady, see Chapter 6 in
     Dissertation, Brigham Young University*.
     [**[VIDEO]**](https://www.nas.nasa.gov/pubs/ams/2022/08-09-22.html)
     [**[PDF]**](https://scholarsarchive.byu.edu/etd/9589/)
-[^3]: E. J. Alvarez and A. Ning (2023), "Meshless Large-Eddy Simulation of
-    Propeller–Wing Interactions with Reformulated Vortex Particle Method,"
-    *Journal of Aircraft*.
-    [**[DOI]**](https://arc.aiaa.org/doi/abs/10.2514/1.C037279)[**[PDF]**](https://scholarsarchive.byu.edu/facpub/6902/)
 
 In order to activate the actuator surface model, we define the following
 parameters:
@@ -84,7 +74,7 @@ include_unsteadyforce       = true          # Include unsteady force
 add_unsteadyforce           = false         # Whether to add the unsteady force to Ftot or to simply output it
 
 include_parasiticdrag       = true          # Include parasitic-drag force
-add_skinfriction            = true          # If false, the parasitic drag is purely form, meaning no skin friction
+add_skinfriction            = true          # If false, the parasitic drag is purely parasitic, meaning no skin friction
 calc_cd_from_cl             = false         # Whether to calculate cd from cl or effective AOA
 wing_polar_file             = "xf-rae101-il-1000000.csv"    # Airfoil polar for parasitic drag
 ```
@@ -98,7 +88,7 @@ that uses the vortex sheet:
 forces = []
 
 # Calculate Kutta-Joukowski force
-kuttajoukowski = uns.generate_aerodynamicforce_kuttajoukowski(KJforce_type,
+kuttajoukowski = uns.generate_calc_aerodynamicforce_kuttajoukowski(KJforce_type,
                                 sigma_vlm_surf, sigma_rotor_surf,
                                 vlm_vortexsheet, vlm_vortexsheet_overlap,
                                 vlm_vortexsheet_distribution,
@@ -183,8 +173,10 @@ uns.run_simulation( ...
                     )
 ```
 
-!!! info "ASM Example"
-    The [next section](@ref prowimaero) shows an example on how to
-    set up and run a simulation using the actuator surface model.
-
+!!! info "ASM and High Fidelity"
+    ASM uses a very high density of particles at the wing
+    surface (~100k particles per wing) to accuratelly introduce the solid
+    boundary into the LES.
+    This increases the computational cost of the simulation considerably.
+    Hence, we recommend using ASM only for high-fidelity simulations.
 

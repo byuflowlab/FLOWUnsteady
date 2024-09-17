@@ -5,7 +5,7 @@ using FLOWUnsteady.
 
 ## Wing
 
-*Sources: E. J. Alvarez, 2022,*[^1] *and E. J. Alvarez and A. Ning, 2023*[^2]
+*Sources: E. J. Alvarez, 2022,*[^1] *and E. J. Alvarez and A. Ning, 2022*[^2]
 
 
 
@@ -206,7 +206,7 @@ OASPL. For updated results, see the [Rotor in Hover tutorial](@ref rotorhovernoi
 
 
 #### Beaver Case
-*Source: E. J. Alvarez, 2022*[^1]*, and E. J. Alvarez and A. Ning, 2023*[^2]
+*Source: E. J. Alvarez, 2022*[^1]*, and E. J. Alvarez and A. Ning, 2022*[^9]
 
 ```@raw html
 <center>
@@ -328,7 +328,7 @@ OASPL. For updated results, see the [Rotor in Hover tutorial](@ref rotorhovernoi
 ## Rotor-Wing Interactions
 
 #### Tailplane w/ Tip-Mounted Propellers
-*Source: E. J. Alvarez, 2022*[^1]*, and E. J. Alvarez and A. Ning, 2023*[^2]
+*Source: E. J. Alvarez, 2022*[^1]*, and E. J. Alvarez and A. Ning, 2022*[^9]
 
 ```@raw html
 <center>
@@ -382,7 +382,7 @@ OASPL. For updated results, see the [Rotor in Hover tutorial](@ref rotorhovernoi
 ```
 
 #### Blown Wing
-*Source: E. J. Alvarez, 2022*[^1]*, and E. J. Alvarez and A. Ning, 2023*[^2]
+*Source: E. J. Alvarez, 2022*[^1]*, and E. J. Alvarez and A. Ning, 2022*[^9]
 
 ```@raw html
 <center>
@@ -416,11 +416,9 @@ OASPL. For updated results, see the [Rotor in Hover tutorial](@ref rotorhovernoi
     Large Eddy Simulation of Multirotor Aircraft," *Doctoral Dissertation, Brigham
     Young University*. [**[PDF]**](https://scholarsarchive.byu.edu/etd/9589/)
 
-[^2]: E. J. Alvarez & A. Ning (2023), "Meshless Large Eddy Simulation of
-    Propeller-Wing Interactions Through the Reformulated Vortex Particle
-    Method," *Journal of Aircraft*.
-    [**[DOI]**](https://arc.aiaa.org/doi/10.2514/1.C037279)
-    [**[PDF]**](https://scholarsarchive.byu.edu/facpub/6902/)
+[^2]: E. J. Alvarez & A. Ning (2022), "Meshless Large Eddy Simulation of
+    Rotor-Wing Interactions Through the Reformulated Vortex Particle Method," (in
+    review).
 
 [^3]: E. J. Alvarez & A. Ning (2020), "High-Fidelity Modeling of Multirotor
     Aerodynamic Interactions for Aircraft Design," *AIAA Journal*.
@@ -430,10 +428,9 @@ OASPL. For updated results, see the [Rotor in Hover tutorial](@ref rotorhovernoi
 [^5]: J. Mehr, E. J. Alvarez, & A. Ning (2022), "Interactional Aerodynamics
     Analysis of a Multi-Rotor Energy Kite," *(in review)*.
 
-[^6]: E. J. Alvarez & A. Ning (2023), "Stable Vortex Particle Method Formulation
-    for Meshless Large-Eddy Simulation," *AIAA Journal*.
-    [**[DOI]**](https://arc.aiaa.org/doi/full/10.2514/1.J063045)
-    [**[PDF]**](https://arc.aiaa.org/doi/epdf/10.2514/1.J063045)
+[^6]: E. J. Alvarez & A. Ning (2022), "Reviving the Vortex Particle Method: A
+    Stable Formulation for Meshless Large Eddy Simulation," *(in review)*.
+    [**[PDF]**](https://arxiv.org/pdf/2206.03658.pdf)
 
 [^7]: E. J. Alvarez, A. Schenk, T. Critchfield, and A. Ning (2020), “Rotor-on-Rotor
     Aeroacoustic Interactions of Multirotor in Hover,” *VFS 76th Forum*.
@@ -443,3 +440,7 @@ OASPL. For updated results, see the [Rotor in Hover tutorial](@ref rotorhovernoi
     for Distributed Electric Propulsion and eVTOL Aircraft in Complex Flow
     Conditions," *AIAA SciTech Forum*.
     [**[PDF]**](https://www.researchgate.net/publication/357565378_A_Comparison_of_Propeller_Wake_Models_for_Distributed_Electric_Propulsion_and_eVTOL_Aircraft_in_Complex_Flow_Conditions)
+
+[^9]: E. J. Alvarez & A. Ning (2022), "Meshless Large Eddy Simulation of
+    Rotor-Wing Interactions with Reformulated Vortex Particle Method,"
+    *(in review)*.

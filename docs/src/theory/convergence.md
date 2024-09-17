@@ -142,7 +142,7 @@ using FLOWUnsteady.
 ```
 
 #### Beaver Propeller Case
-*Source: E. J. Alvarez, 2022*[^1]*, and E. J. Alvarez and A. Ning, 2023*[^3]
+*Source: E. J. Alvarez, 2022*[^1]*, and E. J. Alvarez and A. Ning, 2022*[^3]
 ```@raw html
 <center>
   <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/conv-beaver-aero01.png" alt="Pic here" style="width: 100%;"/>
@@ -174,7 +174,7 @@ using FLOWUnsteady.
 
 
 ## Rotor Wake
-*Source: E. J. Alvarez, 2022*[^1]*, and E. J. Alvarez and A. Ning, 2023*[^3]
+*Source: E. J. Alvarez, 2022*[^1]*, and E. J. Alvarez and A. Ning, 2022*[^3]
 
 > **Case:** Continuation of Beaver propeller convergence study. Wake structure
 > and flow field compared to experimental PIV measurements.
@@ -274,11 +274,9 @@ using FLOWUnsteady.
     [**[DOI]**](https://doi.org/10.2514/1.J059178)
     [**[PDF]**](https://scholarsarchive.byu.edu/facpub/4179/)
 
-[^3]: E. J. Alvarez & A. Ning (2023), "Meshless Large Eddy Simulation of
-    Propeller-Wing Interactions Through the Reformulated Vortex Particle
-    Method," *Journal of Aircraft*.
-    [**[DOI]**](https://arc.aiaa.org/doi/10.2514/1.C037279)
-    [**[PDF]**](https://scholarsarchive.byu.edu/facpub/6902/)
+[^3]: E. J. Alvarez & A. Ning (2022), "Meshless Large Eddy Simulation of
+    Rotor-Wing Interactions with Reformulated Vortex Particle Method,"
+    *(in review)*.
 
 [^4]: J. Mehr, E. J. Alvarez, & A. Ning (2022), "Interactional Aerodynamics
     Analysis of a Multi-Rotor Energy Kite," (in review).
