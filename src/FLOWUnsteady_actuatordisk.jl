@@ -649,8 +649,14 @@ function _calc_dz_poweredwake(particles::AbstractVector{<:vpm.Particle}, X, Gamm
     previ = findfirst(P -> P.circulation[1]==prevtag, particles)
 
     # Error case: no such particle exists
-    @assert !isnothing(previ) ""*
-        "Logic error: Could not find particle with tag $(prevtag)"
+    # @assert !isnothing(previ) ""*
+        # "Logic error: Could not find particle with tag $(prevtag)"
+    if isnothing(previ)
+        @warn "Could not find particle with tag $(prevtag) at nt=$(nt)"
+        
+        dz = 1e2*eps()
+        return dz
+    end
 
     # Calculate displacement in between steps
     prevX = particles[previ].X
