@@ -719,6 +719,129 @@ function generate_monitor_panel_wing(body, bref, arref, Uref, rhoref, nsteps_sim
 end
 
 
+function generate_monitor_panel_systemfield(body, systemfieldname, nsteps_sim;
+                                            save_path=nothing,
+                                            filepref="panel_systemfield",
+                                            disp_plot=true,
+                                            figname="systemfield",
+                                            title_lbl="",
+                                            y_lbls=nothing,
+                                            formatplot=(fcalls, fig, axs)->nothing,
+                                            plot_optargs=(; alpha=0.7),
+                                            nsteps_savefig=10,
+                                            )
+
+
+    # Number of function calls
+    fcalls = 0
+
+    # Name of CSV file
+    if !isnothing(save_path)
+        csvfile = joinpath(save_path, filepref*".csv")
+    end
+
+    # Figure handles
+    fig, axs = nothing, nothing
+
+    function extra_runtime_function(sim, PFIELD, T, DT; optargs...)
+
+        # Fetch system field
+        systemfield = pnl.get_field(body, systemfieldname)
+        fieldval = systemfield["field_data"]
+        systemdims = length(fieldval)
+
+        # Error case
+        @assert systemfield["field_type"] == "system" ""*
+            "Field $(systemfieldname) is not a system field!"*
+            " (found $(systemfield["field_type"]) instead)"
+
+        # Write system field to CSV file
+        if !isnothing(save_path)
+
+            # Write header
+            if fcalls==0 &&
+                open(csvfile, "w") do f
+
+                    if systemdims==1
+                        println(f, "T,val")
+                    else
+                        println(f, "T", [",val$(i)" for i in 1:systemdims]...)
+                    end
+
+                end
+            end
+
+            # Write current value
+            open(csvfile, "a") do f
+
+                if systemdims==1
+                    println(f, T, ",", fieldval)
+                else
+                    println(f, T, [",$(val)" for val in fieldval]...)
+                end
+
+            end
+
+        end
+
+        # Plot system field
+        if disp_plot
+
+            # Color for lines and markers at this time step
+            aux = PFIELD.nt/nsteps_sim
+            clr = (1-aux, 0, aux)
+
+            # Initiate plots
+            if fcalls==0
+
+                formatpyplot()
+
+                fig = plt.figure(figname, figsize=[7*systemdims, 5*1]*2/3)
+                fig.suptitle(title_lbl)
+                axs = systemdims==1 ? [fig.gca()] : fig.subplots(1, systemdims)
+                axs = [axs[i, j] for j in 1:size(axs, 2), i in 1:size(axs, 1)]
+
+                for (axi, ax) in enumerate(axs)
+
+                    ax.set_xlabel("Simulation time (s)")
+
+                    if !isnothing(y_lbls)
+                        ax.set_ylabel(y_lbls[axi])
+                    end
+
+                    ax.spines["right"].set_visible(false)
+                    ax.spines["top"].set_visible(false)
+
+                end
+
+                fig.tight_layout()
+            end
+
+            for (axi, ax) in enumerate(axs)
+                ax.plot([T], [fieldval[axi]], "o"; color=clr, plot_optargs...)
+            end
+
+            # Format plot
+            formatplot(fcalls, fig, axs)
+
+            # Save figure
+            if !isnothing(save_path) && PFIELD.nt%nsteps_savefig==0
+                fig.savefig(joinpath(save_path, filepref*".png"),
+                                                    transparent=false, dpi=300)
+            end
+            
+        end
+
+        fcalls += 1
+
+        return false
+
+    end
+
+    return extra_runtime_function
+end
+
+
 
 """
     generate_monitor_statevariables(; save_path=nothing)
