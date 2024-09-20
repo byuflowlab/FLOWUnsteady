@@ -759,7 +759,7 @@ function generate_monitor_panel_systemfield(body, systemfieldname, nsteps_sim;
         if !isnothing(save_path)
 
             # Write header
-            if fcalls==0 &&
+            if fcalls==0
                 open(csvfile, "w") do f
 
                     if systemdims==1
