@@ -653,7 +653,7 @@ function _calc_dz_poweredwake(particles::AbstractVector{<:vpm.Particle}, X, Gamm
         # "Logic error: Could not find particle with tag $(prevtag)"
     if isnothing(previ)
         @warn "Could not find particle with tag $(prevtag) at nt=$(nt)"
-        
+
         dz = 1e2*eps()
         return dz
     end
@@ -701,13 +701,15 @@ mutable struct PropulsionSystem
     surfacevortexsheets::Vector{SurfaceVortexSheet} # All surface vortex sheets
     poweredwakes::Vector{PoweredWake}               # All powered wakes
     target_deltaVjet::Float64                       # Target jet velocity
+    control_deltaVjet::Float64                      # Current control jet velocity
     couplingstrategy::Function                      # Coupling strategy
 
     function PropulsionSystem(actuatordisks, surfacevortexsheets, poweredwakes;
-                                target_deltaVjet=1.0, couplingstrategy=nocoupling)
+                                target_deltaVjet=1.0, control_deltaVjet=1.0,
+                                couplingstrategy=nocoupling)
 
         return new(actuatordisks, surfacevortexsheets, poweredwakes,
-                    target_deltaVjet, couplingstrategy)
+                    target_deltaVjet, control_deltaVjet, couplingstrategy)
 
     end
 end
@@ -734,6 +736,8 @@ function update(propulsion::PropulsionSystem, target_deltaVjet::Number,
         # TODO
         # ad.gamma =
     end
+
+    propulsion.control_deltaVjet = deltaVjet
 
     return nothing
 end
