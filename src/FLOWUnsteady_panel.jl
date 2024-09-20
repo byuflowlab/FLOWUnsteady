@@ -50,7 +50,8 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
                                 run_name="flowunsteadysim",
                                 # ---------- Restart Options -------------------
                                 restart_save_file=nothing,
-                                restart_read_file=nothing
+                                restart_read_file=nothing,
+                                out_restart_read_file=nothing
                                 )
 
     normals, normalscorr = nothing, nothing
@@ -230,9 +231,11 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
                 if verbose; print("\t"^v_lvl*"Reading restart file... "); end;
                 t = @elapsed begin
 
-                    file = restart_read_file * (splitext(restart_read_file)[2]==".jld" ? "" : ".jld")
+                    if typeof(restart_read_file) <: AbstractString
+                        file = restart_read_file * (splitext(restart_read_file)[2]==".jld" ? "" : ".jld")
+                    end
 
-                    (
+                    rstrt = (
                                 normals, normalscorr,
                                 controlpoints, prev_controlpoints, off_controlpoints,
                                 Vkin, Vtot,
@@ -251,7 +254,8 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
                                 Vpanelt, Vpaneln, Vpanelo,
                                 tangents, obliques,
                                 # Xsheddingss, prev_Xsheddingss, oldstrengthss
-                    ) = JLD.load(file,
+                    ) = typeof(restart_read_file) <: AbstractString ?
+                            JLD.load(file,
                                 "normals", "normalscorr",
                                 "controlpoints", "prev_controlpoints", "off_controlpoints",
                                 "Vkin", "Vtot",
@@ -270,7 +274,12 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
                                 "Vpanelt", "Vpaneln", "Vpanelo",
                                 "tangents", "obliques",
                                 # "Xsheddingss", "prev_Xsheddingss", "oldstrengthss"
-                                )
+                            ) :
+                            restart_read_file
+
+                    if !isnothing(out_restart_read_file)
+                        push!(out_restart_read_file, rstrt)
+                    end
 
                 end
                 if verbose; println("$(round(t, digits=1)) seconds"); end;
