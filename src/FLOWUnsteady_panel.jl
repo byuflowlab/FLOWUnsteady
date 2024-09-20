@@ -277,7 +277,7 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
                             ) :
                             restart_read_file
 
-                    if !isnothing(out_restart_read_file)
+                    if !isnothing(out_restart_read_file) && length(out_restart_read_file)!=1
                         push!(out_restart_read_file, rstrt)
                     end
 
