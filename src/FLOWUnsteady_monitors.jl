@@ -751,9 +751,9 @@ function generate_monitor_panel_systemfield(body, systemfieldname, nsteps_sim;
         systemdims = length(fieldval)
 
         # Error case
-        @assert systemfield["field_type"] == "system" ""*
+        @assert systemfield["entry_type"] == "system" ""*
             "Field $(systemfieldname) is not a system field!"*
-            " (found $(systemfield["field_type"]) instead)"
+            " (found $(systemfield["entry_type"]) instead)"
 
         # Write system field to CSV file
         if !isnothing(save_path)
@@ -829,7 +829,7 @@ function generate_monitor_panel_systemfield(body, systemfieldname, nsteps_sim;
                 fig.savefig(joinpath(save_path, filepref*".png"),
                                                     transparent=false, dpi=300)
             end
-            
+
         end
 
         fcalls += 1
