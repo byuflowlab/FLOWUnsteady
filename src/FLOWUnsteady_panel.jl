@@ -275,7 +275,7 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
                                 "tangents", "obliques",
                                 # "Xsheddingss", "prev_Xsheddingss", "oldstrengthss"
                             ) :
-                            restart_read_file
+                            restart_read_file[1]
 
                     if !isnothing(out_restart_read_file) && length(out_restart_read_file)!=1
                         push!(out_restart_read_file, rstrt)
