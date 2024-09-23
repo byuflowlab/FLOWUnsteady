@@ -31,6 +31,7 @@ mutable struct SurfaceVortexSheet
     gamma0::Float64                             # Starting strength of sheet
     gamma1::Float64                             # End strength of sheet
     distribution::Function                      # Strength distribution
+    flip::Bool                                  # Flip the vortex sheet strength
     overlap::Float64                            # Overlap between particles
     sigma::Float64                              # Prescribed value of particle smoothing
 
@@ -42,6 +43,7 @@ end
 function SurfaceVortexSheet(slices_path::String;
                             gamma1::Real=1.0, gamma0::Real=gamma1,
                             distribution=s->1.0,
+                            flip=false,
                             overlap=1.25,
                             sigma=-1.0,
                             optargs...)
@@ -50,7 +52,7 @@ function SurfaceVortexSheet(slices_path::String;
     nparticles = grid.ncells
 
     return SurfaceVortexSheet(grid,
-                                gamma0, gamma1, distribution,
+                                gamma0, gamma1, distribution, flip,
                                 overlap, sigma,
                                 nparticles)
 
@@ -167,7 +169,7 @@ function generate_svs_grid(slices_path;
             # Case that unstructured grid is locally circular: shake the box
             if (closed || counteri!=npoints-1) && pointi == cells[meshconnectivity1[cells[celli][2]]][2]
 
-                # Find the cell that end with this point
+                # Find the cell that ends with this point
                 celli = meshconnectivity2[pointi]
 
                 # Fetch the point where the cell starts
@@ -334,7 +336,8 @@ function add_static_particles!(pfield::vpm.ParticleField,
 
     return add_static_particles!(pfield,
                                     svs.grid,
-                                    svs.distribution;
+                                    svs.distribution,
+                                    svs.flip;
                                     gamma0=svs.gamma0, gamma1=svs.gamma1,
                                     overlap=svs.overlap,
                                     sigma=svs.sigma <= 0 ? nothing : svs.sigma,
@@ -344,7 +347,7 @@ function add_static_particles!(pfield::vpm.ParticleField,
 end
 
 function add_static_particles!(pfield::vpm.ParticleField,
-                                    grid, distribution;
+                                    grid, distribution, flip;
                                     gamma1=1.0, gamma0=gamma1,
                                     overlap=1.25, sigma=nothing)
 
@@ -433,6 +436,9 @@ function add_static_particles!(pfield::vpm.ParticleField,
 
         # Calculate vortex sheet strength at this cell
         gamma = gamma0 + (gamma1 - gamma0) * distribution(mean(pathpositions[cell]))
+
+        # Flip the vortex sheet strength
+        gamma *= (-1)^flip
 
         # Convert vortex sheet element into a vortex particle
         X .= Ctot
