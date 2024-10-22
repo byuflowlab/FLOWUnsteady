@@ -186,7 +186,7 @@ function generate_rotor(Rtip, Rhub, B::Int,
     # Geometry for CCBlade & FLOWVLM
     r = [Rhub + i*(Rtip-Rhub)/n_bem for i in 0:n_bem] # r is discretized in n+1 sections
     chord = [spl_chord(ri) for ri in r]
-    theta = [spl_theta(ri) for ri in r]
+    theta = [spl_theta(ri) for ri in r] .+ pitch
     LE_x = [spl_LE_x(ri) for ri in r]
     LE_z = [spl_LE_z(ri) for ri in r]
 
