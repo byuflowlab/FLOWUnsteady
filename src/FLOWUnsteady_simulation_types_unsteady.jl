@@ -226,6 +226,13 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
                                             sound_spd=speedofsound,
                                             debug=debug, verbosewarn=false)
                 end
+
+                # Relaxes (rlx->1) or stiffens (rlx->0) the rotor solution
+                if rlx > 0
+                    rlxd_Gamma = rlx*vhcl.rotor_systems[si][ri]._wingsystem.sol["Gamma"] +
+                                        (1-rlx)*prev_rotor_systems[si][ri]._wingsystem.sol["Gamma"]
+                    vlm._addsolution(rotor, "Gamma", rlxd_Gamma)
+                end
             end
         end
 
