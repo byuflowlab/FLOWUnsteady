@@ -128,6 +128,8 @@ function generate_rotor(Rtip, Rhub, B::Int,
                         sweepdist,
                         heightdist,
                         airfoil_contours;
+                        TF_design=Float64,
+                        TF_trajectory=Float64,
                         # INPUT OPTIONS
                         data_path=default_database,
                         read_polar=vlm.ap.read_polar,
@@ -186,7 +188,7 @@ function generate_rotor(Rtip, Rhub, B::Int,
     # Geometry for CCBlade & FLOWVLM
     r = [Rhub + i*(Rtip-Rhub)/n_bem for i in 0:n_bem] # r is discretized in n+1 sections
     chord = [spl_chord(ri) for ri in r]
-    theta = [spl_theta(ri) for ri in r] .+ pitch
+    theta = [spl_theta(ri) for ri in r]
     LE_x = [spl_LE_x(ri) for ri in r]
     LE_z = [spl_LE_z(ri) for ri in r]
 
@@ -203,7 +205,7 @@ function generate_rotor(Rtip, Rhub, B::Int,
               "-accounting for compressibility.\n"*"*"^73)
     end
 
-    airfoils = []
+    airfoils = Tuple{TF_design,vlm.ap.Polar}[]
     Mas = xfoil ? [] : nothing
     for (rfli, (pos, contour, file_name)) in enumerate(airfoil_contours)
         x, y = contour[:,1], contour[:,2]
@@ -252,9 +254,10 @@ function generate_rotor(Rtip, Rhub, B::Int,
     end
 
     if verbose; println("\t"^v_lvl*"Generating FLOWVLM Rotor..."); end;
-    propeller = vlm.Rotor(CW, r, chord, theta, LE_x, LE_z, B, airfoils, turbine_flag)
+    propeller = vlm.Rotor(CW, r, chord, theta, LE_x, LE_z, B, airfoils=airfoils, turbine_flag=turbine_flag, 
+                            TF_design=TF_design, TF_trajectory=TF_trajectory)
 
-    vlm.initialize(propeller, n; r_lat=blade_r, verif=plot_disc,
+    vlm.initialize(propeller, n, TF_trajectory; r_lat=blade_r, verif=plot_disc,
                     genblade_args=[(:spl_k,spline_k), (:spl_s,spline_s)],
                     rfl_n_lower=rfl_n_lower, rfl_n_upper=rfl_n_upper,
                     figsize_factor=figsize_factor,
@@ -313,6 +316,8 @@ function generate_rotor(Rtip, Rhub, B::Int,
                         sweepdist,
                         heightdist,
                         airfoil_files::Array{Tuple{TF,String,String},1};
+                        TF_design=Float64,
+                        TF_trajectory=Float64,
                         # INPUT OPTIONS
                         data_path=def_data_path, optargs...) where TF
 
@@ -334,7 +339,7 @@ function generate_rotor(Rtip, Rhub, B::Int,
 
     return generate_rotor(Rtip, Rhub, B,
                             chorddist, pitchdist, sweepdist, heightdist,
-                            airfoil_contours; data_path=data_path, optargs...)
+                            airfoil_contours; TF_design=TF_design, TF_trajectory=TF_trajectory, data_path=data_path, optargs...)
 end
 
 """
@@ -344,7 +349,7 @@ end
 Generates a `FLOWVLM.Rotor` reading the blade geometry from the blade file
 `blade_file` found in the database `data_path`.
 """
-function generate_rotor(Rtip, Rhub, B::Int, blade_file::String;
+function generate_rotor(Rtip, Rhub, B::Int, blade_file::String; TF_design=Float64, TF_trajectory=Float64,
                         data_path=def_data_path, optargs...)
 
     (chorddist, pitchdist,
@@ -353,7 +358,7 @@ function generate_rotor(Rtip, Rhub, B::Int, blade_file::String;
      spl_s) = read_blade(blade_file; data_path=data_path)
 
     return generate_rotor(Rtip, Rhub, B, chorddist, pitchdist, sweepdist,
-                            heightdist, airfoil_files;
+                            heightdist, airfoil_files; TF_design=TF_design, TF_trajectory=TF_trajectory,
                             data_path=data_path,
                             spline_k=spl_k, spline_s=spl_s, optargs...)
 end
@@ -365,12 +370,13 @@ end
 Generates a `FLOWVLM.Rotor` reading the full rotor geometry from the rotor file
 `rotor_file` found in the database `data_path`.
 """
-function generate_rotor(rotor_file::String;
+
+function generate_rotor(rotor_file::String; TF_design=Float64, TF_trajectory=Float64,
                         data_path=def_data_path, optargs...)
 
     Rtip, Rhub, B, blade_file = read_rotor(rotor_file; data_path=data_path)
 
-    return generate_rotor(Rtip, Rhub, B, blade_file;
+    return generate_rotor(Rtip, Rhub, B, blade_file; TF_design=TF_design, TF_trajectory=TF_trajectory,
                             data_path=data_path, optargs...)
 end
 
