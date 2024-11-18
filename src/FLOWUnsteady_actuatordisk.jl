@@ -126,7 +126,19 @@ function generate_svs_grid(slices_path;
 
         # Remove unused points
         usedpoints = unique(vcat(cells...))
+        toremove = [i for i in 1:size(points, 2) if !(i in usedpoints)]
         points = points[:, usedpoints]
+
+        # Redefine cell connectivity with new points definition
+        for rni in toremove
+            for cell in cells
+                for (i, ni) in enumerate(cell)
+                    if rni<ni
+                        cell[i] -= 1
+                    end
+                end
+            end
+        end
 
         # Map starting points to a cell index
         meshconnectivity1 = Dict((cell[1], ci) for (ci, cell) in enumerate(cells))
@@ -167,7 +179,7 @@ function generate_svs_grid(slices_path;
             celli = meshconnectivity1[pointi]
 
             # Case that unstructured grid is locally circular: shake the box
-            if (closed || counteri!=npoints-1) && pointi == cells[meshconnectivity1[cells[celli][2]]][2]
+            if (closed || counteri!=npoints-1) && (cells[celli][2] in keys(meshconnectivity1) && pointi == cells[meshconnectivity1[ cells[celli][2] ]][2])
 
                 # Find the cell that ends with this point
                 celli = meshconnectivity2[pointi]
