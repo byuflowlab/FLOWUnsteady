@@ -84,6 +84,8 @@ function generate_svs_grid(slices_path;
                             rotation::Meshes.Rotation=one(Meshes.QuatRotation),
                             scaling=1.0,
                             offsetcentroids=(slice, closed)->zeros(3),
+                            removeduplicatenodes=false,
+                            forceclosure=false,
                             file_pref="slice", file_ext=".vtu",
                             NDIVS_section=200, NDIVS_path=100,
                             verify_splines=true,
@@ -123,6 +125,14 @@ function generate_svs_grid(slices_path;
         end
 
         cells = cells[getindex.(sort(collect(values(hashdict)), by=x->x[2]), 1)]
+
+        if removeduplicatenodes
+            # Make sure that in duplicate nodes only one is used and the other remains unused
+            # to ensure that resulting lines are recognized as being continuous
+            distance = (i, j) -> norm(points[:, i] - points[:, j])
+            twins = Dict( (i, (j for j in 1:size(points, 2) if distance(i, j) <= 1e-10 )) for i in 1:size(points, 2)) # List of twins for each node
+            cells = [ [first(twins[ni]) for ni in cell] for cell in cells] # For duplicated nodes make sure that only one is used
+        end
 
         # Remove unused points
         usedpoints = unique(vcat(cells...))
@@ -196,6 +206,12 @@ function generate_svs_grid(slices_path;
             end
 
             counteri += 1
+        end
+
+        # Force closure if requested
+        if forceclosure && !closed
+            points_sorted = hcat(points_sorted, points_sorted[:, 1])
+            closed = true
         end
 
         # Close the contour
