@@ -140,7 +140,7 @@ function generate_svs_grid(slices_path;
         points = points[:, usedpoints]
 
         # Redefine cell connectivity with new points definition
-        for rni in toremove
+        for rni in reverse(toremove)
             for cell in cells
                 for (i, ni) in enumerate(cell)
                     if rni<ni
