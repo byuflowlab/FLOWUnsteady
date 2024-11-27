@@ -48,13 +48,13 @@ out of FLOWVLM components (Wing, WingSystem, Rotor).
 struct UVLMVehicle{N, M, R} <: AbstractVLMVehicle{N, M, R}
 
     # Required inputs
-    system::vlm.WingSystem{R,R}
+    system::vlm.WingSystem
 
     # Optional inputs
-    tilting_systems::NTuple{N, vlm.WingSystem{R,R}}
-    rotor_systems::NTuple{M, Array{vlm.Rotor{R,R}, 1}}
-    vlm_system::vlm.WingSystem{R,R}
-    wake_system::vlm.WingSystem{R,R}
+    tilting_systems::NTuple{N, vlm.WingSystem}
+    rotor_systems::NTuple{M, Array{vlm.Rotor, 1}}
+    vlm_system::vlm.WingSystem
+    wake_system::vlm.WingSystem
     grids::Array{gt.GridTypes, 1}
 
     # Internal properties
