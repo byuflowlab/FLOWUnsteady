@@ -159,7 +159,7 @@ function generate_rotor(Rtip, Rhub, B::Int,
     # _spl_chord = Dierckx.Spline1D(chorddist[:, 1]*Rtip, chorddist[:, 2]*Rtip;
     #                                     k= size(chorddist)[1]>2 ? spline_k : 1,
     #                                     s=splines_s!=nothing ? splines_s[1] : spline_s, bc=spline_bc)
-    function spl_theta(x) let input=pitchdist[:, 1]*Rtip, output=pitchdist[:, 2] .+ pitch;
+    function spl_theta(x) let input=pitchdist[:, 1]*Rtip, output=pitchdist[:, 2];
             return fm.linear(input,output,x)
         end
     end
