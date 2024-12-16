@@ -17,9 +17,9 @@ FLOWUnsteady.
 ## Julia
 
 * Download and install Julia: [julialang.org](https://julialang.org/downloads)
-  (currently we are supporting up to Julia v1.10, so we recommend using
-    [v1.10.2](https://julialang.org/downloads) or
-    [v1.6.7 LTS](https://julialang.org/downloads/#long_term_support_release)
+  (currently we are supporting up to Julia v1.11, so we recommend using
+    [v1.10 LTS](https://julialang.org/downloads/#long_term_support_release) or
+    [v1.11](https://julialang.org/downloads)
     )
 * Add Julia to user-level `bin` folder
   ```bash
@@ -253,7 +253,7 @@ import FLOWUnsteady as uns
 include(joinpath(uns.examples_path, "tetheredwing.jl"))
 ```
 
-This will pull up Paraview visualizing the simulation. Kick off your shoes, sit back, and
+This will pull up ParaView visualizing the simulation. Kick your shoes off, sit back, and
 enjoy the simulation that you have just run.
 
 ```@raw html
