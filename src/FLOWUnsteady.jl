@@ -65,7 +65,7 @@ for header_name in ["vehicle", "vehicle_vlm",
 end
 
 # Format PyPlot
-formatpyplot()
+# formatpyplot()
 
 # VPM utilities
 include(joinpath(vpm.utilities_path, "utilities_fluiddomain.jl"))
