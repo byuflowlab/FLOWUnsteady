@@ -37,7 +37,7 @@ Still inside WSL,
 
 * Download Julia:
   ```bash
-  wget -O julia.tar.gz "https://julialang-s3.julialang.org/bin/linux/x64/1.10/julia-1.10.2-linux-x86_64.tar.gz"
+  wget -O julia.tar.gz "https://julialang-s3.julialang.org/bin/linux/x64/1.10/julia-1.10.7-linux-x86_64.tar.gz"
   ```
 * Decompress Julia:
   ```bash
@@ -45,7 +45,7 @@ Still inside WSL,
   ```
 * Add Julia to user-level path:
   ```bash
-  sudo ln -s ~/Programs/julia-1.10.2/bin/julia /usr/local/bin/
+  sudo ln -s ~/Programs/julia-1.10.7/bin/julia /usr/local/bin/
   ```
 
 ## Install ParaView
