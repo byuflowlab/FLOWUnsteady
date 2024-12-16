@@ -74,7 +74,7 @@ for header_name in ["actuatordisk",
 
 end
 
-# # Format PyPlot
+# Format PyPlot
 # formatpyplot()
 
 # VPM utilities
