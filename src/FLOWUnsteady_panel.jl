@@ -193,6 +193,7 @@ function generate_panel_solver(sigma_rotor, sigma_vlm, ref_magVinf, ref_rho;
                                                 Vtot, controlpoints, normals,
                                                 Das, Dbs,
                                                 elprescribe;
+                                                onlycomputeG=length(elprescribe)==0,
                                                 omit_wake=true
                                                 )
                     mbp .= RHS
