@@ -83,7 +83,9 @@ function generate_svs_grid(slices_path;
                             offset=zeros(3),
                             rotation::Meshes.Rotation=one(Meshes.QuatRotation),
                             scaling=1.0,
-                            offsetcentroids=(slice, closed)->zeros(3),
+                            # offsetcentroids=(slice, closed)->zeros(3),
+                            offsetcentroids=nothing,
+                            sortingfunction=nothing,
                             removeduplicatenodes=false,
                             forceclosure=false,
                             file_pref="slice", file_ext=".vtu",
@@ -240,20 +242,74 @@ function generate_svs_grid(slices_path;
     end
 
     # Calculate the centroid of each slice
-    centroids = [vcat(
-                        mean(slice[1, :]),
-                        (closed ? gt.centroid(slice[2:3, :]) : (mean(slice[2, :]), mean(slice[3, :])) )...
-                    ) for (slice, closed) in slices ]
+    if !isnothing(offsetcentroids)
+        centroids = [vcat(
+                            mean(slice[1, :]),
+                            (closed ? gt.centroid(slice[2:3, :]) : (mean(slice[2, :]), mean(slice[3, :])) )...
+                        ) for (slice, closed) in slices ]
+        # Offset centroids
+        centroids .+= [offsetcentroids(slice, closed) for (slice, closed) in slices]
+    else
+        centroids = [gt.centroid3D(slice) for (slice, closed) in slices]
+    end
 
-    # Offset centroids
-    centroids .+= [offsetcentroids(slice, closed) for (slice, closed) in slices]
+    # Sort points in each slice
+    if !isnothing(sortingfunction)
+
+        newslices = []
+
+        for (si, (points, closed)) in enumerate(slices)
+
+            # Remove repeated nodes
+            distance = (i, j) -> norm(points[:, i] - points[:, j])
+            to_remove = []
+
+            for i in 1:size(points, 2)
+
+                if i in to_remove
+                    nothing
+                else
+                    for j in i+1:size(points, 2)
+                        if distance(i, j) <= 1e3*eps()
+                            push!(to_remove, j)
+                        end
+                    end
+                end
+
+            end
+
+            to_keep = [i for i in 1:size(points, 2) if !(i in to_remove)]
+            newpoints = points[:, to_keep]
+
+            # Sort slice
+            newpoints .= sortslices(newpoints; dims=2, by=X->sortingfunction(X-centroids[si]))
+
+            # Close contour once again
+            if closed
+                newpoints = hcat(newpoints, newpoints[:, 1])
+            end
+
+            push!(newslices, (newpoints, closed))
+
+        end
+
+        slices = newslices
+
+    end
+
+    # Define the tangent unit vector of each slice
+    tangents = [slice[:, 1]-C for ((slice, closed), C) in zip(slices, centroids)]
+    tangents ./= norm.(tangents)
 
     # Estimate the normal of each slice
-    normals = [cross(slice[:, 1]-C, slice[:, 2]-C) for ((slice, closed), C) in zip(slices, centroids)]
+    normals = [cross(tangent, slice[:, 2]-C) for ((slice, closed), C, tangent) in zip(slices, centroids, tangents)]
     normals ./= norm.(normals)
 
-    # Center the slices around the origin
+    # Define the oblique unit vector of each slice
+    obliques = [cross(normal, tangent) for (normal, tangent) in zip(normals, tangents)]
+    obliques ./= norm.(obliques)
 
+    # Center the slices around the origin
     if verify_splines
         fig = plt.figure(figsize=[7, 5]*5/9)
         ax = fig.gca()
@@ -269,15 +325,24 @@ function generate_svs_grid(slices_path;
         end
     end
 
-    # Define loft sections
+    # Define loft sections projected onto the unit vector bases
     xmax = maximum(getindex.(centroids, 1))
     xmin = minimum(getindex.(centroids, 1))
-    sections = [ # (non-dimensional arclength position along path, contour)
-                    (
-                        (centroid[1] - xmin)/(xmax - xmin),
-                        collect(slice[2:3, :]')
-                    ) for (centroid, (slice, closed)) in zip(centroids, slices)
-                ]
+    if !isnothing(offsetcentroids)
+        sections = [ # (non-dimensional arclength position along path, contour)
+                        (
+                            (centroid[1] - xmin)/(xmax - xmin),
+                            collect(slice[2:3, :]')
+                        ) for (centroid, (slice, closed)) in zip(centroids, slices)
+                    ]
+    else
+        sections = [ # (non-dimensional arclength position along path, contour)
+                        (
+                            (centroid[1] - xmin)/(xmax - xmin),
+                            collect(hcat([ [dot(point, t), dot(point, o)] for point in eachcol(slice) ]...)')
+                        ) for (centroid, (slice, closed), t, o) in zip(centroids, slices, tangents, obliques)
+                    ]
+    end
 
     # Sort sections by increasing x position
     sort!(sections, by=section->section[1])
@@ -295,7 +360,8 @@ function generate_svs_grid(slices_path;
     path_normals = deepcopy(normals)
 
     # Twist of section contours along path
-    path_twists = [0.0 for X in path_Xs]
+    # path_twists = [0.0 for X in path_Xs]
+    path_twists = [-atand(dot(tangent, [0, 0, 1]), dot(tangent, [0, 1, 0])) for tangent in tangents]
 
     # Collect the path
     path = collect(zip(path_Xs, path_normals, path_twists))
