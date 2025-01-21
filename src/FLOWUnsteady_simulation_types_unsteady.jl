@@ -177,7 +177,9 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
                               mirror, mirror_X, mirror_normal)
 
         # Add VPM-on-Rotor, VLM-on-Rotor, and Rotor-on-Rotor induced velocity
-        Vinds = Vvpm_rotors + Vvlmrotor_on_rotor
+        Vinds = Vvpm_rotors # + Vvlmrotor_on_rotor # turn this off to reduce noise
+                                                   # should be negligible for most
+                                                   # cases anyway
 
         # ---------- 5) Solve VLM system -----------------------------------
         # Wake-coupled solution
