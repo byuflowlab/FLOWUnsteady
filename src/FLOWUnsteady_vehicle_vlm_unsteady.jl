@@ -52,7 +52,7 @@ struct UVLMVehicle{N, M, R} <: AbstractVLMVehicle{N, M, R}
 
     # Optional inputs
     tilting_systems::NTuple{N, vlm.WingSystem}
-    rotor_systems::NTuple{M, Array{vlm.Rotor, 1}}
+    rotor_systems::NTuple{M, Array{<:vlm.Rotor, 1}}
     vlm_system::vlm.WingSystem
     wake_system::vlm.WingSystem
     grids::Array{gt.GridTypes, 1}

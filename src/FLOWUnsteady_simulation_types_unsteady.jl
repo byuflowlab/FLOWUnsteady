@@ -122,7 +122,7 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
         Vvpm = Vvpm_on_Xs(pfield, vcat(Xs_cp_vlm, Xs_ApA_AB_BBp_vlm, Xs_rotors); dt=dt, fsgm=sigmafactor_vpmonvlm,
                          mirror, mirror_X, mirror_normal)
 
-        @show Vvpm[1]
+        # @show Vvpm[1]
         Vvpm_cp_vlm = Vvpm[1:m]
         Vvpm_ApA_AB_BBp_vlm = Vvpm[m+1:4*m]
         Vvpm_rotors = Vvpm[4*m+1:end]
