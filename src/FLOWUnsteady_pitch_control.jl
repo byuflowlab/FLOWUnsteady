@@ -54,7 +54,7 @@ function PitchAngles(vehicle::AbstractVehicle{<:Any, <:Any, TF}, nsteps) where T
 end
 
 """
-    (pitchangles::PitchAngles)(sim::uns.Simulation{<:Any,<:Any,TF}, pfield, t, dt; vprintln) where TF
+    (pitchangles::PitchAngles)(sim::uns.Simulation{<:Any,<:Any,TF}) where TF
 
 Given the `PitchAnlges` object `pitchangles`, set each blade pitch to a predetermined angle
 """
