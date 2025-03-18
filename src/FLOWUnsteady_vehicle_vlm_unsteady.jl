@@ -114,7 +114,7 @@ end
 UVLMVehicle(system::vlm.WingSystem, R;
         V=zeros(R,3), W=zeros(R,3),
         tilting_systems::NTuple{N, vlm.WingSystem}=NTuple{0, vlm.WingSystem}(),
-        rotor_systems::NTuple{M, Array{vlm.Rotor, 1}}=NTuple{0, Array{vlm.Rotor, 1}}(),
+        rotor_systems::NTuple{M, Array{vlm.Rotor, 1}}=NTuple{0, Array{<:vlm.Rotor, 1}}(),
         grids=Array{gt.GridTypes, 1}(),
         optargs...
         ) where {N, M} = UVLMVehicle{N, M, R}( system;
@@ -319,6 +319,7 @@ function _static_particles(pfield::vpm.ParticleField{R,<:Any,<:Any,<:Any,<:Any,<
             # Vortex strength
             Gamma .= x2
             Gamma .-= x1
+            # @show gamma, Gamma
             Gamma .*= gamma
 
             if !(j in vortices)            # Case that bound vortex is not added
