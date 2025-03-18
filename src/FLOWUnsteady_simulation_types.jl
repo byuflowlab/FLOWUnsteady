@@ -13,7 +13,7 @@
 # SIMULATION TYPE
 ################################################################################
 """
-    Simulation{V<:AbstractVehicle, M<:AbstractManeuver, R<:Real}(vehicle::V,
+    Simulation{V<:AbstractVehicle, M<:AbstractManeuver, R<:Real, TB}(vehicle::V,
                             maneuver::M, Vref::R, RPMref::R, ttot::R, optargs...)
 
 Simulation interface. This type carries the simulation's options and connects
@@ -22,6 +22,7 @@ vehicle and maneuver together.
 # ARGUMENTS
 * `vehicle`                 : Vehicle
 * `maneuver`                : Maneuver
+* `tilt_blades`             : Blade pitch angles
 * `Vref`                    : Reference velocity for the maneuver
 * `RPMref`                  : Reference RPM for the maneuver
 * `ttot`                    : Total time in which to perform the maneuver
@@ -34,29 +35,30 @@ vehicle and maneuver together.
 * `t::Real`                 : Time of current step
 * `nt::Int`                 : Current time step number
 """
-mutable struct Simulation{V<:AbstractVehicle, M<:AbstractManeuver, R}
+mutable struct Simulation{V<:AbstractVehicle, M<:AbstractManeuver, R, TB}
     # USER INPUTS: Simulation setup
     vehicle::V              # Vehicle
     maneuver::M             # Maneuver to be performed
+    tilt_blades::TB         # Pitch angle of blades in this maneuver
     Vref::R                 # Reference velocity in this maneuver
     RPMref::R               # Reference RPM in this maneuver
     ttot::R                 # Total time in which to perform the maneuver
 
     # OPTION USER INPUTS
     Vinit::Any              # Initial vehicle velocity
-    Winit::Any              # Initial vehicle angular velocity
+    Winit::Any              # Initial vehicle angular velocity ## Change from type ANY
 
 
     # INTERNAL PROPERTIES: Runtime parameters
     t::R                    # Dimensional time
     nt::Int                 # Current time step number
 
-    Simulation{V, M, R}(
-                            vehicle, maneuver, Vref, RPMref, ttot;
-                            Vinit=nothing, Winit=nothing,
+    Simulation{V, M, R, TB}(
+                            vehicle, maneuver, tilt_blades, Vref, RPMref, ttot;
+                            Vinit=nothing, Winit=nothing, 
                             t=zero(R), nt=-1
-                        ) where {V, M, R} = _check(vehicle, maneuver) ? new(
-                            vehicle, maneuver, Vref, RPMref, ttot,
+                        ) where {V, M, R, TB} = _check(vehicle, maneuver) ? new(
+                            vehicle, maneuver, tilt_blades, Vref, RPMref, ttot,
                             Vinit, Winit,
                             t, nt
                         ) : nothing
@@ -66,11 +68,11 @@ end
 """
     Simulation(vehicle, maneuver, Vref, RPMref, ttot; optargs...)
 
-Constructor with implicit `V`, `M`, and `R` parameters.
+Constructor with implicit `V`, `M`, `R`, and `TB` parameters.
 """
-Simulation(v::AbstractVehicle, m::AbstractManeuver, n, args...; optargs...
-             ) = Simulation{typeof(v), typeof(m), typeof(n)}(v, m, n, args...;
-                                                                     optargs...)
+Simulation(v::AbstractVehicle, m::AbstractManeuver, tilt_blades, n, args...; optargs...
+             ) = Simulation{typeof(v), typeof(m), typeof(n), typeof(tilt_blades)}(v, m, tilt_blades, n, args...;
+                                                                    optargs...)
 
 
 # Solvers of concrete AbstractVehicle implementations
@@ -121,6 +123,10 @@ function nextstep_kinematic(self::Simulation, dt)
         angles = get_angles(self.maneuver, self.t/self.ttot)
         tilt_systems(self.vehicle, angles)
 
+        # tilt blades
+        self.tilt_blades(self)
+
+        # increment time
         self.t += dt
     end
 
