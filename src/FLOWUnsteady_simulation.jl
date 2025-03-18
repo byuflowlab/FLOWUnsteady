@@ -40,7 +40,7 @@ run_simulation(
     vpm_integration = vpm.rungekutta3,  # VPM time integration scheme (`vpm.euler` or `vpm.rungekutta3`)
     vpm_transposed  = true,             # VPM transposed stretching scheme
     vpm_viscous     = vpm.Inviscid(),   # VPM viscous diffusion scheme (`vpm.Inviscid()`, `vpm.CoreSpreading(nu, sgm0, zeta)`, or `vpm.ParticleStrengthExchange(nu)`)
-    vpm_fmm         = vpm.FMM(; p=4, ncrit=50, theta=0.4, nonzero_sigma=false), # VPM's FMM settings
+    vpm_fmm         = vpm.FMM(; p=4, ncrit=50, theta=0.4, nonzero_sigma=false, ε_tol=nothing), # VPM's FMM settings
     vpm_relaxation  = vpm.pedrizzetti,  # VPM relaxation scheme (`vpm.norelaxation`, `vpm.correctedpedrizzetti`, or `vpm.pedrizzetti`)
     vpm_surface     = true,             # Whether to include surfaces in the VPM through ASM/ALM
 
@@ -131,7 +131,7 @@ function run_simulation(
             vpm_integration = vpm.rungekutta3,  # VPM time integration scheme (`vpm.euler` or `vpm.rungekutta3`)
             vpm_transposed  = true,             # VPM transposed stretching scheme
             vpm_viscous     = vpm.Inviscid(),   # VPM viscous diffusion scheme (`vpm.Inviscid()`, `vpm.CoreSpreading(nu, sgm0, zeta)`, or `vpm.ParticleStrengthExchange(nu)`)
-            vpm_fmm         = vpm.FMM(; p=4, ncrit=50, theta=0.4, nonzero_sigma=false), # VPM's FMM settings
+            vpm_fmm         = vpm.FMM(; p=4, ncrit=50, theta=0.4, nonzero_sigma=false, ε_tol=nothing), # VPM's FMM settings
             vpm_relaxation  = vpm.pedrizzetti,  # VPM relaxation scheme (`vpm.norelaxation`, `vpm.correctedpedrizzetti`, or `vpm.pedrizzetti`)
             vpm_surface     = true,             # Whether to include surfaces in the VPM through ASM/ALM
             vpm_floattype   = Float64,
@@ -455,7 +455,7 @@ function run_simulation(
     return pfield
 end
 
-function add_particle(pfield::vpm.ParticleField{TVPM,<:Any,<:Any,<:Any,<:Any,<:Any,<:Any}, X,
+function add_particle(pfield::vpm.ParticleField{TVPM,<:Any,<:Any,<:Any,<:Any,<:Any,<:Any,<:Any}, X,
                         gamma, dt,
                         V, infD,
                         sigma, vol,
