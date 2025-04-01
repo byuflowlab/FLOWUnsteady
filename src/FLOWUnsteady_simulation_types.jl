@@ -40,11 +40,11 @@ mutable struct Simulation{V<:AbstractVehicle, M<:AbstractManeuver, R, TB}
     vehicle::V              # Vehicle
     maneuver::M             # Maneuver to be performed
     Vref::R                 # Reference velocity in this maneuver
+    tilt_blades::TB         # Pitch angle of blades in this maneuver
     RPMref::R               # Reference RPM in this maneuver
     ttot::R                 # Total time in which to perform the maneuver
 
     # OPTION USER INPUTS
-    tilt_blades::TB         # Pitch angle of blades in this maneuver
     Vinit::Any              # Initial vehicle velocity
     Winit::Any              # Initial vehicle angular velocity ## Change from type ANY?
 
@@ -53,28 +53,24 @@ mutable struct Simulation{V<:AbstractVehicle, M<:AbstractManeuver, R, TB}
     nt::Int                 # Current time step number
 
     Simulation{V, M, R, TB}(
-                            vehicle, maneuver, Vref, RPMref, ttot;
-                            tilt_blades=(sim)->nothing,
+                            vehicle, maneuver, Vref, tilt_blades, RPMref, ttot;
                             Vinit=nothing, Winit=nothing, 
                             t=zero(R), nt=-1
                         ) where {V, M, R, TB} = _check(vehicle, maneuver) ? new(
-                            vehicle, maneuver, Vref, RPMref, ttot,
-                            tilt_blades,
+                            vehicle, maneuver, Vref, tilt_blades, RPMref, ttot,
                             Vinit, Winit,
                             t, nt
                         ) : nothing
 end
-
 
 """
     Simulation(vehicle, maneuver, Vref, RPMref, ttot; optargs...)
 
 Constructor with implicit `V`, `M`, `R`, and `TB` parameters.
 """
-Simulation(v::AbstractVehicle, m::AbstractManeuver, n, args...; tb=(sim)->nothing, optargs...
-             ) = Simulation{typeof(v), typeof(m), typeof(n), typeof(tb)}(v, m, n, args...;
-                                                                                tilt_blades=tb,
-                                                                                optargs...)
+Simulation(v::AbstractVehicle, m::AbstractManeuver, n, tb, args...; optargs...
+             ) = Simulation{typeof(v), typeof(m), typeof(n), typeof(tb)}(v, m, n, tb, args...;
+                                                                                    optargs...)
 
 
 # Solvers of concrete AbstractVehicle implementations

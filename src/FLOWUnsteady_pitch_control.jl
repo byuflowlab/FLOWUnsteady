@@ -104,7 +104,7 @@ Takes in a vector `x` that contains the pitch angle at each time step for each b
 Loads values of `x` into `pitchangles.theta1`, etc.
 """
 function (pitchangles::PitchAngles)(x::Vector{Float64})
-    y = reshape(x,div(length(x),3),3)
+    y = reshape(x, div(length(x),3), 3)
     pitchangles.theta1 .= y[:,1]
     pitchangles.theta2 .= y[:,2]
     pitchangles.theta3 .= y[:,3]
