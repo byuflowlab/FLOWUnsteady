@@ -68,7 +68,7 @@ end
 
 Constructor with implicit `V`, `M`, `R`, and `TB` parameters.
 """
-Simulation(v::AbstractVehicle, m::AbstractManeuver, n, tb, args...; optargs...
+Simulation(v::AbstractVehicle, m::AbstractManeuver, n, args...; tb=(args...)->nothing, optargs...
              ) = Simulation{typeof(v), typeof(m), typeof(n), typeof(tb)}(v, m, n, tb, args...;
                                                                                     optargs...)
 
