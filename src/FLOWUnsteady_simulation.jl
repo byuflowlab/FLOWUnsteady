@@ -235,25 +235,22 @@ function run_simulation(
     end
 
     # Initiate particle field
-    vpm_solver = [
-                    (:formulation, vpm_formulation),
-                    (:viscous, vpm_viscous),
-                    (:kernel, vpm_kernel),
-                    (:UJ, vpm_UJ),
-                    (:SFS, vpm_SFS),
-                    (:integration, vpm_integration),
-                    (:transposed, vpm_transposed),
-                    (:relaxation, vpm_relaxation),
-                    (:fmm, vpm_fmm),
-                 ]
     Xdummy = zeros(3)
     pfield = vpm.ParticleField(max_particles, vpm_floattype; Uinf=t->Vinf(Xdummy, t),
-                                                                  vpm_solver...)
+            formulation=vpm_formulation, viscous=vpm_viscous,
+            kernel=vpm_kernel, UJ=vpm_UJ, SFS=vpm_SFS,
+            integration=vpm_integration,
+            transposed=vpm_transposed, relaxation=vpm_relaxation,
+            fmm=vpm_fmm)                                                             
 
     max_staticp = max_static_particles==nothing ? 4*_get_m_static(sim.vehicle) : max_static_particles
     mirror && (max_staticp += max_particles)
     staticpfield = vpm.ParticleField(max_staticp, vpm_floattype; Uinf=t->Vinf(Xdummy, t),
-                                                                  vpm_solver...)
+            formulation=vpm_formulation, viscous=vpm_viscous,
+            kernel=vpm_kernel, UJ=vpm_UJ, SFS=vpm_SFS,
+            integration=vpm_integration,
+            transposed=vpm_transposed, relaxation=vpm_relaxation,
+            fmm=vpm_fmm)
 
     if vpm_surface && max_static_particles==nothing && vlm_vortexsheet && raisewarnings
         @warn("Vortex sheet representation of VLM has been requested, but "*
