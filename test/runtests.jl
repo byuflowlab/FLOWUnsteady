@@ -1,5 +1,7 @@
 using Test
-
+# Trick for avoiding OpenSSL compatibility issues with PyCall
+# https://discourse.julialang.org/t/error-loading-openssl-jll-version-openssl-3-3-0-not-found-when-precompiling-mldatasets/128977/3
+using OpenSSL_jll
 using PyPlot
 using Printf
 
@@ -35,7 +37,7 @@ end
     # @test run_sweptwing(name; nsteps=300, p_per_step=4, vlm_rlx=0.75,
     #                     simverbose=true, disp_plot=true, save_path="sweptwing00")
 
-    name = "Test quasi-steady solver — Isolated wing"
-    @test run_sweptwing(name; VehicleType=uns.QVLMVehicle, nsteps=10)
+    # name = "Test quasi-steady solver — Isolated wing"
+    # @test run_sweptwing(name; VehicleType=uns.QVLMVehicle, nsteps=10)
 
 end

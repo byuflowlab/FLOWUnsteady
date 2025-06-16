@@ -213,7 +213,7 @@ import Pkg
 
 url = "https://github.com/byuflowlab/"
 
-packages = [ ("AirfoilPrep.jl", "v2.1.2"), ("FLOWVLM", "v2.1.3"),
+packages = [ ("AirfoilPrep.jl", "v2.1.3"), ("FLOWVLM", "v2.1.4"),
              ("FLOWNoise", "v2.3.3"),      ("BPM.jl", "v2.0.1")  ]
 
 Pkg.add([ Pkg.PackageSpec(; url=url*name, rev=v) for (name, v) in packages ])
