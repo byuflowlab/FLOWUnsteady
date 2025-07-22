@@ -52,7 +52,7 @@ struct UVLMVehicle{N, M, R} <: AbstractVLMVehicle{N, M, R}
 
     # Optional inputs
     tilting_systems::NTuple{N, vlm.WingSystem}
-    rotor_systems::NTuple{M, Array{vlm.Rotor, 1}}
+    rotor_systems::NTuple{M, Array{<:vlm.Rotor, 1}}
     vlm_system::vlm.WingSystem
     wake_system::vlm.WingSystem
     grids::Array{gt.GridTypes, 1}
@@ -292,7 +292,7 @@ save_vtk(self::VLMVehicle, args...;
 
 ##### INTERNAL FUNCTIONS  ######################################################
 
-function _static_particles(pfield::vpm.ParticleField{R, F, V, S, Tkernel, TUJ, Tintegration},
+function _static_particles(pfield::vpm.ParticleField{R,<:Any,<:Any,<:Any,<:Any,<:Any,<:Any,<:Any},
                             system::Union{vlm.Wing, vlm.WingSystem, vlm.Rotor},
                             sigma;
                             sigma_vpm=nothing,
@@ -301,7 +301,7 @@ function _static_particles(pfield::vpm.ParticleField{R, F, V, S, Tkernel, TUJ, T
                             vortexsheet_distribution::Function=g_uniform,
                             vortexsheet_sigma_tbv=nothing,
                             vortices=1:3, # Bound vortices to add (1==AB, 2==ApA, 3==BBp)
-                            ) where {R, F, V, S, Tkernel, TUJ, Tintegration}
+                            ) where {R}
 
     #X, Gamma, dl = (zeros(3) for i in 1:3) # zeros creates floats by default.
     X, Gamma, dl = (zeros(R,3) for i in 1:3)
