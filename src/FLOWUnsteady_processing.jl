@@ -131,7 +131,7 @@ function remove_particles_box(Pmin, Pmax, step::Int)
 
             for i in vpm.get_np(PFIELD):-1:1
                 P = vpm.get_particle(PFIELD, i)
-                X = vpm.get_X(P)
+                X = vpm.get_X(P) - sim.vehicle.system.O
 
                 if (  (X[1] < Pmin[1] || X[1] > Pmax[1])
                         ||

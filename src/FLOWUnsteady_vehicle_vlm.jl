@@ -81,7 +81,7 @@ function set_W(self::AbstractVLMVehicle, W)
 end
 
 function tilt_systems(self::AbstractVLMVehicle{N,M,R}, angles::NTuple{N, Array{R2, 1}}
-                                                    ) where{N, M, R, R2<:Real}
+                                                    ) where{N, M, R, R2}
     # Iterate over tilting system
     for i in 1:get_ntltsys(self)
         sys = self.tilting_systems[i]
@@ -90,6 +90,33 @@ function tilt_systems(self::AbstractVLMVehicle{N,M,R}, angles::NTuple{N, Array{R
     end
     return nothing
 end
+# function tilt_systems(self::AbstractVLMVehicle{N,M,R}, angles::NTuple{N, Array{R2, 1}}, dt
+#                                                     ) where{N, M, R, R2<:Real}
+
+#     dX = dt*self.V                  # Translation
+#     dA = 180/pi * dt*self.W 
+
+#     rotation = gt.rotation_matrix2([-a for a in dA]...)
+
+#     # Iterate over tilting system
+#     for i in 1:get_ntltsys(self)
+#         sys = self.tilting_systems[i]
+#         Oaxis = gt.rotation_matrix2([-a for a in angles[i]]...)
+
+#         dO = dX + rotation'*sys.O - sys.O
+
+#         for j in eachindex(sys.wings)
+#             if typeof(sys.wings[j]) <: vlm.Rotor
+#                 vlm.setcoordsystem(sys.wings[j]._wingsystem, sys.wings[j]._wingsystem.O - dO, sys.wings[j]._wingsystem.Oaxis)
+#             else
+#                 vlm.setcoordsystem(sys.wings[j], sys.wings[j].O - dO, sys.wings[j].Oaxis)
+#             end
+#         end
+        
+#         vlm.setcoordsystem(sys, sys.O + dO, Oaxis)
+#     end
+#     return nothing
+# end
 function tilt_systems(self::AbstractVLMVehicle{0,M,R}, angles::Tuple{})  where{M, R}
     return nothing
 end
@@ -110,6 +137,12 @@ function nextstep_kinematic(self::AbstractVLMVehicle, dt)
 
     # Translation and rotation
     vlm.setcoordsystem(self.system, O, Oaxis)
+
+    for i in 1:get_ntltsys(self)
+        sys = self.tilting_systems[i]
+        sys.O += dX
+        sys.O = M'*(sys.O - self.system.O) + self.system.O
+    end
 
     # Translation and rotation of every grid
     for i in 1:length(self.grids)
