@@ -93,8 +93,8 @@ for these_nums in threaded_nums[nthread:nthread]
                                     # maxparticles=Int(8e6),
                                     # maxparticles=Int(12e6),
                                     static_particles=true,
-                                    # fmm=vpm.FMM(; p=4, ncrit=50, theta=0.4, phi=0.5), # FMM parameters
-                                    fmm=vpm.FMM(; p=4, ncrit=50, theta=0.4, phi=0.3),
+                                    # fmm=vpm.FMM(; p=4, ncrit=50, theta=0.4, nonzero_sigma=false, ε_tol=nothing), # FMM parameters
+                                    fmm=vpm.FMM(; p=4, ncrit=50, theta=0.4, nonzero_sigma=false, ε_tol=nothing),
                                     f_sigma=0.5,                # Smoothing radii of node particles as sigma = f_sigma*meansigma
                                     # f_sigma=1.0,
                                     maxmagGamma=Inf,            # Any vortex strengths larger than this get clipped to this value

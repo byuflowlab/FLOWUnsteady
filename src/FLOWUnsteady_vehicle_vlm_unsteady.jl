@@ -52,7 +52,7 @@ struct UVLMVehicle{N, M, R} <: AbstractVLMVehicle{N, M, R}
 
     # Optional inputs
     tilting_systems::NTuple{N, vlm.WingSystem}
-    rotor_systems::NTuple{M, Array{vlm.Rotor, 1}}
+    rotor_systems::NTuple{M, Array{<:vlm.Rotor, 1}}
     vlm_system::vlm.WingSystem
     wake_system::vlm.WingSystem
     grids::Array{gt.GridTypes, 1}
@@ -62,30 +62,31 @@ struct UVLMVehicle{N, M, R} <: AbstractVLMVehicle{N, M, R}
     W::Array{R, 1}                          # Current vehicle angular velocity
     prev_data::Array{Any, 1}                # Information about previous step
     grid_O::Array{Array{R, 1}, 1}           # Origin of every grid
+end
 
-
-    UVLMVehicle{N, M, R}(
+function UVLMVehicle{N, M, R}(
                     system;
                     tilting_systems=NTuple{0, vlm.WingSystem}(),
-                    rotor_systems=NTuple{0, Array{vlm.Rotor, 1}}(),
+                    rotor_systems=NTuple{0, Array{<:vlm.Rotor, 1}}(),
                     vlm_system=vlm.WingSystem(),
                     wake_system=vlm.WingSystem(),
                     grids=Array{gt.GridTypes, 1}(),
                     V=zeros(3), W=zeros(3),
                     prev_data=[deepcopy(vlm_system), deepcopy(wake_system),
                                                     deepcopy(rotor_systems)],
-                    grid_O=Array{Array{Float64, 1}, 1}(),
-                ) where {N, M, R} = new(
-                    system,
-                    tilting_systems,
-                    rotor_systems,
-                    vlm_system,
-                    wake_system,
-                    grids,
-                    V, W,
-                    prev_data,
-                    grid_O,
-                )
+                    grid_O=Array{Array{R, 1}, 1}(),
+                ) where {N, M, R}
+    return UVLMVehicle(
+        system,
+        tilting_systems,
+        rotor_systems,
+        vlm_system,
+        wake_system,
+        grids,
+        V, W,
+        prev_data,
+        grid_O,
+    )
 end
 
 """
@@ -93,13 +94,30 @@ end
 
 Constructor with implicit `N`, `M`, and `R` parameters.
 """
-UVLMVehicle(system::vlm.WingSystem;
+function UVLMVehicle(system::vlm.WingSystem;
         V::Array{R, 1}=zeros(3), W::Array{R, 1}=zeros(3),
+        tilting_systems::NTuple{N, <:vlm.WingSystem}=NTuple{0, <:vlm.WingSystem}(),
+        rotor_systems::NTuple{M, Array{<:vlm.Rotor, 1}}=NTuple{0, Array{<:vlm.Rotor, 1}}(),
+        grids=Array{gt.GridTypes, 1}(),
+        optargs...
+        ) where {N, M, R}
+        return UVLMVehicle{N, M, R}( system;
+                                V=V, W=W,
+                                tilting_systems=tilting_systems,
+                                rotor_systems=rotor_systems,
+                                grids=Array{gt.GridTypes, 1}(grids),
+                                grid_O=[zeros(R, 3) for i in 1:length(grids)],
+                                optargs...)
+end
+
+"Constructor allowing the real type to be specified."
+UVLMVehicle(system::vlm.WingSystem, R;
+        V=zeros(R,3), W=zeros(R,3),
         tilting_systems::NTuple{N, vlm.WingSystem}=NTuple{0, vlm.WingSystem}(),
         rotor_systems::NTuple{M, Array{vlm.Rotor, 1}}=NTuple{0, Array{vlm.Rotor, 1}}(),
         grids=Array{gt.GridTypes, 1}(),
         optargs...
-        ) where {N, M, R} = UVLMVehicle{N, M, R}( system;
+        ) where {N, M} = UVLMVehicle{N, M, R}( system;
                                 V=V, W=W,
                                 tilting_systems=tilting_systems,
                                 rotor_systems=rotor_systems,
@@ -112,7 +130,7 @@ VLMVehicle = UVLMVehicle
 
 ##### FUNCTIONS  ###############################################################
 function shed_wake(self::VLMVehicle, Vinf::Function,
-                            pfield::vpm.ParticleField, dt::Real, nt::Int; t=0.0,
+                            pfield::vpm.ParticleField, dt, nt::Int; t=0.0,
                             unsteady_shedcrit=-1.0,
                             shed_starting=false,
                             p_per_step=1,
@@ -184,13 +202,13 @@ const g_piecewiselinear = g_linear
 
 function generate_static_particle_fun(pfield::vpm.ParticleField, pfield_static::vpm.ParticleField,
                                         self::VLMVehicle,
-                                        sigma_vlm::Real, sigma_rotor::Real;
+                                        sigma_vlm, sigma_rotor;
                                         vlm_vortexsheet=false,
                                         vlm_vortexsheet_overlap=2.125,
                                         vlm_vortexsheet_distribution=g_pressure,
                                         vlm_vortexsheet_sigma_tbv=nothing,
                                         save_path=nothing, run_name="", suff="_staticpfield",
-                                        nsteps_save=1)
+                                        nsteps_save=1, mirror=false, mirror_X=nothing, mirror_normal=nothing)
 
     if sigma_vlm<=0
         error("Invalid VLM smoothing radius $sigma_vlm.")
@@ -224,6 +242,32 @@ function generate_static_particle_fun(pfield::vpm.ParticleField, pfield_static::
             end
         end
 
+        # mirror
+        if mirror
+            np = vpm.get_np(pfield)
+            for i_p in 1:np
+                P = vpm.get_particle(pfield, i_p)
+                X = SVector{3}(vpm.get_X(P))
+                Xm = X - dot(2*(X - mirror_X), mirror_normal) * mirror_normal
+                Γ = SVector{3}(vpm.get_Gamma(P))
+                Γm = 2*dot(Γ, mirror_normal) * Γ / norm(Γ) - Γ
+                σ = vpm.get_sigma(P)[]
+                vol=vpm.get_vol(P)[]
+                circulation=vpm.get_circulation(P)[]
+                C1, C2, C3 = vpm.get_C(P)
+                static=true
+
+                vpm.add_particle(pfield, Xm, Γm, σ; vol, circulation, C=SVector{3}(C1,C2,C3), static)
+            end
+
+            if flag
+                for i_p in np+1:vpm.get_np(pfield)
+                    P = vpm.get_particle(pfield, i_p)
+                    vpm.add_particle(pfield_static, P)
+                end
+            end
+        end
+
         # Save vtk with static particles
         if flag
             if pfield_static.nt%nsteps_save==0
@@ -248,18 +292,19 @@ save_vtk(self::VLMVehicle, args...;
 
 ##### INTERNAL FUNCTIONS  ######################################################
 
-function _static_particles(pfield::vpm.ParticleField,
+function _static_particles(pfield::vpm.ParticleField{R,<:Any,<:Any,<:Any,<:Any,<:Any,<:Any,<:Any},
                             system::Union{vlm.Wing, vlm.WingSystem, vlm.Rotor},
-                            sigma::Real;
+                            sigma;
                             sigma_vpm=nothing,
                             vortexsheet::Bool=false,
-                            vortexsheet_overlap::Real=2.125,
+                            vortexsheet_overlap=2.125,
                             vortexsheet_distribution::Function=g_uniform,
                             vortexsheet_sigma_tbv=nothing,
                             vortices=1:3, # Bound vortices to add (1==AB, 2==ApA, 3==BBp)
-                            )
+                            ) where {R}
 
-    X, Gamma, dl = (zeros(3) for i in 1:3)
+    #X, Gamma, dl = (zeros(3) for i in 1:3) # zeros creates floats by default.
+    X, Gamma, dl = (zeros(R,3) for i in 1:3)
 
     # Adds a particle for every bound vortex of the VLM
     for i in 1:vlm.get_m(system)

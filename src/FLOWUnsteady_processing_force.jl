@@ -134,12 +134,12 @@ function generate_aerodynamicforce_kuttajoukowski(KJforce_type::String,
                                 vehicle=nothing
                                 )
 
-    function calc_aerodynamicforce_kuttajoukowski(vlm_system::Union{vlm.Wing, vlm.WingSystem},
+    function calc_aerodynamicforce_kuttajoukowski(vlm_system::vlm.AbstractWing{TF_design,TF_trajectory},
                                     prev_vlm_system, pfield, Vinf, dt, rho; t=0.0,
                                     per_unit_span=false, spandir=[0, 1, 0],
                                     include_trailingboundvortex=false,
                                     Vout=nothing, lenout=nothing,
-                                    lencrit=-1, debug=false)
+                                    lencrit=-1, debug=false) where {TF_design,TF_trajectory}
 
         m = vlm.get_m(vlm_system)    # Number of horseshoes
 
@@ -168,9 +168,10 @@ function generate_aerodynamicforce_kuttajoukowski(KJforce_type::String,
                                                     targetX=["Ap", "A", "B", "Bp"])
 
         # Pre-allocate memory
-        Ftot = [zeros(3) for i in 1:m]
+        TF = promote_type(TF_design, TF_trajectory)
+        Ftot = [zeros(TF,3) for i in 1:m]
         if debug
-            Vvpms, Vvlms, Vtranmids = ([zeros(3) for i in 1:m] for j in 1:3)
+            Vvpms, Vvlms, Vtranmids = ([zeros(TF,3) for i in 1:m] for j in 1:3)
         end
 
         # Bound vortices to include in force calculation
@@ -204,7 +205,7 @@ function generate_aerodynamicforce_kuttajoukowski(KJforce_type::String,
                                             vlm_vortexsheet_sigma_tbv=vlm_vortexsheet_sigma_tbv)
 
             # Pre-calculate direction of lifting bound vortices
-            BVdir = [zeros(3) for i in 1:m]
+            BVdir = [zeros(TF,3) for i in 1:m]
 
             for i in 1:m
                 BVdir[i] .= B[i]
@@ -237,8 +238,8 @@ function generate_aerodynamicforce_kuttajoukowski(KJforce_type::String,
             pfield.UJ(pfield)
 
             # Collect velocities
-            weights = zeros(m)
-            Vvpm = [zeros(3) for i in 1:m]
+            weights = zeros(TF,m)
+            Vvpm = [zeros(TF,3) for i in 1:m]
 
             for P in vpm.iterate(pfield; include_static=true)
 
@@ -376,15 +377,16 @@ will calculate the unsteady loading and save it under the field `Funs-vector`,
 but it will not be added to the Ftot vector that is used to calculate the
 wing's overall aerodynamic force.
 """
-function calc_aerodynamicforce_unsteady(vlm_system::Union{vlm.Wing, vlm.WingSystem},
+function calc_aerodynamicforce_unsteady(vlm_system::vlm.AbstractWing{TF_design,TF_trajectory},
                                 prev_vlm_system, pfield, Vinf, dt, rho; t=0.0,
                                 per_unit_span=false, spandir=[0, 1, 0],
                                 include_trailingboundvortex=false,
                                 Vout=nothing, lenout=nothing,
                                 lencrit=-1, debug=false,
                                 add_to_Ftot=false # Use false to calculate unsteady force but not add it
-                                )
+                                ) where {TF_design, TF_trajectory}
 
+    TF = promote_type(TF_design, TF_trajectory)
     m = vlm.get_m(vlm_system)    # Number of horseshoes
 
     # Nodes of every horseshoe
@@ -393,8 +395,8 @@ function calc_aerodynamicforce_unsteady(vlm_system::Union{vlm.Wing, vlm.WingSyst
     B = _get_Xs(vlm_system, "B")
     Bp = _get_Xs(vlm_system, "Bp")
 
-    Ftot = [zeros(3) for i in 1:m]
-    area = zeros(3)
+    Ftot = [zeros(TF,3) for i in 1:m]
+    area = zeros(TF,3)
 
 
     if ("Gamma" in keys(prev_vlm_system.sol)) # Case that solution from previous step is available
@@ -461,7 +463,7 @@ function calc_aerodynamicforce_unsteady(vlm_system::Union{vlm.Wing, vlm.WingSyst
 
     else
 
-        return [zeros(3) for i in 1:m]
+        return [zeros(TF,3) for i in 1:m]
 
     end
 end
@@ -543,8 +545,18 @@ function generate_aerodynamicforce_parasiticdrag(polar_file::String;
 
     # Spline through data (NOTE: AOA in radians!)
     k = min(length(alpha)-1, spl_k)
-    spl_cl = Dierckx.Spline1D(alpha*pi/180.0, cl; k=k, s=0.1)
-    spl_cd = Dierckx.Spline1D(alpha*pi/180.0, cd; k=k, s=0.001)
+
+    function spl_cl(x) let input=alpha*pi/180.0,output=cl;
+            return fm.linear(input, output, x)
+        end
+    end
+        # spl_cl = Dierckx.Spline1D(alpha*pi/180.0, cl; k=k, s=0.1)
+    
+    function spl_cd(x) let input=alpha*pi/180.0,output=cd;
+            return fm.linear(input, output, x)
+        end
+    end
+        # spl_cd = Dierckx.Spline1D(alpha*pi/180.0, cd; k=k, s=0.001)
 
     if calc_cd_from_cl
         # Make alpha(cl) an injective function
@@ -554,17 +566,22 @@ function generate_aerodynamicforce_parasiticdrag(polar_file::String;
         cd_inj = cd[cl_mini:cl_maxi]
 
         # Spline cd as a function of cl
-        spl_cdfromcl = Dierckx.Spline1D(cl_inj, cd_inj; k=k, s=0.1, bc="nearest")
+        # spl_cdfromcl = Dierckx.Spline1D(cl_inj, cd_inj; k=k, s=0.1, bc="nearest")
+        function spl_cdfromcl(x) let cl_inj=cl_inj, cd_inj=cd_inj;
+                return fm.linear(cl_inj, cd_inj, x)
+        	end
+        end
     end
 
     # Create function for evaluation parasitic drag from the polar
-    function calc_aerodynamicforce_parasiticdrag(vlm_system::Union{vlm.Wing, vlm.WingSystem},
+    function calc_aerodynamicforce_parasiticdrag(vlm_system::vlm.AbstractWing{TF_design,TF_trajectory},
                                                     prev_vlm_system, pfield, Vinf, dt, rho; t=0.0,
                                                     per_unit_span=false, spandir=[0, 1, 0],
                                                     include_trailingboundvortex=false,
                                                     Vout=nothing, lenout=nothing,
-                                                    lencrit=-1, debug=false)
+                                                    lencrit=-1, debug=false) where {TF_design,TF_trajectory}
 
+        TF = promote_type(TF_design, TF_trajectory)
         m = vlm.get_m(vlm_system)    # Number of horseshoes
 
         # Nodes of every horseshoe
@@ -593,13 +610,13 @@ function generate_aerodynamicforce_parasiticdrag(polar_file::String;
         # Evaluate kinematic velocity on each node
         Vtran = _Vkinematic(vlm_system, prev_vlm_system, dt; t=t, targetX=["A", "B"])
 
-        Ftot = [zeros(3) for i in 1:m]
-        l, leff, Vtranmid, V = (zeros(3) for j in 1:4)
-        that, shat, nhat, dhat = (zeros(3) for j in 1:4)
-        lAAp, lBBp = (zeros(3) for j in 1:2)
+        Ftot = [zeros(TF,3) for i in 1:m]
+        l, leff, Vtranmid, V = (zeros(TF,3) for j in 1:4)
+        that, shat, nhat, dhat = (zeros(TF,3) for j in 1:4)
+        lAAp, lBBp = (zeros(TF,3) for j in 1:2)
 
         if debug
-            AOAeffs, cds, cls = (zeros(m) for j in 1:3)
+            AOAeffs, cds, cls = (zeros(TF,m) for j in 1:3)
         end
 
         for i in 1:m                 # Iterate over horseshoes
@@ -739,13 +756,14 @@ function generate_calc_aerodynamicforce_freevortices(maxboundparticles::Int,
 
     pfield_FV = vpm.ParticleField(maxboundparticles)
 
-    function calc_aerodynamicforce_freevortices(vlm_system::Union{vlm.Wing, vlm.WingSystem},
+    function calc_aerodynamicforce_freevortices(vlm_system::vlm.AbstractWing{TF_design,TF_trajectory},
                                     prev_vlm_system, pfield, Vinf, dt, rho; t=0.0,
                                     per_unit_span=false, spandir=[0, 1, 0],
                                     include_trailingboundvortex=false,
                                     Vout=nothing, lenout=nothing,
-                                    lencrit=-1, debug=false)
+                                    lencrit=-1, debug=false) where {TF_design,TF_trajectory}
 
+        TF = promote_type(TF_design,TF_trajectory)
         m = vlm.get_m(vlm_system)    # Number of horseshoes
 
         # Nodes of every horseshoe
@@ -753,8 +771,8 @@ function generate_calc_aerodynamicforce_freevortices(maxboundparticles::Int,
         B = _get_Xs(vlm_system, "B")
 
         # Pre-allocate memory
-        Ftot = [zeros(3) for i in 1:m]
-        Fbxf = [zeros(3) for i in 1:m]
+        Ftot = [zeros(TF,3) for i in 1:m]
+        Fbxf = [zeros(TF,3) for i in 1:m]
 
         vortices = include_TBVs ? (1:3) : (1:1)  # 1==AB, 2==ApA, 3==BBp
 

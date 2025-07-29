@@ -15,7 +15,7 @@ module FLOWUnsteady
 =#
 
 # ------------ GENERIC MODULES -------------------------------------------------
-import Dierckx
+import FLOWMath
 import CSV
 import DataFrames
 import JLD
@@ -25,6 +25,7 @@ import PyPlot as plt
 using PyPlot: @L_str
 using LinearAlgebra: I
 using Printf: @printf
+using StaticArrays
 
 # ------------ FLOW CODES ------------------------------------------------------
 import GeometricTools
@@ -42,6 +43,7 @@ const vpm   = FLOWVPM
 const vlm   = FLOWVLM
 const vsp   = VSPGeom
 const noise = FLOWNoise
+const fm    = FLOWMath
 
 # ------------ GLOBAL VARIABLES ------------------------------------------------
 const module_path    = splitdir(@__FILE__)[1]              # Path to this module
@@ -65,7 +67,7 @@ for header_name in ["vehicle", "vehicle_vlm",
 end
 
 # Format PyPlot
-# formatpyplot()
+# formatpyplot() # run this after loading FLOWUnsteady
 
 # VPM utilities
 include(joinpath(vpm.utilities_path, "utilities_fluiddomain.jl"))

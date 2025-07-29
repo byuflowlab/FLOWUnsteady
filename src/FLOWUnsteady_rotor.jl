@@ -122,12 +122,14 @@ for.
                             polars plot in that directory
 
 """
-function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
-                        chorddist::Array{Float64,2},
-                        pitchdist::Array{Float64,2},
-                        sweepdist::Array{Float64,2},
-                        heightdist::Array{Float64,2},
-                        airfoil_contours::Array{Tuple{Float64,Array{Float64, 2},String},1};
+function generate_rotor(Rtip, Rhub, B::Int,
+                        chorddist,
+                        pitchdist,
+                        sweepdist,
+                        heightdist,
+                        airfoil_contours;
+                        TF_design=Float64,
+                        TF_trajectory=Float64,
                         # INPUT OPTIONS
                         data_path=default_database,
                         read_polar=vlm.ap.read_polar,
@@ -150,22 +152,38 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
     n_bem = n
 
     # Splines
-    _spl_chord = Dierckx.Spline1D(chorddist[:, 1]*Rtip, chorddist[:, 2]*Rtip;
-                                        k= size(chorddist)[1]>2 ? spline_k : 1,
-                                        s=splines_s!=nothing ? splines_s[1] : spline_s, bc=spline_bc)
-    _spl_theta = Dierckx.Spline1D(pitchdist[:, 1]*Rtip, pitchdist[:, 2];
-                                        k= size(pitchdist)[1]>2 ? spline_k : 1,
-                                        s=splines_s!=nothing ? splines_s[2] : spline_s, bc=spline_bc)
-    _spl_LE_x = Dierckx.Spline1D(sweepdist[:, 1]*Rtip, sweepdist[:, 2]*Rtip;
-                                        k= size(sweepdist)[1]>2 ? spline_k : 1,
-                                        s=splines_s!=nothing ? splines_s[3] : spline_s, bc=spline_bc)
-    _spl_LE_z = Dierckx.Spline1D(heightdist[:, 1]*Rtip, heightdist[:, 2]*Rtip;
-                                        k= size(heightdist)[1]>2 ? spline_k : 1,
-                                        s=splines_s!=nothing ? splines_s[4] : spline_s, bc=spline_bc)
-    spl_chord(x) = Dierckx.evaluate(_spl_chord, x)
-    spl_theta(x) = pitch + Dierckx.evaluate(_spl_theta, x)
-    spl_LE_x(x) = Dierckx.evaluate(_spl_LE_x, x)
-    spl_LE_z(x) = Dierckx.evaluate(_spl_LE_z, x)
+    function spl_chord(x) let input=chorddist[:, 1]*Rtip, output=chorddist[:, 2]*Rtip;
+            return fm.linear(input,output,x)
+        end
+    end
+    # _spl_chord = Dierckx.Spline1D(chorddist[:, 1]*Rtip, chorddist[:, 2]*Rtip;
+    #                                     k= size(chorddist)[1]>2 ? spline_k : 1,
+    #                                     s=splines_s!=nothing ? splines_s[1] : spline_s, bc=spline_bc)
+    function spl_theta(x) let input=pitchdist[:, 1]*Rtip, output=pitchdist[:, 2] .+ pitch;
+            return fm.linear(input,output,x)
+        end
+    end
+    # _spl_theta = Dierckx.Spline1D(pitchdist[:, 1]*Rtip, pitchdist[:, 2];
+    #                                     k= size(pitchdist)[1]>2 ? spline_k : 1,
+    #                                     s=splines_s!=nothing ? splines_s[2] : spline_s, bc=spline_bc)
+    function spl_LE_x(x) let input=sweepdist[:, 1]*Rtip, output=sweepdist[:, 2]*Rtip;
+            return fm.linear(input,output,x)
+        end
+    end
+    # _spl_LE_x = Dierckx.Spline1D(sweepdist[:, 1]*Rtip, sweepdist[:, 2]*Rtip;
+    #                                     k= size(sweepdist)[1]>2 ? spline_k : 1,
+    #                                     s=splines_s!=nothing ? splines_s[3] : spline_s, bc=spline_bc)
+    function spl_LE_z(x) let input=heightdist[:, 1]*Rtip, output=heightdist[:, 2]*Rtip;
+            return fm.linear(input,output,x)
+        end
+    end
+    # _spl_LE_z = Dierckx.Spline1D(heightdist[:, 1]*Rtip, heightdist[:, 2]*Rtip;
+    #                                     k= size(heightdist)[1]>2 ? spline_k : 1,
+    #                                     s=splines_s!=nothing ? splines_s[4] : spline_s, bc=spline_bc)
+    # spl_chord(x) = Dierckx.evaluate(_spl_chord, x)
+    # spl_theta(x) = pitch + Dierckx.evaluate(_spl_theta, x)
+    # spl_LE_x(x) = Dierckx.evaluate(_spl_LE_x, x)
+    # spl_LE_z(x) = Dierckx.evaluate(_spl_LE_z, x)
 
     # Geometry for CCBlade & FLOWVLM
     r = [Rhub + i*(Rtip-Rhub)/n_bem for i in 0:n_bem] # r is discretized in n+1 sections
@@ -187,7 +205,7 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
               "-accounting for compressibility.\n"*"*"^73)
     end
 
-    airfoils = []
+    airfoils = Tuple{TF_design,vlm.ap.Polar}[]
     Mas = xfoil ? [] : nothing
     for (rfli, (pos, contour, file_name)) in enumerate(airfoil_contours)
         x, y = contour[:,1], contour[:,2]
@@ -236,9 +254,10 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
     end
 
     if verbose; println("\t"^v_lvl*"Generating FLOWVLM Rotor..."); end;
-    propeller = vlm.Rotor(CW, r, chord, theta, LE_x, LE_z, B, airfoils, turbine_flag)
+    propeller = vlm.Rotor(CW, r, chord, theta, LE_x, LE_z, B, airfoils=airfoils, turbine_flag=turbine_flag, 
+                            TF_design=TF_design, TF_trajectory=TF_trajectory)
 
-    vlm.initialize(propeller, n; r_lat=blade_r, verif=plot_disc,
+    vlm.initialize(propeller, n, TF_trajectory; r_lat=blade_r, verif=plot_disc,
                     genblade_args=[(:spl_k,spline_k), (:spl_s,spline_s)],
                     rfl_n_lower=rfl_n_lower, rfl_n_upper=rfl_n_upper,
                     figsize_factor=figsize_factor,
@@ -291,32 +310,36 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
 end
 
 
-function generate_rotor(Rtip::Real, Rhub::Real, B::Int,
-                        chorddist::Array{Float64,2},
-                        pitchdist::Array{Float64,2},
-                        sweepdist::Array{Float64,2},
-                        heightdist::Array{Float64,2},
-                        airfoil_files::Array{Tuple{Float64,String,String},1};
+function generate_rotor(Rtip, Rhub, B::Int,
+                        chorddist,
+                        pitchdist,
+                        sweepdist,
+                        heightdist,
+                        airfoil_files::Array{Tuple{TF,String,String},1};
+                        TF_design=Float64,
+                        TF_trajectory=Float64,
                         # INPUT OPTIONS
-                        data_path=def_data_path, optargs...)
+                        data_path=def_data_path, optargs...) where TF
 
     # Read airfoil contours
     # Airfoils along the blade as
     # airfoil_contours=[ (pos1, contour1, polar1), (pos2, contour2, pol2), ...]
     # with contour=(x,y) and pos the position from root to tip between 0 and 1.
     # pos1 must equal 0 (root airfoil) and the last must be 1 (tip airfoil)
-    airfoil_contours = Tuple{Float64,Array{Float64, 2},String}[]
+    airfoil_contours = Tuple{TF,Array{TF, 2},String}[]
     airfoil_path = joinpath(data_path, "airfoils")
     for (r, rfl_file, clcurve_file) in airfoil_files
         x,y = gt.readcontour(rfl_file; delim=",", path=airfoil_path, header_len=1)
-        rfl = hcat(x,y)
+        rfl = Array{TF,2}(undef,length(x),2)
+        rfl[:,1] .= x
+        rfl[:,2] .= y
 
         push!(airfoil_contours, (r, rfl, clcurve_file))
     end
 
     return generate_rotor(Rtip, Rhub, B,
                             chorddist, pitchdist, sweepdist, heightdist,
-                            airfoil_contours; data_path=data_path, optargs...)
+                            airfoil_contours; TF_design=TF_design, TF_trajectory=TF_trajectory, data_path=data_path, optargs...)
 end
 
 """
@@ -326,7 +349,7 @@ end
 Generates a `FLOWVLM.Rotor` reading the blade geometry from the blade file
 `blade_file` found in the database `data_path`.
 """
-function generate_rotor(Rtip::Real, Rhub::Real, B::Int, blade_file::String;
+function generate_rotor(Rtip, Rhub, B::Int, blade_file::String; TF_design=Float64, TF_trajectory=Float64,
                         data_path=def_data_path, optargs...)
 
     (chorddist, pitchdist,
@@ -335,7 +358,7 @@ function generate_rotor(Rtip::Real, Rhub::Real, B::Int, blade_file::String;
      spl_s) = read_blade(blade_file; data_path=data_path)
 
     return generate_rotor(Rtip, Rhub, B, chorddist, pitchdist, sweepdist,
-                            heightdist, airfoil_files;
+                            heightdist, airfoil_files; TF_design=TF_design, TF_trajectory=TF_trajectory,
                             data_path=data_path,
                             spline_k=spl_k, spline_s=spl_s, optargs...)
 end
@@ -347,12 +370,13 @@ end
 Generates a `FLOWVLM.Rotor` reading the full rotor geometry from the rotor file
 `rotor_file` found in the database `data_path`.
 """
-function generate_rotor(rotor_file::String;
+
+function generate_rotor(rotor_file::String; TF_design=Float64, TF_trajectory=Float64,
                         data_path=def_data_path, optargs...)
 
     Rtip, Rhub, B, blade_file = read_rotor(rotor_file; data_path=data_path)
 
-    return generate_rotor(Rtip, Rhub, B, blade_file;
+    return generate_rotor(Rtip, Rhub, B, blade_file; TF_design=TF_design, TF_trajectory=TF_trajectory,
                             data_path=data_path, optargs...)
 end
 

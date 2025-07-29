@@ -13,7 +13,9 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
                 dt::Real, rlx::Real, sigma_vlm::Real, sigma_rotor::Real,
                 rho::Real, speedofsound, staticpfield::vpm.ParticleField,
                 hubtiploss_correction;
-                init_sol::Bool=false, sigmafactor_vpmonvlm=1, debug=false
+                mirror=false, mirror_X=nothing, mirror_normal=nothing,
+                init_sol::Bool=false, sigmafactor_vpmonvlm=1,
+                debug=false
                 ) where {V<:UVLMVehicle, M<:AbstractManeuver, R}
 
 
@@ -41,7 +43,7 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
     # On the first time step (pfield.nt==0), it only does steps (5) and (7),
     # meaning that the unsteady wake of the first time step is never shed.
     if self.nt==0
-        # NOTE: VLMs and Rotors solutions are losely coupled
+        # NOTE: VLMs and Rotors solutions are loosely coupled
 
         # Set Vinf on system to get horseshoes
         vlm.setVinf(vhcl.system, Vinf)
@@ -65,14 +67,14 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
         static_particles_fun(pfield, args...) = _static_particles(pfield, vhcl.vlm_system, sigma_vlm)
 
         ## Evaluate VPM-on-Rotor induced velocity + static particles
-        Vinds = Vvpm_on_Xs(pfield, Xs; static_particles_fun=static_particles_fun, dt=dt, fsgm=sigmafactor_vpmonvlm)
+        Vinds = Vvpm_on_Xs(pfield, Xs; static_particles_fun=static_particles_fun, dt=dt, fsgm=sigmafactor_vpmonvlm,
+                          mirror, mirror_X, mirror_normal)
 
         # Solve Rotors
         for (si, rotors) in enumerate(vhcl.rotor_systems)
 
             # RPM of this rotor system
             RPM = self.RPMref*get_RPM(mnvr, si, t/self.ttot)
-
             for (ri, rotor) in enumerate(rotors)
 
                 # Get velocities induced at every blade of this rotor
@@ -117,8 +119,10 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
         Xs_rotors = _get_midXs(vhcl.rotor_systems)
 
         # Calculate VPM velocity on all points (VLM and rotors)
-        Vvpm = Vvpm_on_Xs(pfield, vcat(Xs_cp_vlm, Xs_ApA_AB_BBp_vlm, Xs_rotors); dt=dt, fsgm=sigmafactor_vpmonvlm)
+        Vvpm = Vvpm_on_Xs(pfield, vcat(Xs_cp_vlm, Xs_ApA_AB_BBp_vlm, Xs_rotors); dt=dt, fsgm=sigmafactor_vpmonvlm,
+                         mirror, mirror_X, mirror_normal)
 
+        # @show Vvpm[1]
         Vvpm_cp_vlm = Vvpm[1:m]
         Vvpm_ApA_AB_BBp_vlm = Vvpm[m+1:4*m]
         Vvpm_rotors = Vvpm[4*m+1:end]
@@ -142,7 +146,8 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
 
         # Evaluate Rotor-on-VLM induced velocity
         Vrotor_on_wing = Vvpm_on_Xs(staticpfield, vcat(Xs_cp_vlm, Xs_ApA_AB_BBp_vlm);
-                                    static_particles_fun=static_particles_fun2, dt=dt, fsgm=sigmafactor_vpmonvlm)
+                                    static_particles_fun=static_particles_fun2, dt=dt, fsgm=sigmafactor_vpmonvlm,
+                                    mirror, mirror_X, mirror_normal)
 
         # Add and save VPM-on-VLM and Rotor-on-VLM induced velocity
         vlm._addsolution(vhcl.vlm_system, "Vvpm",
@@ -168,10 +173,13 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
 
         ## Evaluate VLM-on-Rotor and Rotor-on-Rotor induced velocity
         Vvlmrotor_on_rotor = Vvpm_on_Xs(staticpfield, Xs_rotors;
-                              static_particles_fun=static_particles_fun3, dt=dt, fsgm=sigmafactor_vpmonvlm)
+                              static_particles_fun=static_particles_fun3, dt=dt, fsgm=sigmafactor_vpmonvlm,
+                              mirror, mirror_X, mirror_normal)
 
         # Add VPM-on-Rotor, VLM-on-Rotor, and Rotor-on-Rotor induced velocity
-        Vinds = Vvpm_rotors + Vvlmrotor_on_rotor
+        Vinds = Vvpm_rotors # + Vvlmrotor_on_rotor # turn this off to reduce noise
+                                                   # should be negligible for most
+                                                   # cases anyway
 
         # ---------- 5) Solve VLM system -----------------------------------
         # Wake-coupled solution
@@ -198,7 +206,6 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
 
             # RPM of this rotor system
             RPM = self.RPMref*get_RPM(mnvr, si, t/self.ttot)
-
             for (ri, rotor) in enumerate(rotors)
 
                 # Calculate kinematic velocities
@@ -219,6 +226,13 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
                     vlm.solvefromCCBlade(rotor, Vinf, RPM, rho; t=t,
                                             sound_spd=speedofsound,
                                             debug=debug, verbosewarn=false)
+                end
+
+                # Relaxes (rlx->1) or stiffens (rlx->0) the rotor solution
+                if rlx > 0
+                    rlxd_Gamma = rlx*vhcl.rotor_systems[si][ri]._wingsystem.sol["Gamma"] +
+                                        (1-rlx)*prev_rotor_systems[si][ri]._wingsystem.sol["Gamma"]
+                    vlm._addsolution(rotor, "Gamma", rlxd_Gamma)
                 end
             end
         end

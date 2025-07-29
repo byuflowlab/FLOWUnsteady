@@ -72,8 +72,8 @@ otherwise the time in PSU-WOPWOP will get messed up.
 """
 function run_noise_wopwop(read_path::String,                        # Path from where to read aerodynamic solution (FLOWUnsteady simulation)
                                     run_name,                       # Run name (prefix of rotor files to read)
-                                    RPM::Real,                      # Reference RPM to convert `nrevs` to simulation time
-                                    rho::Real, speedofsound::Real,  # Air density and speed of sound
+                                    RPM,                      # Reference RPM to convert `nrevs` to simulation time
+                                    rho, speedofsound,  # Air density and speed of sound
                                     rotorsystems,                   # `rotorsystems[i][j]` is the number of blades of the j-th rotor in the i-th system
                                     ww_nrevs,                       # Run PSU-WOPWOP for this many revolutions
                                     ww_nsteps_per_rev,              # Number of steps per revolution to use in WW

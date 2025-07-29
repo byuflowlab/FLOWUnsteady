@@ -81,7 +81,7 @@ function set_W(self::AbstractVLMVehicle, W)
 end
 
 function tilt_systems(self::AbstractVLMVehicle{N,M,R}, angles::NTuple{N, Array{R2, 1}}
-                                                    ) where{N, M, R, R2<:Real}
+                                                    ) where{N, M, R, R2}
     # Iterate over tilting system
     for i in 1:get_ntltsys(self)
         sys = self.tilting_systems[i]
@@ -90,12 +90,39 @@ function tilt_systems(self::AbstractVLMVehicle{N,M,R}, angles::NTuple{N, Array{R
     end
     return nothing
 end
+# function tilt_systems(self::AbstractVLMVehicle{N,M,R}, angles::NTuple{N, Array{R2, 1}}, dt
+#                                                     ) where{N, M, R, R2<:Real}
+
+#     dX = dt*self.V                  # Translation
+#     dA = 180/pi * dt*self.W 
+
+#     rotation = gt.rotation_matrix2([-a for a in dA]...)
+
+#     # Iterate over tilting system
+#     for i in 1:get_ntltsys(self)
+#         sys = self.tilting_systems[i]
+#         Oaxis = gt.rotation_matrix2([-a for a in angles[i]]...)
+
+#         dO = dX + rotation'*sys.O - sys.O
+
+#         for j in eachindex(sys.wings)
+#             if typeof(sys.wings[j]) <: vlm.Rotor
+#                 vlm.setcoordsystem(sys.wings[j]._wingsystem, sys.wings[j]._wingsystem.O - dO, sys.wings[j]._wingsystem.Oaxis)
+#             else
+#                 vlm.setcoordsystem(sys.wings[j], sys.wings[j].O - dO, sys.wings[j].Oaxis)
+#             end
+#         end
+        
+#         vlm.setcoordsystem(sys, sys.O + dO, Oaxis)
+#     end
+#     return nothing
+# end
 function tilt_systems(self::AbstractVLMVehicle{0,M,R}, angles::Tuple{})  where{M, R}
     return nothing
 end
 
 
-function nextstep_kinematic(self::AbstractVLMVehicle, dt::Real)
+function nextstep_kinematic(self::AbstractVLMVehicle, dt)
     dX = dt*self.V                  # Translation
     dA = 180/pi * dt*self.W         # Angular rotation (degrees)
 
@@ -110,6 +137,12 @@ function nextstep_kinematic(self::AbstractVLMVehicle, dt::Real)
 
     # Translation and rotation
     vlm.setcoordsystem(self.system, O, Oaxis)
+
+    for i in 1:get_ntltsys(self)
+        sys = self.tilting_systems[i]
+        sys.O += dX
+        sys.O = M'*(sys.O - self.system.O) + self.system.O
+    end
 
     # Translation and rotation of every grid
     for i in 1:length(self.grids)
@@ -134,7 +167,7 @@ Precalculations before calling the solver.
 Calculates kinematic velocity on VLM an adds them as a solution field
 """
 function precalculations(self::AbstractVLMVehicle, Vinf::Function,
-                                pfield::vpm.ParticleField, t::Real, dt::Real,
+                                pfield::vpm.ParticleField, t, dt,
                                 nt::Int)
 
     if nt!=0
@@ -155,7 +188,7 @@ function precalculations(self::AbstractVLMVehicle, Vinf::Function,
             wing = vlm.get_wing(self.wake_system, i)
             prev_wing = vlm.get_wing(_get_prev_wake_system(self), i)
 
-            if typeof(prev_wing) != vlm.Rotor
+            if !(typeof(prev_wing) <: vlm.Rotor)
                 sol = deepcopy(prev_wing.sol["Gamma"])
             else
                 sol = deepcopy(prev_wing._wingsystem.sol["Gamma"])
@@ -167,7 +200,7 @@ function precalculations(self::AbstractVLMVehicle, Vinf::Function,
             wing = vlm.get_wing(self.vlm_system, i)
             prev_wing = vlm.get_wing(_get_prev_vlm_system(self), i)
 
-            if typeof(prev_wing) != vlm.Rotor
+            if !(typeof(prev_wing) <: vlm.Rotor)
                 sol = deepcopy(prev_wing.sol["Gamma"])
             else
                 sol = deepcopy(prev_wing._wingsystem.sol["Gamma"])
@@ -270,7 +303,7 @@ function _Vkinematic_wake(self::AbstractVLMVehicle, args...; optargs...)
                                                                     optargs...)
 end
 
-function _Vkinematic(system, prev_system, dt::Real; t=0.0, targetX="CP")
+function _Vkinematic(system, prev_system, dt; t=0.0, targetX="CP")
 
     cur_Xs = _get_Xs(system, targetX; t=t)
     prev_Xs = _get_Xs(prev_system, targetX; t=t)
@@ -282,9 +315,9 @@ end
 Returns the local translational velocity of every midpoint in the ri-th rotor in
 the si-th system formatted as the output of `_get_midXs()`.
 """
-function _Vkinematic_rotor(rotor_systems::NTuple{M, Array{vlm.Rotor, 1}},
-                           prev_rotor_systems::NTuple{M, Array{vlm.Rotor, 1}},
-                           si, ri, dt::Real
+function _Vkinematic_rotor(rotor_systems::NTuple{M, Array{<:vlm.Rotor, 1}},
+                           prev_rotor_systems::NTuple{M, Array{<:vlm.Rotor, 1}},
+                           si, ri, dt
                           ) where{M}
 
     cur_Xs = _get_midXs(rotor_systems[si][ri])
@@ -328,10 +361,10 @@ end
 _get_midXs(rotor::vlm.Rotor) = vcat([_get_midXs(rotor, j) for j in 1:rotor.B]...)
 
 "Returns all bound-vortex midpoints in an array of rotors"
-_get_midXs(rotors::Array{vlm.Rotor, 1}) = vcat([_get_midXs(rotor) for rotor in rotors]...)
+_get_midXs(rotors::Array{<:vlm.Rotor, 1}) = vcat([_get_midXs(rotor) for rotor in rotors]...)
 
 "Returns all bound-vortex midpoints in multiple rotor systems"
-function _get_midXs(rotor_systems::NTuple{M, Array{vlm.Rotor, 1}}) where{M}
+function _get_midXs(rotor_systems::NTuple{M, Array{<:vlm.Rotor, 1}}) where{M}
     return vcat([_get_midXs(rotors) for rotors in rotor_systems]...)
 end
 
@@ -339,7 +372,7 @@ end
 and returns the section of the array that corresponds to the ri-th rotor in the
 si-th system (formatted linearly).
 "
-function _parse_midXs(rotor_systems::NTuple{M, Array{vlm.Rotor, 1}},
+function _parse_midXs(rotor_systems::NTuple{M, Array{<:vlm.Rotor, 1}},
                         midXs::Array{Array{R, 1}}, si, ri) where{R<:Real, M}
 
     if si>length(rotor_systems) || si<=0
@@ -372,7 +405,7 @@ end
 outputs the array formatted as blades.
 """
 function _format_blades(arr::Array{Array{R, 1}, 1},
-                        rotor_systems::NTuple{M, Array{vlm.Rotor, 1}},
+                        rotor_systems::NTuple{M, Array{<:vlm.Rotor, 1}},
                         si, ri) where{R, M}
 
     rotor = rotor_systems[si][ri]

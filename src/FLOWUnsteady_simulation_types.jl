@@ -34,7 +34,7 @@ vehicle and maneuver together.
 * `t::Real`                 : Time of current step
 * `nt::Int`                 : Current time step number
 """
-mutable struct Simulation{V<:AbstractVehicle, M<:AbstractManeuver, R<:Real}
+mutable struct Simulation{V<:AbstractVehicle, M<:AbstractManeuver, R}
     # USER INPUTS: Simulation setup
     vehicle::V              # Vehicle
     maneuver::M             # Maneuver to be performed
@@ -68,7 +68,7 @@ end
 
 Constructor with implicit `V`, `M`, and `R` parameters.
 """
-Simulation(v::AbstractVehicle, m::AbstractManeuver, n::Real, args...; optargs...
+Simulation(v::AbstractVehicle, m::AbstractManeuver, n, args...; optargs...
              ) = Simulation{typeof(v), typeof(m), typeof(n)}(v, m, n, args...;
                                                                      optargs...)
 
@@ -91,7 +91,7 @@ updates the tilt angle and RPM of every system.
 NOTE: No solver is run in this process, rather it uses the current aerodynamic
 solution to calculate acceleration and moment.
 """
-function nextstep_kinematic(self::Simulation, dt::Real)
+function nextstep_kinematic(self::Simulation, dt)
 
     if self.nt==-1 # Setup step (first step of simulation)
 
@@ -143,7 +143,7 @@ end
 Precalculations before calling the solver.
 """
 function precalculations(self::Simulation, Vinf::Function,
-                                pfield::vpm.ParticleField, t::Real, dt::Real)
+                                pfield::vpm.ParticleField, t, dt)
     # Rotate rotors
     rotate_rotors(self, dt)
 
@@ -160,7 +160,7 @@ function precalculations(self::Simulation, Vinf::Function,
     return nothing
 end
 
-function rotate_rotors(self::Simulation{V, M, R}, dt::Real
+function rotate_rotors(self::Simulation{V, M, R}, dt
                         ) where {V<:AbstractVLMVehicle, M<:AbstractManeuver, R}
 
     for (si, rotors) in enumerate(self.vehicle.rotor_systems)
