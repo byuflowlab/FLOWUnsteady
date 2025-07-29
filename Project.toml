@@ -1,7 +1,7 @@
 name = "FLOWUnsteady"
 uuid = "b491798d-ac6e-455f-a27c-49c10bb0a666"
 authors = ["Eduardo J. Alvarez <Edo.AlvarezR@gmail.com> and contributors"]
-version = "3.3.2"
+version = "3.4.0"
 
 [deps]
 BPM = "f91b385c-3ede-44c9-92c8-2a04f762ef2f"
