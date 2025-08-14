@@ -360,8 +360,8 @@ function run_simulation(
 
             # Remove static particles (assumes particles remained sorted)
             if remove==nothing || remove
-                for pi in vpm.get_np(pfield):-1:(org_np+1)
-                    vpm.remove_particle(pfield, pi)
+                for p_i in vpm.get_np(pfield):-1:(org_np+1)
+                    vpm.remove_particle(pfield, p_i)
                 end
             end
         end
