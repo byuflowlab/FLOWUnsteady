@@ -68,7 +68,7 @@ Oaxis           = gt.rotation_matrix2(0, 0, AOA)    # Orientation of grid
 
 # VPM settings
 maxparticles    = Int(1.0e6 + nnodes)         # Maximum number of particles
-fmm             = vpm.FMM(; p=4, ncrit=50, theta=0.4) # FMM parameters
+fmm             = vpm.FMM(;) # FMM parameters
 scale_sigma     = 1.00                      # Shrink smoothing radii by this factor
 f_sigma         = 0.5                       # Smoothing of node particles as sigma = f_sigma*meansigma
 
