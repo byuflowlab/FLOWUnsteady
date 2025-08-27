@@ -129,7 +129,6 @@ You are now ready to install the FLOWUnsteady package.
 
 In the julia REPL:
 ```julia
-import Pkg
 url = "https://github.com/byuflowlab/"
 packages = [ "AirfoilPrep.jl", "FLOWVLM", "FLOWNoise", "BPM.jl", "FLOWVPM.jl", "FLOWUnsteady"]
 Pkg.add([ Pkg.PackageSpec(; url=url*name) for name in packages ])
