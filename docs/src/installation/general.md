@@ -127,41 +127,10 @@ If you run into errors with PyPlot while running FLOWUnsteady, they are likely r
 
 You are now ready to install the FLOWUnsteady package.
 
-In the terminal clone the following repos:
-```
-git clone https://github.com/byuflowlab/FLOWUnsteady
-git clone https://github.com/byuflowlab/AirfoilPrep.jl.git
-git clone https://github.com/byuflowlab/FLOWVLM.git
-git clone https://github.com/byuflowlab/FLOWNoise.git
-git clone https://github.com/byuflowlab/BPM.jl.git
-git clone https://github.com/byuflowlab/FLOWVPM.jl.git
-cd ./FLOWUnsteady
-```
-
-Now, dev each of the above repos into FLOWUnsteady. 
-
-In the julia REPL perform the following commands:
+In the julia REPL:
 ```julia
-import Pkg
-Pkg.activate(".")
-url = "https://github.com/byuflowlab/"
-Pkg.rm([("AirfoilPrep"), ("FLOWVLM"), ("FLOWNoise"), ("BPM"), ("FLOWVPM")])
-Pkg.develop(path="../AirfoilPrep.jl")
-Pkg.develop(path="../FLOWVLM")
-Pkg.develop(path="../FLOWNoise")
-Pkg.develop(path="../BPM.jl")
-Pkg.develop(path="../FLOWVPM.jl")
-```
-
-Then activate the desired project environment and dev the FLOWUnsteady folder as well as the other added packages.
-```julia
-Pkg.activate() 
-Pkg.develop(path=".")
-Pkg.develop(path="../AirfoilPrep.jl")
-Pkg.develop(path="../FLOWVLM")
-Pkg.develop(path="../FLOWNoise")
-Pkg.develop(path="../BPM.jl")
-Pkg.develop(path="../FLOWVPM.jl")
+packages = [ "AirfoilPrep.jl", "FLOWVLM", "FLOWNoise", "BPM.jl", "FLOWVPM.jl", "FLOWUnsteady"]
+Pkg.add([ Pkg.PackageSpec(; url=url*name) for name in packages ])
 ```
 
 # Test FLOWUnsteady
