@@ -24,7 +24,7 @@ VSPGeom = "9b3f6a95-fce2-4bc5-94a2-f99b39986ea6"
 [compat]
 FLOWVPM = "4.0"
 GeometricTools = "2.3"
-julia = "1.6"
+julia = "1.6-1"
 
 [extras]
 FLOWVPM = "6e19019d-7c31-4940-9d16-c3f15dfe6020"
