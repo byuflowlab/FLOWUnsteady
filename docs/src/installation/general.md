@@ -123,114 +123,15 @@ Since PyCall now relies on a custom install of Python3, make sure that:
 
 If you run into errors with PyPlot while running FLOWUnsteady, they are likely related to one of those two items.
 
-## FLOWVPM
-
-FLOWVPM uses a
-[fast multipole code](https://en.wikipedia.org/wiki/Fast_multipole_method)
-called [ExaFMM](https://www.bu.edu/exafmm/)
-that accelerates the computation of particle interactions.
-ExaFMM is written in C++ and we have developed a Julia wrapper for it:
-[FLOWExaFMM](https://github.com/byuflowlab/FLOWExaFMM.jl).
-
-Before installing [FLOWVPM](https://github.com/byuflowlab/FLOWVPM.jl),
-first you will have to install FLOWExaFMM and compile ExaFMM, as follows.
-
-* Make sure you have CMake, GCC, and OpenMP. On Linux, type to following to install them
-  ```
-  sudo apt-get update
-  sudo apt-get install cmake g++ mpich
-  ```
-* *[Julia REPL]* Install CxxWrap:
-  ```julia
-  import Pkg
-  Pkg.add(name="CxxWrap", version="0.15.0")
-  ```
-
-* *[Terminal]* Clone FLOWExaFMM:
-  ```bash
-  git clone https://github.com/byuflowlab/FLOWExaFMM path/to/FLOWExaFMM
-  ```
-  (replace `path/to/FLOWExaFMM` with your preferred path in your local)
-
-
-
-* Compile ExaFMM running the script [`build.sh`](https://github.com/byuflowlab/FLOWExaFMM.jl/blob/master/build.sh):
-  ```bash
-  cd path/to/FLOWExaFMM
-  sh build.sh
-  ```
-  or in MacOS:
-  ```bash
-  cd path/to/FLOWExaFMM
-  sh build_macos.sh
-  ```
-  This should have generated the file `fmm.so` (or `fmm.dylib` in MacOS) under `src/`, which is a binary
-  library containing ExaFMM.
-
-Now that ExaFMM is compiled, you can add FLOWExaFMM to your Julia environment as
-a development package pointing directly to where you compiled the package and
-add FLOWVPM:
-
-* Add FLOWExaFMM:
-  ```julia
-  # In the Julia REPL
-  ] develop path/to/FLOWExaFMM
-  ```
-
-
-* *[Optional]* Test FLOWExaFMM:
-  ```julia
-  ] test FLOWExaFMM
-  ```
-  If ExaFMM was correctly compiled, this will return a heart-warming "Hello world!"
-
-
-* Add FLOWVPM:
-  ```julia
-  ] add https://github.com/byuflowlab/FLOWVPM.jl
-  ```
-
-
-* *[Optional]* Test FLOWVPM:
-  ```julia
-  ] test FLOWVPM
-  ```
-
-
-If you run into any issues, please try the following:
-* Test that you can correctly compile C++ code wrapped for Julia following these instructions: [LINK](https://nbviewer.org/github/byuflowlab/FLOWVPM.jl/blob/master/docs/installation-linux.ipynb)
-* Mac users, take a look at this thread: [LINK](https://github.com/byuflowlab/FLOWUnsteady/issues/26)
-* Instructions for BYU Fulton supercomputer: [LINK](https://nbviewer.jupyter.org/url/edoalvar2.groups.et.byu.net/LabNotebook/202108/FLOWVPMSuperComputer.ipynb)
-
-If issues persist, please check the resolved issues in [the FLOWExaFMM repo](https://github.com/byuflowlab/FLOWExaFMM.jl/issues?q=), the discussion forum in [the FLOWUnsteady repo](https://github.com/byuflowlab/FLOWUnsteady/discussions?discussions_q=),
-and feel free to open a new issue or discussion for help.
-
-## Other Packages
-Run the following commands in the Julia REPL to add some dependencies that are not
-in the official Julia registry:
-```julia
-import Pkg
-
-url = "https://github.com/byuflowlab/"
-
-packages = [ ("AirfoilPrep.jl", "v2.1.2"), ("FLOWVLM", "v2.1.3"),
-             ("FLOWNoise", "v2.3.3"),      ("BPM.jl", "v2.0.1")  ]
-
-Pkg.add([ Pkg.PackageSpec(; url=url*name, rev=v) for (name, v) in packages ])
-```
-
-!!! info "Troubleshooting"
-    Some things you might need to look out for:
-    * *(MacOS users)* Make sure your Homebrew (in Julia) is up to date. You may need to run the following in order to update your Homebrew: ```using Homebrew; Homebrew.brew(`update-reset`)```
-    * Make sure that things are in place in your Julia settings. Having things like Conda, HDF5, etc. on your machine doesn't necessarily mean that the Julia implementation has them as well.
-
-
 ## Add FLOWUnsteady
 
-You are now ready to install the FLOWUnsteady package. Type this in the Julia REPL:
+You are now ready to install the FLOWUnsteady package.
 
-```
-] add https://github.com/byuflowlab/FLOWUnsteady
+In the julia REPL:
+```julia
+url = "https://github.com/byuflowlab/"
+packages = [ "AirfoilPrep.jl", "FLOWVLM", "FLOWNoise", "BPM.jl", "FLOWVPM.jl", "FLOWUnsteady"]
+Pkg.add([ Pkg.PackageSpec(; url=url*name) for name in packages ])
 ```
 
 # Test FLOWUnsteady
