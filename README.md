@@ -236,6 +236,8 @@ If you find FLOWUnsteady useful in your work, we kindly request that you cite th
 
 >Alvarez, E. J., Mehr, J., and Ning, A., “FLOWUnsteady: An Interactional Aerodynamics Solver for Multirotor Aircraft and Wind Energy,” AIAA AVIATION 2022 Forum, Chicago, IL, 2022. DOI:[10.2514/6.2022-3218](https://doi.org/10.2514/6.2022-3218).
 
+NOTE (28 Aug 2025): The documentation is temporarily unavailable while we make updates. See the examples/ and docs/ folder in the meantime. It should be back up in the next few days.
+
 If you were to encounter any issues or have questions, please first read through
 [the documentation](https://flow.byu.edu/FLOWUnsteady/), [open/closed
 issues](https://github.com/byuflowlab/FLOWUnsteady/issues?q=is%3Aissue+is%3Aclosed),
