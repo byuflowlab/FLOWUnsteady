@@ -33,6 +33,8 @@ while in the high end simulations become meshless large eddy simulations.
 * *Documentation:* [flow.byu.edu/FLOWUnsteady](https://flow.byu.edu/FLOWUnsteady)
 * *Code:* [github.com/byuflowlab/FLOWUnsteady](https://github.com/byuflowlab/FLOWUnsteady)
 
+NOTE (28 Aug 2025): The documentation is temporarily unavailable due to server issues. See the examples/ and docs/ folder in the meantime. It should be back up in the next few days.
+
 ### What is the Reformulated VPM?
 
 The [reformulated VPM](https://scholarsarchive.byu.edu/etd/9589/) is a meshless
@@ -236,7 +238,7 @@ If you find FLOWUnsteady useful in your work, we kindly request that you cite th
 
 >Alvarez, E. J., Mehr, J., and Ning, A., “FLOWUnsteady: An Interactional Aerodynamics Solver for Multirotor Aircraft and Wind Energy,” AIAA AVIATION 2022 Forum, Chicago, IL, 2022. DOI:[10.2514/6.2022-3218](https://doi.org/10.2514/6.2022-3218).
 
-NOTE (28 Aug 2025): The documentation is temporarily unavailable while we make updates. See the examples/ and docs/ folder in the meantime. It should be back up in the next few days.
+NOTE (28 Aug 2025): The documentation is temporarily unavailable due to server issues. See the examples/ and docs/ folder in the meantime. It should be back up in the next few days.
 
 If you were to encounter any issues or have questions, please first read through
 [the documentation](https://flow.byu.edu/FLOWUnsteady/), [open/closed
