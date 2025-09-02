@@ -22,7 +22,7 @@ rotor as an example:
 Rotors can then be generated calling any of following functions:
 
 ```@docs
-FLOWUnsteady.generate_rotor(::String)
+FLOWUnsteady.generate_rotor
 FLOWUnsteady.generate_rotor(::Real, ::Real, ::Int, ::String)
 FLOWUnsteady.generate_rotor(::Real, ::Real, ::Int, ::Array{Float64,2},
                             ::Array{Float64,2}, ::Array{Float64,2},
