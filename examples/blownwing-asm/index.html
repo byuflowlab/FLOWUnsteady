@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Actuator Surface Model · FLOWUnsteady</title><meta name="title" content="Actuator Surface Model · FLOWUnsteady"/><meta property="og:title" content="Actuator Surface Model · FLOWUnsteady"/><meta property="twitter:title" content="Actuator Surface Model · FLOWUnsteady"/><meta name="description" content="Documentation for FLOWUnsteady."/><meta property="og:description" content="Documentation for FLOWUnsteady."/><meta property="twitter:description" content="Documentation for FLOWUnsteady."/><script async src="https://www.googletagmanager.com/gtag/js?id=G-B7CBF7WC7L"></script><script>  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-B7CBF7WC7L', {'page_path': location.pathname + location.search + location.hash});
+</script><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script><link href="../../assets/favicon.ico" rel="icon" type="image/x-icon"/></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../../"><img src="../../assets/logo.png" alt="FLOWUnsteady logo"/></a><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Intro</a></li><li><a class="tocitem" href="../../installation/general/">Installation</a></li><li><input class="collapse-toggle" id="menuitem-4" type="checkbox" checked/><label class="tocitem" for="menuitem-4"><span class="docs-label">Tutorials</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><input class="collapse-toggle" id="menuitem-4-1" type="checkbox"/><label class="tocitem" for="menuitem-4-1"><span class="docs-label">Simple Wing</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../wing-4p2aoa/">Basics</a></li><li><a class="tocitem" href="../wing-aoasweep/">AOA Sweep</a></li></ul></li><li><a class="tocitem" href="../tetheredwing/">Tethered Wing</a></li><li><a class="tocitem" href="../heavingwing/">Heaving Wing</a></li><li><input class="collapse-toggle" id="menuitem-4-4" type="checkbox"/><label class="tocitem" for="menuitem-4-4"><span class="docs-label">Propeller</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../propeller-J040/">Basics</a></li><li><a class="tocitem" href="../propeller-jsweep/"><span>$J$</span> Sweep</a></li><li><a class="tocitem" href="../propeller-quasisteady/">Quasi-Steady Solver</a></li><li><a class="tocitem" href="../propeller-incidence/">Incidence Sweep</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4-5" type="checkbox"/><label class="tocitem" for="menuitem-4-5"><span class="docs-label">Rotor in Hover</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../rotorhover-aero/">Variable Fidelity</a></li><li><a class="tocitem" href="../rotorhover-fdom/">Fluid Domain</a></li><li><a class="tocitem" href="../rotorhover-acoustics/">Aeroacoustics</a></li><li><a class="tocitem" href="../rotorhover-quasisteady/">Quasi-Steady Solver</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4-6" type="checkbox" checked/><label class="tocitem" for="menuitem-4-6"><span class="docs-label">Blown Wing</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../blownwing-aero/">Wing-on-Prop Interactions</a></li><li class="is-active"><a class="tocitem" href>Actuator Surface Model</a></li><li><a class="tocitem" href="../prowim-aero/">Prop-on-Wing Interactions</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4-7" type="checkbox"/><label class="tocitem" for="menuitem-4-7"><span class="docs-label">eVTOL Aircraft</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../vahana-vehicle/">Vehicle Definition</a></li><li><a class="tocitem" href="../vahana-maneuver/">Maneuver Definition</a></li><li><a class="tocitem" href="../vahana-monitor/">Monitors Definitions</a></li><li><a class="tocitem" href="../vahana-run/">Run Simulation</a></li></ul></li><li><a class="tocitem" href="../openvsp-aircraft/">OpenVSP Geometry</a></li></ul></li><li><a class="tocitem" href="../../visualization/">Visualization</a></li><li><input class="collapse-toggle" id="menuitem-6" type="checkbox"/><label class="tocitem" for="menuitem-6"><span class="docs-label">Theory</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../theory/rvpm/">Reformulated VPM</a></li><li><a class="tocitem" href="../../theory/convergence/">Convergence</a></li><li><a class="tocitem" href="../../theory/validation/">Validation</a></li><li><a class="tocitem" href="../../theory/publications/">Publications</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-7" type="checkbox"/><label class="tocitem" for="menuitem-7"><span class="docs-label">API Guide</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><input class="collapse-toggle" id="menuitem-7-1" type="checkbox"/><label class="tocitem" for="menuitem-7-1"><span class="docs-label">(1) Vehicle Definition</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../api/flowunsteady-vehicle-types/">Vehicle types</a></li><li><a class="tocitem" href="../../api/flowunsteady-vehicle-components/">Generating components</a></li><li><a class="tocitem" href="../../api/flowunsteady-vehicle-asm/">Actuator surface model</a></li><li><a class="tocitem" href="../../api/flowunsteady-openvsp/">OpenVSP geometry</a></li></ul></li><li><a class="tocitem" href="../../api/flowunsteady-maneuver/">(2) Maneuver Definition</a></li><li><a class="tocitem" href="../../api/flowunsteady-simulation/">(3) Simulation Definition</a></li><li><a class="tocitem" href="../../api/flowunsteady-monitor/">(4) Monitors Definitions</a></li><li><a class="tocitem" href="../../api/flowunsteady-run/">(5) Run Simulation</a></li><li><input class="collapse-toggle" id="menuitem-7-6" type="checkbox"/><label class="tocitem" for="menuitem-7-6"><span class="docs-label">(6) Viz and Postprocessing</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../api/flowunsteady-postprocessing-fdom/">Fluid Domain</a></li><li><a class="tocitem" href="../../api/flowunsteady-postprocessing-noise/">Aeroacoustic Noise</a></li><li><a class="tocitem" href="../../api/flowunsteady-postprocessing-misc/">Miscellaneous</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-7-7" type="checkbox"/><label class="tocitem" for="menuitem-7-7"><span class="docs-label">Extras</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><input class="collapse-toggle" id="menuitem-7-7-1" type="checkbox"/><label class="tocitem" for="menuitem-7-7-1"><span class="docs-label">FLOWVPM</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../api/flowvpm-particle/">Particle Field</a></li><li><a class="tocitem" href="../../api/flowvpm-uj/">UJ Scheme</a></li><li><a class="tocitem" href="../../api/flowvpm-viscous/">Viscous Scheme</a></li><li><a class="tocitem" href="../../api/flowvpm-relaxation/">Relaxation Scheme</a></li><li><a class="tocitem" href="../../api/flowvpm-sfs/">SFS Scheme</a></li><li><a class="tocitem" href="../../api/flowvpm-time/">Time Integration</a></li></ul></li></ul></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Tutorials</a></li><li><a class="is-disabled">Blown Wing</a></li><li class="is-active"><a href>Actuator Surface Model</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Actuator Surface Model</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/byuflowlab/FLOWUnsteady" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/byuflowlab/FLOWUnsteady/blob/master/docs/src/examples/blownwing-asm.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="asm"><a class="docs-heading-anchor" href="#asm">Actuator Surface Model</a><a id="asm-1"></a><a class="docs-heading-anchor-permalink" href="#asm" title="Permalink"></a></h1><p>The aerodynamic solution computed in <a href="../blownwing-aero/#blownwingaero">the first section</a> was intended to be a mid-low fidelity simulation, which modeled the wing using an actuator line model (ALM). The ALM places all the surface vorticity associated with lift at the quarter chord of the wing, while placing all the trailing bound vorticity at the three-quarter chord, as shown here:</p><center>
+    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//alm00.png" alt="Pic here" style="width: 75%;"/>
+</center>
+<br><p>The ALM is very accurate for isolated wings and even cases with mild wake interactions. However, for cases with stronger wake interactions (e.g., a wake directly impinging on the wing surface), the ALM can lead to unphysical results as the flow tends to cross the airfoil centerline. To address this, we have developed an actuator surface model (ASM) to embed the wing surface in the LES domain and better represent the physics.</p><p>The ASM spreads the surface vorticity following a pressure-like distribution. This produces a velocity field at the wing surface that minimizes the mass flow that crosses the airfoil centerline, thus better representing a solid surface:</p><center>
+    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//asm00.png" alt="Pic here" style="width: 100%;"/>
+    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//asm01.png" alt="Pic here" style="width: 100%;"/>
+</center>
+<br><p>For an in-depth discussion of the actuator models implemented in FLOWUnsteady, see Chapter 6 in <a href="https://scholarsarchive.byu.edu/etd/9589">Alvarez&#39; Dissertation</a><sup class="footnote-reference"><a id="citeref-2" href="#footnote-2">[2]</a></sup> (also published in <a href="https://arc.aiaa.org/doi/abs/10.2514/1.C037279">Alvarez &amp; Ning, 2023</a><sup class="footnote-reference"><a id="citeref-3" href="#footnote-3">[3]</a></sup>).</p><p>In order to activate the actuator surface model, we define the following parameters:</p><pre><code class="language-julia hljs">thickness_w     = 0.15                      # Wing airfoil thickness t/c
+
+# ---------- Vortex sheet parameters ---------------
+vlm_vortexsheet = true                      # Whether to spread the wing circulation as a vortex sheet
+vlm_vortexsheet_overlap = 2.125             # Overlap of the particles that make the vortex sheet
+vlm_vortexsheet_distribution = uns.g_pressure   # Distribution of the vortex sheet
+
+sigma_vlm_surf  = b/100         # Smoothing radius of lifting bound vorticity
+vlm_vortexsheet_sigma_tbv = thickness_w*(b/ar) / 100 # Smoothing radius of trailing bound vorticity
+
+vlm_vortexsheet_maxstaticparticle = 1000000 # How many particles to preallocate for the vortex sheet
+
+
+# ---------- Force calculation parameters ----------
+KJforce_type                = &quot;regular&quot;     # KJ force evaluated at middle of bound vortices
+# KJforce_type              = &quot;averaged&quot;  # KJ force evaluated at average vortex sheet
+# KJforce_type              = &quot;weighted&quot;  # KJ force evaluated at strength-weighted vortex sheet
+
+include_trailingboundvortex = false         # Include trailing bound vortices in force calculations
+
+include_freevortices        = false         # Include free vortices in force calculation
+include_freevortices_TBVs   = false         # Include trailing bound vortex in free-vortex force
+
+include_unsteadyforce       = true          # Include unsteady force
+add_unsteadyforce           = false         # Whether to add the unsteady force to Ftot or to simply output it
+
+include_parasiticdrag       = true          # Include parasitic-drag force
+add_skinfriction            = true          # If false, the parasitic drag is purely form, meaning no skin friction
+calc_cd_from_cl             = false         # Whether to calculate cd from cl or effective AOA
+wing_polar_file             = &quot;xf-rae101-il-1000000.csv&quot;    # Airfoil polar for parasitic drag</code></pre><p>Then we use a custom-defined function for calculating aerodynamic forces that uses the vortex sheet:</p><pre><code class="language-julia hljs"># ---------- Aerodynamic forces --------------
+
+forces = []
+
+# Calculate Kutta-Joukowski force
+kuttajoukowski = uns.generate_aerodynamicforce_kuttajoukowski(KJforce_type,
+                                sigma_vlm_surf, sigma_rotor_surf,
+                                vlm_vortexsheet, vlm_vortexsheet_overlap,
+                                vlm_vortexsheet_distribution,
+                                vlm_vortexsheet_sigma_tbv;
+                                vehicle=vehicle)
+push!(forces, kuttajoukowski)
+
+# Free-vortex force
+if include_freevortices
+    freevortices = uns.generate_calc_aerodynamicforce_freevortices(
+                                            vlm_vortexsheet_maxstaticparticle,
+                                            sigma_vlm_surf,
+                                            vlm_vortexsheet,
+                                            vlm_vortexsheet_overlap,
+                                            vlm_vortexsheet_distribution,
+                                            vlm_vortexsheet_sigma_tbv;
+                                            Ffv=uns.Ffv_direct,
+                                            include_TBVs=include_freevortices_TBVs
+                                            )
+    push!(forces, freevortices)
+end
+
+# Force due to unsteady circulation
+if include_unsteadyforce
+    unsteady(args...; optargs...) = uns.calc_aerodynamicforce_unsteady(args...; add_to_Ftot=add_unsteadyforce, optargs...)
+
+    push!(forces, unsteady)
+end
+
+# Parasatic-drag force (form drag and skin friction)
+if include_parasiticdrag
+    parasiticdrag = uns.generate_aerodynamicforce_parasiticdrag(wing_polar_file;
+                                                            read_path=joinpath(data_path, &quot;airfoils&quot;),
+                                                            calc_cd_from_cl=calc_cd_from_cl,
+                                                            add_skinfriction=add_skinfriction,
+                                                            Mach=speedofsound!=nothing ? magVref/speedofsound : nothing)
+    push!(forces, parasiticdrag)
+end
+
+
+# Stitch all the forces into one function
+function calc_aerodynamicforce_fun(vlm_system, args...; per_unit_span=false, optargs...)
+
+    # Delete any previous force field
+    fieldname = per_unit_span ? &quot;ftot&quot; : &quot;Ftot&quot;
+    if fieldname in keys(vlm_system.sol)
+        pop!(vlm_system.sol, fieldname)
+    end
+
+    Ftot = nothing
+
+    for (fi, force) in enumerate(forces)
+        Ftot = force(vlm_system, args...; per_unit_span=per_unit_span, optargs...)
+    end
+
+    return Ftot
+end</code></pre><p>This custom-defined force needs to be passed to <a href="../../api/flowunsteady-monitor/#FLOWUnsteady.generate_monitor_wing"><code>uns.generate_monitor_wing</code></a>:</p><pre><code class="language-julia hljs">monitor_wing = uns.generate_monitor_wing(   ...
+                                            include_trailingboundvortex=include_trailingboundvortex,
+                                            calc_aerodynamicforce_fun=calc_aerodynamicforce_fun,
+                                            ...
+                                            )</code></pre><p>Finally, pass the following keyword arguments to <a href="../../api/flowunsteady-run/#FLOWUnsteady.run_simulation"><code>uns.run_simulation</code></a>:</p><pre><code class="language-julia hljs"># ------------- 5) RUN SIMULATION ------------------------------------------
+uns.run_simulation( ...
+                    vlm_vortexsheet=vlm_vortexsheet,
+                    vlm_vortexsheet_overlap=vlm_vortexsheet_overlap,
+                    vlm_vortexsheet_distribution=vlm_vortexsheet_distribution,
+                    vlm_vortexsheet_sigma_tbv=vlm_vortexsheet_sigma_tbv,
+                    max_static_particles=vlm_vortexsheet_maxstaticparticle
+                    ...
+                    )</code></pre><div class="admonition is-info" id="ASM-Example-2e10c71c5a047a42"><header class="admonition-header">ASM Example<a class="admonition-anchor" href="#ASM-Example-2e10c71c5a047a42" title="Permalink"></a></header><div class="admonition-body"><p>The <a href="../prowim-aero/#prowimaero">next section</a> shows an example on how to set up and run a simulation using the actuator surface model.</p></div></div><section class="footnotes is-size-7"><ul><li class="footnote" id="footnote-2"><a class="tag is-link" href="#citeref-2">2</a>E. J. Alvarez (2022), &quot;Reformulated Vortex Particle Method and Meshless Large Eddy Simulation of Multirotor Aircraft,&quot; <em>Doctoral Dissertation, Brigham Young University</em>. <a href="https://www.nas.nasa.gov/pubs/ams/2022/08-09-22.html"><strong>[VIDEO]</strong></a> <a href="https://scholarsarchive.byu.edu/etd/9589/"><strong>[PDF]</strong></a></li><li class="footnote" id="footnote-3"><a class="tag is-link" href="#citeref-3">3</a>E. J. Alvarez and A. Ning (2023), &quot;Meshless Large-Eddy Simulation of Propeller–Wing Interactions with Reformulated Vortex Particle Method,&quot; <em>Journal of Aircraft</em>. <a href="https://arc.aiaa.org/doi/abs/10.2514/1.C037279"><strong>[DOI]</strong></a><a href="https://scholarsarchive.byu.edu/facpub/6902/"><strong>[PDF]</strong></a></li></ul></section></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../blownwing-aero/">« Wing-on-Prop Interactions</a><a class="docs-footer-nextpage" href="../prowim-aero/">Prop-on-Wing Interactions »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Monday 1 September 2025 18:03">Monday 1 September 2025</span>. Using Julia version 1.10.10.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

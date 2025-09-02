@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Vehicle Definition · FLOWUnsteady</title><meta name="title" content="Vehicle Definition · FLOWUnsteady"/><meta property="og:title" content="Vehicle Definition · FLOWUnsteady"/><meta property="twitter:title" content="Vehicle Definition · FLOWUnsteady"/><meta name="description" content="Documentation for FLOWUnsteady."/><meta property="og:description" content="Documentation for FLOWUnsteady."/><meta property="twitter:description" content="Documentation for FLOWUnsteady."/><script async src="https://www.googletagmanager.com/gtag/js?id=G-B7CBF7WC7L"></script><script>  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-B7CBF7WC7L', {'page_path': location.pathname + location.search + location.hash});
+</script><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script><link href="../../assets/favicon.ico" rel="icon" type="image/x-icon"/></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../../"><img src="../../assets/logo.png" alt="FLOWUnsteady logo"/></a><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Intro</a></li><li><a class="tocitem" href="../../installation/general/">Installation</a></li><li><input class="collapse-toggle" id="menuitem-4" type="checkbox" checked/><label class="tocitem" for="menuitem-4"><span class="docs-label">Tutorials</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><input class="collapse-toggle" id="menuitem-4-1" type="checkbox"/><label class="tocitem" for="menuitem-4-1"><span class="docs-label">Simple Wing</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../wing-4p2aoa/">Basics</a></li><li><a class="tocitem" href="../wing-aoasweep/">AOA Sweep</a></li></ul></li><li><a class="tocitem" href="../tetheredwing/">Tethered Wing</a></li><li><a class="tocitem" href="../heavingwing/">Heaving Wing</a></li><li><input class="collapse-toggle" id="menuitem-4-4" type="checkbox"/><label class="tocitem" for="menuitem-4-4"><span class="docs-label">Propeller</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../propeller-J040/">Basics</a></li><li><a class="tocitem" href="../propeller-jsweep/"><span>$J$</span> Sweep</a></li><li><a class="tocitem" href="../propeller-quasisteady/">Quasi-Steady Solver</a></li><li><a class="tocitem" href="../propeller-incidence/">Incidence Sweep</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4-5" type="checkbox"/><label class="tocitem" for="menuitem-4-5"><span class="docs-label">Rotor in Hover</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../rotorhover-aero/">Variable Fidelity</a></li><li><a class="tocitem" href="../rotorhover-fdom/">Fluid Domain</a></li><li><a class="tocitem" href="../rotorhover-acoustics/">Aeroacoustics</a></li><li><a class="tocitem" href="../rotorhover-quasisteady/">Quasi-Steady Solver</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4-6" type="checkbox"/><label class="tocitem" for="menuitem-4-6"><span class="docs-label">Blown Wing</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../blownwing-aero/">Wing-on-Prop Interactions</a></li><li><a class="tocitem" href="../blownwing-asm/">Actuator Surface Model</a></li><li><a class="tocitem" href="../prowim-aero/">Prop-on-Wing Interactions</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4-7" type="checkbox" checked/><label class="tocitem" for="menuitem-4-7"><span class="docs-label">eVTOL Aircraft</span><i class="docs-chevron"></i></label><ul class="collapsed"><li class="is-active"><a class="tocitem" href>Vehicle Definition</a></li><li><a class="tocitem" href="../vahana-maneuver/">Maneuver Definition</a></li><li><a class="tocitem" href="../vahana-monitor/">Monitors Definitions</a></li><li><a class="tocitem" href="../vahana-run/">Run Simulation</a></li></ul></li><li><a class="tocitem" href="../openvsp-aircraft/">OpenVSP Geometry</a></li></ul></li><li><a class="tocitem" href="../../visualization/">Visualization</a></li><li><input class="collapse-toggle" id="menuitem-6" type="checkbox"/><label class="tocitem" for="menuitem-6"><span class="docs-label">Theory</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../theory/rvpm/">Reformulated VPM</a></li><li><a class="tocitem" href="../../theory/convergence/">Convergence</a></li><li><a class="tocitem" href="../../theory/validation/">Validation</a></li><li><a class="tocitem" href="../../theory/publications/">Publications</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-7" type="checkbox"/><label class="tocitem" for="menuitem-7"><span class="docs-label">API Guide</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><input class="collapse-toggle" id="menuitem-7-1" type="checkbox"/><label class="tocitem" for="menuitem-7-1"><span class="docs-label">(1) Vehicle Definition</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../api/flowunsteady-vehicle-types/">Vehicle types</a></li><li><a class="tocitem" href="../../api/flowunsteady-vehicle-components/">Generating components</a></li><li><a class="tocitem" href="../../api/flowunsteady-vehicle-asm/">Actuator surface model</a></li><li><a class="tocitem" href="../../api/flowunsteady-openvsp/">OpenVSP geometry</a></li></ul></li><li><a class="tocitem" href="../../api/flowunsteady-maneuver/">(2) Maneuver Definition</a></li><li><a class="tocitem" href="../../api/flowunsteady-simulation/">(3) Simulation Definition</a></li><li><a class="tocitem" href="../../api/flowunsteady-monitor/">(4) Monitors Definitions</a></li><li><a class="tocitem" href="../../api/flowunsteady-run/">(5) Run Simulation</a></li><li><input class="collapse-toggle" id="menuitem-7-6" type="checkbox"/><label class="tocitem" for="menuitem-7-6"><span class="docs-label">(6) Viz and Postprocessing</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../api/flowunsteady-postprocessing-fdom/">Fluid Domain</a></li><li><a class="tocitem" href="../../api/flowunsteady-postprocessing-noise/">Aeroacoustic Noise</a></li><li><a class="tocitem" href="../../api/flowunsteady-postprocessing-misc/">Miscellaneous</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-7-7" type="checkbox"/><label class="tocitem" for="menuitem-7-7"><span class="docs-label">Extras</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><input class="collapse-toggle" id="menuitem-7-7-1" type="checkbox"/><label class="tocitem" for="menuitem-7-7-1"><span class="docs-label">FLOWVPM</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../api/flowvpm-particle/">Particle Field</a></li><li><a class="tocitem" href="../../api/flowvpm-uj/">UJ Scheme</a></li><li><a class="tocitem" href="../../api/flowvpm-viscous/">Viscous Scheme</a></li><li><a class="tocitem" href="../../api/flowvpm-relaxation/">Relaxation Scheme</a></li><li><a class="tocitem" href="../../api/flowvpm-sfs/">SFS Scheme</a></li><li><a class="tocitem" href="../../api/flowvpm-time/">Time Integration</a></li></ul></li></ul></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Tutorials</a></li><li><a class="is-disabled">eVTOL Aircraft</a></li><li class="is-active"><a href>Vehicle Definition</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Vehicle Definition</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/byuflowlab/FLOWUnsteady" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/byuflowlab/FLOWUnsteady/blob/master/docs/src/examples/vahana-vehicle.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="vahanavehicle"><a class="docs-heading-anchor" href="#vahanavehicle">Vehicle Definition</a><a id="vahanavehicle-1"></a><a class="docs-heading-anchor-permalink" href="#vahanavehicle" title="Permalink"></a></h1><p>In this example we simulate the eVTOL transition maneuver of a tandem tilt-wing multirotor aircraft. The aircraft configuration resembles the Vahana eVTOL aircraft but with tilt and stacked rotors:</p><table>
+    <tr>
+        <td>
+            <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//vahana2-vehicle00-cropped-small.png" alt="Pic here" style="width:90%;"/>
+            <br>
+            <center><b>Takeoff and landing</b></center>
+        </td>
+        <td>
+            <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//vahana2-vehicle02-cropped-small.png" alt="Pic here" style="width:90%;"/>
+            <br>
+            <center><b>Cruise</b></center>
+        </td>
+    </tr>
+</table><p>Due to the complexity of this simulation, each step of the simulation setup is quite involved. Hence, we have broken down each step into a function that can be call when we setup the simulation.</p><p>Below is the function that defines the vehicle for the simulation (<a href="../../api/flowunsteady-vehicle-types/#FLOWUnsteady.UVLMVehicle"><code>uns.UVLMVehicle</code></a>). Along with defining the vehicle geometry, it also defines two tilting systems (a tilting system is a set of components that tilt together) and three rotor systems (a rotor system is a set of rotors with a common RPM). Later in the next section we will define the control inputs for these tilting and rotor systems.</p><table>
+    <tr>
+        <td>
+            <center>
+                <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//vahana-tiltingsystems00.png" alt="Pic here" style="width:70%;"/>
+            </center>
+        </td>
+        <td>
+            <center>
+                <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//vahana-rotorsystems00.png" alt="Pic here" style="width:70%;"/>
+            </center>
+        </td>
+    </tr>
+</table><pre><code class="language-julia hljs">&quot;&quot;&quot;
+    Generates the geometry of Vahana aircraft
+&quot;&quot;&quot;
+function generate_vahana_vehicle(;
+                                    # VEHICLE OPTIONS
+                                    xfoil       = true,             # Whether to run XFOIL
+                                    n_factor::Int = 1,              # Discretization factor
+                                    add_wings   = true,             # Whether to add the wings
+                                    add_rotors  = true,             # Whether to add the rotors
+                                    VehicleType = uns.VLMVehicle,   # Type of vehicle to generate (uns.QVLMVehicle for quasi-steady solver)
+                                    data_path   = uns.def_data_path,# Database path
+                                    # OUTPUT OPTIONS
+                                    run_name    = &quot;vahana&quot;,
+                                    verbose     = true,
+                                    v_lvl       = 0
+                                    )
+
+    ############################################################################
+    # PARAMETERS
+    ############################################################################
+
+    if verbose; println(&quot;\t&quot;^(v_lvl)*&quot;Defining parameters...&quot;); end;
+
+    # ------------ GEOMETRIC PARAMETERS ------------------------------------
+    # Tilt and fixed rotors
+    tiltrotor_file  = &quot;VahanaTilt.csv&quot;      # Tilt-rotor file
+    R_w             = 0.75                  # (m) main-wing rotor radius (reference)
+    R_tw            = R_w                   # (m) tandem-wing rotor radius (reference)
+    CW_w            = true                  # Clockwise rotation of main-wing rotor
+    CW_tw           = false                 # Clockwise rotation of tandem-wing rotor
+    nr_w            = 2                     # Number of rotors per side of main wing
+    nr_tw           = 2                     # Number of rotors per side of tandem wing
+    pitch           = 0.0                   # (deg) collective pitch for tiltrotors rotors on main and tandem wings
+    main_outtilt    = 10                    # (deg) Mount main-wing rotors with this out-tilt angle
+    tandem_pitchtilt= 10                    # (deg) Mount tandem-wing rotors with this alternating pitch-tilt angle
+    xoc_offset_main = 0.175                 # Axial distance of main-wing rotors from LE, divided by chord
+    xoc_offset_tandem = 0.10                # Axial distance of tandem-wing rotors from LE, divided by chord
+    soD             = 0.1                   # Tip-to-tip distance of rotors, divided by diameter
+    ReD07           = 1.5e6                 # Assumed diameter-based Reynolds number for all rotors at r/R=0.7
+    ReD             = ReD07/0.7             # Reynolds number at blade tip (for XFOIL)
+    n_rotor         = 7*n_factor            # Number of blade elements per blade
+    r_rotor         = 1/20                  # Geometric expansion between blade elements
+    tilt_read_polar = vlm.ap.read_polar     # What polar reader to use
+
+    # Stacked rotors
+    stackedrotor_file = &quot;VahanaStacked.csv&quot; # Stacked-rotor file
+    stacked         = [nr_w, nr_w+1]        # Index of main-wing rotors that will be stacked rotors
+    stckd_xoc_offset= -1.40                 # Axial distance of stacked rotors from LE, divided by chord
+    stckd_zoc_offset= 0.10                  # Height of stacked rotors above wing, divided by chord
+    stckd_zoR_offset= -0.05                 # Stacking distance between stacked rotors, divided by R
+    stckd_corotating= true                  # Co-rotating stacked rotors if true, counter-rotating otherwise
+    stckd_phase     = -10                   # (deg) initial phase difference of stacked rotors (index angle)
+    stckd_pitch_up  = 5.0                   # (deg) collective pitch of upper rotor in stack
+    stckd_pitch_low = stckd_pitch_up + 7.5  # (deg) collective pitch of lower rotor in stack
+    stacked_read_polar = vlm.ap.read_polar2 # What polar reader to use
+
+    # Main wing
+    b_w             = 5.86                  # (m) span
+    AR_w            = 7.4                   # Aspect ratio (b/c_tip)
+    tr_w            = 1.0                   # Taper ratio (c_tip/c_root)
+    twist_r_w       = 14.0                  # (deg) twist at root
+    twist_t_w       = twist_r_w             # (deg) twist at tip
+    lambda_w        = main_outtilt          # (deg) sweep
+    gamma_w         = 5.0                   # (deg) dihedral
+    md_w            = 0.9                   # Length of middle section, divided by span
+    pivot_w         = 1/4                   # Pivot point along chord of tilt-wing
+    n_w             = 24*n_factor           # Number of wing elements per side
+    r_w             = 2.0                   # Geometric expansion of wing elements
+
+    # Main-wing winglets
+    b_wl            = b_w/4                 # (m) span of winglet from top to bottom
+    AR_wl           = 3.0                   # Aspect ratio (b/c_tip)
+    tr_wl           = (b_wl/AR_wl)/(b_w/AR_w/tr_w)  # Taper ratio (c_tip/c_root)
+    twist_r_wl      = 2.5                   # (deg) twist at root
+    twist_t_wl      = 0.0                   # (deg) twist at tip
+    lambda_wl       = 40.0                  # (deg) sweep
+    gamma_wl        = 15.0                  # (deg) dihedral
+    n_wl            = 8*n_factor            # Number of wing elements per side
+    r_wl            = 2.0                   # Geometric expansion of wing elements
+
+    # Tandem wing
+    b_tw            = b_w*1.0               # (m) span
+    AR_tw           = 9.5                   # Aspect ratio (b/c_tip)
+    tr_tw           = 1.0                   # Taper ratio (c_tip/c_root)
+    twist_r_tw      = 14.0                  # (deg) twist at root
+    twist_t_tw      = twist_r_tw            # (deg) twist at tip
+    lambda_tw       = 0.0                   # (deg) sweep
+    gamma_tw        = 0.0                   # (deg) dihedral
+    md_tw           = 0.2                   # Length of middle section, divided by span
+    pivot_tw        = pivot_w               # Pivot point along chord of tilt-wing
+    n_tw            = 2*n_w                 # Number of wing elements per side
+    r_tw            = r_w                   # Geometric expansion of wing elements
+
+    # Fuselage
+    l_f             = 5.86                  # (m) length
+    h_f             = 2.81*2/3              # (m) height
+
+    # ------------ ASSEMBLY PARAMETERS ------------------------------------
+    # Position of wings on fuselage
+    h_pos_w         = 0.90*h_f              # (m) height position of wing
+    h_pos_tw        = 0.15*h_f              # (m) height position of tandem wing
+    l_pos_w         = 0.95*l_f-b_w/AR_w/tr_w# (m) length position of wing
+    l_pos_tw        = 0.05*l_f              # (m) length position of tandem wing
+
+    # Position of rotors along main wing
+    d_rotor_w       = (1+soD)*(2*R_w)       # Distance between rotors
+    y_pos_rotor_w   = Float64[b_w/2 - i*d_rotor_w for i in 0:nr_w-1]    # y-positions
+
+    # Position of rotors along tandem wing
+    d_rotor_tw      = (1+soD)*(2*R_tw)      # Distance between rotors on wing
+    y_pos_rotor_tw  = Float64[b_tw/2 - i*d_rotor_tw for i in 0:nr_tw-1] # y-positions
+
+    init_ori        = 90.0                  # (deg) initial orientation of wings
+    init_ori_rotor  = 0.0                   # (deg) initial orientation of rotors
+    init_ori_stackedrotor = 30.0            # (deg) initial orientation of stacked rotors
+
+
+    ############################################################################
+    # GENERATE COMPONENTS
+    ############################################################################
+
+    if verbose; println(&quot;\t&quot;^(v_lvl)*&quot;Generating components...&quot;); end;
+
+    # ------------ ROTORS ------------------------------------------------
+    # Generate base rotors (one for each rotation orientation)
+    if add_rotors
+
+        tiltrotors = vlm.Rotor[]                # Tilt rotors
+
+        if verbose; println(&quot;\t&quot;^(v_lvl+1)*&quot;Generating first tilt-rotor...&quot;); end;
+        push!(tiltrotors, uns.generate_rotor(tiltrotor_file; pitch=pitch,
+                                                n=n_rotor, blade_r=r_rotor, CW=!CW_w, ReD=ReD,
+                                                verbose=verbose, v_lvl=v_lvl+2, xfoil=xfoil,
+                                                read_polar=tilt_read_polar,
+                                                data_path=data_path, plot_disc=false))
+
+        if verbose; println(&quot;\t&quot;^(v_lvl+1)*&quot;Generating second tilt-rotor...&quot;); end;
+        push!(tiltrotors, uns.generate_rotor(tiltrotor_file; pitch=pitch,
+                                                n=n_rotor, blade_r=r_rotor, CW=CW_w, ReD=ReD,
+                                                verbose=verbose, v_lvl=v_lvl+2, xfoil=xfoil,
+                                                read_polar=tilt_read_polar,
+                                                data_path=data_path, plot_disc=false))
+
+        stackedrotors = vlm.Rotor[]             # Upper rotor in stacked rotors
+
+        if verbose; println(&quot;\t&quot;^(v_lvl+1)*&quot;Generating first stacked-rotor...&quot;); end;
+        push!(stackedrotors, uns.generate_rotor(stackedrotor_file; pitch=stckd_pitch_up,
+                                                n=n_rotor, blade_r=r_rotor, CW=!CW_w, ReD=ReD,
+                                                verbose=verbose, v_lvl=v_lvl+2, xfoil=xfoil,
+                                                read_polar=stacked_read_polar,
+                                                data_path=data_path, plot_disc=false))
+
+        if verbose; println(&quot;\t&quot;^(v_lvl+1)*&quot;Generating second stacked-rotor...&quot;); end;
+        push!(stackedrotors, uns.generate_rotor(stackedrotor_file; pitch=stckd_pitch_up,
+                                                n=n_rotor, blade_r=r_rotor, CW=CW_w, ReD=ReD,
+                                                verbose=verbose, v_lvl=v_lvl+2, xfoil=xfoil,
+                                                read_polar=stacked_read_polar,
+                                                data_path=data_path, plot_disc=false))
+
+        stackedrotors_low = vlm.Rotor[]         # Lower rotor in stacked rotors
+
+        if stckd_pitch_up != stckd_pitch_low
+
+            if verbose; println(&quot;\t&quot;^(v_lvl+1)*&quot;Generating first lower-stacked-rotor...&quot;); end;
+            push!(stackedrotors_low, uns.generate_rotor(stackedrotor_file; pitch=stckd_pitch_low,
+                                                    n=n_rotor, blade_r=r_rotor, CW=!CW_w, ReD=ReD,
+                                                    verbose=verbose, v_lvl=v_lvl+2, xfoil=xfoil,
+                                                    read_polar=stacked_read_polar,
+                                                    data_path=data_path, plot_disc=false))
+
+            if verbose; println(&quot;\t&quot;^(v_lvl+1)*&quot;Generating second lower-stacked-rotor...&quot;); end;
+            push!(stackedrotors_low, uns.generate_rotor(stackedrotor_file; pitch=stckd_pitch_low,
+                                                    n=n_rotor, blade_r=r_rotor, CW=CW_w, ReD=ReD,
+                                                    verbose=verbose, v_lvl=v_lvl+2, xfoil=xfoil,
+                                                    read_polar=stacked_read_polar,
+                                                    data_path=data_path, plot_disc=false))
+
+        else
+
+            for rotor in stackedrotors
+                push!(stackedrotors_low, rotor)
+            end
+
+        end
+    end
+
+
+    # ------------ MAIN WING ---------------------------------------------
+    # Generate wing
+    if verbose; println(&quot;\t&quot;^(v_lvl+1)*&quot;Generating main wing assembly...&quot;); end;
+
+    # Middle section
+    pos_md_w = [0.0, md_w]
+    clen_md_w = [1/tr_w, md_w + (1/tr_w)*(1-md_w)]
+    twist_md_w = [twist_r_w, twist_r_w + md_w*(twist_t_w-twist_r_w)]
+    wing_md = vlm.complexWing(b_w, AR_w, ceil(Int, md_w*n_w), pos_md_w, clen_md_w, twist_md_w,
+                          lambda_w*ones(1), gamma_w*ones(1);
+                          symmetric=true, chordalign=0.0,
+                          _ign1=true)
+
+    # Left section
+    pos_l_w = [0, -(1-md_w)]   # NOTE: Here we define this wing section from right to left
+    clen_l_w = [1, clen_md_w[end]]
+    twist_l_w = [twist_t_w, twist_md_w[end]]
+    wing_L = vlm.complexWing(b_w, AR_w, ceil(Int, (1-md_w)*n_w/2), pos_l_w, clen_l_w,
+                            twist_l_w, -lambda_w*ones(1), -gamma_w*ones(1);
+                            symmetric=false, chordalign=0.0,
+                            _ign1=true)
+
+    # Right section
+    pos_r_w = [0, (1-md_w)]
+    clen_r_w = [clen_md_w[end], 1]
+    twist_r_w = [twist_md_w[end], twist_t_w]
+    wing_R = vlm.complexWing(b_w, AR_w, ceil(Int, (1-md_w)*n_w/2), pos_r_w, clen_r_w,
+                            twist_r_w, lambda_w*ones(1), gamma_w*ones(1);
+                            symmetric=false, chordalign=0.0,
+                            _ign1=true)
+
+    # Translate right and left sections to position
+    O_w_R = (md_w*b_w/2)*[0, 1, 0]
+    O_w_L = [1 0 0; 0 -1 0; 0 0 1]*O_w_R
+    vlm.setcoordsystem(wing_R, O_w_R, Im)
+    vlm.setcoordsystem(wing_L, O_w_L, Im)
+
+    # Winglets
+    winglet_R = vlm.simpleWing(b_wl, AR_wl, tr_wl, twist_r_wl, lambda_wl, gamma_wl;
+                                          twist_tip=twist_t_wl, n=n_wl, r=r_wl)
+
+    winglet_L = vlm.simpleWing(b_wl, AR_wl, tr_wl, twist_r_wl, lambda_wl, gamma_wl;
+                                          twist_tip=twist_t_wl, n=n_wl, r=r_wl)
+
+    # Translate winglets to position
+    O_wl_R = (b_w/2)*[0, 1, 0]
+    O_wl_R += ((1-md_w)*b_w/2)*[tan(lambda_w*pi/180), 0, tan(gamma_w*pi/180)]
+    O_wl_L = [1 0 0; 0 -1 0; 0 0 1]*O_wl_R
+    Oaxis_wl_R = gt.rotation_matrix(0.0, 0.0, 90.0)
+    Oaxis_wl_L = gt.rotation_matrix(0.0, 0.0, -90.0)
+    vlm.setcoordsystem(winglet_R, O_wl_R, Oaxis_wl_R)
+    vlm.setcoordsystem(winglet_L, O_wl_L, Oaxis_wl_L)
+
+    # Generate main-wing rotors (from right to left)
+    if add_rotors
+
+        if verbose; println(&quot;\t&quot;^(v_lvl+2)*&quot;Generating main-wing rotors...&quot;); end;
+
+        O_rotor_w = [                            # Position of each rotor
+                     (ypos - md_w*b_w/2)*[tan(lambda_w*pi/180), 0, -tan(gamma_w*pi/180)] +
+                     ypos*[0, 1, 0] +
+                     [-(i in stacked ? stckd_xoc_offset : xoc_offset_main)*AR_w/b_w, 0, 0] +
+                     [0, 0, (i in stacked ? stckd_zoc_offset*tan(gamma_w*pi/180) : 0)*AR_w/b_w]
+                     for (i, ypos) in enumerate(y_pos_rotor_w)]
+
+        rotors_w = vlm.Rotor[]                  # Rotors get stored in these arrays
+        rotors_w_stacked_up = vlm.Rotor[]
+        rotors_w_stacked_low = vlm.Rotor[]
+
+        for i in 1:2*nr_w
+            right = i&lt;=nr_w                     # Indicates which side of the wing
+
+            copy_rotor = i in stacked ? stackedrotors[1+i%2] : tiltrotors[1+i%2]
+            this_rotor = deepcopy(copy_rotor)   # Alternates rotation orientation
+
+            this_O = O_rotor_w[ right ? i : nr_w-(i-nr_w-1)]  # Chooses position
+            this_O = [1 0 0; 0 (-1)^!right 0; 0 0 1]*this_O   # Places it in correct side
+            this_Oaxis = i in stacked ? gt.rotation_matrix(0.0, 90, 0.0) :
+                                        gt.rotation_matrix((-1)^(i%2==0)*main_outtilt, 0.0, 0.0)
+
+            # Place rotor in position
+            vlm.setcoordsystem(this_rotor, this_O, this_Oaxis; user=true)
+
+            # Rotate rotor to be tip-to-tip with others
+            vlm.rotate(this_rotor, (-1)^(!CW_w) * (i in stacked ? init_ori_stackedrotor : init_ori_rotor))
+
+            # Add the original polars that are not copied with deepcopy
+            this_rotor.airfoils = copy_rotor.airfoils
+            this_rotor._polars = copy_rotor._polars
+            this_rotor._polarroot = copy_rotor._polarroot
+            this_rotor._polartip = copy_rotor._polartip
+
+            if !(i in stacked)
+
+                push!(rotors_w, this_rotor)
+
+            else
+                push!(rotors_w_stacked_up, this_rotor)
+
+                # Generate lower rotor if this is a stacked rotor
+                copy_rotor = stackedrotors_low[ 1+(i+1*!stckd_corotating)%2 ]
+                this_rotor = deepcopy(copy_rotor)
+
+                # Place rotor in position
+                this_O += R_w*[0, 0, stckd_zoR_offset]
+                vlm.setcoordsystem(this_rotor, this_O, this_Oaxis; user=true)
+
+                # Rotate rotor to be tip-to-tip with others
+                vlm.rotate(this_rotor, (-1)^(!CW_w) * (init_ori_stackedrotor+stckd_phase))
+
+                # Add the original polars that are not copied with deepcopy
+                this_rotor.airfoils = copy_rotor.airfoils
+                this_rotor._polars = copy_rotor._polars
+                this_rotor._polarroot = copy_rotor._polarroot
+                this_rotor._polartip = copy_rotor._polartip
+
+                push!(rotors_w_stacked_low, this_rotor)
+            end
+        end
+    end
+
+    # Assemble fixed section of the wing (middle section + stacked rotors)
+    main_wing_fixed = vlm.WingSystem()
+    vlm.addwing(main_wing_fixed, &quot;WingM&quot;, wing_md)
+
+    if add_rotors
+        for (i, rotor) in enumerate(rotors_w_stacked_up)
+            vlm.addwing(main_wing_fixed, &quot;StackedRotorUp$i&quot;, rotor)
+        end
+        for (i, rotor) in enumerate(rotors_w_stacked_low)
+            vlm.addwing(main_wing_fixed, &quot;StackedRotorLow$i&quot;, rotor)
+        end
+    end
+
+    # Assemble wing tip sections
+    main_wing_R = vlm.WingSystem()
+    vlm.addwing(main_wing_R, &quot;Tip&quot;, wing_R)
+    vlm.addwing(main_wing_R, &quot;Winglet&quot;, winglet_R)
+
+    main_wing_L = vlm.WingSystem()
+    vlm.addwing(main_wing_L, &quot;Tip&quot;, wing_L)
+    vlm.addwing(main_wing_L, &quot;Winglet&quot;, winglet_L)
+
+    # Assemble moving sections of the wing
+    main_wing_moving = vlm.WingSystem()
+    vlm.addwing(main_wing_moving, &quot;WingR&quot;, main_wing_R)
+    vlm.addwing(main_wing_moving, &quot;WingL&quot;, main_wing_L)
+
+    if add_rotors
+        for (i, rotor) in enumerate(rotors_w)
+            vlm.addwing(main_wing_moving, &quot;Rotor$i&quot;, rotor)
+        end
+    end
+
+
+    # Align moving and fixed section with their pivot line
+    x_off_w = pivot_w*b_w/AR_w                  # offset to align with pivot line
+    O_off_w = [-x_off_w, 0.0, 0.0]
+
+    vlm.setcoordsystem(wing_md, O_off_w, Im)
+
+    for vlmwing in main_wing_moving.wings
+        if typeof(vlmwing)==vlm.Rotor
+            vlm.setcoordsystem(vlmwing, vlmwing._wingsystem.O + O_off_w,
+                                        vlmwing._wingsystem.Oaxis; user=false)
+        else
+            vlm.setcoordsystem(vlmwing, vlmwing.O + O_off_w, vlmwing.Oaxis)
+        end
+    end
+
+    # Place tilting sections at main-wing tip
+    O_mv = (md_w*b_w/2)*[tand(lambda_w), 0, tand(gamma_w)]
+
+    # Initial rotation of moving sections
+    Oaxis_wmv = gt.rotation_matrix(0.0, -init_ori, 0.0)
+    vlm.setcoordsystem(main_wing_moving, O_mv, Oaxis_wmv)
+
+    # Assemble main wing
+    main_wing = vlm.WingSystem()
+    vlm.addwing(main_wing, &quot;Fixed&quot;, main_wing_fixed)
+    vlm.addwing(main_wing, &quot;Moving&quot;, main_wing_moving)
+
+    # Position of main wing
+    O_w = [l_pos_w + x_off_w, 0, h_pos_w]
+    Oaxis_w = gt.rotation_matrix(0.0, 0.0, 0.0)
+    vlm.setcoordsystem(main_wing, O_w, Oaxis_w)
+
+    # ------------ TANDEM WING -------------------------------------------
+    if verbose; println(&quot;\t&quot;^(v_lvl+1)*&quot;Generating tandem wing assembly...&quot;); end;
+
+    # Generate tandem wing
+    twing = vlm.simpleWing(b_tw, AR_tw, tr_tw, twist_r_tw, lambda_tw,
+                                gamma_tw; twist_tip=twist_t_tw, n=n_tw, r=r_tw)
+
+    # Middle section
+    pos_md_tw = [-md_tw, 0.0, md_tw]
+    clen_md_tw = [md_tw + (1/tr_tw)*(1-md_tw), 1/tr_tw, md_tw + (1/tr_tw)*(1-md_tw)]
+    twist_md_tw = [twist_r_tw + md_tw*(twist_t_tw-twist_r_tw),
+                        twist_r_tw, twist_r_tw + md_tw*(twist_t_tw-twist_r_tw)]
+    twing_md = vlm.complexWing(b_tw, AR_tw, ceil(Int, md_tw*n_tw), pos_md_tw,
+                                  clen_md_tw, twist_md_tw,
+                                  lambda_tw*ones(2), gamma_tw*ones(2);
+                                  symmetric=false, chordalign=0.0,
+                                  _ign1=true)
+    # Left section
+    pos_l_tw = [-1, pos_md_tw[1]]
+    clen_l_tw = [1, clen_md_tw[1]]
+    twist_l_tw = [twist_t_tw, twist_md_tw[1]]
+    twing_L = vlm.complexWing(b_tw, AR_tw, ceil(Int, (1-md_tw)*n_tw/2), pos_l_tw,
+                                    clen_l_tw, twist_l_tw,
+                                    lambda_tw*ones(1), gamma_tw*ones(1);
+                                    symmetric=false, chordalign=0.0,
+                                    _ign1=true)
+    # Right section
+    pos_r_tw = [pos_md_tw[end], 1]
+    clen_r_tw = [clen_md_tw[end], 1]
+    twist_r_tw = [twist_md_tw[end], twist_t_tw]
+    twing_R = vlm.complexWing(b_tw, AR_tw, ceil(Int, (1-md_tw)*n_tw/2), pos_r_tw,
+                                    clen_r_tw, twist_r_tw,
+                                    lambda_tw*ones(1), gamma_tw*ones(1);
+                                    symmetric=false, chordalign=0.0,
+                                    _ign1=true)
+
+    ## Generate tandem-wing rotors (from right to left)
+    if add_rotors
+
+        if verbose; println(&quot;\t&quot;^(v_lvl+2)*&quot;Generating tandem-wing rotors...&quot;); end;
+
+        O_rotor_tw = [ ypos*[tan(lambda_tw*pi/180), 1, tan(gamma_tw*pi/180)] +
+                        [-xoc_offset_tandem*AR_tw/b_tw, 0, 0]
+                                                  for ypos in y_pos_rotor_tw]
+
+        rotors_tw = vlm.Rotor[]
+
+        for i in 1:2*nr_tw
+            right = i&lt;=nr_tw                        # Indicates which side of the wing
+
+            copy_rotor = tiltrotors[1+(i+(CW_tw!=CW_w))%2]
+            this_rotor = deepcopy(copy_rotor)       # Alternates rotation orientation
+
+            this_O = O_rotor_tw[ right ? i : nr_tw-(i-nr_tw-1)] # Chooses position
+            this_O = [1 0 0; 0 (-1)^!right 0; 0 0 1]*this_O     # Places it in correct side
+            this_Oaxis = gt.rotation_matrix(0, (-1)^(i%2==0)*(-1)^right*tandem_pitchtilt, 0)
+
+            # Place rotor in position
+            vlm.setcoordsystem(this_rotor, this_O, this_Oaxis; user=true)
+
+            # Rotates rotor to be tip-to-tip with others
+            vlm.rotate(this_rotor, (-1)^(!CW_tw) * init_ori_rotor)
+
+            # Add the original polars that are not copied with deepcopy
+            this_rotor.airfoils = copy_rotor.airfoils
+            this_rotor._polars = copy_rotor._polars
+            this_rotor._polarroot = copy_rotor._polarroot
+            this_rotor._polartip = copy_rotor._polartip
+
+            push!(rotors_tw, this_rotor)
+        end
+    end
+
+    # Assemble moving sections of the wing
+    tandem_wing_moving = vlm.WingSystem()
+    vlm.addwing(tandem_wing_moving, &quot;WingR&quot;, twing_R)
+    vlm.addwing(tandem_wing_moving, &quot;WingL&quot;, twing_L)
+
+    if add_rotors
+        for (i, rotor) in enumerate(rotors_tw)
+            vlm.addwing(tandem_wing_moving, &quot;Rotor$i&quot;, rotor)
+        end
+    end
+
+    # Align moving and fixed section with their pivot line
+    x_off_tw = pivot_tw*b_tw/AR_tw                  # offset to align with pivot line
+    O_off_tw = [-x_off_tw, 0.0, 0.0]
+
+    vlm.setcoordsystem(twing_md, O_off_tw, Im)
+
+    for vlmwing in tandem_wing_moving.wings
+        if typeof(vlmwing)==vlm.Rotor
+            vlm.setcoordsystem(vlmwing, vlmwing._wingsystem.O + O_off_tw,
+                                        vlmwing._wingsystem.Oaxis; user=false)
+        else
+            vlm.setcoordsystem(vlmwing, vlmwing.O + O_off_tw, vlmwing.Oaxis)
+        end
+    end
+
+    # Initial rotation of moving sections
+    Oaxis_twmv = gt.rotation_matrix(0.0, -init_ori, 0.0)
+    vlm.setcoordsystem(tandem_wing_moving, zeros(3), Oaxis_twmv)
+
+    # Assemble tandem wing
+    tandem_wing = vlm.WingSystem()
+    vlm.addwing(tandem_wing, &quot;FixedWing&quot;, twing_md)
+    vlm.addwing(tandem_wing, &quot;Moving&quot;, tandem_wing_moving)
+
+    # Position of tandem wing
+    O_tw = [l_pos_tw + x_off_tw, 0, h_pos_tw]
+    Oaxis_tw = gt.rotation_matrix(0.0, 0.0, 0.0)
+    vlm.setcoordsystem(tandem_wing, O_tw, Oaxis_tw)
+
+    # ------------ FUSELAGE ----------------------------------------------
+    if verbose; println(&quot;\t&quot;^(v_lvl+1)*&quot;Generating fuselage...&quot;); end;
+
+    # Generate fuselage
+    fuselage = generatefuselage_vahana(l_f; ncells=20)
+
+    # All grids get stored here
+    body = gt.MultiGrid(3)
+    gt.addgrid(body, &quot;Fuselage&quot;, fuselage)
+
+    # Generate pylons of stacked rotors
+    if add_rotors
+        if verbose; println(&quot;\t&quot;^(v_lvl+1)*&quot;Generating pylons...&quot;); end;
+
+        pylon_pos = 0.70
+        pylon_length = stckd_xoc_offset*AR_w/b_w * pylon_pos
+
+        for i in stacked
+            pylon = generatepylon(pylon_length; ncells=5)
+
+            right = i&lt;=nr_w
+            this_O = O_rotor_w[ right ? i : nr_w-(i-nr_w-1)]  # Chooses position
+            this_O = [1 0 0; 0 (-1)^!right 0; 0 0 1]*this_O   # Places it in correct side
+            this_O += main_wing.O                             # Translates it with the wing
+                                                              # Offsets it according to length
+            this_O += [1/3*0.5*pylon_pos, 0, 3*R_w*stckd_zoR_offset]
+            rotation = gt.rotation_matrix2(0, 0, 0)
+
+            gt.lintransform!(pylon, rotation, this_O)
+
+            gt.addgrid(body, &quot;Pylon$i&quot;, pylon)
+        end
+    end
+
+
+    ############################################################################
+    # DEFINE VEHICLE
+    ############################################################################
+
+    # System of all FLOWVLM objects
+    system = vlm.WingSystem()
+    vlm.addwing(system, &quot;MainWing&quot;, main_wing)
+    vlm.addwing(system, &quot;TandemWing&quot;, tandem_wing)
+
+    # Tilting systems
+    tilting_systems = (main_wing_moving, tandem_wing_moving)
+
+    # Rotors grouped by systems with shared RPM control
+    if add_rotors
+        rotor_systems = (rotors_w, rotors_w_stacked_up, rotors_w_stacked_low, rotors_tw)
+    else
+        rotor_systems = ()
+    end
+
+    # System solved through VLM solver
+    vlm_system_m = vlm.WingSystem()
+    vlm.addwing(vlm_system_m, &quot;letL&quot;, winglet_L)
+    vlm.addwing(vlm_system_m, &quot;L&quot;, wing_L)
+    vlm.addwing(vlm_system_m, &quot;middle&quot;, wing_md)
+    vlm.addwing(vlm_system_m, &quot;R&quot;, wing_R)
+    vlm.addwing(vlm_system_m, &quot;letR&quot;, winglet_R)
+
+    vlm_system_t = vlm.WingSystem()
+    vlm.addwing(vlm_system_t, &quot;L&quot;, twing_L)
+    vlm.addwing(vlm_system_t, &quot;R&quot;, twing_R)
+
+    vlm_system = vlm.WingSystem()
+    if add_wings
+        vlm.addwing(vlm_system, &quot;MWing&quot;, vlm_system_m)
+        vlm.addwing(vlm_system, &quot;TWing&quot;, vlm_system_t)
+    end
+
+    # All rotors
+    if add_rotors
+        rotors = vcat(rotors_w, rotors_w_stacked_up, rotors_w_stacked_low, rotors_tw)
+    end
+
+    # System that will shed a VPM wake
+    wake_system = vlm.WingSystem()
+
+    if add_wings
+        vlm.addwing(wake_system, &quot;SolveVLM&quot;, vlm_system)
+    end
+
+    if add_rotors
+        if VehicleType==uns.VLMVehicle
+            for (i, rotor) in enumerate(rotors)
+                vlm.addwing(wake_system, &quot;Rotor$i&quot;, rotor)
+            end
+        else
+            # Mute warnings regarding potential colinear vortex filaments. This is
+            # needed since the quasi-steady solver will probe induced velocities at the
+            # lifting line of the blade
+            uns.vlm.VLMSolver._mute_warning(true)
+        end
+    end
+
+    # Visualization grids that are rotated and translated along with the vehicle
+    grids = [body]
+
+    # Define vehicle
+    vehicle = VehicleType(   system;
+                                tilting_systems=tilting_systems,
+                                rotor_systems=rotor_systems,
+                                vlm_system=vlm_system,
+                                wake_system=wake_system,
+                                grids=grids
+                             )
+
+    return vehicle
+end</code></pre><div class="admonition is-info" id="Full-example-bc3811cc11630df6"><header class="admonition-header">Full example<a class="admonition-anchor" href="#Full-example-bc3811cc11630df6" title="Permalink"></a></header><div class="admonition-body"><p>The function that defines the fuselage is given in the full example under <a href="https://github.com/byuflowlab/FLOWUnsteady/blob/master/examples/vahana/vahana_vehicle.jl">examples/vahana/vahana_vehicle.jl</a></p></div></div></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../prowim-aero/">« Prop-on-Wing Interactions</a><a class="docs-footer-nextpage" href="../vahana-maneuver/">Maneuver Definition »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Monday 1 September 2025 18:03">Monday 1 September 2025</span>. Using Julia version 1.10.10.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

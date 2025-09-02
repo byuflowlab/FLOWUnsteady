@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Aeroacoustics · FLOWUnsteady</title><meta name="title" content="Aeroacoustics · FLOWUnsteady"/><meta property="og:title" content="Aeroacoustics · FLOWUnsteady"/><meta property="twitter:title" content="Aeroacoustics · FLOWUnsteady"/><meta name="description" content="Documentation for FLOWUnsteady."/><meta property="og:description" content="Documentation for FLOWUnsteady."/><meta property="twitter:description" content="Documentation for FLOWUnsteady."/><script async src="https://www.googletagmanager.com/gtag/js?id=G-B7CBF7WC7L"></script><script>  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-B7CBF7WC7L', {'page_path': location.pathname + location.search + location.hash});
+</script><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script><link href="../../assets/favicon.ico" rel="icon" type="image/x-icon"/></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../../"><img src="../../assets/logo.png" alt="FLOWUnsteady logo"/></a><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Intro</a></li><li><a class="tocitem" href="../../installation/general/">Installation</a></li><li><input class="collapse-toggle" id="menuitem-4" type="checkbox" checked/><label class="tocitem" for="menuitem-4"><span class="docs-label">Tutorials</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><input class="collapse-toggle" id="menuitem-4-1" type="checkbox"/><label class="tocitem" for="menuitem-4-1"><span class="docs-label">Simple Wing</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../wing-4p2aoa/">Basics</a></li><li><a class="tocitem" href="../wing-aoasweep/">AOA Sweep</a></li></ul></li><li><a class="tocitem" href="../tetheredwing/">Tethered Wing</a></li><li><a class="tocitem" href="../heavingwing/">Heaving Wing</a></li><li><input class="collapse-toggle" id="menuitem-4-4" type="checkbox"/><label class="tocitem" for="menuitem-4-4"><span class="docs-label">Propeller</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../propeller-J040/">Basics</a></li><li><a class="tocitem" href="../propeller-jsweep/"><span>$J$</span> Sweep</a></li><li><a class="tocitem" href="../propeller-quasisteady/">Quasi-Steady Solver</a></li><li><a class="tocitem" href="../propeller-incidence/">Incidence Sweep</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4-5" type="checkbox" checked/><label class="tocitem" for="menuitem-4-5"><span class="docs-label">Rotor in Hover</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../rotorhover-aero/">Variable Fidelity</a></li><li><a class="tocitem" href="../rotorhover-fdom/">Fluid Domain</a></li><li class="is-active"><a class="tocitem" href>Aeroacoustics</a><ul class="internal"><li class="toplevel"><a class="tocitem" href="#Preamble"><span>Preamble</span></a></li><li class="toplevel"><a class="tocitem" href="#Tonal-Noise"><span>Tonal Noise</span></a></li><li class="toplevel"><a class="tocitem" href="#Broadband-Noise"><span>Broadband Noise</span></a></li><li class="toplevel"><a class="tocitem" href="#Results"><span>Results</span></a></li></ul></li><li><a class="tocitem" href="../rotorhover-quasisteady/">Quasi-Steady Solver</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4-6" type="checkbox"/><label class="tocitem" for="menuitem-4-6"><span class="docs-label">Blown Wing</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../blownwing-aero/">Wing-on-Prop Interactions</a></li><li><a class="tocitem" href="../blownwing-asm/">Actuator Surface Model</a></li><li><a class="tocitem" href="../prowim-aero/">Prop-on-Wing Interactions</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4-7" type="checkbox"/><label class="tocitem" for="menuitem-4-7"><span class="docs-label">eVTOL Aircraft</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../vahana-vehicle/">Vehicle Definition</a></li><li><a class="tocitem" href="../vahana-maneuver/">Maneuver Definition</a></li><li><a class="tocitem" href="../vahana-monitor/">Monitors Definitions</a></li><li><a class="tocitem" href="../vahana-run/">Run Simulation</a></li></ul></li><li><a class="tocitem" href="../openvsp-aircraft/">OpenVSP Geometry</a></li></ul></li><li><a class="tocitem" href="../../visualization/">Visualization</a></li><li><input class="collapse-toggle" id="menuitem-6" type="checkbox"/><label class="tocitem" for="menuitem-6"><span class="docs-label">Theory</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../theory/rvpm/">Reformulated VPM</a></li><li><a class="tocitem" href="../../theory/convergence/">Convergence</a></li><li><a class="tocitem" href="../../theory/validation/">Validation</a></li><li><a class="tocitem" href="../../theory/publications/">Publications</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-7" type="checkbox"/><label class="tocitem" for="menuitem-7"><span class="docs-label">API Guide</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><input class="collapse-toggle" id="menuitem-7-1" type="checkbox"/><label class="tocitem" for="menuitem-7-1"><span class="docs-label">(1) Vehicle Definition</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../api/flowunsteady-vehicle-types/">Vehicle types</a></li><li><a class="tocitem" href="../../api/flowunsteady-vehicle-components/">Generating components</a></li><li><a class="tocitem" href="../../api/flowunsteady-vehicle-asm/">Actuator surface model</a></li><li><a class="tocitem" href="../../api/flowunsteady-openvsp/">OpenVSP geometry</a></li></ul></li><li><a class="tocitem" href="../../api/flowunsteady-maneuver/">(2) Maneuver Definition</a></li><li><a class="tocitem" href="../../api/flowunsteady-simulation/">(3) Simulation Definition</a></li><li><a class="tocitem" href="../../api/flowunsteady-monitor/">(4) Monitors Definitions</a></li><li><a class="tocitem" href="../../api/flowunsteady-run/">(5) Run Simulation</a></li><li><input class="collapse-toggle" id="menuitem-7-6" type="checkbox"/><label class="tocitem" for="menuitem-7-6"><span class="docs-label">(6) Viz and Postprocessing</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../api/flowunsteady-postprocessing-fdom/">Fluid Domain</a></li><li><a class="tocitem" href="../../api/flowunsteady-postprocessing-noise/">Aeroacoustic Noise</a></li><li><a class="tocitem" href="../../api/flowunsteady-postprocessing-misc/">Miscellaneous</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-7-7" type="checkbox"/><label class="tocitem" for="menuitem-7-7"><span class="docs-label">Extras</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><input class="collapse-toggle" id="menuitem-7-7-1" type="checkbox"/><label class="tocitem" for="menuitem-7-7-1"><span class="docs-label">FLOWVPM</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../api/flowvpm-particle/">Particle Field</a></li><li><a class="tocitem" href="../../api/flowvpm-uj/">UJ Scheme</a></li><li><a class="tocitem" href="../../api/flowvpm-viscous/">Viscous Scheme</a></li><li><a class="tocitem" href="../../api/flowvpm-relaxation/">Relaxation Scheme</a></li><li><a class="tocitem" href="../../api/flowvpm-sfs/">SFS Scheme</a></li><li><a class="tocitem" href="../../api/flowvpm-time/">Time Integration</a></li></ul></li></ul></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Tutorials</a></li><li><a class="is-disabled">Rotor in Hover</a></li><li class="is-active"><a href>Aeroacoustics</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Aeroacoustics</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/byuflowlab/FLOWUnsteady" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/byuflowlab/FLOWUnsteady/blob/master/docs/src/examples/rotorhover-acoustics.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="rotorhovernoise"><a class="docs-heading-anchor" href="#rotorhovernoise">Aeroacoustic Noise</a><a id="rotorhovernoise-1"></a><a class="docs-heading-anchor-permalink" href="#rotorhovernoise" title="Permalink"></a></h1><center>
+    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//dji9443_ccblade01_1.gif" alt="Pic here" style="width:75%;"/>
+</center><p>Using the aerodynamic solution obtained in the previous section, we can now feed the time-resolved loading and blade motion to PSU-WOPWOP and <a href="https://github.com/byuflowlab/BPM.jl">BPM.jl</a> to compute aeroacoustic noise. PSU-WOPWOP is a Ffowcs Williams-Hawkings acoustic analogy using the time-domain integral Farassat 1A formulation to compute <strong>tonal noise</strong> from loading and thickness sources (FLOWUnsteady uses a compact representation for the loading source, while using the actual 3D loft of the blade for the thickness source). <a href="https://github.com/byuflowlab/BPM.jl">BPM.jl</a> is an implementation of the semi-empirical methodology developed by Brooks, Pope, and Marcolini to predict <strong>broadband noise</strong>. The methodology models five self-noise mechanisms due to boundary-layer phenomena: boundary-layer turbulence passing the trailing edge, separated boundary-layer and stalled-airfoil flow, vortex shedding due to laminar-boundary-layer instabilities, vortex shedding from blunt trailing edges, and turbulent flow due to vortex tip formation.</p><p>In the following code we exemplify the following:</p><ul><li>How to define observers (microphones) to probe the aeroacoustic noise</li><li>How to call PSU-WOPWOP through <a href="../../api/flowunsteady-postprocessing-noise/#FLOWUnsteady.run_noise_wopwop"><code>uns.run_noise_wopwop</code></a></li><li>How to call BPM.jl through <a href="../../api/flowunsteady-postprocessing-noise/#FLOWUnsteady.run_noise_bpm"><code>uns.run_noise_bpm</code></a></li><li>How to add the tonal and broadband noise together and postprocess</li></ul><p>As a reference, this is the orientation of the rotor and microphone array used in this example:</p><center>
+    <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady//ransnoise_dji9443_single_new01_00_2.gif" alt="Pic here" style="width:50%;"/>
+</center><div class="admonition is-info" id="PSU-WOPWOP-3d4ea51b51fdd596"><header class="admonition-header">PSU-WOPWOP<a class="admonition-anchor" href="#PSU-WOPWOP-3d4ea51b51fdd596" title="Permalink"></a></header><div class="admonition-body"><p>PSU-WOPWOP is a closed-source code that is not included in FLOWUnsteady, but is graciously made available as a binary by its developers at Penn State University upon inquiry. We recommend contacting them directly to obtain a binary.</p><p>FLOWUnsteady has been tested with PSU-WOPWOP v3.4.4.</p></div></div><pre><code class="language-julia hljs"></code></pre><h1 id="Preamble"><a class="docs-heading-anchor" href="#Preamble">Preamble</a><a id="Preamble-1"></a><a class="docs-heading-anchor-permalink" href="#Preamble" title="Permalink"></a></h1><p>We load FLOWUnsteady and the <code>FLOWUnsteady.noise</code> module:</p><pre><code class="language-julia hljs">import FLOWUnsteady as uns
+import FLOWUnsteady: gt, vlm, noise
+
+# Path where to read and save simulation data
+sims_path = &quot;/media/edoalvar/T7/simulationdata202304&quot;
+</code></pre><h1 id="Tonal-Noise"><a class="docs-heading-anchor" href="#Tonal-Noise">Tonal Noise</a><a id="Tonal-Noise-1"></a><a class="docs-heading-anchor-permalink" href="#Tonal-Noise" title="Permalink"></a></h1><p>First, we calculate the tonal noise from loading and thickness sources. The loading of each blade is read from each time step of the <a href="../rotorhover-aero/#rotorhoveraero">the aerodynamic solution</a>, which is an unsteady loading. The thickness is computed from the 3D lofted geometry that is also outputted by the aero solution.</p><p>These files are read calling <a href="../../api/flowunsteady-postprocessing-noise/#FLOWUnsteady.run_noise_wopwop"><code>uns.run_noise_wopwop</code></a>, which converts the outputs of the aero solution into a PSU-WOPWOP case. The PSU-WOPWOP binary is then called to read the case and propagate the noise to a set of observers (microphones). The PSU-WOPWOP solution is then written to the same case folder.</p><pre><code class="language-julia hljs"># Path from where to read aerodynamic solution
+read_path       = joinpath(sims_path, &quot;rotorhover-example-midhigh00&quot;) # &lt;-- This must point to you aero simulation
+
+# Path where to save PSU-WOPWOP outputs
+save_ww_path    = read_path*&quot;-pww/&quot;
+
+# Path to PSU-WOPWOP binary (not included in FLOWUnsteady)
+wopwopbin       = &quot;/home/edoalvar/Dropbox/WhisperAero/OtherCodes/PSU-WOPWOP_v3.4.4/wopwop3_linux_serial&quot;
+
+# Run name (prefix of rotor files to read)
+run_name        = &quot;singlerotor&quot;
+
+# Make this `true` if the aero simulation used the quasi-steady solver. If so,
+# PSU-WOPWOP will assume that the blade loading and geometry stays constant
+# and will read only one step out of the aero solution
+const_solution  = false
+
+# ------------ PARAMETERS ------------------------------------------------------
+# NOTE: Make sure that these parameters match what was used in the
+#       aerodynamic solution
+
+# Rotor geometry
+rotor_file      = &quot;DJI9443.csv&quot;        # Rotor geometry
+data_path       = uns.def_data_path    # Path to rotor database
+
+# Read radius of this rotor and number of blades
+R, B            = uns.read_rotor(rotor_file; data_path=data_path)[[1,3]]
+
+rotorsystems    = [[B]]                # rotorsystems[si][ri] is the number of blades of the ri-th rotor in the si-th system
+
+# Simulation parameters
+RPM             = 5400                 # RPM here is a reference value to go from nrevs to simulation time
+CW              = false                # Clock-wise rotation of constant geometry (used if const_solution=true)
+rho             = 1.071778             # (kg/m^3) air density
+speedofsound    = 342.35               # (m/s) speed of sound
+
+# Aero input parameters
+nrevs           = 2                    # Number of revolutions to read
+nrevs_min       = 6                    # Start reading from this revolution
+nsteps_per_rev  = 72                   # Number of steps per revolution in aero solution
+num_min         = ceil(Int, nrevs_min*nsteps_per_rev) # Start reading aero files from this step number
+
+if const_solution                       # If constant solution, it overrides to read only the first time step
+    nrevs       = nothing
+    nsteps_per_rev = nothing
+    num_min     = 1
+end
+
+
+# PSU-WOPWOP parameters
+ww_nrevs        = 18                     # Number of revolutions in PSU-WOPWOP (18 revs at 5400 RPM gives fbin = 5 Hz)
+ww_nsteps_per_rev = max(120, 2*nsteps_per_rev) # Number of steps per revolution in PSU-WOPWOP
+const_geometry  = const_solution       # Whether to run PSU-WOPWOP on constant geometry read from num_min
+periodic        = true                 # Periodic aerodynamic solution
+highpass        = 0.0                  # High pass filter (set this to &gt;0 to get rid of 0th freq in OASPL)
+
+# NOTE: `periodic=true` assumes that the aero solution is periodic, which allows
+#       PSU-WOPWOP to simulate more revolutions (`ww_nrevs`) that what is
+#       read from the aero simulation (`nrevs`). This is a good assumption for
+#       an unsteady simulation as long as the loading is somewhat periodic after
+#       the initial transient state (even with small unsteady fluctuations),
+#       but set it to `false` in simulations with complex control inputs
+#       (e.g., maneuvering aircraft, variable RPM, etc). If the outputs of
+#       PSU-WOPWOP seem nonsensical, try setting this to false and increasing
+#       the number of revolutions in the aero solution (`nrevs`).
+
+
+# Observer definition: Circular array of microphones
+sph_R           = 1.905                # (m) radial distance from rotor hub
+sph_nR          = 0                    # Number of microphones in the radial direction
+sph_nphi        = 0                    # Number of microphones in the zenith direction
+sph_ntht        = 72                   # Number of microphones in the azimuthal direction
+sph_thtmin      = 0                    # (deg) first microphone&#39;s angle
+sph_thtmax      = 360                  # (deg) last microphone&#39;s angle
+sph_phimax      = 180
+sph_rotation    = [90, 0, 0]           # Rotation of grid of microphones
+
+# NOTE: Here we have defined the microphone array as a circular array, but
+#       we could have defined a hemisphere instead by simply making `sph_nphi`
+#       different than zero, or a full volumetric spherical mesh making `sph_nR`
+#       different than zero
+
+# Alternative observer definition: Single microphone
+Rmic            = 1.905                # (m) radial distance from rotor hub
+anglemic        = 90*pi/180            # (rad) microphone angle from plane of rotation (- below, + above)
+                                       # 0deg is at the plane of rotation, 90deg is upstream
+microphoneX     = nothing              # Comment and uncomment this to switch from array to single microphone
+# microphoneX   = Rmic*[-sin(anglemic), cos(anglemic), 0]
+
+
+# ------------ RUN PSU-WOPWOP ----------------------------------------------
+@time uns.run_noise_wopwop(read_path, run_name, RPM, rho, speedofsound, rotorsystems,
+                            ww_nrevs, ww_nsteps_per_rev, save_ww_path, wopwopbin;
+                            nrevs=nrevs, nsteps_per_rev=nsteps_per_rev,
+                            # ---------- OBSERVERS -------------------------
+                            sph_R=sph_R,
+                            sph_nR=sph_nR, sph_ntht=sph_ntht,
+                            sph_nphi=sph_nphi, sph_phimax=sph_phimax,
+                            sph_rotation=sph_rotation,
+                            sph_thtmin=sph_thtmin, sph_thtmax=sph_thtmax,
+                            microphoneX=microphoneX,
+                            # ---------- SIMULATION OPTIONS ----------------
+                            periodic=periodic,
+                            # ---------- INPUT OPTIONS ---------------------
+                            num_min=num_min,
+                            const_geometry=const_geometry,
+                            axisrot=&quot;automatic&quot;,
+                            CW=CW,
+                            highpass=highpass,
+                            # ---------- OUTPUT OPTIONS --------------------
+                            verbose=true, v_lvl=0,
+                            prompt=true, debug_paraview=false,
+                            debuglvl=0,                     # PSU-WOPWOP debug level (verbose)
+                            observerf_name=&quot;observergrid&quot;,  # .xyz file with observer grid
+                            case_name=&quot;runcase&quot;,            # Name of case to create and run
+                            );
+</code></pre><span style="font-size: 0.9em; color:gray;"><i>
+    Run time: ~1 minute on a Dell Precision 7760 laptop.
+</i></span>
+<br><br><div class="admonition is-info" id="Frequency-bins-e953df43270a8f42"><header class="admonition-header">Frequency bins<a class="admonition-anchor" href="#Frequency-bins-e953df43270a8f42" title="Permalink"></a></header><div class="admonition-body"><p>The length of the frequency bins in the SPL spectrum obtained from the FFT falls out from the following relationships</p><p class="math-container">\[\begin{align*}
+        f_\mathrm{bin}
+    =
+        \frac{f_\mathrm{sample}}{n_\mathrm{samples}}
+    =
+        \frac{1}{n_\mathrm{samples} \Delta t_\mathrm{sample}}
+    =
+        \frac{\mathrm{RPM}}{60}\frac{1}{n_\mathrm{revs}}
+.\end{align*}\]</p><p>Thus, in order to obtain the desired frequency bin <span>$f_\mathrm{bin}$</span>, the number of revolutions that PSU-WOPWOP needs to simulate (<code>ww_nrevs</code>) is</p><p class="math-container">\[\begin{align*}
+        n_\mathrm{revs}
+    =
+        \frac{\mathrm{RPM}}{60}\frac{1}{f_\mathrm{bin}}
+.\end{align*}\]</p></div></div><p>If you need to debug the aero→acoustics workflow, it is useful to convert the input files that we gave to PSU-WOPWOP back to VTK and visualize them in ParaView. This helps verify that we are passing the right things to PSU-WOPWOP. The following lines grab those input files that are formated for PSU-WOPWOP, converts them into VTK files, and opens them in ParaView:</p><pre><code class="language-julia hljs">
+read_ww_path   = joinpath(save_ww_path, &quot;runcase&quot;)      # Path to PWW&#39;s input files
+save_vtk_path  = joinpath(read_ww_path, &quot;vtks&quot;)         # Where to save VTK files
+
+# Generate VTK files
+vtk_str = noise.save_geomwopwop2vtk(read_ww_path, save_vtk_path)
+
+println(&quot;Generated the following files:\n\t$(vtk_str)&quot;)
+
+# Call Paraview to visualize VTKs
+run(`paraview --data=$(vtk_str)`)
+</code></pre><h1 id="Broadband-Noise"><a class="docs-heading-anchor" href="#Broadband-Noise">Broadband Noise</a><a id="Broadband-Noise-1"></a><a class="docs-heading-anchor-permalink" href="#Broadband-Noise" title="Permalink"></a></h1><p>Now, we calculate the broadband noise from non-deterministic sources through BPM. This is done calling <a href="../../api/flowunsteady-postprocessing-noise/#FLOWUnsteady.run_noise_bpm"><code>uns.run_noise_bpm</code></a> as follows:</p><pre><code class="language-julia hljs"># Path where to save BPM outputs
+save_bpm_path   = joinpath(sims_path, &quot;rotorhover-example-midhigh00-bpm&quot;)
+
+# ------------ PARAMETERS --------------------------------------------------
+# NOTE: Make sure that these parameters match what was used in the
+#       aerodynamic solution
+
+# Rotor geometry
+rotor_file      = &quot;DJI9443.csv&quot;        # Rotor geometry
+data_path       = uns.def_data_path    # Path to rotor database
+read_polar      = vlm.ap.read_polar2   # What polar reader to use
+pitch           = 0.0                  # (deg) collective pitch of blades
+n               = 50                   # Number of blade elements (this does not need to match the aero solution)
+CW              = false                # Clock-wise rotation
+
+# Read radius of this rotor and number of blades
+R, B            = uns.read_rotor(rotor_file; data_path=data_path)[[1,3]]
+
+# Simulation parameters
+RPM             = 5400                 # RPM
+J               = 0.0001               # Advance ratio Vinf/(nD)
+AOA             = 0                    # (deg) Angle of attack (incidence angle)
+
+rho             = 1.071778             # (kg/m^3) air density
+mu              = 1.85508e-5           # (kg/ms) air dynamic viscosity
+speedofsound    = 342.35               # (m/s) speed of sound
+
+magVinf         = J*RPM/60*(2*R)
+Vinf(X,t)       = magVinf*[cosd(AOA), sind(AOA), 0]  # (m/s) freestream velocity
+
+# BPM parameters
+TE_thickness    = 16.0                 # (deg) trailing edge thickness
+noise_correction= 1.00                 # Calibration parameter (1 = no correction)
+freq_bins       = uns.BPM.default_f    # Frequency bins (default is one-third octave band)
+
+# Observer definition: Circular array of microphones
+sph_R           = 1.905                # (m) radial distance from rotor hub
+sph_nR          = 0                    # Number of microphones in the radial direction
+sph_nphi        = 0                    # Number of microphones in the zenith direction
+sph_thtmin      = 0                    # (deg) first microphone&#39;s angle
+sph_thtmax      = 360                  # (deg) last microphone&#39;s angle
+sph_phimax      = 180
+sph_rotation    = [90, 0, 0]           # Rotation of grid of microphones
+
+# Alternative observer definition: Single microphone
+Rmic            = 1.905                # (m) radial distance from rotor hub
+anglemic        = 90*pi/180            # (rad) microphone angle from plane of rotation (- below, + above)
+                                       # 0deg is at the plane of rotation, 90deg is upstream
+microphoneX     = nothing              # Comment and uncomment this to switch from array to single microphone
+# microphoneX   = Rmic*[-sin(anglemic), cos(anglemic), 0]
+
+# ------------ GENERATE GEOMETRY -------------------------------------------
+# Generate rotor
+rotor = uns.generate_rotor(rotor_file; pitch=pitch,
+                                        n=n, CW=CW, ReD=0.0,
+                                        verbose=false, xfoil=false,
+                                        data_path=data_path,
+                                        read_polar=read_polar,
+                                        plot_disc=false)
+
+rotors = vlm.Rotor[rotor]              # All rotors in the computational domain
+
+# ------------ RUN BPM -----------------------------------------------------
+uns.run_noise_bpm(rotors, RPM, Vinf, rho, mu, speedofsound,
+                                save_bpm_path;
+                                # ---------- OBSERVERS -------------------------
+                                sph_R=sph_R,
+                                sph_nR=sph_nR, sph_ntht=sph_ntht,
+                                sph_nphi=sph_nphi, sph_phimax=sph_phimax,
+                                sph_rotation=sph_rotation,
+                                sph_thtmin=sph_thtmin, sph_thtmax=sph_thtmax,
+                                microphoneX=microphoneX,
+                                # ---------- BPM OPTIONS -----------------------
+                                noise_correction=noise_correction,
+                                TE_thickness=TE_thickness,
+                                freq_bins=freq_bins,
+                                # ---------- OUTPUT OPTIONS --------------------
+                                prompt=true
+                                );
+</code></pre><h1 id="Results"><a class="docs-heading-anchor" href="#Results">Results</a><a id="Results-1"></a><a class="docs-heading-anchor-permalink" href="#Results" title="Permalink"></a></h1><p>Finally, we add tonal and broadband noise together and plot the results</p><h3 id="Read-datasets"><a class="docs-heading-anchor" href="#Read-datasets">Read datasets</a><a id="Read-datasets-1"></a><a class="docs-heading-anchor-permalink" href="#Read-datasets" title="Permalink"></a></h3><p>We start by reading the outputs from PSU-WOPWOP and BPM:</p><pre><code class="language-julia hljs"># Dataset to read and associated information
+dataset_infos = [ # (label, PWW solution, BPM solution, line style, color)
+                    (&quot;FLOWUnsteady&quot;,
+                        joinpath(sims_path, &quot;rotorhover-example-midhigh00-pww/runcase/&quot;),
+                        joinpath(sims_path, &quot;rotorhover-example-midhigh00-bpm&quot;),
+                        &quot;-&quot;, &quot;steelblue&quot;),
+                ]
+
+datasets_pww = Dict()     # Stores PWW data in this dictionary
+datasets_bpm = Dict()     # Stores BPM data in this dictionary
+
+# Read datasets and stores them in dictionaries
+noise.read_data(dataset_infos; datasets_pww=datasets_pww, datasets_bpm=datasets_bpm)
+
+println(&quot;Done!&quot;)
+</code></pre><p>Also, we need to recreate the circular array of microphones that was used when generating the aeroacoustic solutions:</p><pre><code class="language-julia hljs"># These parameters will be used for plotting
+RPM          = 5400                  # RPM of solution
+nblades      = 2                     # Number of blades
+BPF          = nblades*RPM/60        # Blade passing frequency
+
+# Make sure this grid is the same used as an observer by the aeroacoustic solution
+sph_R        = 1.905                 # (m) radial distance from rotor hub
+sph_nR       = 0
+sph_nphi     = 0
+sph_ntht     = 72                    # Number of microphones
+sph_thtmin   = 0                     # (deg) first microphone&#39;s angle
+sph_thtmax   = 360                   # (deg) last microphone&#39;s angle
+sph_phimax   = 180
+sph_rotation = [90, 0, 0]            # Rotation of grid of microphones
+
+# Create observer grid
+grid = noise.observer_sphere(sph_R, sph_nR, sph_ntht, sph_nphi;
+                                thtmin=sph_thtmin, thtmax=sph_thtmax, phimax=sph_phimax,
+                                rotation=sph_rotation);
+
+# This function calculates the angle that corresponds to every microphone
+pangle(i) = -180/pi*atan(gt.get_node(grid, i)[1], gt.get_node(grid, i)[2])
+</code></pre><h3 id="Pressure-waveform"><a class="docs-heading-anchor" href="#Pressure-waveform">Pressure waveform</a><a id="Pressure-waveform-1"></a><a class="docs-heading-anchor-permalink" href="#Pressure-waveform" title="Permalink"></a></h3><p>Here we plot the pressure waveform at some of the microphones. <em>This pressure waveform includes only the tonal component</em>, as given by PSU-WOPWOP.</p><pre><code class="language-julia hljs">microphones  = [-45, 90]            # (deg) microphones to plot
+
+noise.plot_pressure(dataset_infos, microphones, RPM, sph_ntht, pangle;
+                                datasets_pww=datasets_pww, xlims=[0, 5])
+</code></pre><center>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/rotorhover_noise_1.png" alt="Pic here" style="width: 75%;"/>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/rotorhover_noise_2.png" alt="Pic here" style="width: 75%;"/>
+</center><h3 id="SPL-Spectrum"><a class="docs-heading-anchor" href="#SPL-Spectrum">SPL Spectrum</a><a id="SPL-Spectrum-1"></a><a class="docs-heading-anchor-permalink" href="#SPL-Spectrum" title="Permalink"></a></h3><p>We now compare the (sound pressure level) SPL spectrum at the microphone <span>$-45^\circ$</span> below the plane of rotation with the experimental data reported by Zawodny <em>et al</em>.<sup class="footnote-reference"><a id="citeref-1" href="#footnote-1">[1]</a></sup>.</p><p>One-third octave band:</p><pre><code class="language-julia hljs">microphones  = [-45]                # (deg) microphone to plot
+Aweighted    = false                # Plot A-weighted SPL
+onethirdoctave = true               # Plot 1/3 octave band
+
+# Experimental data from Zawodny et al., Fig. 9
+zawodny_path = joinpath(uns.examples_path, &quot;..&quot;, &quot;docs&quot;, &quot;resources&quot;, &quot;data&quot;, &quot;zawodny2016&quot;)
+exp_filename = joinpath(zawodny_path, &quot;zawodny_dji9443-fig9-OTO-5400.csv&quot;)
+plot_experimental = [(exp_filename, &quot;Experimental&quot;, &quot;o:k&quot;, Aweighted, [])]
+
+# Plot SPL spectrum
+noise.plot_spectrum_spl(dataset_infos, microphones, BPF, sph_ntht, pangle;
+                          datasets_pww=datasets_pww, datasets_bpm=datasets_bpm,
+                          Aweighted=Aweighted,
+                          onethirdoctave=onethirdoctave,
+                          plot_csv=plot_experimental,
+                          xBPF=false, xlims=[100, 3e4], ylims=[0, 80], BPF_lines=8)
+</code></pre><center>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/rotorhover_noise_3.png" alt="Pic here" style="width: 75%;"/>
+</center><p>A-weighted narrow band:</p><pre><code class="language-julia hljs">Aweighted    = true                # Plot A-weighted SPL
+
+# Experimental data from Zawodny et al., Fig. 9
+exp_filename = joinpath(zawodny_path, &quot;zawodny_dji9443_spl_5400_01.csv&quot;)
+plot_experimental = [(exp_filename, &quot;Experimental&quot;, &quot;k&quot;, Aweighted, [])]
+
+# Plot SPL spectrum
+noise.plot_spectrum_spl(dataset_infos, microphones, BPF, sph_ntht, pangle;
+                          datasets_pww=datasets_pww, datasets_bpm=datasets_bpm,
+                          Aweighted=Aweighted,
+                          plot_csv=plot_experimental,
+                          xBPF=false, xlims=[100, 3e4], BPF_lines=21)</code></pre><center>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/rotorhover_noise_4.png" alt="Pic here" style="width: 75%;"/>
+</center><p>In the narrow band spectrum, keep in mind that the broadband output of BPM has been converted from 1/3 octaves into narrow band (5 hz bin) in order to plot it together with the tonal noise, but this is a very rough approximation (we lack enough information to interpolate from a coarse band to a narrow band besides just smearing the energy content). Hence, the broadband component seems to overpredict relative to the experimental, but this is an artifice of the 1/3 octave <span>$\rightarrow$</span> narrow band conversion. In the OASPL directivity plots we will see that the A-weighted OASPL predicted with BPM actually matches the experimental values very well.</p><h3 id="Tonal-noise"><a class="docs-heading-anchor" href="#Tonal-noise">Tonal noise</a><a id="Tonal-noise-1"></a><a class="docs-heading-anchor-permalink" href="#Tonal-noise" title="Permalink"></a></h3><p>Here we plot only the tonal component of noise associated with harmonics of the blade passing frequency (BPF),</p><p>Tonal SPL spectrum</p><pre><code class="language-julia hljs">Aweighted       = false
+add_broadband   = false
+
+# Experimental data from Zawodny et al., Fig. 9
+exp_filename = joinpath(zawodny_path, &quot;zawodny_dji9443_spl_5400_01.csv&quot;)
+plot_experimental = [(exp_filename, &quot;Experimental&quot;, &quot;k&quot;, Aweighted, [])]
+
+# Plot SPL spectrum
+noise.plot_spectrum_spl(dataset_infos, microphones, BPF, sph_ntht, pangle;
+                          datasets_pww=datasets_pww, datasets_bpm=datasets_bpm,
+                          Aweighted=Aweighted,
+                          plot_csv=plot_experimental,
+                          add_broadband=add_broadband,
+                          xBPF=false, xlims=[100, 3e4], BPF_lines=21)
+</code></pre><center>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/rotorhover_noise_5.png" alt="Pic here" style="width: 75%;"/>
+</center><p>Directivity of <span>$1^\mathrm{st}$</span> BPF</p><pre><code class="language-julia hljs">BPFi = 1                 # Multiple of blade-passing frequency to plot
+
+# Experimental and computational data reported by Zawodny et al., Fig. 14
+filename1 = joinpath(zawodny_path, &quot;zawodny_fig14_topright_exp00.csv&quot;)
+filename2 = joinpath(zawodny_path, &quot;zawodny_fig14_topright_of00.csv&quot;)
+filename3 = joinpath(zawodny_path, &quot;zawodny_fig14_topright_pas00.csv&quot;)
+
+plot_experimental = [(filename1, &quot;Experimental&quot;, &quot;ok&quot;, Aweighted, []),
+                     (filename2, &quot;OVERFLOW2&quot;, &quot;-y&quot;, Aweighted, [(:alpha, 0.8)])]
+
+# Plot SPL directivity of first blade-passing frequency
+noise.plot_directivity_splbpf(dataset_infos, BPFi, BPF, pangle;
+                                    datasets_pww=datasets_pww,
+                                    datasets_bpm=datasets_bpm,
+                                    plot_csv=plot_experimental,
+                                    rticks=40:4:52, rlims=[40, 54], rorigin=36)
+</code></pre><center>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/rotorhover_noise_6.png" alt="Pic here" style="width: 50%;"/>
+</center><p>Directivity of <span>$2^\mathrm{nd}$</span> BPF</p><pre><code class="language-julia hljs">BPFi = 2                 # Multiple of blade-passing frequency to plot
+
+# Experimental and computational data reported by Zawodny et al., Fig. 14
+filename1 = joinpath(zawodny_path, &quot;zawodny_fig14_bottomright_exp00.csv&quot;)
+filename2 = joinpath(zawodny_path, &quot;zawodny_fig14_bottomright_of00.csv&quot;)
+filename3 = joinpath(zawodny_path, &quot;zawodny_fig14_bottomright_pas00.csv&quot;)
+
+plot_experimental = [(filename1, &quot;Experimental&quot;, &quot;ok&quot;, Aweighted, []),
+                     (filename2, &quot;OVERFLOW2&quot;, &quot;-y&quot;, Aweighted, [(:alpha, 0.8)])]
+
+# Plot SPL directivity of first blade-passing frequency
+noise.plot_directivity_splbpf(dataset_infos, BPFi, BPF, pangle;
+                                    datasets_pww=datasets_pww,
+                                    datasets_bpm=datasets_bpm,
+                                    plot_csv=plot_experimental,
+                                    rticks=15:5:30, rlims=[0, 32], rorigin=0)
+</code></pre><center>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/rotorhover_noise_7.png" alt="Pic here" style="width: 50%;"/>
+</center><h3 id="OASPL-directivity"><a class="docs-heading-anchor" href="#OASPL-directivity">OASPL directivity</a><a id="OASPL-directivity-1"></a><a class="docs-heading-anchor-permalink" href="#OASPL-directivity" title="Permalink"></a></h3><p>Unweighted overall SPL (OASPL)</p><pre><code class="language-julia hljs">Aweighted = false
+
+# Experimental and computational data reported by Zawodny et al., Fig. 12
+exp_filename = joinpath(zawodny_path, &quot;zawodny_fig12_left_5400_00.csv&quot;)
+plot_experimental = [(exp_filename, &quot;Experimental&quot;, &quot;ok&quot;, Aweighted, [])]
+
+# Plot OASPL directivity
+noise.plot_directivity_oaspl(dataset_infos, pangle;
+                                    datasets_pww=datasets_pww,
+                                    datasets_bpm=datasets_bpm,
+                                    Aweighted=Aweighted,
+                                    plot_csv=plot_experimental,
+                                    rticks=40:10:70, rlims=[40, 72], rorigin=30)
+</code></pre><center>
+  <img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/rotorhover_noise_8.png" alt="Pic here" style="width: 50%;"/>
+</center><p>A-weighted OASPL</p><pre><code class="language-julia hljs">Aweighted = true
+
+# Experimental and computational data reported by Zawodny et al., Fig. 12
+exp_filename = joinpath(zawodny_path, &quot;zawodny_fig12_right_5400_00.csv&quot;)
+plot_experimental = [(exp_filename, &quot;Experimental&quot;, &quot;ok&quot;, Aweighted, [])]
+
+# Plot OASPL directivity
+noise.plot_directivity_oaspl(dataset_infos, pangle;
+                                    datasets_pww=datasets_pww,
+                                    datasets_bpm=datasets_bpm,
+                                    Aweighted=Aweighted,
+                                    plot_csv=plot_experimental,
+                                    rticks=40:10:70, rlims=[40, 72], rorigin=30)</code></pre><center>
+<img src="https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/rotorhover_noise_9.png" alt="Pic here" style="width: 50%;"/>
+</center><pre><code class="language-julia hljs"></code></pre><section class="footnotes is-size-7"><ul><li class="footnote" id="footnote-1"><a class="tag is-link" href="#citeref-1">1</a>N. S. Zawodny, D. D. Boyd, Jr., and C. L. Burley, “Acoustic Characterization and Prediction of Representative, Small-scale Rotary-wing Unmanned Aircraft System Components,” in <em>72nd American Helicopter Society (AHS) Annual Forum</em> (2016).</li></ul></section></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../rotorhover-fdom/">« Fluid Domain</a><a class="docs-footer-nextpage" href="../rotorhover-quasisteady/">Quasi-Steady Solver »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Monday 1 September 2025 18:03">Monday 1 September 2025</span>. Using Julia version 1.10.10.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
