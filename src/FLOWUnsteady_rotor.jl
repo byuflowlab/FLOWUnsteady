@@ -370,7 +370,6 @@ end
 Generates a `FLOWVLM.Rotor` reading the full rotor geometry from the rotor file
 `rotor_file` found in the database `data_path`.
 """
-
 function generate_rotor(rotor_file::String; TF_design=Float64, TF_trajectory=Float64,
                         data_path=def_data_path, optargs...)
 
