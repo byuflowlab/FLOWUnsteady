@@ -147,26 +147,56 @@ function run_noise_bpm(         rotors::Array{vlm.Rotor, 1},             # Rotor
             obs = grid.nodes[:,i] + [0.0, 0.0, h]
             obs = rotate_observers(obs, 90)
 
-            OASPL[i], OASPLA[i], SPLf[i,:], SPLfA[i,:] = BPM.turbinepos_multi(x, y, obs,
-                                    winddir, windvel,
-                                    rpm, B, hs,
-                                    rad, c, c1, alpha,
-                                    nu, c0,
-                                    psi, AR,
-                                    noise_correction; f=freq_bins, AdB=db_offset)
+            p2_lin  = zeros(nf)
+            p2A_lin = zeros(nf)
+            for j = 1:nrotors
+                ox_j  = obs[1] - x[j]
+                oy_j  = obs[2] - y[j]
+                oz_j  = obs[3] - hs[j]
+                Ω_j   = rpm[j] * 2π / 60
+                h_te  = zeros(length(rad[j]))
+                psi_j = fill(psi[j], length(rad[j]))
+                _, spl_j  = BPM.sound_pressure_levels(ox_j, oy_j, oz_j, windvel[j], Ω_j, B[j],
+                                rad[j], c[j], c1[j], h_te, copy(alpha[j]), psi_j, nu, c0;
+                                blunt=false, weighted=false, f=freq_bins, AdB=db_offset)
+                _, splA_j = BPM.sound_pressure_levels(ox_j, oy_j, oz_j, windvel[j], Ω_j, B[j],
+                                rad[j], c[j], c1[j], h_te, copy(alpha[j]), psi_j, nu, c0;
+                                blunt=false, weighted=true, f=freq_bins, AdB=db_offset)
+                p2_lin  .+= 10 .^ (spl_j  ./ 10)
+                p2A_lin .+= 10 .^ (splA_j ./ 10)
+            end
+            SPLf[i,:]  = 10 .* log10.(p2_lin)
+            SPLfA[i,:] = 10 .* log10.(p2A_lin)
+            OASPL[i]   = 10 * log10(sum(p2_lin))
+            OASPLA[i]  = 10 * log10(sum(p2A_lin))
         end
 
     else
         obs = observer + [0.0, 0.0, h] # offsetting observers to match height
         obs = rotate_observers(obs, 90)
 
-        OASPL, OASPLA, SPLf, SPLfA = BPM.turbinepos_multi(x, y, obs,
-                                                    winddir, windvel,
-                                                    rpm, B, hs,
-                                                    rad, c, c1, alpha,
-                                                    nu, c0,
-                                                    psi, AR,
-                                                    noise_correction; f=freq_bins, AdB=db_offset)
+        p2_lin  = zeros(nf)
+        p2A_lin = zeros(nf)
+        for j = 1:nrotors
+            ox_j  = obs[1] - x[j]
+            oy_j  = obs[2] - y[j]
+            oz_j  = obs[3] - hs[j]
+            Ω_j   = rpm[j] * 2π / 60
+            h_te  = zeros(length(rad[j]))
+            psi_j = fill(psi[j], length(rad[j]))
+            _, spl_j  = BPM.sound_pressure_levels(ox_j, oy_j, oz_j, windvel[j], Ω_j, B[j],
+                            rad[j], c[j], c1[j], h_te, copy(alpha[j]), psi_j, nu, c0;
+                            blunt=false, weighted=false, f=freq_bins, AdB=db_offset)
+            _, splA_j = BPM.sound_pressure_levels(ox_j, oy_j, oz_j, windvel[j], Ω_j, B[j],
+                            rad[j], c[j], c1[j], h_te, copy(alpha[j]), psi_j, nu, c0;
+                            blunt=false, weighted=true, f=freq_bins, AdB=db_offset)
+            p2_lin  .+= 10 .^ (spl_j  ./ 10)
+            p2A_lin .+= 10 .^ (splA_j ./ 10)
+        end
+        SPLf   = 10 .* log10.(p2_lin)
+        SPLfA  = 10 .* log10.(p2A_lin)
+        OASPL  = 10 * log10(sum(p2_lin))
+        OASPLA = 10 * log10(sum(p2A_lin))
     end
 
 
