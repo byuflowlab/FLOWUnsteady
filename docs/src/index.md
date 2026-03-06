@@ -334,8 +334,6 @@ If you find FLOWUnsteady useful in your work, we kindly request that you cite th
 
 >Alvarez, E. J., Mehr, J., and Ning, A., “FLOWUnsteady: An Interactional Aerodynamics Solver for Multirotor Aircraft and Wind Energy,” AIAA AVIATION 2022 Forum, Chicago, IL, 2022. DOI:[10.2514/6.2022-3218](https://doi.org/10.2514/6.2022-3218).
 
-NOTE (28 Aug 2025): The documentation is temporarily unavailable due to server issues. See the examples/ and docs/ folder in the meantime. It should be back up in the next few days.
-
 If you were to encounter any issues or have questions, please first read through
 [the documentation](https://flow.byu.edu/FLOWUnsteady/), [open/closed
 issues](https://github.com/byuflowlab/FLOWUnsteady/issues?q=is%3Aissue+is%3Aclosed),
@@ -344,6 +342,6 @@ If the issue still persists, please participate in
 [the discussion forum](https://github.com/byuflowlab/FLOWUnsteady/discussions?discussions_q=)
 and/or [open a new issue](https://github.com/byuflowlab/FLOWUnsteady/issues).
 
-  * Developers/contributors : [Eduardo J. Alvarez](https://www.edoalvarez.com/) (main), [Cibin Joseph](https://github.com/cibinjoseph), [Judd Mehr](https://www.juddmehr.com/), [Ryan Anderson](https://flow.byu.edu/people/), [Eric Green](https://flow.byu.edu/people/)
+  * Developers/contributors : [Eduardo J. Alvarez](https://www.edoalvarez.com/) (main), [Cibin Joseph](https://github.com/cibinjoseph), [Judd Mehr](https://www.juddmehr.com/), [Ryan Anderson](https://flow.byu.edu/people/), [Eric Green](https://flow.byu.edu/people/), [Benjamin Varela](https://flow.byu.edu/people/)
   * Created           : Sep 2017
   * License           : MIT License
