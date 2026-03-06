@@ -92,28 +92,43 @@ We recommend [installing OpenVSP](https://openvsp.org/download.php) in your syst
 ## [PyCall](@id pycall)
 
 One of the dependencies ([AirfoilPrep.jl](https://github.com/byuflowlab/AirfoilPrep.jl)) is a wrapper of Python code that is written in Python v3.8+.
-For this reason, make sure that your Python version linked to PyCall is 3.8 or higher.
+For this reason, make sure that your Python version linked to PyCall is 3.8 or higher. We recommend Python 3.9.12 to avoid segmentation faults caused by PyCall when Julia multithreads.
 You can do that as follows:
 ```julia
-# Install PyCall
-import Pkg; Pkg.add("PyCall")
+using Pkg
+Pkg.add("Conda")
+using Conda
 
-# Point environment to your Python 3.8 (or higher)
-ENV["PYTHON"] = "path/to/your/python3"
+Conda.add("python=3.9.12", :py39)
 
-# Rebuild PyCall
+# Install Python packages into that env
+Conda.add("matplotlib", :py39)
+Conda.add("mpmath", :py39)
+Conda.add("scipy", :py39)
+
+# Point PyCall to that Python
+py = joinpath(Conda.ROOTENV, "envs", "py39", "bin", "python")  # macOS/Linux
+ENV["PYTHON"] = py
+
+# (Re)build PyCall against that interpreter
 Pkg.build("PyCall")
 ```
 Then close and reopen the Julia REPL, and run:
 ```julia
-import PyCall
+using Pkg
+Pkg.add("PyCall")
+using PyCall
+pyimport("matplotlib")
+pyimport("mpmath")
+pyimport("scipy")
 PyCall.pyversion
 ```
-which should reveal your Python version:
+which should not error and reveal your Python version:
 ```julia
-v"3.8"
+v"3.9.12"
 ```
 
+### Notes on PyCall if using different instructions
 Since PyCall now relies on a custom install of Python3, make sure that:
 * matplotlib, mpmath, and scipy are installed in that Python,
   ```bash
@@ -167,23 +182,3 @@ enjoy the simulation that you have just run.
 <br><br><br><br>
 <br><br><br><br>
 ```
-
-
-!!! info "2D View"
-    When opening a simulation with a flat surface (like `wing.jl`), ParaView
-    automatically activates its 2D view mode. Disable the 2D view by clicking
-    these two buttons:
-    ![pic](https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/paraview-2d00.png)
-
-!!! info "CPU Parallelization"
-    If any of the examples is taking longer than 10 to 20 minutes to run, it is
-    possible that ExaFMM was compiled without OpenMP, thus running in only one
-    core as opposed to parallelizing the computation across all your CPU cores.
-
-    To confirm that ExaFMM is successfully parallelized, pull up whatever CPU
-    monitor is available in your operative system and confirm that Julia is
-    using all the cores as the simulation is running. For instance, the
-    Resources tab of the Task Manager in Windows should look like this:
-    ![pic](https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/cpus02.png)
-    and `htop` in the terminal (Linux and MacOS) should look like this:
-    ![pic](https://edoalvar2.groups.et.byu.net/public/FLOWUnsteady/cpus01-2.png)

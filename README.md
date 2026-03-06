@@ -246,6 +246,6 @@ If the issue still persists, please participate in
 [the discussion forum](https://github.com/byuflowlab/FLOWUnsteady/discussions?discussions_q=)
 and/or [open a new issue](https://github.com/byuflowlab/FLOWUnsteady/issues).
 
-  * Developers/contributors : [Eduardo J. Alvarez](https://www.edoalvarez.com/) (main), [Cibin Joseph](https://github.com/cibinjoseph), [Judd Mehr](https://www.juddmehr.com/), [Ryan Anderson](https://flow.byu.edu/people/), [Eric Green](https://flow.byu.edu/people/)
+  * Developers/contributors : [Eduardo J. Alvarez](https://www.edoalvarez.com/) (main), [Cibin Joseph](https://github.com/cibinjoseph), [Judd Mehr](https://www.juddmehr.com/), [Ryan Anderson](https://flow.byu.edu/people/), [Eric Green](https://flow.byu.edu/people/), [Benjamin Varela](https://flow.byu.edu/people/)
   * Created           : Sep 2017
   * License           : MIT License
