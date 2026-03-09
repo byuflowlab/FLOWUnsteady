@@ -108,7 +108,6 @@ function run_noise_bpm(         rotors::Array{vlm.Rotor, 1},             # Rotor
     nrotors = length(x)
 
     magVinf = norm(Vinf(0.0, 0.0))
-    winddir = fill(0, nrotors) #south #? Does it matter?
     windvel = fill(magVinf, nrotors)
     B = [rotor.B for rotor in rotors] # number of blades, 2 for now
     h = 10.0 # height of rotor, not really applicable in this case but I add an arbitrary height just in case and then offset the observers this much in the z direction as well
@@ -120,7 +119,6 @@ function run_noise_bpm(         rotors::Array{vlm.Rotor, 1},             # Rotor
     nu = mu/rho
     c0 = speedofsound
     # psi = 16.15 # for now - from 3856, webplotdigitizer
-    AR = [rotor.rotorR/calc_cbar(rotor) for rotor in rotors]
     psi = typeof(TE_thickness)==Float64 ? fill(TE_thickness, nrotors) : TE_thickness
     nf = length(freq_bins)
 
@@ -147,26 +145,23 @@ function run_noise_bpm(         rotors::Array{vlm.Rotor, 1},             # Rotor
             obs = grid.nodes[:,i] + [0.0, 0.0, h]
             obs = rotate_observers(obs, 90)
 
-            OASPL[i], OASPLA[i], SPLf[i,:], SPLfA[i,:] = BPM.turbinepos_multi(x, y, obs,
-                                    winddir, windvel,
-                                    rpm, B, hs,
-                                    rad, c, c1, alpha,
-                                    nu, c0,
-                                    psi, AR,
-                                    noise_correction; f=freq_bins, AdB=db_offset)
+            spl_i, splA_i, oaspl_i, oasplA_i = _bpm_observer_spl(
+                obs, nrotors, x, y, hs, rpm, B, rad, c, c1, alpha, psi,
+                windvel, nu, c0, nf, noise_correction, freq_bins, db_offset)
+
+            SPLf[i,:]  = spl_i
+            SPLfA[i,:] = splA_i
+            OASPL[i]   = oaspl_i
+            OASPLA[i]  = oasplA_i
         end
 
     else
         obs = observer + [0.0, 0.0, h] # offsetting observers to match height
         obs = rotate_observers(obs, 90)
 
-        OASPL, OASPLA, SPLf, SPLfA = BPM.turbinepos_multi(x, y, obs,
-                                                    winddir, windvel,
-                                                    rpm, B, hs,
-                                                    rad, c, c1, alpha,
-                                                    nu, c0,
-                                                    psi, AR,
-                                                    noise_correction; f=freq_bins, AdB=db_offset)
+        SPLf, SPLfA, OASPL, OASPLA = _bpm_observer_spl(
+            obs, nrotors, x, y, hs, rpm, B, rad, c, c1, alpha, psi,
+            windvel, nu, c0, nf, noise_correction, freq_bins, db_offset)
     end
 
 
@@ -255,6 +250,37 @@ function run_noise_bpm(         rotors::Array{vlm.Rotor, 1},             # Rotor
     if verbose; println("\t"^v_lvl*"BPM calculation is done!"); end;
 
     return observer
+end
+
+
+"""
+Accumulate BPM SPL contributions from all rotors for a single observer position.
+Returns (SPLf, SPLfA, OASPL, OASPLA).
+"""
+function _bpm_observer_spl(obs, nrotors, x, y, hs, rpm, B, rad, c, c1, alpha, psi,
+                           windvel, nu, c0, nf, noise_correction, freq_bins, db_offset)
+
+    p2_lin = zeros(nf)
+    for j = 1:nrotors
+        ox_j  = obs[1] - x[j]
+        oy_j  = obs[2] - y[j]
+        oz_j  = obs[3] - hs[j]
+        Ω_j   = rpm[j] * 2π / 60
+        h_te  = zeros(length(rad[j]))
+        psi_j = fill(psi[j], length(rad[j]))
+        _, spl_j = BPM.sound_pressure_levels(ox_j, oy_j, oz_j, windvel[j], Ω_j, B[j],
+                        rad[j], c[j], c1[j], h_te, copy(alpha[j]), psi_j, nu, c0;
+                        blunt=false, weighted=false, f=freq_bins, AdB=db_offset)
+        p2_lin .+= 10 .^ (spl_j ./ 10)
+    end
+    p2_lin .*= noise_correction
+
+    SPLf   = 10 .* log10.(p2_lin)
+    SPLfA  = SPLf .+ db_offset
+    OASPL  = 10 * log10(sum(p2_lin))
+    OASPLA = 10 * log10(sum(p2_lin .* 10 .^ (db_offset ./ 10)))
+
+    return SPLf, SPLfA, OASPL, OASPLA
 end
 
 
