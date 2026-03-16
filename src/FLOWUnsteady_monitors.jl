@@ -50,7 +50,9 @@ function generate_monitor_rotors( rotors::Array{<:vlm.Rotor, 1},
                                     nsteps_plot=1,
                                     nsteps_savefig=10,
                                     colors="rgbcmy"^100,
-                                    stls="o^*.px"^100, )
+                                    stls="o^*.px"^100, 
+                                    V_inf=nothing,
+                                    turbine=false)
 
     fcalls = 0                  # Number of function calls
 
@@ -184,7 +186,11 @@ function generate_monitor_rotors( rotors::Array{<:vlm.Rotor, 1},
 
         # Plot performance parameters
         for (i, rotor) in enumerate(rotors)
-            CT, CQ = vlm.calc_thrust_torque_coeffs(rotor, rho_ref)
+            if isnothing(V_inf)
+                CT, CQ = vlm.calc_thrust_torque_coeffs(rotor, rho_ref)
+            else
+                CT, CQ = vlm.calc_thrust_torque_coeffs(rotor, rho_ref, V_inf, turbine)
+            end
             eta = J_ref*CT/(2*pi*CQ)
 
             if PFIELD.nt%nsteps_plot==0 && disp_conv
