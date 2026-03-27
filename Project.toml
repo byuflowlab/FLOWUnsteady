@@ -1,7 +1,7 @@
 name = "FLOWUnsteady"
 uuid = "b491798d-ac6e-455f-a27c-49c10bb0a666"
-authors = ["Eduardo J. Alvarez <Edo.AlvarezR@gmail.com> and contributors"]
 version = "3.4.0"
+authors = ["Eduardo J. Alvarez <Edo.AlvarezR@gmail.com> and contributors"]
 
 [deps]
 AirfoilPrep = "008c61af-3522-4e14-81c5-9301d18a9f66"
@@ -22,6 +22,7 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 VSPGeom = "9b3f6a95-fce2-4bc5-94a2-f99b39986ea6"
 
 [compat]
+BPM = "3"
 FLOWVPM = "4.0"
 GeometricTools = "2.3"
 julia = "1.6"
