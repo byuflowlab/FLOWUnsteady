@@ -473,6 +473,9 @@ function add_particle(pfield::vpm.ParticleField{TVPM,<:Any,<:Any,<:Any,<:Any,<:A
     # aux = min((sigma/p_per_step)/overwrite_sigma, 1)
     # pps = max(1, min(p_per_step, floor(Int, 1/(1-(aux-1e-14))) ))
     pps = p_per_step
+    # r = sqrt(X[1] * X[1] + X[2] * X[2] + X[3] * X[3])
+    # R = 63.0
+    # pps = max(1, min(pps, floor(Int, 1/(1-(r/R) + 1e-6))))
 
     if overwrite_sigma==nothing
         sigmap = sigma/pps

@@ -35,7 +35,7 @@ import FLOWVPM
 import FLOWVLM
 import VSPGeom
 import FLOWNoise
-import BPM
+import BroadbandBPM
 
 # Aliases
 const gt    = GeometricTools
