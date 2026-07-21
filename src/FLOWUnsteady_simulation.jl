@@ -144,6 +144,8 @@ function run_simulation(
             vlm_rlx         = -1,               # VLM relaxation (>0.9 can cause divergence, <0.2 slows simulation too much, deactivated with <0)
             vlm_init        = false,            # Initialize the first step with the VLM semi-infinite wake solution
             hubtiploss_correction = vlm.hubtiploss_nocorrection, # Hub and tip loss correction of rotors (ignored in quasi-steady solver)
+            apply_correction3D = true,          # Whether to apply AirfoilPrep's Du-Selig 3D rotational correction to rotor airfoil polars
+            apply_extrapolate  = true,          # Whether to apply AirfoilPrep's Viterna 360-deg extrapolation to rotor airfoil polars
 
             # method of images
             mirror = false,                     # whether to mirror particles over a plane
@@ -389,6 +391,7 @@ function run_simulation(
                 sigma_vlm_surf, sigma_rotor_surf, rho, sound_spd,
                 staticpfield, hubtiploss_correction;
                 init_sol=vlm_init, sigmafactor_vpmonvlm=sigmafactor_vpmonvlm,
+                apply_correction3D=apply_correction3D, apply_extrapolate=apply_extrapolate,
                 debug=debug)
 
         # Shed unsteady-loading wake with new solution

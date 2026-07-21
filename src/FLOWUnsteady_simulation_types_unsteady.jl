@@ -15,6 +15,7 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
                 hubtiploss_correction;
                 mirror=false, mirror_X=nothing, mirror_normal=nothing,
                 init_sol::Bool=false, sigmafactor_vpmonvlm=1,
+                apply_correction3D=true, apply_extrapolate=true,
                 debug=false
                 ) where {V<:UVLMVehicle, M<:AbstractManeuver, R}
 
@@ -86,10 +87,14 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
                     vlm.solvefromV(rotor, VindVkin, Vinf, RPM, rho; t=t,
                                     sound_spd=speedofsound,
                                     hubtiploss_correction=hubtiploss_correction,
+                                    apply_correction3D=apply_correction3D,
+                                    apply_extrapolate=apply_extrapolate,
                                     debug=debug, verbosewarn=true)
                 else
                     vlm.solvefromCCBlade(rotor, Vinf, RPM, rho;
                                               t=t, sound_spd=speedofsound,
+                                              apply_correction3D=apply_correction3D,
+                                              apply_extrapolate=apply_extrapolate,
                                               debug=debug, verbosewarn=true)
                 end
             end
@@ -221,10 +226,14 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
                     vlm.solvefromV(rotor, VindVkin, Vinf, RPM, rho; t=t,
                                     sound_spd=speedofsound,
                                     hubtiploss_correction=hubtiploss_correction,
+                                    apply_correction3D=apply_correction3D,
+                                    apply_extrapolate=apply_extrapolate,
                                     debug=debug, verbosewarn=false)
                 else
                     vlm.solvefromCCBlade(rotor, Vinf, RPM, rho; t=t,
                                             sound_spd=speedofsound,
+                                            apply_correction3D=apply_correction3D,
+                                            apply_extrapolate=apply_extrapolate,
                                             debug=debug, verbosewarn=false)
                 end
 
