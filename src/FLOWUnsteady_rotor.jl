@@ -143,6 +143,7 @@ function generate_rotor(Rtip, Rhub, B::Int,
                         turbine_flag=false,
                         rfl_n_lower=15, rfl_n_upper=15,
                         rediscretize_airfoils=true,
+                        precone=0.0,
                         # OUTPUT OPTIONS
                         verbose=false, verbose_xfoil=false, v_lvl=1,
                         save_polars=nothing, save_polar_pref="airfoilpolar",
@@ -261,7 +262,8 @@ function generate_rotor(Rtip, Rhub, B::Int,
                     genblade_args=[(:spl_k,spline_k), (:spl_s,spline_s)],
                     rfl_n_lower=rfl_n_lower, rfl_n_upper=rfl_n_upper,
                     figsize_factor=figsize_factor,
-                    rediscretize=rediscretize_airfoils)
+                    rediscretize=rediscretize_airfoils,
+                    precone=precone)
 
     if plot_disc
         formatpyplot()
@@ -373,10 +375,10 @@ Generates a `FLOWVLM.Rotor` reading the full rotor geometry from the rotor file
 function generate_rotor(rotor_file::String; TF_design=Float64, TF_trajectory=Float64,
                         data_path=def_data_path, optargs...)
 
-    Rtip, Rhub, B, blade_file = read_rotor(rotor_file; data_path=data_path)
+    Rtip, Rhub, B, blade_file, precone = read_rotor(rotor_file; data_path=data_path)
 
     return generate_rotor(Rtip, Rhub, B, blade_file; TF_design=TF_design, TF_trajectory=TF_trajectory,
-                            data_path=data_path, optargs...)
+                            data_path=data_path, precone=precone, optargs...)
 end
 
 function read_rotor(rotor_file::String; data_path=def_data_path)
@@ -389,8 +391,9 @@ function read_rotor(rotor_file::String; data_path=def_data_path)
     Rhub = Meta.parse(data[2, 2])
     B = Meta.parse(data[3, 2])
     blade_file = String(data[4, 2])
+    precone = size(data, 1) >= 5 ? Float64(Meta.parse(data[5, 2])) : 0.0
 
-    return Rtip, Rhub, B, blade_file
+    return Rtip, Rhub, B, blade_file, precone
 end
 
 function read_blade(blade_file::String; data_path=def_data_path)
