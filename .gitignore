@@ -4,6 +4,10 @@ docs/build/
 docs/site/
 .DS_Store
 *Manifest.toml
+!environments/mpi/Manifest.toml
+environments/mpi/.venv/
+environments/mpi/LocalPreferences.toml
+__pycache__/
 *-example/
 *.h5
 *.bson

@@ -1,0 +1,38 @@
+name: MPI regression
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      matrix:
+        threads: [1, 2]
+    env:
+      JULIA_NUM_THREADS: ${{ matrix.threads }}
+      JULIA_NUM_PRECOMPILE_TASKS: 2
+      MPLBACKEND: Agg
+      OPENBLAS_NUM_THREADS: 1
+      PYTHON: ${{ github.workspace }}/environments/mpi/.venv/bin/python
+    steps:
+      - uses: actions/checkout@v7
+      - uses: julia-actions/setup-julia@v3
+        with:
+          version: '1.13.1'
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Install pinned environment
+        run: |
+          python -m venv environments/mpi/.venv
+          environments/mpi/.venv/bin/python -m pip install -r environments/mpi/requirements.txt
+          julia --startup-file=no scripts/setup_mpi.jl
+      - name: MPI and failure regressions
+        run: julia --startup-file=no --project=environments/mpi scripts/test_mpi.jl

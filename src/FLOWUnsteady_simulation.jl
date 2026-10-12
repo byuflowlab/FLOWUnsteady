@@ -26,7 +26,8 @@ run_simulation(
     tquit           = Inf,              # (s) force quit the simulation at this time
     rand_RPM        = false,            # (experimental) randomize RPM fluctuations
 
-    extra_runtime_function = (sim, PFIELD, T, DT; optargs...)->false,
+    extra_runtime_function = _runtime_noop,
+    parallel        = nothing,         # Use ReplicatedMPI() for collective MPI execution
 
     # -------- SOLVERS OPTIONS --------------------------------------------
     # Vortex particle method
@@ -106,6 +107,28 @@ run_simulation(sim::Simulation, nsteps::Int;
 """
 function run_simulation(
 
+            sim::Simulation,
+            nsteps::Int;
+            parallel=nothing,
+            kwargs...
+        )
+    try
+        return _run_simulation(sim, nsteps; parallel, kwargs...)
+    catch exception
+        # An unexpected rank-local failure (including file I/O) must not leave
+        # other ranks blocked in a later collective. MPI jobs own their lifetime.
+        if parallel isa ReplicatedMPI && parallel.nranks > 1
+            println(stderr, "FLOWUnsteady failed on MPI rank $(parallel.rank)")
+            showerror(stderr, exception, catch_backtrace())
+            println(stderr)
+            MPI.Abort(parallel.comm, 1)
+        end
+        rethrow()
+    end
+end
+
+function _run_simulation(
+
             sim::Simulation,                    # Simulation object
             nsteps::Int;                        # Total time steps in simulation
 
@@ -117,7 +140,8 @@ function run_simulation(
             tquit           = Inf,              # (s) force quit the simulation at this time
             rand_RPM        = false,            # (experimental) randomize RPM fluctuations
 
-            extra_runtime_function = (sim, PFIELD, T, DT; optargs...)->false, # See [`4)-Monitors-Definitions`](@ref)
+            extra_runtime_function = _runtime_noop, # See [`4)-Monitors-Definitions`](@ref)
+            parallel        = nothing,         # Use ReplicatedMPI() for collective MPI execution
 
             # -------- SOLVERS OPTIONS -----------------------------------------
             # Vortex particle method
@@ -191,6 +215,21 @@ function run_simulation(
             save_wopwopin   = false,            # Generate input files for PSU-WOPWOP
 
         )
+
+    if !isnothing(parallel)
+        parallel isa ReplicatedMPI || throw(ArgumentError("parallel must be nothing or ReplicatedMPI"))
+        sim.vehicle isa UVLMVehicle || throw(ArgumentError("MPI currently supports UVLMVehicle"))
+        mirror && throw(ArgumentError("MPI mirror/ground-effect support requires separate validation"))
+        sigmafactor_vpmonvlm == 1 || throw(ArgumentError("MPI requires sigmafactor_vpmonvlm=1"))
+        vpm_floattype in (Float32, Float64) || throw(ArgumentError("MPI supports Float32 or Float64 particle fields"))
+        vpm_UJ === vpm.UJ_fmm && vpm_floattype !== Float64 && throw(ArgumentError("The pinned MPI FMM backend requires Float64"))
+        vpm_UJ = _parallel_interaction(parallel, vpm_UJ, vpm_viscous)
+        if !_parallel_root(parallel)
+            save_path = nothing
+            verbose = false
+            raisewarnings = false
+        end
+    end
 
     if wake_coupled==false && raisewarnings
         @warn("Running wake-decoupled simulation")
@@ -416,7 +455,10 @@ function run_simulation(
         end
 
         # Simulation-specific postprocessing
-        breakflag1 = extra_runtime_function(sim, PFIELD, T, DT; vprintln=vprintln_vpm)
+        breakflag1 = _parallel_callback(parallel, extra_runtime_function,
+                                       sim, PFIELD, T, DT; sync_from=org_np+1,
+                                       sync_omit_shedding=omit_shedding,
+                                       vprintln=vprintln_vpm)
 
         # Output vtks
         if save_path!=nothing && PFIELD.nt%nsteps_save==0
@@ -428,7 +470,7 @@ function run_simulation(
         breakflag2 = sim.t >= tquit
 
         if breakflag2
-            vprintln("Quitting time $(tquit) (s) has been reached. Simulation will now end.")
+            vprintln("Quitting time $(tquit) (s) has been reached. Simulation will now end.", v_lvl+1)
         end
 
         breakflag = breakflag1 || breakflag2
@@ -499,6 +541,30 @@ Returns the velocity induced by particle field on every position `Xs`
 """
 function Vvpm_on_Xs(pfield::vpm.ParticleField, Xs::Array{T, 1}; static_particles_fun=(args...)->nothing, dt=0, fsgm=1,
                     mirror=false, mirror_X=nothing, mirror_normal=nothing) where {T}
+
+    targeted = _has_target_api && pfield.useGPU == 0 && !mirror && abs(fsgm) == 1 &&
+        (pfield.UJ isa _MPIInteraction || pfield.UJ === vpm.UJ_fmm || pfield.UJ === vpm.UJ_direct)
+    if targeted
+        original_np = pfield.np
+        try
+            err = nothing
+            try
+                static_particles_fun(pfield, pfield.t, dt)
+            catch exception
+                err = exception
+            end
+            if pfield.UJ isa _MPIInteraction && pfield.UJ.backend.active
+                _collective_error(pfield.UJ.backend, err)
+            elseif !isnothing(err)
+                throw(err)
+            end
+            return _target_velocities(pfield, Xs, pfield.UJ)
+        finally
+            for i in pfield.np:-1:original_np+1
+                vpm.remove_particle(pfield, i)
+            end
+        end
+    end
 
     if length(Xs)!=0 # && vpm.get_np(pfield)!=0
         # Omit freestream

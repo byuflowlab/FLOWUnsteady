@@ -25,6 +25,7 @@ makedocs(
                 "Intro"         => "index.md",
 
                 "Installation"  => "installation/general.md",
+                "MPI Execution" => ["Guide" => "mpi.md", "Local validation" => "mpi-validation.md"],
                 hide("installation/windows.md"),
 
                 "Tutorials"     => [
