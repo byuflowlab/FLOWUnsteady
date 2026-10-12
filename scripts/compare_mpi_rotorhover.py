@@ -18,6 +18,10 @@ from pathlib import Path
 L2_TOLERANCE = 1e-5
 MAX_TOLERANCE = 5e-5
 SCALE_FLOOR = 1e-12
+IDENTITY_METADATA = (
+    "script_sha256", "solver_sha256", "package_identity_sha256", "database_sha256",
+    "manifest_sha256", "julia_version", "python_version", "numpy_version", "scipy_version",
+)
 
 # Mode, rank count, thread count and run times intentionally differ. Warmup
 # configuration can differ without changing the fresh measured simulation.
@@ -26,9 +30,9 @@ SAME_METADATA = (
     "particles", "particle_fields", "particle_time", "particle_step",
     "simulation_time", "simulation_step", "radius", "blades", "RPM", "rho", "J",
     "integration", "viscous", "SFS", "fmm_p", "fmm_ncrit",
-    "fmm_relative_tolerance", "fmm_absolute_tolerance", "julia_version",
+    "fmm_relative_tolerance", "fmm_absolute_tolerance",
     "gc_policy",
-    "script_sha256", "solver_sha256", "comparison_l2", "comparison_max",
+    *IDENTITY_METADATA, "comparison_l2", "comparison_max",
     "comparison_scale_floor",
 )
 
@@ -145,6 +149,8 @@ def compare(reference_meta, reference_tables, candidate_dir):
     mismatches = {key: [reference_meta.get(key), candidate_meta.get(key)]
                   for key in SAME_METADATA if reference_meta.get(key) != candidate_meta.get(key)}
     report = {"candidate": str(candidate_dir), "metadata_mismatches": mismatches,
+              "identity_checks": {key: candidate_meta[key] == reference_meta[key]
+                                  for key in IDENTITY_METADATA},
               "mode": candidate_meta["mode"], "ranks": int(candidate_meta["ranks"]),
               "threads_per_rank": int(candidate_meta["threads_per_rank"]),
               "nodes": int(candidate_meta["nodes"]),
@@ -224,6 +230,7 @@ def main():
         parser.error("Reference must be a one-process serial run")
     report = {"reference": str(args.reference), "normalized_l2_tolerance": L2_TOLERANCE,
               "normalized_max_tolerance": MAX_TOLERANCE, "scale_floor": SCALE_FLOOR,
+              "reference_identity": {key: reference_meta[key] for key in IDENTITY_METADATA},
               "reference_seconds": float(reference_meta["seconds"]), "comparisons": []}
     for candidate in args.candidates:
         try:

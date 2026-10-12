@@ -2,7 +2,7 @@
 # Headless DJI 9443 hover comparison, derived from the published very-low-fidelity
 # case: https://flow.byu.edu/FLOWUnsteady/examples/rotorhover-aero/
 # Run directly for serial, or on every rank with the configured MPI launcher.
-# Example: julia --project=environments/mpi examples/mpi/rotorhover.jl 
+# Example: julia --project=environments/mpi examples/mpi/rotorhover.jl
 #   --mode serial --n 8 --revolutions 4 --steps-per-rev 36 --p-per-step 2 --output /tmp/hover-serial
 using LinearAlgebra, Printf, TOML, SHA, Pkg
 using Sockets: gethostname
@@ -136,6 +136,43 @@ function write_csv(path, header, rows)
     end
 end
 
+function result_identity(repository)
+    # Exclude machine-specific installation paths from package/database identity.
+    # UUID disambiguates packages with the same name. The active manifest has
+    # relative source paths in the pinned application environment.
+    packages = sort([(info.name, string(uuid), string(info.version), string(info.tree_hash))
+        for (uuid, info) in Pkg.dependencies()])
+    package_records = join((join(record, '\t') for record in packages), '\n') * "\n"
+    database = joinpath(repository, "database")
+    database_records = String[]
+    for (directory, _, files) in walkdir(database), filename in files
+        path = joinpath(directory, filename)
+        relative = replace(relpath(path, database), '\\' => '/')
+        push!(database_records, relative * "\t" * bytes2hex(sha256(read(path))))
+    end
+    isempty(database_records) && error("The rotor database is empty or missing")
+    sort!(database_records)
+    manifest_path = Pkg.Types.manifestfile_path(dirname(Base.active_project()); strict=true)
+    isnothing(manifest_path) && error("A resolved application Manifest is required for identity checks")
+    # Python calls happen on the main thread after the complete timed run and its
+    # deferred-GC cleanup, with no FMM worker task active.
+    pycall = uns.plt.PyCall
+    python_version = string(pycall.pyimport("platform").python_version())
+    numpy_version = string(pycall.pyimport("numpy").__version__)
+    scipy_version = string(pycall.pyimport("scipy").__version__)
+    identity = Dict{String,Any}(
+        "package_identity_sha256" => bytes2hex(sha256(codeunits(package_records))),
+        "database_sha256" => bytes2hex(sha256(codeunits(join(database_records, '\n') * "\n"))),
+        "manifest_sha256" => bytes2hex(sha256(read(manifest_path))),
+        "python_version" => python_version, "numpy_version" => numpy_version,
+        "scipy_version" => scipy_version, "package_count" => length(packages),
+        "database_file_count" => length(database_records))
+    inventory = Dict(name * "/" * uuid => Dict("name" => name, "uuid" => uuid,
+        "version" => version, "tree_hash" => tree_hash)
+        for (name, uuid, version, tree_hash) in packages)
+    return identity, inventory
+end
+
 function save_result(config, case, pfield, warmup_seconds, seconds, stats, profiles)
     mkpath(config.output)
     write_csv(joinpath(config.output, "particles.csv"),
@@ -181,9 +218,9 @@ function save_result(config, case, pfield, warmup_seconds, seconds, stats, profi
         "solver_sha256" => bytes2hex(sha256(vcat([vcat(codeunits(basename(path)), UInt8[0], read(path))
             for path in sort(filter(path -> endswith(path, ".jl"),
                 readdir(joinpath(repository, "src"); join=true)))]...))))
-    metadata["packages"] = Dict(info.name => Dict("version" => string(info.version),
-        "tree_hash" => string(info.tree_hash)) for info in values(Pkg.dependencies())
-        if info.name in ("FLOWUnsteady", "FLOWVLM", "FLOWVPM", "FastMultipole", "MPI", "MPIPreferences"))
+    identity, package_inventory = result_identity(repository)
+    merge!(metadata, identity)
+    metadata["packages"] = package_inventory
     # Scalar CSV permits comparison using any Python 3 standard library; TOML
     # additionally retains package identity and structured phase statistics.
     write_csv(joinpath(config.output, "metadata.csv"), ["key", "value"],
