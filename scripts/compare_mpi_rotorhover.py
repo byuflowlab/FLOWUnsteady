@@ -151,7 +151,15 @@ def compare(reference_meta, reference_tables, candidate_dir):
     report = {"candidate": str(candidate_dir), "metadata_mismatches": mismatches,
               "identity_checks": {key: candidate_meta[key] == reference_meta[key]
                                   for key in IDENTITY_METADATA},
-              "mode": candidate_meta["mode"], "ranks": int(candidate_meta["ranks"]),
+              "mode": candidate_meta["mode"],
+              "partition": candidate_meta.get("mpi_partition", "targets"),
+              "target_groups": candidate_meta.get("target_groups", "1"),
+              "thread_pinning": candidate_meta.get("thread_pinning", "none"),
+              "source_order": candidate_meta.get("source_order", "contiguous"),
+              "nearfield_scheduler": candidate_meta.get("nearfield_scheduler", "static"),
+              "callback_sync": candidate_meta.get("callback_sync", "full"),
+              "rotor_parallel": candidate_meta.get("rotor_parallel", "false"),
+              "ranks": int(candidate_meta["ranks"]),
               "threads_per_rank": int(candidate_meta["threads_per_rank"]),
               "nodes": int(candidate_meta["nodes"]),
               "max_rank_peak_rss_bytes": int(candidate_meta["max_rank_peak_rss_bytes"]),
@@ -241,7 +249,7 @@ def main():
         print(f"{'PASS' if result['passed'] else 'FAIL'} {candidate}")
         if "speedup" in result:
             print(f"  seconds={result['seconds']:.6f}, speedup={result['speedup']:.4f}, "
-                  f"rank_efficiency={result['rank_efficiency']:.4f}")
+                  f"reference_rank_efficiency={result['rank_efficiency']:.4f}")
         if result.get("metadata_mismatches"):
             print("  incompatible metadata: " + ", ".join(result["metadata_mismatches"]))
         for name, check in result.get("checks", {}).items():

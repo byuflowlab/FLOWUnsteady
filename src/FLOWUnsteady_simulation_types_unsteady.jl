@@ -84,7 +84,7 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
                 VindVkin = _format_blades(this_Vinds, vhcl.rotor_systems, si, ri)
 
                 if wake_coupled
-                    vlm.solvefromV(rotor, VindVkin, Vinf, RPM, rho; t=t,
+                    _parallel_solvefromV(pfield, rotor, VindVkin, Vinf, RPM, rho; t=t,
                                     sound_spd=speedofsound,
                                     hubtiploss_correction=hubtiploss_correction,
                                     apply_correction3D=apply_correction3D,
@@ -150,9 +150,10 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
         static_particles_fun2(pfield, args...) = _static_particles(pfield, allrotors, sigma_rotor)
 
         # Evaluate Rotor-on-VLM induced velocity
-        Vrotor_on_wing = Vvpm_on_Xs(staticpfield, vcat(Xs_cp_vlm, Xs_ApA_AB_BBp_vlm);
-                                    static_particles_fun=static_particles_fun2, dt=dt, fsgm=sigmafactor_vpmonvlm,
-                                    mirror, mirror_X, mirror_normal)
+        Vrotor_on_wing = m == 0 ? Vector{eltype(Vvpm)}() :
+            Vvpm_on_Xs(staticpfield, vcat(Xs_cp_vlm, Xs_ApA_AB_BBp_vlm);
+                       static_particles_fun=static_particles_fun2, dt=dt, fsgm=sigmafactor_vpmonvlm,
+                       mirror, mirror_X, mirror_normal)
 
         # Add and save VPM-on-VLM and Rotor-on-VLM induced velocity
         vlm._addsolution(vhcl.vlm_system, "Vvpm",
@@ -164,27 +165,9 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
         vlm._addsolution(vhcl.vlm_system, "Vvpm_BBp",
                         Vvpm_ApA_AB_BBp_vlm[2*m+1:3*m] + Vrotor_on_wing[3*m+1:4*m]; t=t)
 
-        # Calculate induced velocities to use in rotor solver
-        ## Particles for VLM-on-Rotor induced velocity
-        # NOTE: If I keep the rotor particles wouldn't I be double-counting
-        # the blade induced velocity and make the solution unstable?
-        # ANSWER: We are never double-accounting for the blade induced velocity
-        function static_particles_fun3(pfield, args...)
-            # Rotor static particles
-            static_particles_fun2(pfield, args...)
-            # VLM static particles
-            _static_particles(pfield, vhcl.vlm_system, sigma_vlm)
-        end
-
-        ## Evaluate VLM-on-Rotor and Rotor-on-Rotor induced velocity
-        Vvlmrotor_on_rotor = Vvpm_on_Xs(staticpfield, Xs_rotors;
-                              static_particles_fun=static_particles_fun3, dt=dt, fsgm=sigmafactor_vpmonvlm,
-                              mirror, mirror_X, mirror_normal)
-
-        # Add VPM-on-Rotor, VLM-on-Rotor, and Rotor-on-Rotor induced velocity
-        Vinds = Vvpm_rotors # + Vvlmrotor_on_rotor # turn this off to reduce noise
-                                                   # should be negligible for most
-                                                   # cases anyway
+        # Rotor coupling uses wake-induced velocity. The former static-surface
+        # query was discarded here; avoid evaluating a field the solver does not use.
+        Vinds = Vvpm_rotors
 
         # ---------- 5) Solve VLM system -----------------------------------
         # Wake-coupled solution
@@ -223,7 +206,7 @@ function solve(self::Simulation{V, M, R}, Vinf::Function,
                 VindVkin = _format_blades(this_Vinds + Vkin, vhcl.rotor_systems,
                                                                         si, ri)
                 if wake_coupled
-                    vlm.solvefromV(rotor, VindVkin, Vinf, RPM, rho; t=t,
+                    _parallel_solvefromV(pfield, rotor, VindVkin, Vinf, RPM, rho; t=t,
                                     sound_spd=speedofsound,
                                     hubtiploss_correction=hubtiploss_correction,
                                     apply_correction3D=apply_correction3D,

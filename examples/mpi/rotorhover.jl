@@ -8,11 +8,36 @@ using LinearAlgebra, Printf, TOML, SHA, Pkg
 using Sockets: gethostname
 import FLOWUnsteady as uns
 const MPI, vlm, vpm = uns.MPI, uns.vlm, uns.vpm
+include(joinpath(@__DIR__, "..", "..", "scripts", "pin_mpi_threads.jl"))
+const benchmark_thread_bindings = Ref{Any}(nothing)
+
+function configure_thread_pinning!(config, comm)
+    flags = MPI.Allgather(config.pin_threads, comm)
+    all(==(first(flags)), flags) || error("Thread-pinning flags differ between ranks")
+    config.pin_threads || return nothing
+    err, bindings = nothing, nothing
+    try
+        bindings = pin_mpi_threads!()
+    catch exception
+        err = exception
+    end
+    rank, nranks = MPI.Comm_rank(comm), MPI.Comm_size(comm)
+    failed = MPI.Allreduce(isnothing(err) ? nranks : rank, min, comm)
+    if failed < nranks
+        message = MPI.bcast(rank == failed ? sprint(showerror, err) : nothing, comm; root=failed)
+        error("Thread pinning failed on rank $failed: $message")
+    end
+    benchmark_thread_bindings[] = bindings
+    return nothing
+end
 
 function parse_options(args)
     options = Dict("mode" => "mpi", "n" => "8", "revolutions" => "4",
         "steps-per-rev" => "36", "p-per-step" => "2", "output" => "",
-        "warmup-steps" => "", "check-state" => "false", "gc-policy" => "automatic")
+        "warmup-steps" => "", "check-state" => "false", "gc-policy" => "automatic",
+        "partition" => "targets", "nearfield" => "static", "callback-sync" => "full",
+        "rotor-parallel" => "false", "target-groups" => "1", "pin-threads" => "false",
+        "source-order" => "contiguous")
     iseven(length(args)) || error("Arguments must be --name value pairs")
     for i in 1:2:length(args)
         startswith(args[i], "--") || error("Expected --name, received $(args[i])")
@@ -22,6 +47,19 @@ function parse_options(args)
     end
     mode = options["mode"]
     mode in ("serial", "mpi") || error("--mode must be serial or mpi")
+    partition = options["partition"]
+    partition in ("targets", "sources", "hybrid") || error("--partition must be targets, sources or hybrid")
+    target_groups = parse(Int, options["target-groups"])
+    target_groups > 0 || error("--target-groups must be positive")
+    partition == "hybrid" || target_groups == 1 || error("--target-groups requires --partition hybrid")
+    source_order = options["source-order"]
+    source_order in ("contiguous", "cyclic") || error("--source-order must be contiguous or cyclic")
+    nearfield = options["nearfield"]
+    nearfield in ("static", "dynamic") || error("--nearfield must be static or dynamic")
+    callback_sync = options["callback-sync"]
+    callback_sync in ("full", "readonly") || error("--callback-sync must be full or readonly")
+    rotor_parallel = parse(Bool, options["rotor-parallel"])
+    pin_threads = parse(Bool, options["pin-threads"])
     n = parse(Int, options["n"])
     revolutions = parse(Float64, options["revolutions"])
     steps_per_rev = parse(Int, options["steps-per-rev"])
@@ -36,7 +74,7 @@ function parse_options(args)
     isempty(options["output"]) && error("Provide a unique --output directory")
     gc_policy = options["gc-policy"]
     gc_policy in ("automatic", "deferred") || error("--gc-policy must be automatic or deferred")
-    return (; mode, n, revolutions, steps_per_rev, p_per_step, nsteps,
+    return (; mode, partition, target_groups, source_order, nearfield, callback_sync, rotor_parallel, pin_threads, n, revolutions, steps_per_rev, p_per_step, nsteps,
         warmup_steps, gc_policy, output=abspath(options["output"]),
         check_state=parse(Bool, options["check-state"]))
 end
@@ -173,7 +211,8 @@ function result_identity(repository)
     return identity, inventory
 end
 
-function save_result(config, case, pfield, warmup_seconds, seconds, stats, profiles)
+function save_result(config, case, pfield, warmup_seconds, seconds, stats, profiles;
+        comm=MPI.COMM_WORLD, benchmark_metadata=Dict{String,Any}())
     mkpath(config.output)
     write_csv(joinpath(config.output, "particles.csv"),
         vcat(["particle"], ["state_$i" for i in axes(pfield.particles, 1)]),
@@ -190,10 +229,20 @@ function save_result(config, case, pfield, warmup_seconds, seconds, stats, profi
             case.rotor.sol["Tp"]["field_data"][blade][element])
             for blade in 1:case.B for element in 1:config.n))
     write_csv(joinpath(config.output, "rank_times.csv"),
-        string.(collect(keys(first(profiles)))), (values(profile) for profile in profiles))
+        string.(collect(keys(first(profiles)))),
+        ((value isa Union{Number,AbstractString} ? value : string(value)
+          for value in values(profile)) for profile in profiles))
     repository = normpath(joinpath(@__DIR__, "..", ".."))
     metadata = Dict{String,Any}(
-        "format_version" => 1, "mode" => config.mode, "ranks" => MPI.Comm_size(MPI.COMM_WORLD),
+        "format_version" => 1, "mode" => config.mode, "mpi_partition" => config.partition,
+        "target_groups" => config.mode == "mpi" ? config.target_groups : 1,
+        "source_order" => config.mode == "mpi" && config.partition != "targets" ? config.source_order : "contiguous",
+        "thread_pinning" => config.pin_threads ? "physical" : "none",
+        "worker_thread_bindings" => isnothing(benchmark_thread_bindings[]) ? [] : benchmark_thread_bindings[],
+        "nearfield_scheduler" => config.mode == "mpi" ? config.nearfield : "static",
+        "callback_sync" => config.mode == "mpi" ? config.callback_sync : "full",
+        "rotor_parallel" => config.mode == "mpi" && config.rotor_parallel,
+        "ranks" => MPI.Comm_size(comm),
         "threads_per_rank" => Threads.nthreads(), "blas_threads" => BLAS.get_num_threads(),
         "nodes" => length(unique(profile.hostname for profile in profiles)),
         "max_rank_peak_rss_bytes" => maximum(profile.maxrss_bytes for profile in profiles),
@@ -214,12 +263,14 @@ function save_result(config, case, pfield, warmup_seconds, seconds, stats, profi
         "julia_version" => string(VERSION), "comparison_l2" => 1e-5,
         "comparison_max" => 5e-5, "comparison_scale_floor" => 1e-12,
         "tutorial" => "https://flow.byu.edu/FLOWUnsteady/examples/rotorhover-aero/",
-        "script_sha256" => bytes2hex(sha256(read(@__FILE__))),
+        "script_sha256" => bytes2hex(sha256(vcat(read(@__FILE__),
+            read(joinpath(repository, "scripts", "pin_mpi_threads.jl"))))),
         "solver_sha256" => bytes2hex(sha256(vcat([vcat(codeunits(basename(path)), UInt8[0], read(path))
             for path in sort(filter(path -> endswith(path, ".jl"),
                 readdir(joinpath(repository, "src"); join=true)))]...))))
     identity, package_inventory = result_identity(repository)
     merge!(metadata, identity)
+    merge!(metadata, benchmark_metadata)
     metadata["packages"] = package_inventory
     # Scalar CSV permits comparison using any Python 3 standard library; TOML
     # additionally retains package identity and structured phase statistics.
@@ -237,7 +288,7 @@ function save_result(config, case, pfield, warmup_seconds, seconds, stats, profi
     end
     println("mode,ranks,threads_per_rank,steps,particles,warmup_seconds,seconds,output")
     @printf("%s,%d,%d,%d,%d,%.6f,%.6f,%s\n", config.mode,
-        MPI.Comm_size(MPI.COMM_WORLD), Threads.nthreads(), config.nsteps,
+        MPI.Comm_size(comm), Threads.nthreads(), config.nsteps,
         pfield.np, warmup_seconds, seconds, config.output)
 end
 
@@ -248,39 +299,52 @@ function main(args=ARGS)
         config.mode == "serial" && MPI.Comm_size(MPI.COMM_WORLD) != 1 &&
             error("Serial mode requires one process")
         BLAS.set_num_threads(1)
-        backend() = config.mode == "mpi" ? uns.ReplicatedMPI(; check_state=config.check_state) : nothing
+        configure_thread_pinning!(config, MPI.COMM_WORLD)
+        backend() = config.mode == "mpi" ? uns.ReplicatedMPI(;
+            check_state=config.check_state, partition=Symbol(config.partition),
+            target_groups=config.target_groups,
+            source_order=Symbol(config.source_order),
+            nearfield=Symbol(config.nearfield), callback_sync=Symbol(config.callback_sync),
+            rotor_parallel=config.rotor_parallel) : nothing
         warmup = make_case(config, config.warmup_steps)
         warm_backend = backend()
         MPI.Barrier(MPI.COMM_WORLD)
         warmup_seconds = @elapsed run_case(warmup, config.warmup_steps, warm_backend, config.gc_policy)
         warmup_seconds = MPI.Allreduce(warmup_seconds, max, MPI.COMM_WORLD)
+        isnothing(warm_backend) || close(warm_backend)
         case = make_case(config, config.nsteps)
         timed_backend = backend()
-        GC.gc()
-        MPI.Barrier(MPI.COMM_WORLD)
-        local_seconds = @elapsed pfield = run_case(case, config.nsteps, timed_backend, config.gc_policy)
-        # Sys.maxrss() reports bytes, and is a lifetime high-water mark rather
-        # than timed-phase-only usage. Capture it before CSV/state export.
-        peak_rss = Int(Sys.maxrss())
-        allowed_cpus = "unavailable"
-        if isfile("/proc/self/status")
-            lines = filter(line -> startswith(line, "Cpus_allowed_list:"), readlines("/proc/self/status"))
-            isempty(lines) || (allowed_cpus = strip(split(first(lines), ':'; limit=2)[2]))
-        end
-        local_profile = (; rank=MPI.Comm_rank(MPI.COMM_WORLD), seconds=local_seconds,
-            maxrss_bytes=peak_rss, hostname=gethostname(), cpus_allowed_list=allowed_cpus,
-            threads=Threads.nthreads(), phase_profile_available=!isnothing(timed_backend),
-            evaluations=isnothing(timed_backend) ? 0 : timed_backend.evaluations,
-            evaluation_seconds=isnothing(timed_backend) ? 0.0 : timed_backend.evaluation_seconds,
-            exchange_seconds=isnothing(timed_backend) ? 0.0 : timed_backend.exchange_seconds,
-            sfs_seconds=isnothing(timed_backend) ? 0.0 : timed_backend.sfs_seconds,
-            probe_seconds=isnothing(timed_backend) ? 0.0 : timed_backend.probe_seconds,
-            callback_seconds=isnothing(timed_backend) ? 0.0 : timed_backend.callback_seconds)
-        profiles = MPI.gather(local_profile, MPI.COMM_WORLD; root=0)
-        seconds = MPI.Allreduce(local_seconds, max, MPI.COMM_WORLD)
-        stats = isnothing(timed_backend) ? nothing : uns.parallel_statistics(timed_backend)
-        if MPI.Comm_rank(MPI.COMM_WORLD) == 0
-            save_result(config, case, pfield, warmup_seconds, seconds, stats, profiles)
+        try
+            GC.gc()
+            MPI.Barrier(MPI.COMM_WORLD)
+            local_seconds = @elapsed pfield = run_case(case, config.nsteps, timed_backend, config.gc_policy)
+            # Sys.maxrss() reports bytes, and is a lifetime high-water mark rather
+            # than timed-phase-only usage. Capture it before CSV/state export.
+            peak_rss = Int(Sys.maxrss())
+            allowed_cpus = "unavailable"
+            if isfile("/proc/self/status")
+                lines = filter(line -> startswith(line, "Cpus_allowed_list:"), readlines("/proc/self/status"))
+                isempty(lines) || (allowed_cpus = strip(split(first(lines), ':'; limit=2)[2]))
+            end
+            local_profile = (; rank=MPI.Comm_rank(MPI.COMM_WORLD), seconds=local_seconds,
+                maxrss_bytes=peak_rss, hostname=gethostname(), cpus_allowed_list=allowed_cpus,
+                worker_thread_bindings=isnothing(benchmark_thread_bindings[]) ? [] : benchmark_thread_bindings[],
+                threads=Threads.nthreads(), phase_profile_available=!isnothing(timed_backend),
+                evaluations=isnothing(timed_backend) ? 0 : timed_backend.evaluations,
+                evaluation_seconds=isnothing(timed_backend) ? 0.0 : timed_backend.evaluation_seconds,
+                exchange_seconds=isnothing(timed_backend) ? 0.0 : timed_backend.exchange_seconds,
+                sfs_seconds=isnothing(timed_backend) ? 0.0 : timed_backend.sfs_seconds,
+                probe_seconds=isnothing(timed_backend) ? 0.0 : timed_backend.probe_seconds,
+                callback_seconds=isnothing(timed_backend) ? 0.0 : timed_backend.callback_seconds,
+                rotor_seconds=isnothing(timed_backend) ? 0.0 : timed_backend.rotor_seconds)
+            profiles = MPI.gather(local_profile, MPI.COMM_WORLD; root=0)
+            seconds = MPI.Allreduce(local_seconds, max, MPI.COMM_WORLD)
+            stats = isnothing(timed_backend) ? nothing : uns.parallel_statistics(timed_backend)
+            if MPI.Comm_rank(MPI.COMM_WORLD) == 0
+                save_result(config, case, pfield, warmup_seconds, seconds, stats, profiles)
+            end
+        finally
+            isnothing(timed_backend) || close(timed_backend)
         end
         MPI.Finalize()
     catch exception

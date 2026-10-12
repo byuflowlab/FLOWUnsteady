@@ -1,0 +1,13 @@
+job,run,n,process_provenance,nodes,hostname,ranks_on_host,sum_rank_lifetime_peak_rss_bytes,max_rank_lifetime_peak_rss_bytes,sum_rank_lifetime_peak_rss_gib
+28,mpi-hybrid-dynamic-3-r12-rep1,8,reused,3,compute-dy-c6a4xlarge-1,4,12220985344,3704328192,11.38167953491211
+28,mpi-hybrid-dynamic-3-r12-rep1,8,reused,3,compute-dy-c6a4xlarge-2,4,11481305088,2984824832,10.692798614501953
+28,mpi-hybrid-dynamic-3-r12-rep1,8,reused,3,compute-dy-c6a4xlarge-3,4,11267366912,2926190592,10.493553161621094
+28,mpi-hybrid-dynamic-1-r4-rep1,8,reused,1,compute-dy-c6a4xlarge-1,4,12220985344,3704328192,11.38167953491211
+28,mpi-hybrid-dynamic-2-r8-rep1,8,reused,2,compute-dy-c6a4xlarge-1,4,12220985344,3704328192,11.38167953491211
+28,mpi-hybrid-dynamic-2-r8-rep1,8,reused,2,compute-dy-c6a4xlarge-2,4,11481305088,2984824832,10.692798614501953
+29,mpi-hybrid-dynamic-3-r12-rep1,16,reused,3,compute-dy-c6a4xlarge-1,4,13881917440,4279365632,12.928543090820312
+29,mpi-hybrid-dynamic-3-r12-rep1,16,reused,3,compute-dy-c6a4xlarge-2,4,13047218176,3306561536,12.151168823242188
+29,mpi-hybrid-dynamic-3-r12-rep1,16,reused,3,compute-dy-c6a4xlarge-3,4,12694913024,3271925760,11.82305908203125
+29,mpi-hybrid-dynamic-1-r4-rep1,16,reused,1,compute-dy-c6a4xlarge-1,4,13881917440,4279365632,12.928543090820312
+29,mpi-hybrid-dynamic-2-r8-rep1,16,reused,2,compute-dy-c6a4xlarge-1,4,13881917440,4279365632,12.928543090820312
+29,mpi-hybrid-dynamic-2-r8-rep1,16,reused,2,compute-dy-c6a4xlarge-2,4,13047218176,3306561536,12.151168823242188

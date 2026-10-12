@@ -166,6 +166,7 @@ try
             @test state.time == 0.1
             @test state.calls == 1
             @test callback_calls[] == (rank == nranks-1 ? 1 : 0)
+            @test backend.callback_seconds > 0
             uns._check_replicas(backend, pf)
             @test_throws ErrorException uns._parallel_callback(backend, (args...; kwargs...) -> error("callback failure"), state, pf, 0.0, 0.1)
             @test backend.active
@@ -174,6 +175,34 @@ try
                 (args...; kwargs...) -> (empty!(omitted); false), state, pf, 0.0, 0.1;
                 sync_omit_shedding=omitted)
             @test isempty(omitted)
+            if nranks == 1
+                @test_throws ErrorException uns._parallel_callback(backend,
+                    (args...; kwargs...) -> 1, state, pf, 0.0, 0.1)
+                backend.active = false
+                @test !uns._parallel_callback(backend, uns._runtime_noop,
+                                              state, pf, 0.0, 0.1)
+                @test !backend.active
+                backend.active = true
+            end
+        end
+
+        @testset "Callback snapshots retain shared state" begin
+            values = [1.0, 2.0]
+            model = CallbackState(0.1, 2)
+            original = (values, Dict("values" => values), model, model)
+            snapshot = uns._callback_state(original)
+            @test snapshot[1] === snapshot[2]["values"]
+            @test snapshot[3] === snapshot[4]
+            values[1] = -1.0
+            @test snapshot[1] == [1.0, 2.0]
+            local_values = zeros(2)
+            local_model = CallbackState(0.0, 0)
+            restored = uns._restore_callback_state(
+                (local_values, Dict("values" => local_values), local_model, local_model), snapshot)
+            @test restored[1] === restored[2]["values"]
+            @test restored[3] === restored[4]
+            @test restored[1] == [1.0, 2.0]
+            @test restored[3].time == 0.1 && restored[3].calls == 2
         end
 
         if nranks > 1

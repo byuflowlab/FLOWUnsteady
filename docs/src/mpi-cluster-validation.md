@@ -1,10 +1,11 @@
 # ParallelCluster validation log
 
-The one-, two- and three-node implementations produced matching numerical results
-in the DJI hover pilot, with zero recorded differences across every checked field
-and history. Three repetitions per layout gave a 1.346x speedup on three nodes
-versus the threaded serial baseline (20.563 s versus 15.282 s). All work is
-committed on `feat/mpi-single-simulation`; the complete cluster jobs have finished.
+The initial target-partition implementation passed the DJI hover comparison but
+scaled poorly: three nodes took 15.282 s versus the 20.563 s threaded serial
+baseline (1.346x). Subsequent source partitioning, thread scheduling, callback
+synchronization and distributed rotor preprocessing are evaluated below. Report
+node scaling against the fastest validated one-node implementation with the same
+physical-core budget, independently of improvements over the original serial code.
 
 Objective: reduce elapsed time for one coupled simulation. Compare a matched
 single-node run with two and three compute nodes. Numerical agreement is required
@@ -16,7 +17,7 @@ near-zero advance ratio, published hub/tip correction and initial hub-wake
 suppression), with fewer blade elements and particle sheds. This checks the
 implementation; it does not establish aerodynamic accuracy or converged hover.
 
-## Case and final measurements
+## Original pilot and baseline measurements
 
 The two-bladed DJI 9443 case uses eight elements per blade, 36 steps/revolution,
 two particle sheds/step and four revolutions at 5,400 RPM. Advance ratio is
@@ -94,8 +95,10 @@ Acceptance thresholds, fixed before examining cluster results:
 
 Timing excludes compilation warmup and artifact export, and includes coupling,
 integration, shedding and runtime callbacks. Report the slowest rank's elapsed
-time and repeat measured runs. A threaded ordinary serial run is the primary
-single-node baseline; a one-rank MPI run measures adapter overhead.
+time and repeat measured runs. In the initial target-partition study, the threaded
+ordinary serial run was the primary single-node baseline and one-rank MPI measured
+adapter overhead. The later strong-scaling study uses the fastest validated
+eight-core one-node implementation, including alternate MPI layouts.
 
 Further job IDs, observed outcomes and numerical/performance results are appended
 below as testing proceeds.
@@ -217,12 +220,12 @@ Independent phase maxima can come from different ranks and must not be summed
 into a critical-path breakdown. Coupling, integration, allocation and deferred
 GC cleanup have not been profiled separately.
 
-Before increasing case size/duration, address PyCall finalizer safety. Then
-profile FMM tree construction, upward/translation/near-field passes and allocation
-costs, and investigate buffer/cache reuse before choosing a distributed-source
-implementation. These measurements establish numerical equivalence and modest
-speedup for this four-revolution configuration, not larger-case scaling or
-aerodynamic convergence.
+The initial follow-up plan was to address PyCall finalizer safety, profile FMM
+passes and allocation, and investigate buffer/cache reuse before choosing a
+distributed-source implementation. Later tests below keep the same bounded,
+deferred-GC workaround; they do not establish long-run finalizer safety. These
+initial measurements establish numerical equivalence and modest speedup for the
+four-revolution pilot, without an aerodynamic convergence claim.
 
 ## Repeating the cluster checks
 
@@ -258,3 +261,193 @@ MPI machine preferences and Python environments are ignored by Git. Credential
 patterns were checked on each staged block and the complete branch diff; AWS
 credentials, SSH keys and machine preferences were not committed. No branch was
 pushed and no pull request was opened.
+
+## 2026-10-13: strong-scaling investigation
+
+The target is at least 90% node efficiency: a three-node speedup of 2.7x or
+better against the fastest validated one-node layout with the same eight physical
+cores per node. This is an operational near-linear criterion. Improvements over
+the original serial algorithm are reported separately.
+
+The user clarified that acceptance applies to the existing four-revolution,
+eight-element DJI hover pilot, with its physics and accuracy settings fixed.
+Its best current whole-simulation speedup is 2.24x, so that target remains unmet.
+The n16/n32 results below are supplementary workload-size experiments; the n32
+2.78x result does not satisfy the requested pilot target.
+
+The original eight-element pilot remains fixed within every comparison. A second
+case uses 16 elements per blade and finishes with 12,168 particles; its duration,
+time step, shedding rate, physical parameters, correction models and fixed FMM
+settings remain the same. A third case uses 32 elements per blade and finishes
+with 23,780 particles. Each resolution has its own one-node baseline. These
+are implementation benchmarks, without a new aerodynamic convergence claim.
+
+### Implementation changes
+
+- Source partitioning sums disjoint source contributions instead of duplicating
+  source work for disjoint target blocks. Relative regularization roots are
+  reused; absolute roots are skipped only when a guarded residual proves the
+  existing minimum. Boundary cases retain the original solver.
+- Dynamic near-field scheduling splits target leaves into disjoint body ranges.
+  Each body retains its source accumulation order. Empty far-field interaction
+  lists skip unused upward, translation and downward passes, retaining the same
+  trees and direct lists. Genuine far-field cases retain all passes.
+- Read-only callbacks synchronize stopping and the explicit shedding mask while
+  each rank retains its independently evolved solver state. The default full
+  synchronization remains available for callbacks that change solver state.
+- Distributed rotor preprocessing applies the original Mach, 3D and extrapolation
+  functions at the current inflow. Plain spline coefficients are transported;
+  native/Python objects and spline scratch arrays remain local.
+- A rectangular source/target decomposition reduces duplicated target work and
+  places target gathering within each node when `target_groups=ranks_per_node`.
+  Its child communicators have explicit collective cleanup.
+- Cyclic source ownership spreads wake ages across source groups. Linux worker
+  pinning chooses one allowed logical CPU per distinct physical core; the MPI
+  process masks alone had allowed occasional simultaneous SMT-sibling execution.
+  Both choices are opt-in, and pinning leaves non-default helper threads alone.
+
+No acceptance threshold, integration model, kernel or physical correction was
+loosened. Source trees can choose different far-field lists after decomposition;
+the nominal per-tree FMM tolerances do not prove a global summed-error bound.
+Complete-case comparisons, including all 46 particle rows and histories, remain
+required for each workload.
+
+### Screening evidence
+
+Each layout receives a full same-case warmup and a fresh measured simulation.
+The tuning harness reuses imported processes across layouts; final selections
+require separate fresh-process confirmation. Each completed candidate below
+passes all nine identity checks and all 35 numerical checks against its matched
+serial reference. Different frozen source versions are kept separate.
+
+| Frozen version | Case | Fastest tested 1-node s | Fastest tested 2-node s | Fastest tested 3-node s | Strong speedup on 3 nodes |
+| --- | --- | --- | --- | --- | --- |
+| v1: source work and regularization | n8 | 20.250 | 12.939 | 10.371 | 1.953x |
+| v2: scheduling and read-only callbacks | n8 | 18.035 | 10.921 | 8.643 | 2.087x |
+| v3: distributed rotor preprocessing | n8 | 15.714 | 9.240 | 7.371 | 2.132x |
+| v4: empty far-field pass removal | n8 | 14.327 | 8.290 | 6.372 | 2.249x |
+| v4: same code, finer blade grid | n16 | 43.453 | 28.161 | 18.009 | 2.413x |
+| v5: hybrid only, four ranks/node | n8 | 14.738 | 8.706 | 6.871 | 2.145x |
+| v5: hybrid only, four ranks/node | n16 | 50.322 | 24.458 | 22.561 | 2.231x |
+| v6: pinned workers and cyclic sources | n8 | 13.960 | 8.055 | 6.224 | 2.243x |
+| v6: same code, finer blade grid | n16 | 41.705 | 22.563 | 16.313 | 2.557x |
+
+v2 has two repetitions; the other rows are single-pass screening, with v3/v4
+choosing across one-, two- and four-rank layouts where measured. v5 measures only
+the listed hybrid layout. Lower-thread serial rows in the process-reuse sweeps
+are numerical references, not eight-core performance baselines. They are excluded
+from the strong-scaling denominator unless their per-node core budgets match.
+
+Sampled profile job 27 separately verifies the original numerical thresholds.
+Its elapsed times include profiling overhead and are not scaling measurements.
+The main-thread stacks attribute much of the time outside phase counters to
+control-collective waiting. Garbage collection and previous-state copying are the
+largest smaller noncollective parts. Counts describe sampled stacks; phase maxima
+can come from different ranks and cannot be summed into a critical-path time.
+
+The pinned frozen-wake diagnostic uses two default workers and executes all 12
+source shards sequentially on one machine. Cyclic ownership reduces the slowest
+shard median from 45.47 to 43.03 ms and max/mean from 1.069 to 1.004. Both assembled
+source sums pass the fixed U/J tolerances. This diagnoses balance; it does not
+establish node scaling.
+
+Archived comparisons, summaries and placement ledgers are indexed under
+[scaling evidence](assets/mpi-cluster/scaling/index.md).
+
+![Small-case whole-simulation and particle-evaluation screening](assets/mpi-cluster/scaling/small-case-screening.svg)
+
+The v6 n8 particle-evaluation timer scales 2.89x on three nodes with four ranks
+per node. The complete simulation scales 2.24x against the strongest tested
+eight-core one-node layout. The whole-case curve selects the fastest tested layout
+at each node count; the evaluation curve keeps four ranks/node. Both curves are
+single-pass process-reuse screening, not final repeated measurements.
+
+The v6 n16 source layout uses four ranks and two default Julia workers per node.
+Its evaluation timer scales from 38.678 to 19.517 to 13.197 s: 2.931x on three
+nodes, with at least 99.68% mean/max evaluation balance. Whole-simulation times
+are 41.705, 22.563 and 16.313 s, giving 92.4% efficiency on two nodes and 85.2%
+on three. Probes, rotor processing, exchange and replicated solver work account
+for the remaining limit; per-phase maxima are not an additive wall-time budget.
+All nine n16 source/target/hybrid candidates pass the same 35 numerical and nine
+identity checks. This is still screening with reused processes.
+
+### Fresh-process confirmation on the n32 case
+
+The fixed 32-element case meets the operational near-linear target across one,
+two and three nodes. It ends with 23,780 particles after the same 144 steps.
+Each node supplies eight physical cores: four MPI ranks, two pinned default Julia
+workers per rank, cyclic source ownership, dynamic near-field scheduling,
+read-only callbacks and distributed rotor preprocessing.
+
+Jobs 37 and 39 provide three fresh-process measurements per node count, with a
+full same-case warmup before every measured simulation. Job 38 checks additional
+one-node layouts. All 11 distinct MPI candidates pass all 35 numerical and nine
+identity checks against the same serial reference, without changing the physics,
+integration or accuracy settings within this experiment.
+
+| Nodes | Fresh samples | Median seconds | Observed min–max seconds | Strong speedup | Node efficiency |
+| --- | --- | --- | --- | --- | --- |
+| 1 | 3 | 151.631 | 151.556–151.945 | 1.000x | 100.0% |
+| 2 | 3 | 78.850 | 78.308–80.196 | 1.923x | 96.2% |
+| 3 | 3 | 54.506 | 54.365–54.508 | 2.782x | 92.7% |
+
+The denominator is the fastest tested eight-core one-node implementation. The
+other fresh one-node controls take 175.346 s for ordinary serial, 157.090 s for
+one MPI rank with eight workers, and 153.063 s for two ranks with four workers.
+These controls each have one sample; the selected four-rank baseline has three.
+Comparing three nodes only with ordinary serial would also count algorithmic
+improvements available on one node.
+
+The median of each run's maximum-rank evaluation timer is 145.662, 73.384 and
+49.148 s, giving 2.964x kernel speedup on three nodes. Other phase maxima do not
+form an additive critical path. The worst normalized maximum and L2 errors
+across the 11 fresh MPI candidates are 6.47e-14 and 4.87e-14, respectively.
+The largest observed one-node sums of process-lifetime peak RSS are 5.747 GiB for one rank,
+10.503 GiB for two and 19.241 GiB for four. These include imports and warmup;
+they are not simultaneous measurements of total node RSS. Multiple ranks
+improve rotor preprocessing at the cost of additional replicated state.
+
+![Whole-simulation scaling for three fixed workloads](assets/mpi-cluster/scaling/fixed-workload-scaling.svg)
+
+Each curve keeps its workload fixed. The n8/n16 curves show screening results
+with reused processes; n32 shows fresh-process medians. The n32 error bars use
+the observed runtime range divided into the fixed one-node median, rather than
+a statistical confidence interval. Smaller workloads remain limited by rotor
+processing, exchange and replicated solver work; n8 whole-case scaling is still
+2.24x. The larger case amortizes that overhead. The backend retains complete
+particle storage on every rank and the existing bounded deferred-GC workaround;
+this result does not establish distributed memory capacity or long-run safety.
+
+### Reproducing the n32 fresh-process checks
+
+The prepared v6 directory retains the frozen code, runtime and depot. The
+[archived launch wrappers](assets/mpi-cluster/scaling/v6/wrappers/wrapper-provenance.csv)
+record the exact job 37–39 scripts and their SHA256 hashes. Copies of the two
+n32-specific wrappers sit beside `code`, rather than modifying its frozen files.
+The sequence below first creates a new ordinary serial reference, then checks
+alternate one-node layouts and runs two additional repetitions of each node
+count. Each launch performs 144 warmup and 144 measured steps.
+
+```bash
+task_root=/home/ubuntu/flowunsteady-scaling-v6-20261013
+fresh_job=$(/opt/slurm/bin/sbatch --parsable \
+  --output="$task_root/logs/scaling-fresh-%j.log" \
+  "$task_root/code/scripts/cluster/scaling.sbatch" \
+  "$task_root" 1 2 4 sources dynamic readonly true 32 true cyclic)
+reference="$task_root/results/scaling-$fresh_job-serial-targets-1-dynamic-readonly-t8-r1-rep1"
+one_node="$task_root/results/scaling-$fresh_job-mpi-sources-1-dynamic-readonly-t2-r4-rep1"
+baseline_job=$(/opt/slurm/bin/sbatch --parsable --dependency="afterok:$fresh_job" \
+  --output="$task_root/logs/n32-baselines-%j.log" \
+  "$task_root/n32-one-node-baselines.sbatch" \
+  "$task_root" alternates "$reference" "$one_node")
+/opt/slurm/bin/sbatch --dependency="afterok:$baseline_job" \
+  --output="$task_root/logs/n32-repeats-%j.log" \
+  "$task_root/n32-source4r2-repeats.sbatch" "$task_root" "$reference"
+```
+
+Use the current summary script on the completed comparison reports with
+`--process-provenance fresh`. The declaration is supported by the separate
+process launches in these wrappers; explicit reused metadata is rejected.
+Deduplicate the shared serial reference and four-rank one-node artifact, and
+report the median and range for each layout. Reused-process screening remains
+a separate timing cohort.
