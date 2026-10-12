@@ -133,8 +133,9 @@ the different stages of design.
   > *• Maneuvering vehicle with prescribed kinematics*
   >
   > **rVPM Solver:**
-  > *Fast-multipole acceleration through [ExaFMM](https://joss.theoj.org/papers/10.21105/joss.03145)*
-  > *• CPU parallelization through OpenMP*
+  > *Fast-multipole acceleration through [FastMultipole.jl](https://github.com/byuflowlab/FastMultipole.jl)*
+  > *• CPU parallelization through Julia threads*
+  > *• Experimental MPI acceleration of one simulation with replicated particles ([setup and limitations](mpi.md))*
   > *• Second-order spatial accuracy and third-order RK time integration*
   > *• Numerically stable by reshaping particles subject to vortex stretching*
   > *• Subfilter-scale (SFS) model of turbulence associated to vortex stretching*
@@ -163,7 +164,7 @@ the different stages of design.
   > **Limitations:**
   > *Viscous drag and separation is only captured through airfoil lookup tables, without attempting to shed separation wakes*
   > *• Incompressible flow only (though wave drag can be captured through airfoil lookup tables)*
-  > *• CPU parallelization through OpenMP without support for distributed memory (no MPI, i.e., only single-node runs)*
+  > *• MPI execution retains the full particle field on each rank; particle capacity remains limited by individual-node memory*
   >
   > *Coded in [the Julia language](https://www.infoworld.com/article/3284380/what-is-julia-a-fresh-approach-to-numerical-computing.html) for Linux, MacOS, and Windows WSL.*
 

@@ -1,0 +1,18 @@
+[deps]
+AirfoilPrep = "008c61af-3522-4e14-81c5-9301d18a9f66"
+BroadbandBPM = "f91b385c-3ede-44c9-92c8-2a04f762ef2f"
+FLOWNoise = "d27480ee-285d-533b-ae3d-5018956ae0bc"
+FLOWUnsteady = "b491798d-ac6e-455f-a27c-49c10bb0a666"
+FLOWVLM = "1a3ff0be-0410-4572-aa62-b496bdd1f33b"
+FLOWVPM = "6e19019d-7c31-4940-9d16-c3f15dfe6020"
+FastMultipole = "ce07d0d3-2b9f-49ba-89eb-12c800257c85"
+MPIPreferences = "3da0fdf6-3ccc-4f1b-acd9-58baa6c99267"
+
+[sources]
+AirfoilPrep = {rev = "16db0d24f82b041382c70c7cb73ba6f0bd67df52", url = "https://github.com/byuflowlab/AirfoilPrep.jl"}
+BroadbandBPM = {rev = "b1440522d1f93e414d51d36207f9587ea6ed59e4", url = "https://github.com/byuflowlab/BPM.jl"}
+FLOWNoise = {rev = "4e0334c67f6cca570d564a8ba0fe674beb071215", url = "https://github.com/byuflowlab/FLOWNoise"}
+FLOWUnsteady = {path = "../.."}
+FLOWVLM = {rev = "f7c437250f25c8919c30a4088852e19fdfb360d6", url = "https://github.com/byuflowlab/FLOWVLM"}
+FLOWVPM = {rev = "4f433fb09f6baad25db65c9905e0d9cbb09663ce", url = "https://github.com/byuflowlab/FLOWVPM.jl"}
+FastMultipole = {rev = "21dcc2f2376ab67e0b2030d2f213d47dbae727ad", url = "https://github.com/byuflowlab/FastMultipole.jl"}

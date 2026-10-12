@@ -21,6 +21,7 @@ import DataFrames
 import JLD
 import Dates
 import PyPlot as plt
+import MPI
 
 using PyPlot: @L_str
 using LinearAlgebra: I
@@ -57,7 +58,7 @@ const Im = Array(1.0I, 3, 3)
 # ------------ HEADERS ---------------------------------------------------------
 for header_name in ["vehicle", "vehicle_vlm",
                     "maneuver", "rotor",
-                    "simulation_types", "simulation", "utils",
+                    "simulation_types", "parallel", "parallel_hybrid", "parallel_rotor", "simulation", "utils",
                     "processing", "processing_force", "monitors",
                     "noise_wopwop", "noise_bpm", "postprocessing",
                     "openvsp"]

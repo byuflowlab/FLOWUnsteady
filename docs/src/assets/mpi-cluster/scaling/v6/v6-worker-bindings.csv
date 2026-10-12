@@ -1,0 +1,569 @@
+job,run,rank,hostname,allowed_cpus,current_cpu,julia_thread_id,native_tid,original_allowed_cpus,physical_core_id,physical_package_id,thread_pool
+37,scaling-37-serial-targets-1-dynamic-readonly-t8-r1-rep1,0,compute-dy-c6a4xlarge-1,[0],0,2,7285,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",0,0,default
+37,scaling-37-serial-targets-1-dynamic-readonly-t8-r1-rep1,0,compute-dy-c6a4xlarge-1,[1],1,3,7286,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",1,0,default
+37,scaling-37-serial-targets-1-dynamic-readonly-t8-r1-rep1,0,compute-dy-c6a4xlarge-1,[2],2,4,7287,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",2,0,default
+37,scaling-37-serial-targets-1-dynamic-readonly-t8-r1-rep1,0,compute-dy-c6a4xlarge-1,[3],3,5,7288,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",3,0,default
+37,scaling-37-serial-targets-1-dynamic-readonly-t8-r1-rep1,0,compute-dy-c6a4xlarge-1,[4],4,6,7289,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",4,0,default
+37,scaling-37-serial-targets-1-dynamic-readonly-t8-r1-rep1,0,compute-dy-c6a4xlarge-1,[5],5,7,7290,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",5,0,default
+37,scaling-37-serial-targets-1-dynamic-readonly-t8-r1-rep1,0,compute-dy-c6a4xlarge-1,[6],6,8,7291,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",6,0,default
+37,scaling-37-serial-targets-1-dynamic-readonly-t8-r1-rep1,0,compute-dy-c6a4xlarge-1,[7],7,9,7292,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",7,0,default
+38,mpi-r1-t8,0,compute-dy-c6a4xlarge-1,[0],0,2,7872,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",0,0,default
+38,mpi-r1-t8,0,compute-dy-c6a4xlarge-1,[1],1,3,7873,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",1,0,default
+38,mpi-r1-t8,0,compute-dy-c6a4xlarge-1,[2],2,4,7874,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",2,0,default
+38,mpi-r1-t8,0,compute-dy-c6a4xlarge-1,[3],3,5,7875,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",3,0,default
+38,mpi-r1-t8,0,compute-dy-c6a4xlarge-1,[4],4,6,7876,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",4,0,default
+38,mpi-r1-t8,0,compute-dy-c6a4xlarge-1,[5],5,7,7877,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",5,0,default
+38,mpi-r1-t8,0,compute-dy-c6a4xlarge-1,[6],6,8,7878,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",6,0,default
+38,mpi-r1-t8,0,compute-dy-c6a4xlarge-1,[7],7,9,7879,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",7,0,default
+38,mpi-r2-t4,0,compute-dy-c6a4xlarge-1,[0],0,2,8038,"[0, 1, 2, 3, 8, 9, 10, 11]",0,0,default
+38,mpi-r2-t4,0,compute-dy-c6a4xlarge-1,[1],1,3,8039,"[0, 1, 2, 3, 8, 9, 10, 11]",1,0,default
+38,mpi-r2-t4,0,compute-dy-c6a4xlarge-1,[2],2,4,8040,"[0, 1, 2, 3, 8, 9, 10, 11]",2,0,default
+38,mpi-r2-t4,0,compute-dy-c6a4xlarge-1,[3],3,5,8041,"[0, 1, 2, 3, 8, 9, 10, 11]",3,0,default
+38,mpi-r2-t4,1,compute-dy-c6a4xlarge-1,[4],4,2,8043,"[4, 5, 6, 7, 12, 13, 14, 15]",4,0,default
+38,mpi-r2-t4,1,compute-dy-c6a4xlarge-1,[5],5,3,8044,"[4, 5, 6, 7, 12, 13, 14, 15]",5,0,default
+38,mpi-r2-t4,1,compute-dy-c6a4xlarge-1,[6],6,4,8045,"[4, 5, 6, 7, 12, 13, 14, 15]",6,0,default
+38,mpi-r2-t4,1,compute-dy-c6a4xlarge-1,[7],7,5,8048,"[4, 5, 6, 7, 12, 13, 14, 15]",7,0,default
+37,scaling-37-mpi-sources-1-dynamic-readonly-t2-r4-rep1,0,compute-dy-c6a4xlarge-1,[0],0,2,7562,"[0, 1, 8, 9]",0,0,default
+37,scaling-37-mpi-sources-1-dynamic-readonly-t2-r4-rep1,0,compute-dy-c6a4xlarge-1,[1],1,3,7563,"[0, 1, 8, 9]",1,0,default
+37,scaling-37-mpi-sources-1-dynamic-readonly-t2-r4-rep1,1,compute-dy-c6a4xlarge-1,[2],2,2,7571,"[2, 3, 10, 11]",2,0,default
+37,scaling-37-mpi-sources-1-dynamic-readonly-t2-r4-rep1,1,compute-dy-c6a4xlarge-1,[3],3,3,7572,"[2, 3, 10, 11]",3,0,default
+37,scaling-37-mpi-sources-1-dynamic-readonly-t2-r4-rep1,2,compute-dy-c6a4xlarge-1,[4],4,2,7565,"[4, 5, 12, 13]",4,0,default
+37,scaling-37-mpi-sources-1-dynamic-readonly-t2-r4-rep1,2,compute-dy-c6a4xlarge-1,[5],5,3,7566,"[4, 5, 12, 13]",5,0,default
+37,scaling-37-mpi-sources-1-dynamic-readonly-t2-r4-rep1,3,compute-dy-c6a4xlarge-1,[6],6,2,7567,"[6, 7, 14, 15]",6,0,default
+37,scaling-37-mpi-sources-1-dynamic-readonly-t2-r4-rep1,3,compute-dy-c6a4xlarge-1,[7],7,3,7568,"[6, 7, 14, 15]",7,0,default
+39,mpi-sources-n3-r12-t2-rep1,0,compute-dy-c6a4xlarge-1,[0],0,2,8300,"[0, 1, 8, 9]",0,0,default
+39,mpi-sources-n3-r12-t2-rep1,0,compute-dy-c6a4xlarge-1,[1],1,3,8301,"[0, 1, 8, 9]",1,0,default
+39,mpi-sources-n3-r12-t2-rep1,1,compute-dy-c6a4xlarge-1,[2],2,2,8293,"[2, 3, 10, 11]",2,0,default
+39,mpi-sources-n3-r12-t2-rep1,1,compute-dy-c6a4xlarge-1,[3],3,3,8295,"[2, 3, 10, 11]",3,0,default
+39,mpi-sources-n3-r12-t2-rep1,2,compute-dy-c6a4xlarge-1,[4],4,2,8291,"[4, 5, 12, 13]",4,0,default
+39,mpi-sources-n3-r12-t2-rep1,2,compute-dy-c6a4xlarge-1,[5],5,3,8292,"[4, 5, 12, 13]",5,0,default
+39,mpi-sources-n3-r12-t2-rep1,3,compute-dy-c6a4xlarge-1,[6],6,2,8296,"[6, 7, 14, 15]",6,0,default
+39,mpi-sources-n3-r12-t2-rep1,3,compute-dy-c6a4xlarge-1,[7],7,3,8297,"[6, 7, 14, 15]",7,0,default
+39,mpi-sources-n3-r12-t2-rep1,4,compute-dy-c6a4xlarge-2,[0],0,2,3353,"[0, 1, 8, 9]",0,0,default
+39,mpi-sources-n3-r12-t2-rep1,4,compute-dy-c6a4xlarge-2,[1],1,3,3355,"[0, 1, 8, 9]",1,0,default
+39,mpi-sources-n3-r12-t2-rep1,5,compute-dy-c6a4xlarge-2,[2],2,2,3351,"[2, 3, 10, 11]",2,0,default
+39,mpi-sources-n3-r12-t2-rep1,5,compute-dy-c6a4xlarge-2,[3],3,3,3354,"[2, 3, 10, 11]",3,0,default
+39,mpi-sources-n3-r12-t2-rep1,6,compute-dy-c6a4xlarge-2,[4],4,2,3359,"[4, 5, 12, 13]",4,0,default
+39,mpi-sources-n3-r12-t2-rep1,6,compute-dy-c6a4xlarge-2,[5],5,3,3360,"[4, 5, 12, 13]",5,0,default
+39,mpi-sources-n3-r12-t2-rep1,7,compute-dy-c6a4xlarge-2,[6],6,2,3350,"[6, 7, 14, 15]",6,0,default
+39,mpi-sources-n3-r12-t2-rep1,7,compute-dy-c6a4xlarge-2,[7],7,3,3352,"[6, 7, 14, 15]",7,0,default
+39,mpi-sources-n3-r12-t2-rep1,8,compute-dy-c6a4xlarge-3,[0],0,2,3364,"[0, 1, 8, 9]",0,0,default
+39,mpi-sources-n3-r12-t2-rep1,8,compute-dy-c6a4xlarge-3,[1],1,3,3365,"[0, 1, 8, 9]",1,0,default
+39,mpi-sources-n3-r12-t2-rep1,9,compute-dy-c6a4xlarge-3,[2],2,2,3358,"[2, 3, 10, 11]",2,0,default
+39,mpi-sources-n3-r12-t2-rep1,9,compute-dy-c6a4xlarge-3,[3],3,3,3361,"[2, 3, 10, 11]",3,0,default
+39,mpi-sources-n3-r12-t2-rep1,10,compute-dy-c6a4xlarge-3,[4],4,2,3357,"[4, 5, 12, 13]",4,0,default
+39,mpi-sources-n3-r12-t2-rep1,10,compute-dy-c6a4xlarge-3,[5],5,3,3359,"[4, 5, 12, 13]",5,0,default
+39,mpi-sources-n3-r12-t2-rep1,11,compute-dy-c6a4xlarge-3,[6],6,2,3355,"[6, 7, 14, 15]",6,0,default
+39,mpi-sources-n3-r12-t2-rep1,11,compute-dy-c6a4xlarge-3,[7],7,3,3356,"[6, 7, 14, 15]",7,0,default
+39,mpi-sources-n1-r4-t2-rep1,0,compute-dy-c6a4xlarge-1,[0],0,2,8404,"[0, 1, 8, 9]",0,0,default
+39,mpi-sources-n1-r4-t2-rep1,0,compute-dy-c6a4xlarge-1,[1],1,3,8405,"[0, 1, 8, 9]",1,0,default
+39,mpi-sources-n1-r4-t2-rep1,1,compute-dy-c6a4xlarge-1,[2],2,2,8401,"[2, 3, 10, 11]",2,0,default
+39,mpi-sources-n1-r4-t2-rep1,1,compute-dy-c6a4xlarge-1,[3],3,3,8402,"[2, 3, 10, 11]",3,0,default
+39,mpi-sources-n1-r4-t2-rep1,2,compute-dy-c6a4xlarge-1,[4],4,2,8395,"[4, 5, 12, 13]",4,0,default
+39,mpi-sources-n1-r4-t2-rep1,2,compute-dy-c6a4xlarge-1,[5],5,3,8396,"[4, 5, 12, 13]",5,0,default
+39,mpi-sources-n1-r4-t2-rep1,3,compute-dy-c6a4xlarge-1,[6],6,2,8398,"[6, 7, 14, 15]",6,0,default
+39,mpi-sources-n1-r4-t2-rep1,3,compute-dy-c6a4xlarge-1,[7],7,3,8399,"[6, 7, 14, 15]",7,0,default
+39,mpi-sources-n2-r8-t2-rep1,0,compute-dy-c6a4xlarge-1,[0],0,2,8564,"[0, 1, 8, 9]",0,0,default
+39,mpi-sources-n2-r8-t2-rep1,0,compute-dy-c6a4xlarge-1,[1],1,3,8565,"[0, 1, 8, 9]",1,0,default
+39,mpi-sources-n2-r8-t2-rep1,1,compute-dy-c6a4xlarge-1,[2],2,2,8568,"[2, 3, 10, 11]",2,0,default
+39,mpi-sources-n2-r8-t2-rep1,1,compute-dy-c6a4xlarge-1,[3],3,3,8570,"[2, 3, 10, 11]",3,0,default
+39,mpi-sources-n2-r8-t2-rep1,2,compute-dy-c6a4xlarge-1,[4],4,2,8567,"[4, 5, 12, 13]",4,0,default
+39,mpi-sources-n2-r8-t2-rep1,2,compute-dy-c6a4xlarge-1,[5],5,3,8569,"[4, 5, 12, 13]",5,0,default
+39,mpi-sources-n2-r8-t2-rep1,3,compute-dy-c6a4xlarge-1,[6],6,2,8579,"[6, 7, 14, 15]",6,0,default
+39,mpi-sources-n2-r8-t2-rep1,3,compute-dy-c6a4xlarge-1,[7],7,3,8580,"[6, 7, 14, 15]",7,0,default
+39,mpi-sources-n2-r8-t2-rep1,4,compute-dy-c6a4xlarge-2,[0],0,2,4559,"[0, 1, 8, 9]",0,0,default
+39,mpi-sources-n2-r8-t2-rep1,4,compute-dy-c6a4xlarge-2,[1],1,3,4560,"[0, 1, 8, 9]",1,0,default
+39,mpi-sources-n2-r8-t2-rep1,5,compute-dy-c6a4xlarge-2,[2],2,2,4561,"[2, 3, 10, 11]",2,0,default
+39,mpi-sources-n2-r8-t2-rep1,5,compute-dy-c6a4xlarge-2,[3],3,3,4563,"[2, 3, 10, 11]",3,0,default
+39,mpi-sources-n2-r8-t2-rep1,6,compute-dy-c6a4xlarge-2,[4],4,2,4557,"[4, 5, 12, 13]",4,0,default
+39,mpi-sources-n2-r8-t2-rep1,6,compute-dy-c6a4xlarge-2,[5],5,3,4558,"[4, 5, 12, 13]",5,0,default
+39,mpi-sources-n2-r8-t2-rep1,7,compute-dy-c6a4xlarge-2,[6],6,2,4566,"[6, 7, 14, 15]",6,0,default
+39,mpi-sources-n2-r8-t2-rep1,7,compute-dy-c6a4xlarge-2,[7],7,3,4567,"[6, 7, 14, 15]",7,0,default
+39,mpi-sources-n1-r4-t2-rep2,0,compute-dy-c6a4xlarge-2,[0],0,2,4733,"[0, 1, 8, 9]",0,0,default
+39,mpi-sources-n1-r4-t2-rep2,0,compute-dy-c6a4xlarge-2,[1],1,3,4734,"[0, 1, 8, 9]",1,0,default
+39,mpi-sources-n1-r4-t2-rep2,1,compute-dy-c6a4xlarge-2,[2],2,2,4727,"[2, 3, 10, 11]",2,0,default
+39,mpi-sources-n1-r4-t2-rep2,1,compute-dy-c6a4xlarge-2,[3],3,3,4729,"[2, 3, 10, 11]",3,0,default
+39,mpi-sources-n1-r4-t2-rep2,2,compute-dy-c6a4xlarge-2,[4],4,2,4736,"[4, 5, 12, 13]",4,0,default
+39,mpi-sources-n1-r4-t2-rep2,2,compute-dy-c6a4xlarge-2,[5],5,3,4737,"[4, 5, 12, 13]",5,0,default
+39,mpi-sources-n1-r4-t2-rep2,3,compute-dy-c6a4xlarge-2,[6],6,2,4728,"[6, 7, 14, 15]",6,0,default
+39,mpi-sources-n1-r4-t2-rep2,3,compute-dy-c6a4xlarge-2,[7],7,3,4730,"[6, 7, 14, 15]",7,0,default
+39,mpi-sources-n2-r8-t2-rep2,0,compute-dy-c6a4xlarge-2,[0],0,2,4901,"[0, 1, 8, 9]",0,0,default
+39,mpi-sources-n2-r8-t2-rep2,0,compute-dy-c6a4xlarge-2,[1],1,3,4903,"[0, 1, 8, 9]",1,0,default
+39,mpi-sources-n2-r8-t2-rep2,1,compute-dy-c6a4xlarge-2,[2],2,2,4902,"[2, 3, 10, 11]",2,0,default
+39,mpi-sources-n2-r8-t2-rep2,1,compute-dy-c6a4xlarge-2,[3],3,3,4904,"[2, 3, 10, 11]",3,0,default
+39,mpi-sources-n2-r8-t2-rep2,2,compute-dy-c6a4xlarge-2,[4],4,2,4900,"[4, 5, 12, 13]",4,0,default
+39,mpi-sources-n2-r8-t2-rep2,2,compute-dy-c6a4xlarge-2,[5],5,3,4907,"[4, 5, 12, 13]",5,0,default
+39,mpi-sources-n2-r8-t2-rep2,3,compute-dy-c6a4xlarge-2,[6],6,2,4897,"[6, 7, 14, 15]",6,0,default
+39,mpi-sources-n2-r8-t2-rep2,3,compute-dy-c6a4xlarge-2,[7],7,3,4898,"[6, 7, 14, 15]",7,0,default
+39,mpi-sources-n2-r8-t2-rep2,4,compute-dy-c6a4xlarge-3,[0],0,2,4753,"[0, 1, 8, 9]",0,0,default
+39,mpi-sources-n2-r8-t2-rep2,4,compute-dy-c6a4xlarge-3,[1],1,3,4754,"[0, 1, 8, 9]",1,0,default
+39,mpi-sources-n2-r8-t2-rep2,5,compute-dy-c6a4xlarge-3,[2],2,2,4745,"[2, 3, 10, 11]",2,0,default
+39,mpi-sources-n2-r8-t2-rep2,5,compute-dy-c6a4xlarge-3,[3],3,3,4747,"[2, 3, 10, 11]",3,0,default
+39,mpi-sources-n2-r8-t2-rep2,6,compute-dy-c6a4xlarge-3,[4],4,2,4744,"[4, 5, 12, 13]",4,0,default
+39,mpi-sources-n2-r8-t2-rep2,6,compute-dy-c6a4xlarge-3,[5],5,3,4746,"[4, 5, 12, 13]",5,0,default
+39,mpi-sources-n2-r8-t2-rep2,7,compute-dy-c6a4xlarge-3,[6],6,2,4749,"[6, 7, 14, 15]",6,0,default
+39,mpi-sources-n2-r8-t2-rep2,7,compute-dy-c6a4xlarge-3,[7],7,3,4751,"[6, 7, 14, 15]",7,0,default
+39,mpi-sources-n3-r12-t2-rep2,0,compute-dy-c6a4xlarge-1,[0],0,2,8907,"[0, 1, 8, 9]",0,0,default
+39,mpi-sources-n3-r12-t2-rep2,0,compute-dy-c6a4xlarge-1,[1],1,3,8908,"[0, 1, 8, 9]",1,0,default
+39,mpi-sources-n3-r12-t2-rep2,1,compute-dy-c6a4xlarge-1,[2],2,2,8904,"[2, 3, 10, 11]",2,0,default
+39,mpi-sources-n3-r12-t2-rep2,1,compute-dy-c6a4xlarge-1,[3],3,3,8905,"[2, 3, 10, 11]",3,0,default
+39,mpi-sources-n3-r12-t2-rep2,2,compute-dy-c6a4xlarge-1,[4],4,2,8909,"[4, 5, 12, 13]",4,0,default
+39,mpi-sources-n3-r12-t2-rep2,2,compute-dy-c6a4xlarge-1,[5],5,3,8910,"[4, 5, 12, 13]",5,0,default
+39,mpi-sources-n3-r12-t2-rep2,3,compute-dy-c6a4xlarge-1,[6],6,2,8913,"[6, 7, 14, 15]",6,0,default
+39,mpi-sources-n3-r12-t2-rep2,3,compute-dy-c6a4xlarge-1,[7],7,3,8914,"[6, 7, 14, 15]",7,0,default
+39,mpi-sources-n3-r12-t2-rep2,4,compute-dy-c6a4xlarge-2,[0],0,2,5051,"[0, 1, 8, 9]",0,0,default
+39,mpi-sources-n3-r12-t2-rep2,4,compute-dy-c6a4xlarge-2,[1],1,3,5052,"[0, 1, 8, 9]",1,0,default
+39,mpi-sources-n3-r12-t2-rep2,5,compute-dy-c6a4xlarge-2,[2],2,2,5054,"[2, 3, 10, 11]",2,0,default
+39,mpi-sources-n3-r12-t2-rep2,5,compute-dy-c6a4xlarge-2,[3],3,3,5057,"[2, 3, 10, 11]",3,0,default
+39,mpi-sources-n3-r12-t2-rep2,6,compute-dy-c6a4xlarge-2,[4],4,2,5053,"[4, 5, 12, 13]",4,0,default
+39,mpi-sources-n3-r12-t2-rep2,6,compute-dy-c6a4xlarge-2,[5],5,3,5055,"[4, 5, 12, 13]",5,0,default
+39,mpi-sources-n3-r12-t2-rep2,7,compute-dy-c6a4xlarge-2,[6],6,2,5067,"[6, 7, 14, 15]",6,0,default
+39,mpi-sources-n3-r12-t2-rep2,7,compute-dy-c6a4xlarge-2,[7],7,3,5068,"[6, 7, 14, 15]",7,0,default
+39,mpi-sources-n3-r12-t2-rep2,8,compute-dy-c6a4xlarge-3,[0],0,2,4899,"[0, 1, 8, 9]",0,0,default
+39,mpi-sources-n3-r12-t2-rep2,8,compute-dy-c6a4xlarge-3,[1],1,3,4901,"[0, 1, 8, 9]",1,0,default
+39,mpi-sources-n3-r12-t2-rep2,9,compute-dy-c6a4xlarge-3,[2],2,2,4897,"[2, 3, 10, 11]",2,0,default
+39,mpi-sources-n3-r12-t2-rep2,9,compute-dy-c6a4xlarge-3,[3],3,3,4898,"[2, 3, 10, 11]",3,0,default
+39,mpi-sources-n3-r12-t2-rep2,10,compute-dy-c6a4xlarge-3,[4],4,2,4894,"[4, 5, 12, 13]",4,0,default
+39,mpi-sources-n3-r12-t2-rep2,10,compute-dy-c6a4xlarge-3,[5],5,3,4895,"[4, 5, 12, 13]",5,0,default
+39,mpi-sources-n3-r12-t2-rep2,11,compute-dy-c6a4xlarge-3,[6],6,2,4903,"[6, 7, 14, 15]",6,0,default
+39,mpi-sources-n3-r12-t2-rep2,11,compute-dy-c6a4xlarge-3,[7],7,3,4904,"[6, 7, 14, 15]",7,0,default
+32,serial-targets-static-1-r1-rep1,0,compute-dy-c6a4xlarge-1,[0],0,2,6170,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",0,0,default
+32,serial-targets-static-1-r1-rep1,0,compute-dy-c6a4xlarge-1,[1],1,3,6171,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",1,0,default
+32,serial-targets-static-1-r1-rep1,0,compute-dy-c6a4xlarge-1,[2],2,4,6172,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",2,0,default
+32,serial-targets-static-1-r1-rep1,0,compute-dy-c6a4xlarge-1,[3],3,5,6173,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",3,0,default
+32,serial-targets-static-1-r1-rep1,0,compute-dy-c6a4xlarge-1,[4],4,6,6174,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",4,0,default
+32,serial-targets-static-1-r1-rep1,0,compute-dy-c6a4xlarge-1,[5],5,7,6175,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",5,0,default
+32,serial-targets-static-1-r1-rep1,0,compute-dy-c6a4xlarge-1,[6],6,8,6176,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",6,0,default
+32,serial-targets-static-1-r1-rep1,0,compute-dy-c6a4xlarge-1,[7],7,9,6177,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",7,0,default
+32,mpi-sources-dynamic-3-r3-rep1,0,compute-dy-c6a4xlarge-1,[0],0,2,6170,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",0,0,default
+32,mpi-sources-dynamic-3-r3-rep1,0,compute-dy-c6a4xlarge-1,[1],1,3,6171,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",1,0,default
+32,mpi-sources-dynamic-3-r3-rep1,0,compute-dy-c6a4xlarge-1,[2],2,4,6172,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",2,0,default
+32,mpi-sources-dynamic-3-r3-rep1,0,compute-dy-c6a4xlarge-1,[3],3,5,6173,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",3,0,default
+32,mpi-sources-dynamic-3-r3-rep1,0,compute-dy-c6a4xlarge-1,[4],4,6,6174,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",4,0,default
+32,mpi-sources-dynamic-3-r3-rep1,0,compute-dy-c6a4xlarge-1,[5],5,7,6175,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",5,0,default
+32,mpi-sources-dynamic-3-r3-rep1,0,compute-dy-c6a4xlarge-1,[6],6,8,6176,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",6,0,default
+32,mpi-sources-dynamic-3-r3-rep1,0,compute-dy-c6a4xlarge-1,[7],7,9,6177,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",7,0,default
+32,mpi-sources-dynamic-3-r3-rep1,1,compute-dy-c6a4xlarge-2,[0],0,2,5758,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",0,0,default
+32,mpi-sources-dynamic-3-r3-rep1,1,compute-dy-c6a4xlarge-2,[1],1,3,5759,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",1,0,default
+32,mpi-sources-dynamic-3-r3-rep1,1,compute-dy-c6a4xlarge-2,[2],2,4,5760,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",2,0,default
+32,mpi-sources-dynamic-3-r3-rep1,1,compute-dy-c6a4xlarge-2,[3],3,5,5761,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",3,0,default
+32,mpi-sources-dynamic-3-r3-rep1,1,compute-dy-c6a4xlarge-2,[4],4,6,5762,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",4,0,default
+32,mpi-sources-dynamic-3-r3-rep1,1,compute-dy-c6a4xlarge-2,[5],5,7,5763,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",5,0,default
+32,mpi-sources-dynamic-3-r3-rep1,1,compute-dy-c6a4xlarge-2,[6],6,8,5764,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",6,0,default
+32,mpi-sources-dynamic-3-r3-rep1,1,compute-dy-c6a4xlarge-2,[7],7,9,5765,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",7,0,default
+32,mpi-sources-dynamic-3-r3-rep1,2,compute-dy-c6a4xlarge-3,[0],0,2,5462,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",0,0,default
+32,mpi-sources-dynamic-3-r3-rep1,2,compute-dy-c6a4xlarge-3,[1],1,3,5463,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",1,0,default
+32,mpi-sources-dynamic-3-r3-rep1,2,compute-dy-c6a4xlarge-3,[2],2,4,5464,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",2,0,default
+32,mpi-sources-dynamic-3-r3-rep1,2,compute-dy-c6a4xlarge-3,[3],3,5,5465,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",3,0,default
+32,mpi-sources-dynamic-3-r3-rep1,2,compute-dy-c6a4xlarge-3,[4],4,6,5466,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",4,0,default
+32,mpi-sources-dynamic-3-r3-rep1,2,compute-dy-c6a4xlarge-3,[5],5,7,5467,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",5,0,default
+32,mpi-sources-dynamic-3-r3-rep1,2,compute-dy-c6a4xlarge-3,[6],6,8,5468,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",6,0,default
+32,mpi-sources-dynamic-3-r3-rep1,2,compute-dy-c6a4xlarge-3,[7],7,9,5469,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",7,0,default
+32,mpi-sources-dynamic-1-r1-rep1,0,compute-dy-c6a4xlarge-1,[0],0,2,6170,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",0,0,default
+32,mpi-sources-dynamic-1-r1-rep1,0,compute-dy-c6a4xlarge-1,[1],1,3,6171,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",1,0,default
+32,mpi-sources-dynamic-1-r1-rep1,0,compute-dy-c6a4xlarge-1,[2],2,4,6172,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",2,0,default
+32,mpi-sources-dynamic-1-r1-rep1,0,compute-dy-c6a4xlarge-1,[3],3,5,6173,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",3,0,default
+32,mpi-sources-dynamic-1-r1-rep1,0,compute-dy-c6a4xlarge-1,[4],4,6,6174,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",4,0,default
+32,mpi-sources-dynamic-1-r1-rep1,0,compute-dy-c6a4xlarge-1,[5],5,7,6175,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",5,0,default
+32,mpi-sources-dynamic-1-r1-rep1,0,compute-dy-c6a4xlarge-1,[6],6,8,6176,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",6,0,default
+32,mpi-sources-dynamic-1-r1-rep1,0,compute-dy-c6a4xlarge-1,[7],7,9,6177,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",7,0,default
+32,mpi-sources-dynamic-2-r2-rep1,0,compute-dy-c6a4xlarge-1,[0],0,2,6170,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",0,0,default
+32,mpi-sources-dynamic-2-r2-rep1,0,compute-dy-c6a4xlarge-1,[1],1,3,6171,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",1,0,default
+32,mpi-sources-dynamic-2-r2-rep1,0,compute-dy-c6a4xlarge-1,[2],2,4,6172,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",2,0,default
+32,mpi-sources-dynamic-2-r2-rep1,0,compute-dy-c6a4xlarge-1,[3],3,5,6173,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",3,0,default
+32,mpi-sources-dynamic-2-r2-rep1,0,compute-dy-c6a4xlarge-1,[4],4,6,6174,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",4,0,default
+32,mpi-sources-dynamic-2-r2-rep1,0,compute-dy-c6a4xlarge-1,[5],5,7,6175,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",5,0,default
+32,mpi-sources-dynamic-2-r2-rep1,0,compute-dy-c6a4xlarge-1,[6],6,8,6176,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",6,0,default
+32,mpi-sources-dynamic-2-r2-rep1,0,compute-dy-c6a4xlarge-1,[7],7,9,6177,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",7,0,default
+32,mpi-sources-dynamic-2-r2-rep1,1,compute-dy-c6a4xlarge-2,[0],0,2,5758,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",0,0,default
+32,mpi-sources-dynamic-2-r2-rep1,1,compute-dy-c6a4xlarge-2,[1],1,3,5759,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",1,0,default
+32,mpi-sources-dynamic-2-r2-rep1,1,compute-dy-c6a4xlarge-2,[2],2,4,5760,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",2,0,default
+32,mpi-sources-dynamic-2-r2-rep1,1,compute-dy-c6a4xlarge-2,[3],3,5,5761,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",3,0,default
+32,mpi-sources-dynamic-2-r2-rep1,1,compute-dy-c6a4xlarge-2,[4],4,6,5762,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",4,0,default
+32,mpi-sources-dynamic-2-r2-rep1,1,compute-dy-c6a4xlarge-2,[5],5,7,5763,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",5,0,default
+32,mpi-sources-dynamic-2-r2-rep1,1,compute-dy-c6a4xlarge-2,[6],6,8,5764,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",6,0,default
+32,mpi-sources-dynamic-2-r2-rep1,1,compute-dy-c6a4xlarge-2,[7],7,9,5765,"[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]",7,0,default
+33,serial-targets-static-1-r1-rep1,0,compute-dy-c6a4xlarge-1,[0],0,2,6321,"[0, 1, 2, 3, 8, 9, 10, 11]",0,0,default
+33,serial-targets-static-1-r1-rep1,0,compute-dy-c6a4xlarge-1,[1],1,3,6322,"[0, 1, 2, 3, 8, 9, 10, 11]",1,0,default
+33,serial-targets-static-1-r1-rep1,0,compute-dy-c6a4xlarge-1,[2],2,4,6325,"[0, 1, 2, 3, 8, 9, 10, 11]",2,0,default
+33,serial-targets-static-1-r1-rep1,0,compute-dy-c6a4xlarge-1,[3],3,5,6327,"[0, 1, 2, 3, 8, 9, 10, 11]",3,0,default
+33,mpi-sources-dynamic-3-r6-rep1,0,compute-dy-c6a4xlarge-1,[0],0,2,6321,"[0, 1, 2, 3, 8, 9, 10, 11]",0,0,default
+33,mpi-sources-dynamic-3-r6-rep1,0,compute-dy-c6a4xlarge-1,[1],1,3,6322,"[0, 1, 2, 3, 8, 9, 10, 11]",1,0,default
+33,mpi-sources-dynamic-3-r6-rep1,0,compute-dy-c6a4xlarge-1,[2],2,4,6325,"[0, 1, 2, 3, 8, 9, 10, 11]",2,0,default
+33,mpi-sources-dynamic-3-r6-rep1,0,compute-dy-c6a4xlarge-1,[3],3,5,6327,"[0, 1, 2, 3, 8, 9, 10, 11]",3,0,default
+33,mpi-sources-dynamic-3-r6-rep1,1,compute-dy-c6a4xlarge-1,[4],4,2,6323,"[4, 5, 6, 7, 12, 13, 14, 15]",4,0,default
+33,mpi-sources-dynamic-3-r6-rep1,1,compute-dy-c6a4xlarge-1,[5],5,3,6324,"[4, 5, 6, 7, 12, 13, 14, 15]",5,0,default
+33,mpi-sources-dynamic-3-r6-rep1,1,compute-dy-c6a4xlarge-1,[6],6,4,6326,"[4, 5, 6, 7, 12, 13, 14, 15]",6,0,default
+33,mpi-sources-dynamic-3-r6-rep1,1,compute-dy-c6a4xlarge-1,[7],7,5,6328,"[4, 5, 6, 7, 12, 13, 14, 15]",7,0,default
+33,mpi-sources-dynamic-3-r6-rep1,2,compute-dy-c6a4xlarge-2,[0],0,2,6194,"[0, 1, 2, 3, 8, 9, 10, 11]",0,0,default
+33,mpi-sources-dynamic-3-r6-rep1,2,compute-dy-c6a4xlarge-2,[1],1,3,6195,"[0, 1, 2, 3, 8, 9, 10, 11]",1,0,default
+33,mpi-sources-dynamic-3-r6-rep1,2,compute-dy-c6a4xlarge-2,[2],2,4,6196,"[0, 1, 2, 3, 8, 9, 10, 11]",2,0,default
+33,mpi-sources-dynamic-3-r6-rep1,2,compute-dy-c6a4xlarge-2,[3],3,5,6197,"[0, 1, 2, 3, 8, 9, 10, 11]",3,0,default
+33,mpi-sources-dynamic-3-r6-rep1,3,compute-dy-c6a4xlarge-2,[4],4,2,6201,"[4, 5, 6, 7, 12, 13, 14, 15]",4,0,default
+33,mpi-sources-dynamic-3-r6-rep1,3,compute-dy-c6a4xlarge-2,[5],5,3,6202,"[4, 5, 6, 7, 12, 13, 14, 15]",5,0,default
+33,mpi-sources-dynamic-3-r6-rep1,3,compute-dy-c6a4xlarge-2,[6],6,4,6203,"[4, 5, 6, 7, 12, 13, 14, 15]",6,0,default
+33,mpi-sources-dynamic-3-r6-rep1,3,compute-dy-c6a4xlarge-2,[7],7,5,6204,"[4, 5, 6, 7, 12, 13, 14, 15]",7,0,default
+33,mpi-sources-dynamic-3-r6-rep1,4,compute-dy-c6a4xlarge-3,[0],0,2,5609,"[0, 1, 2, 3, 8, 9, 10, 11]",0,0,default
+33,mpi-sources-dynamic-3-r6-rep1,4,compute-dy-c6a4xlarge-3,[1],1,3,5610,"[0, 1, 2, 3, 8, 9, 10, 11]",1,0,default
+33,mpi-sources-dynamic-3-r6-rep1,4,compute-dy-c6a4xlarge-3,[2],2,4,5612,"[0, 1, 2, 3, 8, 9, 10, 11]",2,0,default
+33,mpi-sources-dynamic-3-r6-rep1,4,compute-dy-c6a4xlarge-3,[3],3,5,5614,"[0, 1, 2, 3, 8, 9, 10, 11]",3,0,default
+33,mpi-sources-dynamic-3-r6-rep1,5,compute-dy-c6a4xlarge-3,[4],4,2,5611,"[4, 5, 6, 7, 12, 13, 14, 15]",4,0,default
+33,mpi-sources-dynamic-3-r6-rep1,5,compute-dy-c6a4xlarge-3,[5],5,3,5613,"[4, 5, 6, 7, 12, 13, 14, 15]",5,0,default
+33,mpi-sources-dynamic-3-r6-rep1,5,compute-dy-c6a4xlarge-3,[6],6,4,5615,"[4, 5, 6, 7, 12, 13, 14, 15]",6,0,default
+33,mpi-sources-dynamic-3-r6-rep1,5,compute-dy-c6a4xlarge-3,[7],7,5,5616,"[4, 5, 6, 7, 12, 13, 14, 15]",7,0,default
+33,mpi-sources-dynamic-1-r2-rep1,0,compute-dy-c6a4xlarge-1,[0],0,2,6321,"[0, 1, 2, 3, 8, 9, 10, 11]",0,0,default
+33,mpi-sources-dynamic-1-r2-rep1,0,compute-dy-c6a4xlarge-1,[1],1,3,6322,"[0, 1, 2, 3, 8, 9, 10, 11]",1,0,default
+33,mpi-sources-dynamic-1-r2-rep1,0,compute-dy-c6a4xlarge-1,[2],2,4,6325,"[0, 1, 2, 3, 8, 9, 10, 11]",2,0,default
+33,mpi-sources-dynamic-1-r2-rep1,0,compute-dy-c6a4xlarge-1,[3],3,5,6327,"[0, 1, 2, 3, 8, 9, 10, 11]",3,0,default
+33,mpi-sources-dynamic-1-r2-rep1,1,compute-dy-c6a4xlarge-1,[4],4,2,6323,"[4, 5, 6, 7, 12, 13, 14, 15]",4,0,default
+33,mpi-sources-dynamic-1-r2-rep1,1,compute-dy-c6a4xlarge-1,[5],5,3,6324,"[4, 5, 6, 7, 12, 13, 14, 15]",5,0,default
+33,mpi-sources-dynamic-1-r2-rep1,1,compute-dy-c6a4xlarge-1,[6],6,4,6326,"[4, 5, 6, 7, 12, 13, 14, 15]",6,0,default
+33,mpi-sources-dynamic-1-r2-rep1,1,compute-dy-c6a4xlarge-1,[7],7,5,6328,"[4, 5, 6, 7, 12, 13, 14, 15]",7,0,default
+33,mpi-sources-dynamic-2-r4-rep1,0,compute-dy-c6a4xlarge-1,[0],0,2,6321,"[0, 1, 2, 3, 8, 9, 10, 11]",0,0,default
+33,mpi-sources-dynamic-2-r4-rep1,0,compute-dy-c6a4xlarge-1,[1],1,3,6322,"[0, 1, 2, 3, 8, 9, 10, 11]",1,0,default
+33,mpi-sources-dynamic-2-r4-rep1,0,compute-dy-c6a4xlarge-1,[2],2,4,6325,"[0, 1, 2, 3, 8, 9, 10, 11]",2,0,default
+33,mpi-sources-dynamic-2-r4-rep1,0,compute-dy-c6a4xlarge-1,[3],3,5,6327,"[0, 1, 2, 3, 8, 9, 10, 11]",3,0,default
+33,mpi-sources-dynamic-2-r4-rep1,1,compute-dy-c6a4xlarge-1,[4],4,2,6323,"[4, 5, 6, 7, 12, 13, 14, 15]",4,0,default
+33,mpi-sources-dynamic-2-r4-rep1,1,compute-dy-c6a4xlarge-1,[5],5,3,6324,"[4, 5, 6, 7, 12, 13, 14, 15]",5,0,default
+33,mpi-sources-dynamic-2-r4-rep1,1,compute-dy-c6a4xlarge-1,[6],6,4,6326,"[4, 5, 6, 7, 12, 13, 14, 15]",6,0,default
+33,mpi-sources-dynamic-2-r4-rep1,1,compute-dy-c6a4xlarge-1,[7],7,5,6328,"[4, 5, 6, 7, 12, 13, 14, 15]",7,0,default
+33,mpi-sources-dynamic-2-r4-rep1,2,compute-dy-c6a4xlarge-2,[0],0,2,6194,"[0, 1, 2, 3, 8, 9, 10, 11]",0,0,default
+33,mpi-sources-dynamic-2-r4-rep1,2,compute-dy-c6a4xlarge-2,[1],1,3,6195,"[0, 1, 2, 3, 8, 9, 10, 11]",1,0,default
+33,mpi-sources-dynamic-2-r4-rep1,2,compute-dy-c6a4xlarge-2,[2],2,4,6196,"[0, 1, 2, 3, 8, 9, 10, 11]",2,0,default
+33,mpi-sources-dynamic-2-r4-rep1,2,compute-dy-c6a4xlarge-2,[3],3,5,6197,"[0, 1, 2, 3, 8, 9, 10, 11]",3,0,default
+33,mpi-sources-dynamic-2-r4-rep1,3,compute-dy-c6a4xlarge-2,[4],4,2,6201,"[4, 5, 6, 7, 12, 13, 14, 15]",4,0,default
+33,mpi-sources-dynamic-2-r4-rep1,3,compute-dy-c6a4xlarge-2,[5],5,3,6202,"[4, 5, 6, 7, 12, 13, 14, 15]",5,0,default
+33,mpi-sources-dynamic-2-r4-rep1,3,compute-dy-c6a4xlarge-2,[6],6,4,6203,"[4, 5, 6, 7, 12, 13, 14, 15]",6,0,default
+33,mpi-sources-dynamic-2-r4-rep1,3,compute-dy-c6a4xlarge-2,[7],7,5,6204,"[4, 5, 6, 7, 12, 13, 14, 15]",7,0,default
+34,serial-targets-static-1-r1-rep1,0,compute-dy-c6a4xlarge-1,[0],0,2,6658,"[0, 1, 8, 9]",0,0,default
+34,serial-targets-static-1-r1-rep1,0,compute-dy-c6a4xlarge-1,[1],1,3,6660,"[0, 1, 8, 9]",1,0,default
+34,mpi-sources-dynamic-3-r12-rep1,0,compute-dy-c6a4xlarge-1,[0],0,2,6658,"[0, 1, 8, 9]",0,0,default
+34,mpi-sources-dynamic-3-r12-rep1,0,compute-dy-c6a4xlarge-1,[1],1,3,6660,"[0, 1, 8, 9]",1,0,default
+34,mpi-sources-dynamic-3-r12-rep1,1,compute-dy-c6a4xlarge-1,[2],2,2,6653,"[2, 3, 10, 11]",2,0,default
+34,mpi-sources-dynamic-3-r12-rep1,1,compute-dy-c6a4xlarge-1,[3],3,3,6654,"[2, 3, 10, 11]",3,0,default
+34,mpi-sources-dynamic-3-r12-rep1,2,compute-dy-c6a4xlarge-1,[4],4,2,6650,"[4, 5, 12, 13]",4,0,default
+34,mpi-sources-dynamic-3-r12-rep1,2,compute-dy-c6a4xlarge-1,[5],5,3,6651,"[4, 5, 12, 13]",5,0,default
+34,mpi-sources-dynamic-3-r12-rep1,3,compute-dy-c6a4xlarge-1,[6],6,2,6655,"[6, 7, 14, 15]",6,0,default
+34,mpi-sources-dynamic-3-r12-rep1,3,compute-dy-c6a4xlarge-1,[7],7,3,6657,"[6, 7, 14, 15]",7,0,default
+34,mpi-sources-dynamic-3-r12-rep1,4,compute-dy-c6a4xlarge-2,[0],0,2,6585,"[0, 1, 8, 9]",0,0,default
+34,mpi-sources-dynamic-3-r12-rep1,4,compute-dy-c6a4xlarge-2,[1],1,3,6586,"[0, 1, 8, 9]",1,0,default
+34,mpi-sources-dynamic-3-r12-rep1,5,compute-dy-c6a4xlarge-2,[2],2,2,6579,"[2, 3, 10, 11]",2,0,default
+34,mpi-sources-dynamic-3-r12-rep1,5,compute-dy-c6a4xlarge-2,[3],3,3,6581,"[2, 3, 10, 11]",3,0,default
+34,mpi-sources-dynamic-3-r12-rep1,6,compute-dy-c6a4xlarge-2,[4],4,2,6583,"[4, 5, 12, 13]",4,0,default
+34,mpi-sources-dynamic-3-r12-rep1,6,compute-dy-c6a4xlarge-2,[5],5,3,6587,"[4, 5, 12, 13]",5,0,default
+34,mpi-sources-dynamic-3-r12-rep1,7,compute-dy-c6a4xlarge-2,[6],6,2,6578,"[6, 7, 14, 15]",6,0,default
+34,mpi-sources-dynamic-3-r12-rep1,7,compute-dy-c6a4xlarge-2,[7],7,3,6580,"[6, 7, 14, 15]",7,0,default
+34,mpi-sources-dynamic-3-r12-rep1,8,compute-dy-c6a4xlarge-3,[0],0,2,6024,"[0, 1, 8, 9]",0,0,default
+34,mpi-sources-dynamic-3-r12-rep1,8,compute-dy-c6a4xlarge-3,[1],1,3,6027,"[0, 1, 8, 9]",1,0,default
+34,mpi-sources-dynamic-3-r12-rep1,9,compute-dy-c6a4xlarge-3,[2],2,2,6022,"[2, 3, 10, 11]",2,0,default
+34,mpi-sources-dynamic-3-r12-rep1,9,compute-dy-c6a4xlarge-3,[3],3,3,6025,"[2, 3, 10, 11]",3,0,default
+34,mpi-sources-dynamic-3-r12-rep1,10,compute-dy-c6a4xlarge-3,[4],4,2,6021,"[4, 5, 12, 13]",4,0,default
+34,mpi-sources-dynamic-3-r12-rep1,10,compute-dy-c6a4xlarge-3,[5],5,3,6026,"[4, 5, 12, 13]",5,0,default
+34,mpi-sources-dynamic-3-r12-rep1,11,compute-dy-c6a4xlarge-3,[6],6,2,6020,"[6, 7, 14, 15]",6,0,default
+34,mpi-sources-dynamic-3-r12-rep1,11,compute-dy-c6a4xlarge-3,[7],7,3,6023,"[6, 7, 14, 15]",7,0,default
+34,mpi-targets-dynamic-3-r12-rep1,0,compute-dy-c6a4xlarge-1,[0],0,2,6658,"[0, 1, 8, 9]",0,0,default
+34,mpi-targets-dynamic-3-r12-rep1,0,compute-dy-c6a4xlarge-1,[1],1,3,6660,"[0, 1, 8, 9]",1,0,default
+34,mpi-targets-dynamic-3-r12-rep1,1,compute-dy-c6a4xlarge-1,[2],2,2,6653,"[2, 3, 10, 11]",2,0,default
+34,mpi-targets-dynamic-3-r12-rep1,1,compute-dy-c6a4xlarge-1,[3],3,3,6654,"[2, 3, 10, 11]",3,0,default
+34,mpi-targets-dynamic-3-r12-rep1,2,compute-dy-c6a4xlarge-1,[4],4,2,6650,"[4, 5, 12, 13]",4,0,default
+34,mpi-targets-dynamic-3-r12-rep1,2,compute-dy-c6a4xlarge-1,[5],5,3,6651,"[4, 5, 12, 13]",5,0,default
+34,mpi-targets-dynamic-3-r12-rep1,3,compute-dy-c6a4xlarge-1,[6],6,2,6655,"[6, 7, 14, 15]",6,0,default
+34,mpi-targets-dynamic-3-r12-rep1,3,compute-dy-c6a4xlarge-1,[7],7,3,6657,"[6, 7, 14, 15]",7,0,default
+34,mpi-targets-dynamic-3-r12-rep1,4,compute-dy-c6a4xlarge-2,[0],0,2,6585,"[0, 1, 8, 9]",0,0,default
+34,mpi-targets-dynamic-3-r12-rep1,4,compute-dy-c6a4xlarge-2,[1],1,3,6586,"[0, 1, 8, 9]",1,0,default
+34,mpi-targets-dynamic-3-r12-rep1,5,compute-dy-c6a4xlarge-2,[2],2,2,6579,"[2, 3, 10, 11]",2,0,default
+34,mpi-targets-dynamic-3-r12-rep1,5,compute-dy-c6a4xlarge-2,[3],3,3,6581,"[2, 3, 10, 11]",3,0,default
+34,mpi-targets-dynamic-3-r12-rep1,6,compute-dy-c6a4xlarge-2,[4],4,2,6583,"[4, 5, 12, 13]",4,0,default
+34,mpi-targets-dynamic-3-r12-rep1,6,compute-dy-c6a4xlarge-2,[5],5,3,6587,"[4, 5, 12, 13]",5,0,default
+34,mpi-targets-dynamic-3-r12-rep1,7,compute-dy-c6a4xlarge-2,[6],6,2,6578,"[6, 7, 14, 15]",6,0,default
+34,mpi-targets-dynamic-3-r12-rep1,7,compute-dy-c6a4xlarge-2,[7],7,3,6580,"[6, 7, 14, 15]",7,0,default
+34,mpi-targets-dynamic-3-r12-rep1,8,compute-dy-c6a4xlarge-3,[0],0,2,6024,"[0, 1, 8, 9]",0,0,default
+34,mpi-targets-dynamic-3-r12-rep1,8,compute-dy-c6a4xlarge-3,[1],1,3,6027,"[0, 1, 8, 9]",1,0,default
+34,mpi-targets-dynamic-3-r12-rep1,9,compute-dy-c6a4xlarge-3,[2],2,2,6022,"[2, 3, 10, 11]",2,0,default
+34,mpi-targets-dynamic-3-r12-rep1,9,compute-dy-c6a4xlarge-3,[3],3,3,6025,"[2, 3, 10, 11]",3,0,default
+34,mpi-targets-dynamic-3-r12-rep1,10,compute-dy-c6a4xlarge-3,[4],4,2,6021,"[4, 5, 12, 13]",4,0,default
+34,mpi-targets-dynamic-3-r12-rep1,10,compute-dy-c6a4xlarge-3,[5],5,3,6026,"[4, 5, 12, 13]",5,0,default
+34,mpi-targets-dynamic-3-r12-rep1,11,compute-dy-c6a4xlarge-3,[6],6,2,6020,"[6, 7, 14, 15]",6,0,default
+34,mpi-targets-dynamic-3-r12-rep1,11,compute-dy-c6a4xlarge-3,[7],7,3,6023,"[6, 7, 14, 15]",7,0,default
+34,mpi-hybrid-dynamic-3-r12-rep1,0,compute-dy-c6a4xlarge-1,[0],0,2,6658,"[0, 1, 8, 9]",0,0,default
+34,mpi-hybrid-dynamic-3-r12-rep1,0,compute-dy-c6a4xlarge-1,[1],1,3,6660,"[0, 1, 8, 9]",1,0,default
+34,mpi-hybrid-dynamic-3-r12-rep1,1,compute-dy-c6a4xlarge-1,[2],2,2,6653,"[2, 3, 10, 11]",2,0,default
+34,mpi-hybrid-dynamic-3-r12-rep1,1,compute-dy-c6a4xlarge-1,[3],3,3,6654,"[2, 3, 10, 11]",3,0,default
+34,mpi-hybrid-dynamic-3-r12-rep1,2,compute-dy-c6a4xlarge-1,[4],4,2,6650,"[4, 5, 12, 13]",4,0,default
+34,mpi-hybrid-dynamic-3-r12-rep1,2,compute-dy-c6a4xlarge-1,[5],5,3,6651,"[4, 5, 12, 13]",5,0,default
+34,mpi-hybrid-dynamic-3-r12-rep1,3,compute-dy-c6a4xlarge-1,[6],6,2,6655,"[6, 7, 14, 15]",6,0,default
+34,mpi-hybrid-dynamic-3-r12-rep1,3,compute-dy-c6a4xlarge-1,[7],7,3,6657,"[6, 7, 14, 15]",7,0,default
+34,mpi-hybrid-dynamic-3-r12-rep1,4,compute-dy-c6a4xlarge-2,[0],0,2,6585,"[0, 1, 8, 9]",0,0,default
+34,mpi-hybrid-dynamic-3-r12-rep1,4,compute-dy-c6a4xlarge-2,[1],1,3,6586,"[0, 1, 8, 9]",1,0,default
+34,mpi-hybrid-dynamic-3-r12-rep1,5,compute-dy-c6a4xlarge-2,[2],2,2,6579,"[2, 3, 10, 11]",2,0,default
+34,mpi-hybrid-dynamic-3-r12-rep1,5,compute-dy-c6a4xlarge-2,[3],3,3,6581,"[2, 3, 10, 11]",3,0,default
+34,mpi-hybrid-dynamic-3-r12-rep1,6,compute-dy-c6a4xlarge-2,[4],4,2,6583,"[4, 5, 12, 13]",4,0,default
+34,mpi-hybrid-dynamic-3-r12-rep1,6,compute-dy-c6a4xlarge-2,[5],5,3,6587,"[4, 5, 12, 13]",5,0,default
+34,mpi-hybrid-dynamic-3-r12-rep1,7,compute-dy-c6a4xlarge-2,[6],6,2,6578,"[6, 7, 14, 15]",6,0,default
+34,mpi-hybrid-dynamic-3-r12-rep1,7,compute-dy-c6a4xlarge-2,[7],7,3,6580,"[6, 7, 14, 15]",7,0,default
+34,mpi-hybrid-dynamic-3-r12-rep1,8,compute-dy-c6a4xlarge-3,[0],0,2,6024,"[0, 1, 8, 9]",0,0,default
+34,mpi-hybrid-dynamic-3-r12-rep1,8,compute-dy-c6a4xlarge-3,[1],1,3,6027,"[0, 1, 8, 9]",1,0,default
+34,mpi-hybrid-dynamic-3-r12-rep1,9,compute-dy-c6a4xlarge-3,[2],2,2,6022,"[2, 3, 10, 11]",2,0,default
+34,mpi-hybrid-dynamic-3-r12-rep1,9,compute-dy-c6a4xlarge-3,[3],3,3,6025,"[2, 3, 10, 11]",3,0,default
+34,mpi-hybrid-dynamic-3-r12-rep1,10,compute-dy-c6a4xlarge-3,[4],4,2,6021,"[4, 5, 12, 13]",4,0,default
+34,mpi-hybrid-dynamic-3-r12-rep1,10,compute-dy-c6a4xlarge-3,[5],5,3,6026,"[4, 5, 12, 13]",5,0,default
+34,mpi-hybrid-dynamic-3-r12-rep1,11,compute-dy-c6a4xlarge-3,[6],6,2,6020,"[6, 7, 14, 15]",6,0,default
+34,mpi-hybrid-dynamic-3-r12-rep1,11,compute-dy-c6a4xlarge-3,[7],7,3,6023,"[6, 7, 14, 15]",7,0,default
+34,mpi-sources-dynamic-1-r4-rep1,0,compute-dy-c6a4xlarge-1,[0],0,2,6658,"[0, 1, 8, 9]",0,0,default
+34,mpi-sources-dynamic-1-r4-rep1,0,compute-dy-c6a4xlarge-1,[1],1,3,6660,"[0, 1, 8, 9]",1,0,default
+34,mpi-sources-dynamic-1-r4-rep1,1,compute-dy-c6a4xlarge-1,[2],2,2,6653,"[2, 3, 10, 11]",2,0,default
+34,mpi-sources-dynamic-1-r4-rep1,1,compute-dy-c6a4xlarge-1,[3],3,3,6654,"[2, 3, 10, 11]",3,0,default
+34,mpi-sources-dynamic-1-r4-rep1,2,compute-dy-c6a4xlarge-1,[4],4,2,6650,"[4, 5, 12, 13]",4,0,default
+34,mpi-sources-dynamic-1-r4-rep1,2,compute-dy-c6a4xlarge-1,[5],5,3,6651,"[4, 5, 12, 13]",5,0,default
+34,mpi-sources-dynamic-1-r4-rep1,3,compute-dy-c6a4xlarge-1,[6],6,2,6655,"[6, 7, 14, 15]",6,0,default
+34,mpi-sources-dynamic-1-r4-rep1,3,compute-dy-c6a4xlarge-1,[7],7,3,6657,"[6, 7, 14, 15]",7,0,default
+34,mpi-targets-dynamic-1-r4-rep1,0,compute-dy-c6a4xlarge-1,[0],0,2,6658,"[0, 1, 8, 9]",0,0,default
+34,mpi-targets-dynamic-1-r4-rep1,0,compute-dy-c6a4xlarge-1,[1],1,3,6660,"[0, 1, 8, 9]",1,0,default
+34,mpi-targets-dynamic-1-r4-rep1,1,compute-dy-c6a4xlarge-1,[2],2,2,6653,"[2, 3, 10, 11]",2,0,default
+34,mpi-targets-dynamic-1-r4-rep1,1,compute-dy-c6a4xlarge-1,[3],3,3,6654,"[2, 3, 10, 11]",3,0,default
+34,mpi-targets-dynamic-1-r4-rep1,2,compute-dy-c6a4xlarge-1,[4],4,2,6650,"[4, 5, 12, 13]",4,0,default
+34,mpi-targets-dynamic-1-r4-rep1,2,compute-dy-c6a4xlarge-1,[5],5,3,6651,"[4, 5, 12, 13]",5,0,default
+34,mpi-targets-dynamic-1-r4-rep1,3,compute-dy-c6a4xlarge-1,[6],6,2,6655,"[6, 7, 14, 15]",6,0,default
+34,mpi-targets-dynamic-1-r4-rep1,3,compute-dy-c6a4xlarge-1,[7],7,3,6657,"[6, 7, 14, 15]",7,0,default
+34,mpi-hybrid-dynamic-1-r4-rep1,0,compute-dy-c6a4xlarge-1,[0],0,2,6658,"[0, 1, 8, 9]",0,0,default
+34,mpi-hybrid-dynamic-1-r4-rep1,0,compute-dy-c6a4xlarge-1,[1],1,3,6660,"[0, 1, 8, 9]",1,0,default
+34,mpi-hybrid-dynamic-1-r4-rep1,1,compute-dy-c6a4xlarge-1,[2],2,2,6653,"[2, 3, 10, 11]",2,0,default
+34,mpi-hybrid-dynamic-1-r4-rep1,1,compute-dy-c6a4xlarge-1,[3],3,3,6654,"[2, 3, 10, 11]",3,0,default
+34,mpi-hybrid-dynamic-1-r4-rep1,2,compute-dy-c6a4xlarge-1,[4],4,2,6650,"[4, 5, 12, 13]",4,0,default
+34,mpi-hybrid-dynamic-1-r4-rep1,2,compute-dy-c6a4xlarge-1,[5],5,3,6651,"[4, 5, 12, 13]",5,0,default
+34,mpi-hybrid-dynamic-1-r4-rep1,3,compute-dy-c6a4xlarge-1,[6],6,2,6655,"[6, 7, 14, 15]",6,0,default
+34,mpi-hybrid-dynamic-1-r4-rep1,3,compute-dy-c6a4xlarge-1,[7],7,3,6657,"[6, 7, 14, 15]",7,0,default
+34,mpi-sources-dynamic-2-r8-rep1,0,compute-dy-c6a4xlarge-1,[0],0,2,6658,"[0, 1, 8, 9]",0,0,default
+34,mpi-sources-dynamic-2-r8-rep1,0,compute-dy-c6a4xlarge-1,[1],1,3,6660,"[0, 1, 8, 9]",1,0,default
+34,mpi-sources-dynamic-2-r8-rep1,1,compute-dy-c6a4xlarge-1,[2],2,2,6653,"[2, 3, 10, 11]",2,0,default
+34,mpi-sources-dynamic-2-r8-rep1,1,compute-dy-c6a4xlarge-1,[3],3,3,6654,"[2, 3, 10, 11]",3,0,default
+34,mpi-sources-dynamic-2-r8-rep1,2,compute-dy-c6a4xlarge-1,[4],4,2,6650,"[4, 5, 12, 13]",4,0,default
+34,mpi-sources-dynamic-2-r8-rep1,2,compute-dy-c6a4xlarge-1,[5],5,3,6651,"[4, 5, 12, 13]",5,0,default
+34,mpi-sources-dynamic-2-r8-rep1,3,compute-dy-c6a4xlarge-1,[6],6,2,6655,"[6, 7, 14, 15]",6,0,default
+34,mpi-sources-dynamic-2-r8-rep1,3,compute-dy-c6a4xlarge-1,[7],7,3,6657,"[6, 7, 14, 15]",7,0,default
+34,mpi-sources-dynamic-2-r8-rep1,4,compute-dy-c6a4xlarge-2,[0],0,2,6585,"[0, 1, 8, 9]",0,0,default
+34,mpi-sources-dynamic-2-r8-rep1,4,compute-dy-c6a4xlarge-2,[1],1,3,6586,"[0, 1, 8, 9]",1,0,default
+34,mpi-sources-dynamic-2-r8-rep1,5,compute-dy-c6a4xlarge-2,[2],2,2,6579,"[2, 3, 10, 11]",2,0,default
+34,mpi-sources-dynamic-2-r8-rep1,5,compute-dy-c6a4xlarge-2,[3],3,3,6581,"[2, 3, 10, 11]",3,0,default
+34,mpi-sources-dynamic-2-r8-rep1,6,compute-dy-c6a4xlarge-2,[4],4,2,6583,"[4, 5, 12, 13]",4,0,default
+34,mpi-sources-dynamic-2-r8-rep1,6,compute-dy-c6a4xlarge-2,[5],5,3,6587,"[4, 5, 12, 13]",5,0,default
+34,mpi-sources-dynamic-2-r8-rep1,7,compute-dy-c6a4xlarge-2,[6],6,2,6578,"[6, 7, 14, 15]",6,0,default
+34,mpi-sources-dynamic-2-r8-rep1,7,compute-dy-c6a4xlarge-2,[7],7,3,6580,"[6, 7, 14, 15]",7,0,default
+34,mpi-targets-dynamic-2-r8-rep1,0,compute-dy-c6a4xlarge-1,[0],0,2,6658,"[0, 1, 8, 9]",0,0,default
+34,mpi-targets-dynamic-2-r8-rep1,0,compute-dy-c6a4xlarge-1,[1],1,3,6660,"[0, 1, 8, 9]",1,0,default
+34,mpi-targets-dynamic-2-r8-rep1,1,compute-dy-c6a4xlarge-1,[2],2,2,6653,"[2, 3, 10, 11]",2,0,default
+34,mpi-targets-dynamic-2-r8-rep1,1,compute-dy-c6a4xlarge-1,[3],3,3,6654,"[2, 3, 10, 11]",3,0,default
+34,mpi-targets-dynamic-2-r8-rep1,2,compute-dy-c6a4xlarge-1,[4],4,2,6650,"[4, 5, 12, 13]",4,0,default
+34,mpi-targets-dynamic-2-r8-rep1,2,compute-dy-c6a4xlarge-1,[5],5,3,6651,"[4, 5, 12, 13]",5,0,default
+34,mpi-targets-dynamic-2-r8-rep1,3,compute-dy-c6a4xlarge-1,[6],6,2,6655,"[6, 7, 14, 15]",6,0,default
+34,mpi-targets-dynamic-2-r8-rep1,3,compute-dy-c6a4xlarge-1,[7],7,3,6657,"[6, 7, 14, 15]",7,0,default
+34,mpi-targets-dynamic-2-r8-rep1,4,compute-dy-c6a4xlarge-2,[0],0,2,6585,"[0, 1, 8, 9]",0,0,default
+34,mpi-targets-dynamic-2-r8-rep1,4,compute-dy-c6a4xlarge-2,[1],1,3,6586,"[0, 1, 8, 9]",1,0,default
+34,mpi-targets-dynamic-2-r8-rep1,5,compute-dy-c6a4xlarge-2,[2],2,2,6579,"[2, 3, 10, 11]",2,0,default
+34,mpi-targets-dynamic-2-r8-rep1,5,compute-dy-c6a4xlarge-2,[3],3,3,6581,"[2, 3, 10, 11]",3,0,default
+34,mpi-targets-dynamic-2-r8-rep1,6,compute-dy-c6a4xlarge-2,[4],4,2,6583,"[4, 5, 12, 13]",4,0,default
+34,mpi-targets-dynamic-2-r8-rep1,6,compute-dy-c6a4xlarge-2,[5],5,3,6587,"[4, 5, 12, 13]",5,0,default
+34,mpi-targets-dynamic-2-r8-rep1,7,compute-dy-c6a4xlarge-2,[6],6,2,6578,"[6, 7, 14, 15]",6,0,default
+34,mpi-targets-dynamic-2-r8-rep1,7,compute-dy-c6a4xlarge-2,[7],7,3,6580,"[6, 7, 14, 15]",7,0,default
+34,mpi-hybrid-dynamic-2-r8-rep1,0,compute-dy-c6a4xlarge-1,[0],0,2,6658,"[0, 1, 8, 9]",0,0,default
+34,mpi-hybrid-dynamic-2-r8-rep1,0,compute-dy-c6a4xlarge-1,[1],1,3,6660,"[0, 1, 8, 9]",1,0,default
+34,mpi-hybrid-dynamic-2-r8-rep1,1,compute-dy-c6a4xlarge-1,[2],2,2,6653,"[2, 3, 10, 11]",2,0,default
+34,mpi-hybrid-dynamic-2-r8-rep1,1,compute-dy-c6a4xlarge-1,[3],3,3,6654,"[2, 3, 10, 11]",3,0,default
+34,mpi-hybrid-dynamic-2-r8-rep1,2,compute-dy-c6a4xlarge-1,[4],4,2,6650,"[4, 5, 12, 13]",4,0,default
+34,mpi-hybrid-dynamic-2-r8-rep1,2,compute-dy-c6a4xlarge-1,[5],5,3,6651,"[4, 5, 12, 13]",5,0,default
+34,mpi-hybrid-dynamic-2-r8-rep1,3,compute-dy-c6a4xlarge-1,[6],6,2,6655,"[6, 7, 14, 15]",6,0,default
+34,mpi-hybrid-dynamic-2-r8-rep1,3,compute-dy-c6a4xlarge-1,[7],7,3,6657,"[6, 7, 14, 15]",7,0,default
+34,mpi-hybrid-dynamic-2-r8-rep1,4,compute-dy-c6a4xlarge-2,[0],0,2,6585,"[0, 1, 8, 9]",0,0,default
+34,mpi-hybrid-dynamic-2-r8-rep1,4,compute-dy-c6a4xlarge-2,[1],1,3,6586,"[0, 1, 8, 9]",1,0,default
+34,mpi-hybrid-dynamic-2-r8-rep1,5,compute-dy-c6a4xlarge-2,[2],2,2,6579,"[2, 3, 10, 11]",2,0,default
+34,mpi-hybrid-dynamic-2-r8-rep1,5,compute-dy-c6a4xlarge-2,[3],3,3,6581,"[2, 3, 10, 11]",3,0,default
+34,mpi-hybrid-dynamic-2-r8-rep1,6,compute-dy-c6a4xlarge-2,[4],4,2,6583,"[4, 5, 12, 13]",4,0,default
+34,mpi-hybrid-dynamic-2-r8-rep1,6,compute-dy-c6a4xlarge-2,[5],5,3,6587,"[4, 5, 12, 13]",5,0,default
+34,mpi-hybrid-dynamic-2-r8-rep1,7,compute-dy-c6a4xlarge-2,[6],6,2,6578,"[6, 7, 14, 15]",6,0,default
+34,mpi-hybrid-dynamic-2-r8-rep1,7,compute-dy-c6a4xlarge-2,[7],7,3,6580,"[6, 7, 14, 15]",7,0,default
+36,serial-targets-static-1-r1-rep1,0,compute-dy-c6a4xlarge-1,[0],0,2,6897,"[0, 1, 8, 9]",0,0,default
+36,serial-targets-static-1-r1-rep1,0,compute-dy-c6a4xlarge-1,[1],1,3,6898,"[0, 1, 8, 9]",1,0,default
+36,mpi-sources-dynamic-3-r12-rep1,0,compute-dy-c6a4xlarge-1,[0],0,2,6897,"[0, 1, 8, 9]",0,0,default
+36,mpi-sources-dynamic-3-r12-rep1,0,compute-dy-c6a4xlarge-1,[1],1,3,6898,"[0, 1, 8, 9]",1,0,default
+36,mpi-sources-dynamic-3-r12-rep1,1,compute-dy-c6a4xlarge-1,[2],2,2,6887,"[2, 3, 10, 11]",2,0,default
+36,mpi-sources-dynamic-3-r12-rep1,1,compute-dy-c6a4xlarge-1,[3],3,3,6889,"[2, 3, 10, 11]",3,0,default
+36,mpi-sources-dynamic-3-r12-rep1,2,compute-dy-c6a4xlarge-1,[4],4,2,6882,"[4, 5, 12, 13]",4,0,default
+36,mpi-sources-dynamic-3-r12-rep1,2,compute-dy-c6a4xlarge-1,[5],5,3,6883,"[4, 5, 12, 13]",5,0,default
+36,mpi-sources-dynamic-3-r12-rep1,3,compute-dy-c6a4xlarge-1,[6],6,2,6885,"[6, 7, 14, 15]",6,0,default
+36,mpi-sources-dynamic-3-r12-rep1,3,compute-dy-c6a4xlarge-1,[7],7,3,6886,"[6, 7, 14, 15]",7,0,default
+36,mpi-sources-dynamic-3-r12-rep1,4,compute-dy-c6a4xlarge-2,[0],0,2,6822,"[0, 1, 8, 9]",0,0,default
+36,mpi-sources-dynamic-3-r12-rep1,4,compute-dy-c6a4xlarge-2,[1],1,3,6824,"[0, 1, 8, 9]",1,0,default
+36,mpi-sources-dynamic-3-r12-rep1,5,compute-dy-c6a4xlarge-2,[2],2,2,6820,"[2, 3, 10, 11]",2,0,default
+36,mpi-sources-dynamic-3-r12-rep1,5,compute-dy-c6a4xlarge-2,[3],3,3,6821,"[2, 3, 10, 11]",3,0,default
+36,mpi-sources-dynamic-3-r12-rep1,6,compute-dy-c6a4xlarge-2,[4],4,2,6814,"[4, 5, 12, 13]",4,0,default
+36,mpi-sources-dynamic-3-r12-rep1,6,compute-dy-c6a4xlarge-2,[5],5,3,6816,"[4, 5, 12, 13]",5,0,default
+36,mpi-sources-dynamic-3-r12-rep1,7,compute-dy-c6a4xlarge-2,[6],6,2,6815,"[6, 7, 14, 15]",6,0,default
+36,mpi-sources-dynamic-3-r12-rep1,7,compute-dy-c6a4xlarge-2,[7],7,3,6817,"[6, 7, 14, 15]",7,0,default
+36,mpi-sources-dynamic-3-r12-rep1,8,compute-dy-c6a4xlarge-3,[0],0,2,6235,"[0, 1, 8, 9]",0,0,default
+36,mpi-sources-dynamic-3-r12-rep1,8,compute-dy-c6a4xlarge-3,[1],1,3,6236,"[0, 1, 8, 9]",1,0,default
+36,mpi-sources-dynamic-3-r12-rep1,9,compute-dy-c6a4xlarge-3,[2],2,2,6226,"[2, 3, 10, 11]",2,0,default
+36,mpi-sources-dynamic-3-r12-rep1,9,compute-dy-c6a4xlarge-3,[3],3,3,6227,"[2, 3, 10, 11]",3,0,default
+36,mpi-sources-dynamic-3-r12-rep1,10,compute-dy-c6a4xlarge-3,[4],4,2,6228,"[4, 5, 12, 13]",4,0,default
+36,mpi-sources-dynamic-3-r12-rep1,10,compute-dy-c6a4xlarge-3,[5],5,3,6230,"[4, 5, 12, 13]",5,0,default
+36,mpi-sources-dynamic-3-r12-rep1,11,compute-dy-c6a4xlarge-3,[6],6,2,6231,"[6, 7, 14, 15]",6,0,default
+36,mpi-sources-dynamic-3-r12-rep1,11,compute-dy-c6a4xlarge-3,[7],7,3,6232,"[6, 7, 14, 15]",7,0,default
+36,mpi-targets-dynamic-3-r12-rep1,0,compute-dy-c6a4xlarge-1,[0],0,2,6897,"[0, 1, 8, 9]",0,0,default
+36,mpi-targets-dynamic-3-r12-rep1,0,compute-dy-c6a4xlarge-1,[1],1,3,6898,"[0, 1, 8, 9]",1,0,default
+36,mpi-targets-dynamic-3-r12-rep1,1,compute-dy-c6a4xlarge-1,[2],2,2,6887,"[2, 3, 10, 11]",2,0,default
+36,mpi-targets-dynamic-3-r12-rep1,1,compute-dy-c6a4xlarge-1,[3],3,3,6889,"[2, 3, 10, 11]",3,0,default
+36,mpi-targets-dynamic-3-r12-rep1,2,compute-dy-c6a4xlarge-1,[4],4,2,6882,"[4, 5, 12, 13]",4,0,default
+36,mpi-targets-dynamic-3-r12-rep1,2,compute-dy-c6a4xlarge-1,[5],5,3,6883,"[4, 5, 12, 13]",5,0,default
+36,mpi-targets-dynamic-3-r12-rep1,3,compute-dy-c6a4xlarge-1,[6],6,2,6885,"[6, 7, 14, 15]",6,0,default
+36,mpi-targets-dynamic-3-r12-rep1,3,compute-dy-c6a4xlarge-1,[7],7,3,6886,"[6, 7, 14, 15]",7,0,default
+36,mpi-targets-dynamic-3-r12-rep1,4,compute-dy-c6a4xlarge-2,[0],0,2,6822,"[0, 1, 8, 9]",0,0,default
+36,mpi-targets-dynamic-3-r12-rep1,4,compute-dy-c6a4xlarge-2,[1],1,3,6824,"[0, 1, 8, 9]",1,0,default
+36,mpi-targets-dynamic-3-r12-rep1,5,compute-dy-c6a4xlarge-2,[2],2,2,6820,"[2, 3, 10, 11]",2,0,default
+36,mpi-targets-dynamic-3-r12-rep1,5,compute-dy-c6a4xlarge-2,[3],3,3,6821,"[2, 3, 10, 11]",3,0,default
+36,mpi-targets-dynamic-3-r12-rep1,6,compute-dy-c6a4xlarge-2,[4],4,2,6814,"[4, 5, 12, 13]",4,0,default
+36,mpi-targets-dynamic-3-r12-rep1,6,compute-dy-c6a4xlarge-2,[5],5,3,6816,"[4, 5, 12, 13]",5,0,default
+36,mpi-targets-dynamic-3-r12-rep1,7,compute-dy-c6a4xlarge-2,[6],6,2,6815,"[6, 7, 14, 15]",6,0,default
+36,mpi-targets-dynamic-3-r12-rep1,7,compute-dy-c6a4xlarge-2,[7],7,3,6817,"[6, 7, 14, 15]",7,0,default
+36,mpi-targets-dynamic-3-r12-rep1,8,compute-dy-c6a4xlarge-3,[0],0,2,6235,"[0, 1, 8, 9]",0,0,default
+36,mpi-targets-dynamic-3-r12-rep1,8,compute-dy-c6a4xlarge-3,[1],1,3,6236,"[0, 1, 8, 9]",1,0,default
+36,mpi-targets-dynamic-3-r12-rep1,9,compute-dy-c6a4xlarge-3,[2],2,2,6226,"[2, 3, 10, 11]",2,0,default
+36,mpi-targets-dynamic-3-r12-rep1,9,compute-dy-c6a4xlarge-3,[3],3,3,6227,"[2, 3, 10, 11]",3,0,default
+36,mpi-targets-dynamic-3-r12-rep1,10,compute-dy-c6a4xlarge-3,[4],4,2,6228,"[4, 5, 12, 13]",4,0,default
+36,mpi-targets-dynamic-3-r12-rep1,10,compute-dy-c6a4xlarge-3,[5],5,3,6230,"[4, 5, 12, 13]",5,0,default
+36,mpi-targets-dynamic-3-r12-rep1,11,compute-dy-c6a4xlarge-3,[6],6,2,6231,"[6, 7, 14, 15]",6,0,default
+36,mpi-targets-dynamic-3-r12-rep1,11,compute-dy-c6a4xlarge-3,[7],7,3,6232,"[6, 7, 14, 15]",7,0,default
+36,mpi-hybrid-dynamic-3-r12-rep1,0,compute-dy-c6a4xlarge-1,[0],0,2,6897,"[0, 1, 8, 9]",0,0,default
+36,mpi-hybrid-dynamic-3-r12-rep1,0,compute-dy-c6a4xlarge-1,[1],1,3,6898,"[0, 1, 8, 9]",1,0,default
+36,mpi-hybrid-dynamic-3-r12-rep1,1,compute-dy-c6a4xlarge-1,[2],2,2,6887,"[2, 3, 10, 11]",2,0,default
+36,mpi-hybrid-dynamic-3-r12-rep1,1,compute-dy-c6a4xlarge-1,[3],3,3,6889,"[2, 3, 10, 11]",3,0,default
+36,mpi-hybrid-dynamic-3-r12-rep1,2,compute-dy-c6a4xlarge-1,[4],4,2,6882,"[4, 5, 12, 13]",4,0,default
+36,mpi-hybrid-dynamic-3-r12-rep1,2,compute-dy-c6a4xlarge-1,[5],5,3,6883,"[4, 5, 12, 13]",5,0,default
+36,mpi-hybrid-dynamic-3-r12-rep1,3,compute-dy-c6a4xlarge-1,[6],6,2,6885,"[6, 7, 14, 15]",6,0,default
+36,mpi-hybrid-dynamic-3-r12-rep1,3,compute-dy-c6a4xlarge-1,[7],7,3,6886,"[6, 7, 14, 15]",7,0,default
+36,mpi-hybrid-dynamic-3-r12-rep1,4,compute-dy-c6a4xlarge-2,[0],0,2,6822,"[0, 1, 8, 9]",0,0,default
+36,mpi-hybrid-dynamic-3-r12-rep1,4,compute-dy-c6a4xlarge-2,[1],1,3,6824,"[0, 1, 8, 9]",1,0,default
+36,mpi-hybrid-dynamic-3-r12-rep1,5,compute-dy-c6a4xlarge-2,[2],2,2,6820,"[2, 3, 10, 11]",2,0,default
+36,mpi-hybrid-dynamic-3-r12-rep1,5,compute-dy-c6a4xlarge-2,[3],3,3,6821,"[2, 3, 10, 11]",3,0,default
+36,mpi-hybrid-dynamic-3-r12-rep1,6,compute-dy-c6a4xlarge-2,[4],4,2,6814,"[4, 5, 12, 13]",4,0,default
+36,mpi-hybrid-dynamic-3-r12-rep1,6,compute-dy-c6a4xlarge-2,[5],5,3,6816,"[4, 5, 12, 13]",5,0,default
+36,mpi-hybrid-dynamic-3-r12-rep1,7,compute-dy-c6a4xlarge-2,[6],6,2,6815,"[6, 7, 14, 15]",6,0,default
+36,mpi-hybrid-dynamic-3-r12-rep1,7,compute-dy-c6a4xlarge-2,[7],7,3,6817,"[6, 7, 14, 15]",7,0,default
+36,mpi-hybrid-dynamic-3-r12-rep1,8,compute-dy-c6a4xlarge-3,[0],0,2,6235,"[0, 1, 8, 9]",0,0,default
+36,mpi-hybrid-dynamic-3-r12-rep1,8,compute-dy-c6a4xlarge-3,[1],1,3,6236,"[0, 1, 8, 9]",1,0,default
+36,mpi-hybrid-dynamic-3-r12-rep1,9,compute-dy-c6a4xlarge-3,[2],2,2,6226,"[2, 3, 10, 11]",2,0,default
+36,mpi-hybrid-dynamic-3-r12-rep1,9,compute-dy-c6a4xlarge-3,[3],3,3,6227,"[2, 3, 10, 11]",3,0,default
+36,mpi-hybrid-dynamic-3-r12-rep1,10,compute-dy-c6a4xlarge-3,[4],4,2,6228,"[4, 5, 12, 13]",4,0,default
+36,mpi-hybrid-dynamic-3-r12-rep1,10,compute-dy-c6a4xlarge-3,[5],5,3,6230,"[4, 5, 12, 13]",5,0,default
+36,mpi-hybrid-dynamic-3-r12-rep1,11,compute-dy-c6a4xlarge-3,[6],6,2,6231,"[6, 7, 14, 15]",6,0,default
+36,mpi-hybrid-dynamic-3-r12-rep1,11,compute-dy-c6a4xlarge-3,[7],7,3,6232,"[6, 7, 14, 15]",7,0,default
+36,mpi-sources-dynamic-1-r4-rep1,0,compute-dy-c6a4xlarge-1,[0],0,2,6897,"[0, 1, 8, 9]",0,0,default
+36,mpi-sources-dynamic-1-r4-rep1,0,compute-dy-c6a4xlarge-1,[1],1,3,6898,"[0, 1, 8, 9]",1,0,default
+36,mpi-sources-dynamic-1-r4-rep1,1,compute-dy-c6a4xlarge-1,[2],2,2,6887,"[2, 3, 10, 11]",2,0,default
+36,mpi-sources-dynamic-1-r4-rep1,1,compute-dy-c6a4xlarge-1,[3],3,3,6889,"[2, 3, 10, 11]",3,0,default
+36,mpi-sources-dynamic-1-r4-rep1,2,compute-dy-c6a4xlarge-1,[4],4,2,6882,"[4, 5, 12, 13]",4,0,default
+36,mpi-sources-dynamic-1-r4-rep1,2,compute-dy-c6a4xlarge-1,[5],5,3,6883,"[4, 5, 12, 13]",5,0,default
+36,mpi-sources-dynamic-1-r4-rep1,3,compute-dy-c6a4xlarge-1,[6],6,2,6885,"[6, 7, 14, 15]",6,0,default
+36,mpi-sources-dynamic-1-r4-rep1,3,compute-dy-c6a4xlarge-1,[7],7,3,6886,"[6, 7, 14, 15]",7,0,default
+36,mpi-targets-dynamic-1-r4-rep1,0,compute-dy-c6a4xlarge-1,[0],0,2,6897,"[0, 1, 8, 9]",0,0,default
+36,mpi-targets-dynamic-1-r4-rep1,0,compute-dy-c6a4xlarge-1,[1],1,3,6898,"[0, 1, 8, 9]",1,0,default
+36,mpi-targets-dynamic-1-r4-rep1,1,compute-dy-c6a4xlarge-1,[2],2,2,6887,"[2, 3, 10, 11]",2,0,default
+36,mpi-targets-dynamic-1-r4-rep1,1,compute-dy-c6a4xlarge-1,[3],3,3,6889,"[2, 3, 10, 11]",3,0,default
+36,mpi-targets-dynamic-1-r4-rep1,2,compute-dy-c6a4xlarge-1,[4],4,2,6882,"[4, 5, 12, 13]",4,0,default
+36,mpi-targets-dynamic-1-r4-rep1,2,compute-dy-c6a4xlarge-1,[5],5,3,6883,"[4, 5, 12, 13]",5,0,default
+36,mpi-targets-dynamic-1-r4-rep1,3,compute-dy-c6a4xlarge-1,[6],6,2,6885,"[6, 7, 14, 15]",6,0,default
+36,mpi-targets-dynamic-1-r4-rep1,3,compute-dy-c6a4xlarge-1,[7],7,3,6886,"[6, 7, 14, 15]",7,0,default
+36,mpi-hybrid-dynamic-1-r4-rep1,0,compute-dy-c6a4xlarge-1,[0],0,2,6897,"[0, 1, 8, 9]",0,0,default
+36,mpi-hybrid-dynamic-1-r4-rep1,0,compute-dy-c6a4xlarge-1,[1],1,3,6898,"[0, 1, 8, 9]",1,0,default
+36,mpi-hybrid-dynamic-1-r4-rep1,1,compute-dy-c6a4xlarge-1,[2],2,2,6887,"[2, 3, 10, 11]",2,0,default
+36,mpi-hybrid-dynamic-1-r4-rep1,1,compute-dy-c6a4xlarge-1,[3],3,3,6889,"[2, 3, 10, 11]",3,0,default
+36,mpi-hybrid-dynamic-1-r4-rep1,2,compute-dy-c6a4xlarge-1,[4],4,2,6882,"[4, 5, 12, 13]",4,0,default
+36,mpi-hybrid-dynamic-1-r4-rep1,2,compute-dy-c6a4xlarge-1,[5],5,3,6883,"[4, 5, 12, 13]",5,0,default
+36,mpi-hybrid-dynamic-1-r4-rep1,3,compute-dy-c6a4xlarge-1,[6],6,2,6885,"[6, 7, 14, 15]",6,0,default
+36,mpi-hybrid-dynamic-1-r4-rep1,3,compute-dy-c6a4xlarge-1,[7],7,3,6886,"[6, 7, 14, 15]",7,0,default
+36,mpi-sources-dynamic-2-r8-rep1,0,compute-dy-c6a4xlarge-1,[0],0,2,6897,"[0, 1, 8, 9]",0,0,default
+36,mpi-sources-dynamic-2-r8-rep1,0,compute-dy-c6a4xlarge-1,[1],1,3,6898,"[0, 1, 8, 9]",1,0,default
+36,mpi-sources-dynamic-2-r8-rep1,1,compute-dy-c6a4xlarge-1,[2],2,2,6887,"[2, 3, 10, 11]",2,0,default
+36,mpi-sources-dynamic-2-r8-rep1,1,compute-dy-c6a4xlarge-1,[3],3,3,6889,"[2, 3, 10, 11]",3,0,default
+36,mpi-sources-dynamic-2-r8-rep1,2,compute-dy-c6a4xlarge-1,[4],4,2,6882,"[4, 5, 12, 13]",4,0,default
+36,mpi-sources-dynamic-2-r8-rep1,2,compute-dy-c6a4xlarge-1,[5],5,3,6883,"[4, 5, 12, 13]",5,0,default
+36,mpi-sources-dynamic-2-r8-rep1,3,compute-dy-c6a4xlarge-1,[6],6,2,6885,"[6, 7, 14, 15]",6,0,default
+36,mpi-sources-dynamic-2-r8-rep1,3,compute-dy-c6a4xlarge-1,[7],7,3,6886,"[6, 7, 14, 15]",7,0,default
+36,mpi-sources-dynamic-2-r8-rep1,4,compute-dy-c6a4xlarge-2,[0],0,2,6822,"[0, 1, 8, 9]",0,0,default
+36,mpi-sources-dynamic-2-r8-rep1,4,compute-dy-c6a4xlarge-2,[1],1,3,6824,"[0, 1, 8, 9]",1,0,default
+36,mpi-sources-dynamic-2-r8-rep1,5,compute-dy-c6a4xlarge-2,[2],2,2,6820,"[2, 3, 10, 11]",2,0,default
+36,mpi-sources-dynamic-2-r8-rep1,5,compute-dy-c6a4xlarge-2,[3],3,3,6821,"[2, 3, 10, 11]",3,0,default
+36,mpi-sources-dynamic-2-r8-rep1,6,compute-dy-c6a4xlarge-2,[4],4,2,6814,"[4, 5, 12, 13]",4,0,default
+36,mpi-sources-dynamic-2-r8-rep1,6,compute-dy-c6a4xlarge-2,[5],5,3,6816,"[4, 5, 12, 13]",5,0,default
+36,mpi-sources-dynamic-2-r8-rep1,7,compute-dy-c6a4xlarge-2,[6],6,2,6815,"[6, 7, 14, 15]",6,0,default
+36,mpi-sources-dynamic-2-r8-rep1,7,compute-dy-c6a4xlarge-2,[7],7,3,6817,"[6, 7, 14, 15]",7,0,default
+36,mpi-targets-dynamic-2-r8-rep1,0,compute-dy-c6a4xlarge-1,[0],0,2,6897,"[0, 1, 8, 9]",0,0,default
+36,mpi-targets-dynamic-2-r8-rep1,0,compute-dy-c6a4xlarge-1,[1],1,3,6898,"[0, 1, 8, 9]",1,0,default
+36,mpi-targets-dynamic-2-r8-rep1,1,compute-dy-c6a4xlarge-1,[2],2,2,6887,"[2, 3, 10, 11]",2,0,default
+36,mpi-targets-dynamic-2-r8-rep1,1,compute-dy-c6a4xlarge-1,[3],3,3,6889,"[2, 3, 10, 11]",3,0,default
+36,mpi-targets-dynamic-2-r8-rep1,2,compute-dy-c6a4xlarge-1,[4],4,2,6882,"[4, 5, 12, 13]",4,0,default
+36,mpi-targets-dynamic-2-r8-rep1,2,compute-dy-c6a4xlarge-1,[5],5,3,6883,"[4, 5, 12, 13]",5,0,default
+36,mpi-targets-dynamic-2-r8-rep1,3,compute-dy-c6a4xlarge-1,[6],6,2,6885,"[6, 7, 14, 15]",6,0,default
+36,mpi-targets-dynamic-2-r8-rep1,3,compute-dy-c6a4xlarge-1,[7],7,3,6886,"[6, 7, 14, 15]",7,0,default
+36,mpi-targets-dynamic-2-r8-rep1,4,compute-dy-c6a4xlarge-2,[0],0,2,6822,"[0, 1, 8, 9]",0,0,default
+36,mpi-targets-dynamic-2-r8-rep1,4,compute-dy-c6a4xlarge-2,[1],1,3,6824,"[0, 1, 8, 9]",1,0,default
+36,mpi-targets-dynamic-2-r8-rep1,5,compute-dy-c6a4xlarge-2,[2],2,2,6820,"[2, 3, 10, 11]",2,0,default
+36,mpi-targets-dynamic-2-r8-rep1,5,compute-dy-c6a4xlarge-2,[3],3,3,6821,"[2, 3, 10, 11]",3,0,default
+36,mpi-targets-dynamic-2-r8-rep1,6,compute-dy-c6a4xlarge-2,[4],4,2,6814,"[4, 5, 12, 13]",4,0,default
+36,mpi-targets-dynamic-2-r8-rep1,6,compute-dy-c6a4xlarge-2,[5],5,3,6816,"[4, 5, 12, 13]",5,0,default
+36,mpi-targets-dynamic-2-r8-rep1,7,compute-dy-c6a4xlarge-2,[6],6,2,6815,"[6, 7, 14, 15]",6,0,default
+36,mpi-targets-dynamic-2-r8-rep1,7,compute-dy-c6a4xlarge-2,[7],7,3,6817,"[6, 7, 14, 15]",7,0,default
+36,mpi-hybrid-dynamic-2-r8-rep1,0,compute-dy-c6a4xlarge-1,[0],0,2,6897,"[0, 1, 8, 9]",0,0,default
+36,mpi-hybrid-dynamic-2-r8-rep1,0,compute-dy-c6a4xlarge-1,[1],1,3,6898,"[0, 1, 8, 9]",1,0,default
+36,mpi-hybrid-dynamic-2-r8-rep1,1,compute-dy-c6a4xlarge-1,[2],2,2,6887,"[2, 3, 10, 11]",2,0,default
+36,mpi-hybrid-dynamic-2-r8-rep1,1,compute-dy-c6a4xlarge-1,[3],3,3,6889,"[2, 3, 10, 11]",3,0,default
+36,mpi-hybrid-dynamic-2-r8-rep1,2,compute-dy-c6a4xlarge-1,[4],4,2,6882,"[4, 5, 12, 13]",4,0,default
+36,mpi-hybrid-dynamic-2-r8-rep1,2,compute-dy-c6a4xlarge-1,[5],5,3,6883,"[4, 5, 12, 13]",5,0,default
+36,mpi-hybrid-dynamic-2-r8-rep1,3,compute-dy-c6a4xlarge-1,[6],6,2,6885,"[6, 7, 14, 15]",6,0,default
+36,mpi-hybrid-dynamic-2-r8-rep1,3,compute-dy-c6a4xlarge-1,[7],7,3,6886,"[6, 7, 14, 15]",7,0,default
+36,mpi-hybrid-dynamic-2-r8-rep1,4,compute-dy-c6a4xlarge-2,[0],0,2,6822,"[0, 1, 8, 9]",0,0,default
+36,mpi-hybrid-dynamic-2-r8-rep1,4,compute-dy-c6a4xlarge-2,[1],1,3,6824,"[0, 1, 8, 9]",1,0,default
+36,mpi-hybrid-dynamic-2-r8-rep1,5,compute-dy-c6a4xlarge-2,[2],2,2,6820,"[2, 3, 10, 11]",2,0,default
+36,mpi-hybrid-dynamic-2-r8-rep1,5,compute-dy-c6a4xlarge-2,[3],3,3,6821,"[2, 3, 10, 11]",3,0,default
+36,mpi-hybrid-dynamic-2-r8-rep1,6,compute-dy-c6a4xlarge-2,[4],4,2,6814,"[4, 5, 12, 13]",4,0,default
+36,mpi-hybrid-dynamic-2-r8-rep1,6,compute-dy-c6a4xlarge-2,[5],5,3,6816,"[4, 5, 12, 13]",5,0,default
+36,mpi-hybrid-dynamic-2-r8-rep1,7,compute-dy-c6a4xlarge-2,[6],6,2,6815,"[6, 7, 14, 15]",6,0,default
+36,mpi-hybrid-dynamic-2-r8-rep1,7,compute-dy-c6a4xlarge-2,[7],7,3,6817,"[6, 7, 14, 15]",7,0,default
+37,scaling-37-mpi-sources-3-dynamic-readonly-t2-r12-rep1,0,compute-dy-c6a4xlarge-1,[0],0,2,7481,"[0, 1, 8, 9]",0,0,default
+37,scaling-37-mpi-sources-3-dynamic-readonly-t2-r12-rep1,0,compute-dy-c6a4xlarge-1,[1],1,3,7482,"[0, 1, 8, 9]",1,0,default
+37,scaling-37-mpi-sources-3-dynamic-readonly-t2-r12-rep1,1,compute-dy-c6a4xlarge-1,[2],2,2,7472,"[2, 3, 10, 11]",2,0,default
+37,scaling-37-mpi-sources-3-dynamic-readonly-t2-r12-rep1,1,compute-dy-c6a4xlarge-1,[3],3,3,7474,"[2, 3, 10, 11]",3,0,default
+37,scaling-37-mpi-sources-3-dynamic-readonly-t2-r12-rep1,2,compute-dy-c6a4xlarge-1,[4],4,2,7473,"[4, 5, 12, 13]",4,0,default
+37,scaling-37-mpi-sources-3-dynamic-readonly-t2-r12-rep1,2,compute-dy-c6a4xlarge-1,[5],5,3,7475,"[4, 5, 12, 13]",5,0,default
+37,scaling-37-mpi-sources-3-dynamic-readonly-t2-r12-rep1,3,compute-dy-c6a4xlarge-1,[6],6,2,7476,"[6, 7, 14, 15]",6,0,default
+37,scaling-37-mpi-sources-3-dynamic-readonly-t2-r12-rep1,3,compute-dy-c6a4xlarge-1,[7],7,3,7477,"[6, 7, 14, 15]",7,0,default
+37,scaling-37-mpi-sources-3-dynamic-readonly-t2-r12-rep1,4,compute-dy-c6a4xlarge-2,[0],0,2,7333,"[0, 1, 8, 9]",0,0,default
+37,scaling-37-mpi-sources-3-dynamic-readonly-t2-r12-rep1,4,compute-dy-c6a4xlarge-2,[1],1,3,7334,"[0, 1, 8, 9]",1,0,default
+37,scaling-37-mpi-sources-3-dynamic-readonly-t2-r12-rep1,5,compute-dy-c6a4xlarge-2,[2],2,2,7325,"[2, 3, 10, 11]",2,0,default
+37,scaling-37-mpi-sources-3-dynamic-readonly-t2-r12-rep1,5,compute-dy-c6a4xlarge-2,[3],3,3,7326,"[2, 3, 10, 11]",3,0,default
+37,scaling-37-mpi-sources-3-dynamic-readonly-t2-r12-rep1,6,compute-dy-c6a4xlarge-2,[4],4,2,7328,"[4, 5, 12, 13]",4,0,default
+37,scaling-37-mpi-sources-3-dynamic-readonly-t2-r12-rep1,6,compute-dy-c6a4xlarge-2,[5],5,3,7329,"[4, 5, 12, 13]",5,0,default
+37,scaling-37-mpi-sources-3-dynamic-readonly-t2-r12-rep1,7,compute-dy-c6a4xlarge-2,[6],6,2,7330,"[6, 7, 14, 15]",6,0,default
+37,scaling-37-mpi-sources-3-dynamic-readonly-t2-r12-rep1,7,compute-dy-c6a4xlarge-2,[7],7,3,7332,"[6, 7, 14, 15]",7,0,default
+37,scaling-37-mpi-sources-3-dynamic-readonly-t2-r12-rep1,8,compute-dy-c6a4xlarge-3,[0],0,2,6740,"[0, 1, 8, 9]",0,0,default
+37,scaling-37-mpi-sources-3-dynamic-readonly-t2-r12-rep1,8,compute-dy-c6a4xlarge-3,[1],1,3,6743,"[0, 1, 8, 9]",1,0,default
+37,scaling-37-mpi-sources-3-dynamic-readonly-t2-r12-rep1,9,compute-dy-c6a4xlarge-3,[2],2,2,6739,"[2, 3, 10, 11]",2,0,default
+37,scaling-37-mpi-sources-3-dynamic-readonly-t2-r12-rep1,9,compute-dy-c6a4xlarge-3,[3],3,3,6742,"[2, 3, 10, 11]",3,0,default
+37,scaling-37-mpi-sources-3-dynamic-readonly-t2-r12-rep1,10,compute-dy-c6a4xlarge-3,[4],4,2,6737,"[4, 5, 12, 13]",4,0,default
+37,scaling-37-mpi-sources-3-dynamic-readonly-t2-r12-rep1,10,compute-dy-c6a4xlarge-3,[5],5,3,6745,"[4, 5, 12, 13]",5,0,default
+37,scaling-37-mpi-sources-3-dynamic-readonly-t2-r12-rep1,11,compute-dy-c6a4xlarge-3,[6],6,2,6738,"[6, 7, 14, 15]",6,0,default
+37,scaling-37-mpi-sources-3-dynamic-readonly-t2-r12-rep1,11,compute-dy-c6a4xlarge-3,[7],7,3,6741,"[6, 7, 14, 15]",7,0,default
+37,scaling-37-mpi-sources-2-dynamic-readonly-t2-r8-rep1,0,compute-dy-c6a4xlarge-1,[0],0,2,7739,"[0, 1, 8, 9]",0,0,default
+37,scaling-37-mpi-sources-2-dynamic-readonly-t2-r8-rep1,0,compute-dy-c6a4xlarge-1,[1],1,3,7740,"[0, 1, 8, 9]",1,0,default
+37,scaling-37-mpi-sources-2-dynamic-readonly-t2-r8-rep1,1,compute-dy-c6a4xlarge-1,[2],2,2,7727,"[2, 3, 10, 11]",2,0,default
+37,scaling-37-mpi-sources-2-dynamic-readonly-t2-r8-rep1,1,compute-dy-c6a4xlarge-1,[3],3,3,7728,"[2, 3, 10, 11]",3,0,default
+37,scaling-37-mpi-sources-2-dynamic-readonly-t2-r8-rep1,2,compute-dy-c6a4xlarge-1,[4],4,2,7730,"[4, 5, 12, 13]",4,0,default
+37,scaling-37-mpi-sources-2-dynamic-readonly-t2-r8-rep1,2,compute-dy-c6a4xlarge-1,[5],5,3,7731,"[4, 5, 12, 13]",5,0,default
+37,scaling-37-mpi-sources-2-dynamic-readonly-t2-r8-rep1,3,compute-dy-c6a4xlarge-1,[6],6,2,7744,"[6, 7, 14, 15]",6,0,default
+37,scaling-37-mpi-sources-2-dynamic-readonly-t2-r8-rep1,3,compute-dy-c6a4xlarge-1,[7],7,3,7745,"[6, 7, 14, 15]",7,0,default
+37,scaling-37-mpi-sources-2-dynamic-readonly-t2-r8-rep1,4,compute-dy-c6a4xlarge-2,[0],0,2,7559,"[0, 1, 8, 9]",0,0,default
+37,scaling-37-mpi-sources-2-dynamic-readonly-t2-r8-rep1,4,compute-dy-c6a4xlarge-2,[1],1,3,7561,"[0, 1, 8, 9]",1,0,default
+37,scaling-37-mpi-sources-2-dynamic-readonly-t2-r8-rep1,5,compute-dy-c6a4xlarge-2,[2],2,2,7551,"[2, 3, 10, 11]",2,0,default
+37,scaling-37-mpi-sources-2-dynamic-readonly-t2-r8-rep1,5,compute-dy-c6a4xlarge-2,[3],3,3,7552,"[2, 3, 10, 11]",3,0,default
+37,scaling-37-mpi-sources-2-dynamic-readonly-t2-r8-rep1,6,compute-dy-c6a4xlarge-2,[4],4,2,7554,"[4, 5, 12, 13]",4,0,default
+37,scaling-37-mpi-sources-2-dynamic-readonly-t2-r8-rep1,6,compute-dy-c6a4xlarge-2,[5],5,3,7555,"[4, 5, 12, 13]",5,0,default
+37,scaling-37-mpi-sources-2-dynamic-readonly-t2-r8-rep1,7,compute-dy-c6a4xlarge-2,[6],6,2,7557,"[6, 7, 14, 15]",6,0,default
+37,scaling-37-mpi-sources-2-dynamic-readonly-t2-r8-rep1,7,compute-dy-c6a4xlarge-2,[7],7,3,7558,"[6, 7, 14, 15]",7,0,default

@@ -16,6 +16,7 @@ FLOWVPM = "6e19019d-7c31-4940-9d16-c3f15dfe6020"
 GeometricTools = "83792f5e-c6a1-11e8-2e0a-93511f02ae5f"
 JLD = "4138dd39-2aa7-5051-a626-17a0bb65d9c8"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+MPI = "da04e1cc-30fd-572f-bb4f-1f8673147195"
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 PyPlot = "d330b81b-6aea-500a-939a-2ce795aea3ee"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
@@ -24,6 +25,7 @@ VSPGeom = "9b3f6a95-fce2-4bc5-94a2-f99b39986ea6"
 [compat]
 FLOWVPM = "4.0"
 GeometricTools = "2.3"
+MPI = "0.20"
 julia = "1.6"
 
 [extras]
