@@ -62,8 +62,7 @@ additions, deletions and edits, coupled simulation state, scheme state and the
 callback's stop decision are propagated to the other ranks.
 The driver's `omit_shedding` vector is also synchronized after callbacks, so the
 tutorial's initial hub-wake suppression and subsequent release apply on all ranks.
-Functions and native
-airfoil/Python objects stay local to each rank. Callbacks must keep those models,
+Functions and native airfoil/Python objects stay local to each rank. Callbacks must keep those models,
 freestream functions and vehicle topology fixed. During that callback,
 additional interaction queries run serially on the root. Callbacks must return a
 `Bool`; they must not invoke their own MPI collectives. Worker state is restored
@@ -101,6 +100,30 @@ MPI job, preventing peers from remaining blocked in a collective.
   guaranteed to improve elapsed time; measure the intended case and node layout.
 
 ## Local verification and cluster launch
+
+The [ParallelCluster log](mpi-cluster-validation.md) records cluster setup,
+matched hover cases, fixed numerical thresholds, failures and results. The
+headless rotor case exports all active particle fields and every-step
+thrust/torque/blade histories:
+
+```bash
+JULIA_NUM_THREADS=8 julia --project=environments/mpi examples/mpi/rotorhover.jl \
+  --mode serial --n 8 --revolutions 4 --steps-per-rev 36 --p-per-step 2 \
+  --gc-policy deferred --output /tmp/hover-serial
+JULIA_NUM_THREADS=8 julia --project=environments/mpi scripts/launch_mpi.jl 2 \
+  examples/mpi/rotorhover.jl --mode mpi --n 8 --revolutions 4 \
+  --steps-per-rev 36 --p-per-step 2 --gc-policy deferred \
+  --check-state true --output /tmp/hover-mpi
+python3 scripts/compare_mpi_rotorhover.py /tmp/hover-serial /tmp/hover-mpi \
+  --output /tmp/hover-comparison.json
+```
+
+`deferred` postpones Julia garbage collection during each bounded simulation to
+avoid a PyCall finalizer/threading defect; collection afterward is included in
+elapsed time. The example defaults to automatic GC. Deferred collection increases
+memory use and is not a production solution for unrestricted long runs. Both
+baselines must use the same policy. See the cluster log for the observed failure
+and memory measurements.
 
 Run the regression suite with the MPI launcher matching MPI.jl:
 
