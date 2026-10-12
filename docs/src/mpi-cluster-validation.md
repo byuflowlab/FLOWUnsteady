@@ -114,3 +114,38 @@ below as testing proceeds.
   the application manifest and the complete rotor database, plus matching
   Python/NumPy/SciPy versions. An injected dependency-version mismatch was
   rejected in the local smoke test.
+- Job `9`: distributed regression suite passed on all three nodes (106 checks
+  on the output-owning rank, 104 on each worker), including coupled wing/rotor,
+  RK3/SFS, callback synchronization and output. The reference hover run completed
+  144 steps with 6,658 active particles; warmup 47.045 s, timed run 20.686 s.
+- Job `9` completed successfully. Every MPI layout passed all nine input identity
+  checks and all 35 numerical checks. Recorded state, circulation and load
+  differences were zero; clocks, counts and shedding-mask histories agreed
+  exactly. The case exercised suppression through revolution three and subsequent
+  release, completing four revolutions.
+
+| Active nodes | Mode | Ranks | Threads/rank | Timed seconds | Speedup vs serial |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Serial | 1 | 8 | 20.686 | 1.000 |
+| 1 | MPI | 1 | 8 | 21.654 | 0.955 |
+| 2 | MPI | 2 | 8 | 16.803 | 1.231 |
+| 3 | MPI | 3 | 8 | 15.417 | 1.342 |
+
+These initial validation timings use `check_state=true`. Peak process RSS was
+3.78 GiB in serial and at most 4.77 GiB in MPI, including imports/compilation and
+warmup. One MPI rank adds overhead; distributing interaction targets across
+two/three nodes reduces elapsed time for this case.
+
+Recorded evidence: [all comparison checks](assets/mpi-cluster/validation-comparison.json),
+[group summary](assets/mpi-cluster/validation-summary.csv) and
+[individual runs](assets/mpi-cluster/validation-summary-runs.csv).
+The complete particle/blade/history artifacts and job logs are retained outside
+Git in `/tmp/flowunsteady-cluster-20261013` locally and the isolated cluster task
+directory. The committed reports contain input fingerprints and measured results;
+they contain no AWS credentials or MPI machine preferences.
+
+- Job `10` repeats each of the four layouts three times, with `check_state=false`
+  and the same accuracy, inputs and GC policy. Each process performs a complete
+  same-case warmup, then constructs a fresh simulation for measurement. The
+  distributed order alternates between repetitions. Every measured result is
+  compared with the first serial reference using the unchanged thresholds.
