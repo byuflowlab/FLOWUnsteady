@@ -1,5 +1,11 @@
 # ParallelCluster validation log
 
+The one-, two- and three-node implementations produced matching numerical results
+in the DJI hover pilot, with zero recorded differences across every checked field
+and history. Three repetitions per layout gave a 1.346x speedup on three nodes
+versus the threaded serial baseline (20.563 s versus 15.282 s). All work is
+committed on `feat/mpi-single-simulation`; the complete cluster jobs have finished.
+
 Objective: reduce elapsed time for one coupled simulation. Compare a matched
 single-node run with two and three compute nodes. Numerical agreement is required
 within declared tolerances; bitwise equality is not required.
@@ -9,6 +15,47 @@ The pilot keeps the tutorial's mid-low-fidelity model (Euler, inviscid, no SFS,
 near-zero advance ratio, published hub/tip correction and initial hub-wake
 suppression), with fewer blade elements and particle sheds. This checks the
 implementation; it does not establish aerodynamic accuracy or converged hover.
+
+## Case and final measurements
+
+The two-bladed DJI 9443 case uses eight elements per blade, 36 steps/revolution,
+two particle sheds/step and four revolutions at 5,400 RPM. Advance ratio is
+`1e-4`; density is 1.071778 kg/m^3. The simulation completes 144 steps with 6,658
+particles. It uses Float64, rVPM/Euler, inviscid diffusion, no SFS, the tutorial's
+hub/tip correction and initial hub-wake suppression released at revolution three.
+FMM settings are fixed: `p=12`, `ncrit=min_ncrit=64`, relative tolerance `1e-7`,
+absolute tolerance `1e-10`, and no order/leaf-size autotuning.
+
+Job `10` completed all twelve measurements in 21m52s. Each fresh process ran a
+complete same-case warmup before the timed simulation; `check_state=false` for
+timings. Every candidate, including repeated serial runs, passed nine input
+identity checks and 35 numerical checks against the first serial reference.
+All recorded normalized L2/max errors were zero. No acceptance tolerance was
+loosened and no aerodynamic model was changed to obtain agreement.
+
+| Active nodes | Mode | Ranks | Threads/rank | Runs | Median s | Min-max s | Speedup |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | Serial | 1 | 8 | 3 | 20.563 | 20.447-20.755 | 1.000 |
+| 1 | MPI | 1 | 8 | 3 | 21.511 | 21.497-21.702 | 0.956 |
+| 2 | MPI | 2 | 8 | 3 | 16.605 | 16.562-16.730 | 1.238 |
+| 3 | MPI | 3 | 8 | 3 | 15.282 | 15.241-15.389 | 1.346 |
+
+Each active node uses its eight physical cores; Slurm advertises 16 vCPUs because
+SMT is enabled. The sequential comparison allocation reserves all three nodes,
+but each layout launches only on the listed number of hosts. These are active
+compute counts, not an AWS billing estimate. Three nodes reduce measured elapsed
+time by 25.7%, with 44.9% efficiency relative to ideal three-node scaling.
+Peak process RSS across the repeated MPI runs was 4.69 GiB, including imports,
+compilation and warmup.
+
+The bounded runs require the explicit deferred-GC workaround described below.
+Cleanup collection is included in elapsed time; artifact export is excluded.
+Longer/higher-fidelity production runs need a proper PyCall threading/finalizer
+solution before this policy can be generalized.
+
+Evidence: [complete repeated comparisons](assets/mpi-cluster/benchmark-comparison.json),
+[median summary](assets/mpi-cluster/benchmark-summary.csv),
+[individual measurements](assets/mpi-cluster/benchmark-summary-runs.csv).
 
 ## 2026-10-13: preparation
 
@@ -149,3 +196,65 @@ they contain no AWS credentials or MPI machine preferences.
   same-case warmup, then constructs a fresh simulation for measurement. The
   distributed order alternates between repetitions. Every measured result is
   compared with the first serial reference using the unchanged thresholds.
+
+## Interpretation of the first measurements
+
+The backend accelerates one simulation by distributing targets. It retains the
+whole wake, source-tree construction/upward passes, particle integration and
+rotor solves on each rank. It does not distribute particle storage or increase
+the particle capacity of a node.
+
+In job `9`, accumulated maximum-rank interaction evaluation fell from 15.778 s
+on one MPI rank to 10.083 s on two and 8.195 s on three. Surface-query time changed
+little (2.144, 2.044, 2.029 s), and callback/synchronization time was 0.889, 1.246,
+1.236 s. Overall evaluation totals across ranks differed by only a few percent
+in the first benchmark repetition; severe overall imbalance is not the leading
+observed limit for this pilot.
+
+Target-result Allgatherv took 0.021, 0.090, 0.160 s, respectively. This timer does
+not include control collectives, and callback timing includes broadcast/waiting.
+Independent phase maxima can come from different ranks and must not be summed
+into a critical-path breakdown. Coupling, integration, allocation and deferred
+GC cleanup have not been profiled separately.
+
+Before increasing case size/duration, address PyCall finalizer safety. Then
+profile FMM tree construction, upward/translation/near-field passes and allocation
+costs, and investigate buffer/cache reuse before choosing a distributed-source
+implementation. These measurements establish numerical equivalence and modest
+speedup for this four-revolution configuration, not larger-case scaling or
+aerodynamic convergence.
+
+## Repeating the cluster checks
+
+The scripts expect the prepared shared task directory with `code`, `runtime`
+(Julia 1.13.1 and `uv`) and a private `depot`. Setup was validated using the
+preseeded pinned package downloads/artifacts; it rebuilds machine-specific Python
+metadata and configures all MPI libraries consistently. On the head node:
+
+```bash
+task_root=/home/ubuntu/flowunsteady-mpi-20261013
+/opt/slurm/bin/sbatch --output="$task_root/logs/setup-%j.log" \
+  "$task_root/code/scripts/cluster/setup.sbatch" "$task_root"
+# Wait for successful setup before launching validation.
+/opt/slurm/bin/sbatch --output="$task_root/logs/validate-%j.log" \
+  "$task_root/code/scripts/cluster/validate.sbatch" "$task_root"
+# After validation passes, repeat each layout three times.
+/opt/slurm/bin/sbatch --output="$task_root/logs/benchmark-%j.log" \
+  "$task_root/code/scripts/cluster/benchmark.sbatch" "$task_root" 3
+```
+
+The application writes full particle, blade and load histories plus input hashes,
+rank placement, timings and RSS. Compare/summarize downloaded results with:
+
+```bash
+python3 scripts/compare_mpi_rotorhover.py SERIAL_DIR MPI_DIR [MPI_DIR ...] \
+  --output comparison.json
+python3 scripts/summarize_mpi_rotorhover.py comparison.json \
+  --results-root RESULTS_DIR --csv summary.csv --markdown summary.md
+```
+
+The pinned manifest, source/database hashes and Python versions must match.
+MPI machine preferences and Python environments are ignored by Git. Credential
+patterns were checked on each staged block and the complete branch diff; AWS
+credentials, SSH keys and machine preferences were not committed. No branch was
+pushed and no pull request was opened.
